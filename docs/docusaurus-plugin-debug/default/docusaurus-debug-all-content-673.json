@@ -1,0 +1,391 @@
+{
+  "docusaurus-plugin-content-docs": {
+    "default": {
+      "loadedVersions": [
+        {
+          "versionName": "current",
+          "versionLabel": "Next",
+          "versionPath": "/lsdo_optimizer/docs",
+          "tagsPath": "/lsdo_optimizer/docs/tags",
+          "versionEditUrl": "https://github.com/lsdolab/lsdo_optimizer/edit/main/website/docs",
+          "versionEditUrlLocalized": "https://github.com/lsdolab/lsdo_optimizer/edit/main/website/i18n/en/docusaurus-plugin-content-docs/current",
+          "versionBanner": null,
+          "versionBadge": false,
+          "versionClassName": "docs-version-current",
+          "isLast": true,
+          "routePriority": -1,
+          "sidebarFilePath": "/Users/anugrah/Packages/lsdo_optimizer/docs/sidebars.js",
+          "contentPath": "/Users/anugrah/Packages/lsdo_optimizer/docs/docs",
+          "contentPathLocalized": "/Users/anugrah/Packages/lsdo_optimizer/docs/i18n/en/docusaurus-plugin-content-docs/current",
+          "mainDocId": "introduction",
+          "sidebars": {
+            "tutorialSidebar": [
+              {
+                "type": "doc",
+                "id": "introduction"
+              },
+              {
+                "type": "doc",
+                "id": "installation_instructions"
+              },
+              {
+                "type": "category",
+                "label": "Getting Started",
+                "items": [
+                  {
+                    "type": "doc",
+                    "id": "getting_started/simple_example"
+                  },
+                  {
+                    "type": "doc",
+                    "id": "getting_started/new_optimizer"
+                  },
+                  {
+                    "type": "doc",
+                    "id": "getting_started/new_problem"
+                  },
+                  {
+                    "type": "doc",
+                    "id": "getting_started/coupling_optimizer_with_problem"
+                  }
+                ],
+                "collapsed": true,
+                "collapsible": true
+              },
+              {
+                "type": "doc",
+                "id": "standard_optimization_algorithms"
+              },
+              {
+                "type": "doc",
+                "id": "interfacing_existing_optimizers"
+              },
+              {
+                "type": "doc",
+                "id": "more_examples"
+              },
+              {
+                "type": "doc",
+                "id": "benchmarking"
+              }
+            ]
+          },
+          "docs": [
+            {
+              "unversionedId": "benchmarking",
+              "id": "benchmarking",
+              "isDocsHomePage": false,
+              "title": "Benchmarking",
+              "description": "CUTEst Problem Suite",
+              "source": "@site/docs/benchmarking.mdx",
+              "sourceDirName": ".",
+              "slug": "/benchmarking",
+              "permalink": "/lsdo_optimizer/docs/benchmarking",
+              "editUrl": "https://github.com/lsdolab/lsdo_optimizer/edit/main/website/docs/benchmarking.mdx",
+              "tags": [],
+              "version": "current",
+              "sidebarPosition": 7,
+              "frontMatter": {
+                "title": "Benchmarking",
+                "sidebar_position": 7
+              },
+              "sidebar": "tutorialSidebar",
+              "previous": {
+                "title": "More Examples",
+                "permalink": "/lsdo_optimizer/docs/more_examples"
+              }
+            },
+            {
+              "unversionedId": "getting_started/coupling_optimizer_with_problem",
+              "id": "getting_started/coupling_optimizer_with_problem",
+              "isDocsHomePage": false,
+              "title": "Coupling an optimizer with a problem",
+              "description": "",
+              "source": "@site/docs/getting_started/coupling_optimizer_with_problem.mdx",
+              "sourceDirName": "getting_started",
+              "slug": "/getting_started/coupling_optimizer_with_problem",
+              "permalink": "/lsdo_optimizer/docs/getting_started/coupling_optimizer_with_problem",
+              "editUrl": "https://github.com/lsdolab/lsdo_optimizer/edit/main/website/docs/getting_started/coupling_optimizer_with_problem.mdx",
+              "tags": [],
+              "version": "current",
+              "sidebarPosition": 4,
+              "frontMatter": {
+                "sidebar_position": 4
+              },
+              "sidebar": "tutorialSidebar",
+              "previous": {
+                "title": "Defining an optimization problem",
+                "permalink": "/lsdo_optimizer/docs/getting_started/new_problem"
+              },
+              "next": {
+                "title": "Standard Optimization Algorithms Available",
+                "permalink": "/lsdo_optimizer/docs/standard_optimization_algorithms"
+              }
+            },
+            {
+              "unversionedId": "getting_started/new_optimizer",
+              "id": "getting_started/new_optimizer",
+              "isDocsHomePage": false,
+              "title": "Developing a new optimizer",
+              "description": "",
+              "source": "@site/docs/getting_started/new_optimizer.mdx",
+              "sourceDirName": "getting_started",
+              "slug": "/getting_started/new_optimizer",
+              "permalink": "/lsdo_optimizer/docs/getting_started/new_optimizer",
+              "editUrl": "https://github.com/lsdolab/lsdo_optimizer/edit/main/website/docs/getting_started/new_optimizer.mdx",
+              "tags": [],
+              "version": "current",
+              "sidebarPosition": 2,
+              "frontMatter": {
+                "sidebar_position": 2
+              },
+              "sidebar": "tutorialSidebar",
+              "previous": {
+                "title": "A Simple Example",
+                "permalink": "/lsdo_optimizer/docs/getting_started/simple_example"
+              },
+              "next": {
+                "title": "Defining an optimization problem",
+                "permalink": "/lsdo_optimizer/docs/getting_started/new_problem"
+              }
+            },
+            {
+              "unversionedId": "getting_started/new_problem",
+              "id": "getting_started/new_problem",
+              "isDocsHomePage": false,
+              "title": "Defining an optimization problem",
+              "description": "",
+              "source": "@site/docs/getting_started/new_problem.mdx",
+              "sourceDirName": "getting_started",
+              "slug": "/getting_started/new_problem",
+              "permalink": "/lsdo_optimizer/docs/getting_started/new_problem",
+              "editUrl": "https://github.com/lsdolab/lsdo_optimizer/edit/main/website/docs/getting_started/new_problem.mdx",
+              "tags": [],
+              "version": "current",
+              "sidebarPosition": 3,
+              "frontMatter": {
+                "sidebar_position": 3
+              },
+              "sidebar": "tutorialSidebar",
+              "previous": {
+                "title": "Developing a new optimizer",
+                "permalink": "/lsdo_optimizer/docs/getting_started/new_optimizer"
+              },
+              "next": {
+                "title": "Coupling an optimizer with a problem",
+                "permalink": "/lsdo_optimizer/docs/getting_started/coupling_optimizer_with_problem"
+              }
+            },
+            {
+              "unversionedId": "getting_started/simple_example",
+              "id": "getting_started/simple_example",
+              "isDocsHomePage": false,
+              "title": "A Simple Example",
+              "description": "Here we look at a simple optimization algorithm (the steepest descent) and use it to solve a simple unconstrained",
+              "source": "@site/docs/getting_started/simple_example.mdx",
+              "sourceDirName": "getting_started",
+              "slug": "/getting_started/simple_example",
+              "permalink": "/lsdo_optimizer/docs/getting_started/simple_example",
+              "editUrl": "https://github.com/lsdolab/lsdo_optimizer/edit/main/website/docs/getting_started/simple_example.mdx",
+              "tags": [],
+              "version": "current",
+              "sidebarPosition": 1,
+              "frontMatter": {
+                "sidebar_position": 1
+              },
+              "sidebar": "tutorialSidebar",
+              "previous": {
+                "title": "Installation Instructions",
+                "permalink": "/lsdo_optimizer/docs/installation_instructions"
+              },
+              "next": {
+                "title": "Developing a new optimizer",
+                "permalink": "/lsdo_optimizer/docs/getting_started/new_optimizer"
+              }
+            },
+            {
+              "unversionedId": "installation_instructions",
+              "id": "installation_instructions",
+              "isDocsHomePage": false,
+              "title": "Installation Instructions",
+              "description": "To install `sode`, first clone the repository and install using pip.",
+              "source": "@site/docs/installation_instructions.mdx",
+              "sourceDirName": ".",
+              "slug": "/installation_instructions",
+              "permalink": "/lsdo_optimizer/docs/installation_instructions",
+              "editUrl": "https://github.com/lsdolab/lsdo_optimizer/edit/main/website/docs/installation_instructions.mdx",
+              "tags": [],
+              "version": "current",
+              "sidebarPosition": 2,
+              "frontMatter": {
+                "title": "Installation Instructions",
+                "sidebar_position": 2
+              },
+              "sidebar": "tutorialSidebar",
+              "previous": {
+                "title": "Introduction",
+                "permalink": "/lsdo_optimizer/docs/introduction"
+              },
+              "next": {
+                "title": "A Simple Example",
+                "permalink": "/lsdo_optimizer/docs/getting_started/simple_example"
+              }
+            },
+            {
+              "unversionedId": "interfacing_existing_optimizers",
+              "id": "interfacing_existing_optimizers",
+              "isDocsHomePage": false,
+              "title": "Interfacing Existing Optimizers",
+              "description": "",
+              "source": "@site/docs/interfacing_existing_optimizers.mdx",
+              "sourceDirName": ".",
+              "slug": "/interfacing_existing_optimizers",
+              "permalink": "/lsdo_optimizer/docs/interfacing_existing_optimizers",
+              "editUrl": "https://github.com/lsdolab/lsdo_optimizer/edit/main/website/docs/interfacing_existing_optimizers.mdx",
+              "tags": [],
+              "version": "current",
+              "sidebarPosition": 5,
+              "frontMatter": {
+                "title": "Interfacing Existing Optimizers",
+                "sidebar_position": 5
+              },
+              "sidebar": "tutorialSidebar",
+              "previous": {
+                "title": "Standard Optimization Algorithms Available",
+                "permalink": "/lsdo_optimizer/docs/standard_optimization_algorithms"
+              },
+              "next": {
+                "title": "More Examples",
+                "permalink": "/lsdo_optimizer/docs/more_examples"
+              }
+            },
+            {
+              "unversionedId": "introduction",
+              "id": "introduction",
+              "isDocsHomePage": false,
+              "title": "Introduction",
+              "description": "This webpage serves as the documentation for SODE - a framework for developing and benchmarking gradient-based optimizers.",
+              "source": "@site/docs/introduction.mdx",
+              "sourceDirName": ".",
+              "slug": "/introduction",
+              "permalink": "/lsdo_optimizer/docs/introduction",
+              "editUrl": "https://github.com/lsdolab/lsdo_optimizer/edit/main/website/docs/introduction.mdx",
+              "tags": [],
+              "version": "current",
+              "sidebarPosition": 1,
+              "frontMatter": {
+                "title": "Introduction",
+                "sidebar_position": 1
+              },
+              "sidebar": "tutorialSidebar",
+              "next": {
+                "title": "Installation Instructions",
+                "permalink": "/lsdo_optimizer/docs/installation_instructions"
+              }
+            },
+            {
+              "unversionedId": "more_examples",
+              "id": "more_examples",
+              "isDocsHomePage": false,
+              "title": "More Examples",
+              "description": "Example 1",
+              "source": "@site/docs/more_examples.mdx",
+              "sourceDirName": ".",
+              "slug": "/more_examples",
+              "permalink": "/lsdo_optimizer/docs/more_examples",
+              "editUrl": "https://github.com/lsdolab/lsdo_optimizer/edit/main/website/docs/more_examples.mdx",
+              "tags": [],
+              "version": "current",
+              "sidebarPosition": 6,
+              "frontMatter": {
+                "title": "More Examples",
+                "sidebar_position": 6
+              },
+              "sidebar": "tutorialSidebar",
+              "previous": {
+                "title": "Interfacing Existing Optimizers",
+                "permalink": "/lsdo_optimizer/docs/interfacing_existing_optimizers"
+              },
+              "next": {
+                "title": "Benchmarking",
+                "permalink": "/lsdo_optimizer/docs/benchmarking"
+              }
+            },
+            {
+              "unversionedId": "standard_optimization_algorithms",
+              "id": "standard_optimization_algorithms",
+              "isDocsHomePage": false,
+              "title": "Standard Optimization Algorithms Available",
+              "description": "Welcome to the documentation for LSDO-ODF -- a framework for developing and benchmarking optimizers.",
+              "source": "@site/docs/standard_optimization_algorithms.mdx",
+              "sourceDirName": ".",
+              "slug": "/standard_optimization_algorithms",
+              "permalink": "/lsdo_optimizer/docs/standard_optimization_algorithms",
+              "editUrl": "https://github.com/lsdolab/lsdo_optimizer/edit/main/website/docs/standard_optimization_algorithms.mdx",
+              "tags": [],
+              "version": "current",
+              "sidebarPosition": 4,
+              "frontMatter": {
+                "title": "Standard Optimization Algorithms Available",
+                "sidebar_position": 4
+              },
+              "sidebar": "tutorialSidebar",
+              "previous": {
+                "title": "Coupling an optimizer with a problem",
+                "permalink": "/lsdo_optimizer/docs/getting_started/coupling_optimizer_with_problem"
+              },
+              "next": {
+                "title": "Interfacing Existing Optimizers",
+                "permalink": "/lsdo_optimizer/docs/interfacing_existing_optimizers"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "docusaurus-plugin-content-blog": {
+    "default": {
+      "blogSidebarTitle": "Recent posts",
+      "blogPosts": [],
+      "blogListPaginated": [],
+      "blogTags": {},
+      "blogTagsListPath": null
+    }
+  },
+  "docusaurus-plugin-content-pages": {
+    "default": [
+      {
+        "type": "mdx",
+        "permalink": "/lsdo_optimizer/community",
+        "source": "@site/src/pages/community.mdx"
+      },
+      {
+        "type": "mdx",
+        "permalink": "/lsdo_optimizer/faq",
+        "source": "@site/src/pages/faq.mdx"
+      },
+      {
+        "type": "jsx",
+        "permalink": "/lsdo_optimizer/",
+        "source": "@site/src/pages/index.js"
+      },
+      {
+        "type": "mdx",
+        "permalink": "/lsdo_optimizer/news",
+        "source": "@site/src/pages/news.mdx"
+      },
+      {
+        "type": "mdx",
+        "permalink": "/lsdo_optimizer/publications",
+        "source": "@site/src/pages/publications.mdx"
+      }
+    ]
+  },
+  "docusaurus-plugin-debug": {
+    "default": null
+  },
+  "docusaurus-theme-classic": {
+    "default": null
+  }
+}

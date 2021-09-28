@@ -1,0 +1,28 @@
+{
+  "unversionedId": "standard_optimization_algorithms",
+  "id": "standard_optimization_algorithms",
+  "isDocsHomePage": false,
+  "title": "Standard Optimization Algorithms Available",
+  "description": "Welcome to the documentation for LSDO-ODF -- a framework for developing and benchmarking optimizers.",
+  "source": "@site/docs/standard_optimization_algorithms.mdx",
+  "sourceDirName": ".",
+  "slug": "/standard_optimization_algorithms",
+  "permalink": "/lsdo_optimizer/docs/standard_optimization_algorithms",
+  "editUrl": "https://github.com/lsdolab/lsdo_optimizer/edit/main/website/docs/standard_optimization_algorithms.mdx",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 4,
+  "frontMatter": {
+    "title": "Standard Optimization Algorithms Available",
+    "sidebar_position": 4
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Coupling an optimizer with a problem",
+    "permalink": "/lsdo_optimizer/docs/getting_started/coupling_optimizer_with_problem"
+  },
+  "next": {
+    "title": "Interfacing Existing Optimizers",
+    "permalink": "/lsdo_optimizer/docs/interfacing_existing_optimizers"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "unversionedId": "introduction",
+  "id": "introduction",
+  "isDocsHomePage": false,
+  "title": "Introduction",
+  "description": "This webpage serves as the documentation for SODE - a framework for developing and benchmarking gradient-based optimizers.",
+  "source": "@site/docs/introduction.mdx",
+  "sourceDirName": ".",
+  "slug": "/introduction",
+  "permalink": "/lsdo_optimizer/docs/introduction",
+  "editUrl": "https://github.com/lsdolab/lsdo_optimizer/edit/main/website/docs/introduction.mdx",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 1,
+  "frontMatter": {
+    "title": "Introduction",
+    "sidebar_position": 1
+  },
+  "sidebar": "tutorialSidebar",
+  "next": {
+    "title": "Installation Instructions",
+    "permalink": "/lsdo_optimizer/docs/installation_instructions"
+  }
+}

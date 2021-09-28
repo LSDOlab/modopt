@@ -1,0 +1,28 @@
+{
+  "unversionedId": "more_examples",
+  "id": "more_examples",
+  "isDocsHomePage": false,
+  "title": "More Examples",
+  "description": "Example 1",
+  "source": "@site/docs/more_examples.mdx",
+  "sourceDirName": ".",
+  "slug": "/more_examples",
+  "permalink": "/lsdo_optimizer/docs/more_examples",
+  "editUrl": "https://github.com/lsdolab/lsdo_optimizer/edit/main/website/docs/more_examples.mdx",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 6,
+  "frontMatter": {
+    "title": "More Examples",
+    "sidebar_position": 6
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Interfacing Existing Optimizers",
+    "permalink": "/lsdo_optimizer/docs/interfacing_existing_optimizers"
+  },
+  "next": {
+    "title": "Benchmarking",
+    "permalink": "/lsdo_optimizer/docs/benchmarking"
+  }
+}

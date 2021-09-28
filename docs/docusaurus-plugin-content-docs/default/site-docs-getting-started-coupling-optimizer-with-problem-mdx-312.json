@@ -1,0 +1,27 @@
+{
+  "unversionedId": "getting_started/coupling_optimizer_with_problem",
+  "id": "getting_started/coupling_optimizer_with_problem",
+  "isDocsHomePage": false,
+  "title": "Coupling an optimizer with a problem",
+  "description": "",
+  "source": "@site/docs/getting_started/coupling_optimizer_with_problem.mdx",
+  "sourceDirName": "getting_started",
+  "slug": "/getting_started/coupling_optimizer_with_problem",
+  "permalink": "/lsdo_optimizer/docs/getting_started/coupling_optimizer_with_problem",
+  "editUrl": "https://github.com/lsdolab/lsdo_optimizer/edit/main/website/docs/getting_started/coupling_optimizer_with_problem.mdx",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 4,
+  "frontMatter": {
+    "sidebar_position": 4
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Defining an optimization problem",
+    "permalink": "/lsdo_optimizer/docs/getting_started/new_problem"
+  },
+  "next": {
+    "title": "Standard Optimization Algorithms Available",
+    "permalink": "/lsdo_optimizer/docs/standard_optimization_algorithms"
+  }
+}

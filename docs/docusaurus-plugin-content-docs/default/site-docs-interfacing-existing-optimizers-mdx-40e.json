@@ -1,0 +1,28 @@
+{
+  "unversionedId": "interfacing_existing_optimizers",
+  "id": "interfacing_existing_optimizers",
+  "isDocsHomePage": false,
+  "title": "Interfacing Existing Optimizers",
+  "description": "",
+  "source": "@site/docs/interfacing_existing_optimizers.mdx",
+  "sourceDirName": ".",
+  "slug": "/interfacing_existing_optimizers",
+  "permalink": "/lsdo_optimizer/docs/interfacing_existing_optimizers",
+  "editUrl": "https://github.com/lsdolab/lsdo_optimizer/edit/main/website/docs/interfacing_existing_optimizers.mdx",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 5,
+  "frontMatter": {
+    "title": "Interfacing Existing Optimizers",
+    "sidebar_position": 5
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Standard Optimization Algorithms Available",
+    "permalink": "/lsdo_optimizer/docs/standard_optimization_algorithms"
+  },
+  "next": {
+    "title": "More Examples",
+    "permalink": "/lsdo_optimizer/docs/more_examples"
+  }
+}

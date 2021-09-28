@@ -1,0 +1,28 @@
+{
+  "unversionedId": "installation_instructions",
+  "id": "installation_instructions",
+  "isDocsHomePage": false,
+  "title": "Installation Instructions",
+  "description": "To install `sode`, first clone the repository and install using pip.",
+  "source": "@site/docs/installation_instructions.mdx",
+  "sourceDirName": ".",
+  "slug": "/installation_instructions",
+  "permalink": "/lsdo_optimizer/docs/installation_instructions",
+  "editUrl": "https://github.com/lsdolab/lsdo_optimizer/edit/main/website/docs/installation_instructions.mdx",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 2,
+  "frontMatter": {
+    "title": "Installation Instructions",
+    "sidebar_position": 2
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Introduction",
+    "permalink": "/lsdo_optimizer/docs/introduction"
+  },
+  "next": {
+    "title": "A Simple Example",
+    "permalink": "/lsdo_optimizer/docs/getting_started/simple_example"
+  }
+}

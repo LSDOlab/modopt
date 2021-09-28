@@ -1,0 +1,13 @@
+
+loaders:
+  - type: python
+processors:
+  - type: filter
+    expression: default() or type(obj).__name__ == 'Function'
+    exclude_private: false
+    exclude_special: false
+    documented_only: true
+  - type: smart
+  - type: crossref
+renderer:
+  type: markdown

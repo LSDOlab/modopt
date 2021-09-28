@@ -1,0 +1,27 @@
+{
+  "unversionedId": "getting_started",
+  "id": "getting_started",
+  "isDocsHomePage": false,
+  "title": "Getting Started",
+  "description": "Welcome to the documentation for LSDO-ODF -- a framework for developing and benchmarking optimizers.",
+  "source": "@site/docs/getting_started.mdx",
+  "sourceDirName": ".",
+  "slug": "/getting_started",
+  "permalink": "/lsdo_optimizer/docs/getting_started",
+  "editUrl": "https://github.com/lsdolab/lsdo_optimizer/edit/main/website/docs/getting_started.mdx",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "title": "Getting Started",
+    "sidebarposition": 3
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Installation Instructions",
+    "permalink": "/lsdo_optimizer/docs/installation_instructions"
+  },
+  "next": {
+    "title": "Standard Optimization Algorithms Available",
+    "permalink": "/lsdo_optimizer/docs/standard_optimization_algorithms"
+  }
+}

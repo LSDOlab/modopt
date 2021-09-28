@@ -1,0 +1,96 @@
+{
+  "/lsdo_optimizer/-ef8": {
+    "component": "component---site-src-pages-index-jsc-4-f-f99",
+    "config": "config---lsdo-optimizer-5-e-9-5d5"
+  },
+  "/lsdo_optimizer/__docusaurus/debug-731": {
+    "component": "component---theme-debug-config-23-a-2ff"
+  },
+  "/lsdo_optimizer/__docusaurus/debug/config-6d7": {
+    "component": "component---theme-debug-config-23-a-2ff"
+  },
+  "/lsdo_optimizer/__docusaurus/debug/content-e90": {
+    "component": "component---theme-debug-contentba-8-ce7",
+    "allContent": "allContent---lsdo-optimizer-docusaurus-debug-content-246-416"
+  },
+  "/lsdo_optimizer/__docusaurus/debug/globalData-3d6": {
+    "component": "component---theme-debug-global-dataede-0fa"
+  },
+  "/lsdo_optimizer/__docusaurus/debug/metadata-976": {
+    "component": "component---theme-debug-site-metadata-68-e-3d4"
+  },
+  "/lsdo_optimizer/__docusaurus/debug/registry-fcc": {
+    "component": "component---theme-debug-registry-679-501"
+  },
+  "/lsdo_optimizer/__docusaurus/debug/routes-7b4": {
+    "component": "component---theme-debug-routes-946-699"
+  },
+  "/lsdo_optimizer/blog/archive-8cb": {
+    "component": "component---theme-blog-archive-page-9-e-4-1d8",
+    "archive": "archive---lsdo-optimizer-blog-archive-3-f-3-054"
+  },
+  "/lsdo_optimizer/community-36e": {
+    "component": "component---theme-mdx-page-1-f-3-b90",
+    "content": "content---lsdo-optimizer-communityd-81-9ba"
+  },
+  "/lsdo_optimizer/docs/tags-8fa": {
+    "component": "component---theme-doc-tags-list-page-372-89e",
+    "tags": "tags---lsdo-optimizer-docs-tags-559-701"
+  },
+  "/lsdo_optimizer/faq-ee8": {
+    "component": "component---theme-mdx-page-1-f-3-b90",
+    "content": "content---lsdo-optimizer-faq-9-a-4-698"
+  },
+  "/lsdo_optimizer/news-9e0": {
+    "component": "component---theme-mdx-page-1-f-3-b90",
+    "content": "content---lsdo-optimizer-news-060-6fc"
+  },
+  "/lsdo_optimizer/publications-63f": {
+    "component": "component---theme-mdx-page-1-f-3-b90",
+    "content": "content---lsdo-optimizer-publicationsefc-ae0"
+  },
+  "/lsdo_optimizer/docs-cd2": {
+    "component": "component---theme-doc-page-1-be-9be",
+    "versionMetadata": "versionMetadata---lsdo-optimizer-docs-935-10d"
+  },
+  "/lsdo_optimizer/docs/benchmarking-700": {
+    "component": "component---theme-doc-item-178-a40",
+    "content": "content---lsdo-optimizer-docs-benchmarking-955-731"
+  },
+  "/lsdo_optimizer/docs/getting_started/coupling_optimizer_with_problem-1d4": {
+    "component": "component---theme-doc-item-178-a40",
+    "content": "content---lsdo-optimizer-docs-getting-started-coupling-optimizer-with-problem-312-fdc"
+  },
+  "/lsdo_optimizer/docs/getting_started/new_optimizer-88c": {
+    "component": "component---theme-doc-item-178-a40",
+    "content": "content---lsdo-optimizer-docs-getting-started-new-optimizer-93-f-5d7"
+  },
+  "/lsdo_optimizer/docs/getting_started/new_problem-c97": {
+    "component": "component---theme-doc-item-178-a40",
+    "content": "content---lsdo-optimizer-docs-getting-started-new-problem-25-a-7d1"
+  },
+  "/lsdo_optimizer/docs/getting_started/simple_example-c6a": {
+    "component": "component---theme-doc-item-178-a40",
+    "content": "content---lsdo-optimizer-docs-getting-started-simple-example-88-f-68b"
+  },
+  "/lsdo_optimizer/docs/installation_instructions-3ba": {
+    "component": "component---theme-doc-item-178-a40",
+    "content": "content---lsdo-optimizer-docs-installation-instructions-547-a40"
+  },
+  "/lsdo_optimizer/docs/interfacing_existing_optimizers-6c1": {
+    "component": "component---theme-doc-item-178-a40",
+    "content": "content---lsdo-optimizer-docs-interfacing-existing-optimizers-40-e-0ce"
+  },
+  "/lsdo_optimizer/docs/introduction-995": {
+    "component": "component---theme-doc-item-178-a40",
+    "content": "content---lsdo-optimizer-docs-introduction-972-0cc"
+  },
+  "/lsdo_optimizer/docs/more_examples-e51": {
+    "component": "component---theme-doc-item-178-a40",
+    "content": "content---lsdo-optimizer-docs-more-examples-065-da3"
+  },
+  "/lsdo_optimizer/docs/standard_optimization_algorithms-715": {
+    "component": "component---theme-doc-item-178-a40",
+    "content": "content---lsdo-optimizer-docs-standard-optimization-algorithmsa-1-d-ec9"
+  }
+}

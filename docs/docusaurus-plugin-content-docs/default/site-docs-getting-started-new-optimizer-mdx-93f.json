@@ -1,0 +1,27 @@
+{
+  "unversionedId": "getting_started/new_optimizer",
+  "id": "getting_started/new_optimizer",
+  "isDocsHomePage": false,
+  "title": "Developing a new optimizer",
+  "description": "",
+  "source": "@site/docs/getting_started/new_optimizer.mdx",
+  "sourceDirName": "getting_started",
+  "slug": "/getting_started/new_optimizer",
+  "permalink": "/lsdo_optimizer/docs/getting_started/new_optimizer",
+  "editUrl": "https://github.com/lsdolab/lsdo_optimizer/edit/main/website/docs/getting_started/new_optimizer.mdx",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 2,
+  "frontMatter": {
+    "sidebar_position": 2
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "A Simple Example",
+    "permalink": "/lsdo_optimizer/docs/getting_started/simple_example"
+  },
+  "next": {
+    "title": "Defining an optimization problem",
+    "permalink": "/lsdo_optimizer/docs/getting_started/new_problem"
+  }
+}

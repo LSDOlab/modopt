@@ -1,0 +1,68 @@
+{
+  "docusaurus-plugin-content-docs": {
+    "default": {
+      "path": "/modopt/docs",
+      "versions": [
+        {
+          "name": "current",
+          "label": "Next",
+          "isLast": true,
+          "path": "/modopt/docs",
+          "mainDocId": "introduction",
+          "docs": [
+            {
+              "id": "benchmarking",
+              "path": "/modopt/docs/benchmarking",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "getting_started/coupling_optimizer_with_problem",
+              "path": "/modopt/docs/getting_started/coupling_optimizer_with_problem",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "getting_started/new_optimizer",
+              "path": "/modopt/docs/getting_started/new_optimizer",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "getting_started/new_problem",
+              "path": "/modopt/docs/getting_started/new_problem",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "getting_started/simple_example",
+              "path": "/modopt/docs/getting_started/simple_example",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "installation_instructions",
+              "path": "/modopt/docs/installation_instructions",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "interfacing_existing_optimizers",
+              "path": "/modopt/docs/interfacing_existing_optimizers",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "introduction",
+              "path": "/modopt/docs/introduction",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "more_examples",
+              "path": "/modopt/docs/more_examples",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "standard_optimization_algorithms",
+              "path": "/modopt/docs/standard_optimization_algorithms",
+              "sidebar": "tutorialSidebar"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

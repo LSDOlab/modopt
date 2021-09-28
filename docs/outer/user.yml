@@ -1,0 +1,10 @@
+loaders:
+  - type: python
+processors:
+  - type: filter
+    exclude_special: false
+    documented_only: true
+  - type: smart
+  - type: crossref
+renderer:
+  type: markdown

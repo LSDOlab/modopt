@@ -1,0 +1,27 @@
+{
+  "unversionedId": "getting_started/new_problem",
+  "id": "getting_started/new_problem",
+  "isDocsHomePage": false,
+  "title": "Defining an optimization problem",
+  "description": "",
+  "source": "@site/docs/getting_started/new_problem.mdx",
+  "sourceDirName": "getting_started",
+  "slug": "/getting_started/new_problem",
+  "permalink": "/lsdo_optimizer/docs/getting_started/new_problem",
+  "editUrl": "https://github.com/lsdolab/lsdo_optimizer/edit/main/website/docs/getting_started/new_problem.mdx",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 3,
+  "frontMatter": {
+    "sidebar_position": 3
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Developing a new optimizer",
+    "permalink": "/lsdo_optimizer/docs/getting_started/new_optimizer"
+  },
+  "next": {
+    "title": "Coupling an optimizer with a problem",
+    "permalink": "/lsdo_optimizer/docs/getting_started/coupling_optimizer_with_problem"
+  }
+}

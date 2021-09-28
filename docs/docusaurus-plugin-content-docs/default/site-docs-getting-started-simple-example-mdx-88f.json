@@ -1,0 +1,27 @@
+{
+  "unversionedId": "getting_started/simple_example",
+  "id": "getting_started/simple_example",
+  "isDocsHomePage": false,
+  "title": "A Simple Example",
+  "description": "Here we look at a simple optimization algorithm (the steepest descent) and use it to solve a simple unconstrained",
+  "source": "@site/docs/getting_started/simple_example.mdx",
+  "sourceDirName": "getting_started",
+  "slug": "/getting_started/simple_example",
+  "permalink": "/lsdo_optimizer/docs/getting_started/simple_example",
+  "editUrl": "https://github.com/lsdolab/lsdo_optimizer/edit/main/website/docs/getting_started/simple_example.mdx",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 1,
+  "frontMatter": {
+    "sidebar_position": 1
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Installation Instructions",
+    "permalink": "/lsdo_optimizer/docs/installation_instructions"
+  },
+  "next": {
+    "title": "Developing a new optimizer",
+    "permalink": "/lsdo_optimizer/docs/getting_started/new_optimizer"
+  }
+}
