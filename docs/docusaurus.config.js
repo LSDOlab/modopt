@@ -6,8 +6,8 @@ const katex = require('rehype-katex');
 // With JSDoc @type annotations, IDEs can provide config autocompletion
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
 (module.exports = {
-    title: 'A Scalable Optimizer Development Environment',
-    tagline: 'A framework for developing and bechmarking gradient-based optimizers',
+    title: 'modOpt',
+    tagline: 'A modular development environment and library for optimization algorithms',
     url: 'https://lsdolab.github.io',
     baseUrl: '/modopt/',
     onBrokenLinks: 'throw',
@@ -57,7 +57,7 @@ const katex = require('rehype-katex');
                 items: [
                     {
                         to: '/',
-                        label: 'Home',
+                        label: 'modOpt',
                         position: 'left'
                     },
                     {
@@ -99,21 +99,21 @@ const katex = require('rehype-katex');
                     title: 'Docs',
                     items: [
                         {
-                            label: 'Tutorial',
-                            to: '/docs/tutorial/install',
+                            label: 'Getting Started',
+                            to: '/docs/getting_started/simple_example',
                         },
                         // {
                         //     label: 'CSDL by Example',
                         //     to: '/docs/examples/intro',
                         // },
-                        {
-                            label: 'Language Reference',
-                            to: '/docs/lang_ref/model',
-                        },
-                        {
-                            label: 'Developer API',
-                            to: '/docs/developer/api',
-                        },
+                        // {
+                        //     label: 'Language Reference',
+                        //     to: '/docs/lang_ref/model',
+                        // },
+                        // {
+                        //     label: 'Developer API',
+                        //     to: '/docs/developer/api',
+                        // },
                     ],
                 },
                 {

@@ -11,12 +11,12 @@
       {
         "type": "link",
         "label": "Introduction",
-        "href": "/lsdo_optimizer/docs/introduction"
+        "href": "/modopt/docs/introduction"
       },
       {
         "type": "link",
         "label": "Installation Instructions",
-        "href": "/lsdo_optimizer/docs/installation_instructions"
+        "href": "/modopt/docs/installation_instructions"
       },
       {
         "type": "category",
@@ -25,22 +25,22 @@
           {
             "type": "link",
             "label": "A Simple Example",
-            "href": "/lsdo_optimizer/docs/getting_started/simple_example"
+            "href": "/modopt/docs/getting_started/simple_example"
           },
           {
             "type": "link",
             "label": "Developing a new optimizer",
-            "href": "/lsdo_optimizer/docs/getting_started/new_optimizer"
+            "href": "/modopt/docs/getting_started/new_optimizer"
           },
           {
             "type": "link",
             "label": "Defining an optimization problem",
-            "href": "/lsdo_optimizer/docs/getting_started/new_problem"
+            "href": "/modopt/docs/getting_started/new_problem"
           },
           {
             "type": "link",
             "label": "Coupling an optimizer with a problem",
-            "href": "/lsdo_optimizer/docs/getting_started/coupling_optimizer_with_problem"
+            "href": "/modopt/docs/getting_started/coupling_optimizer_with_problem"
           }
         ],
         "collapsed": true,
@@ -49,22 +49,22 @@
       {
         "type": "link",
         "label": "Standard Optimization Algorithms Available",
-        "href": "/lsdo_optimizer/docs/standard_optimization_algorithms"
+        "href": "/modopt/docs/standard_optimization_algorithms"
       },
       {
         "type": "link",
         "label": "Interfacing Existing Optimizers",
-        "href": "/lsdo_optimizer/docs/interfacing_existing_optimizers"
+        "href": "/modopt/docs/interfacing_existing_optimizers"
       },
       {
         "type": "link",
         "label": "More Examples",
-        "href": "/lsdo_optimizer/docs/more_examples"
+        "href": "/modopt/docs/more_examples"
       },
       {
         "type": "link",
         "label": "Benchmarking",
-        "href": "/lsdo_optimizer/docs/benchmarking"
+        "href": "/modopt/docs/benchmarking"
       }
     ]
   }

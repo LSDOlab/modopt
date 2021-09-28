@@ -7,8 +7,8 @@
   "source": "@site/docs/more_examples.mdx",
   "sourceDirName": ".",
   "slug": "/more_examples",
-  "permalink": "/lsdo_optimizer/docs/more_examples",
-  "editUrl": "https://github.com/lsdolab/lsdo_optimizer/edit/main/website/docs/more_examples.mdx",
+  "permalink": "/modopt/docs/more_examples",
+  "editUrl": "https://github.com/lsdolab/modopt/edit/main/website/docs/more_examples.mdx",
   "tags": [],
   "version": "current",
   "sidebarPosition": 6,
@@ -19,10 +19,10 @@
   "sidebar": "tutorialSidebar",
   "previous": {
     "title": "Interfacing Existing Optimizers",
-    "permalink": "/lsdo_optimizer/docs/interfacing_existing_optimizers"
+    "permalink": "/modopt/docs/interfacing_existing_optimizers"
   },
   "next": {
     "title": "Benchmarking",
-    "permalink": "/lsdo_optimizer/docs/benchmarking"
+    "permalink": "/modopt/docs/benchmarking"
   }
 }

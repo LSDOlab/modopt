@@ -7,8 +7,8 @@
   "source": "@site/docs/installation_instructions.mdx",
   "sourceDirName": ".",
   "slug": "/installation_instructions",
-  "permalink": "/lsdo_optimizer/docs/installation_instructions",
-  "editUrl": "https://github.com/lsdolab/lsdo_optimizer/edit/main/website/docs/installation_instructions.mdx",
+  "permalink": "/modopt/docs/installation_instructions",
+  "editUrl": "https://github.com/lsdolab/modopt/edit/main/website/docs/installation_instructions.mdx",
   "tags": [],
   "version": "current",
   "sidebarPosition": 2,
@@ -19,10 +19,10 @@
   "sidebar": "tutorialSidebar",
   "previous": {
     "title": "Introduction",
-    "permalink": "/lsdo_optimizer/docs/introduction"
+    "permalink": "/modopt/docs/introduction"
   },
   "next": {
     "title": "A Simple Example",
-    "permalink": "/lsdo_optimizer/docs/getting_started/simple_example"
+    "permalink": "/modopt/docs/getting_started/simple_example"
   }
 }

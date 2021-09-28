@@ -7,8 +7,8 @@
   "source": "@site/docs/standard_optimization_algorithms.mdx",
   "sourceDirName": ".",
   "slug": "/standard_optimization_algorithms",
-  "permalink": "/lsdo_optimizer/docs/standard_optimization_algorithms",
-  "editUrl": "https://github.com/lsdolab/lsdo_optimizer/edit/main/website/docs/standard_optimization_algorithms.mdx",
+  "permalink": "/modopt/docs/standard_optimization_algorithms",
+  "editUrl": "https://github.com/lsdolab/modopt/edit/main/website/docs/standard_optimization_algorithms.mdx",
   "tags": [],
   "version": "current",
   "sidebarPosition": 4,
@@ -19,10 +19,10 @@
   "sidebar": "tutorialSidebar",
   "previous": {
     "title": "Coupling an optimizer with a problem",
-    "permalink": "/lsdo_optimizer/docs/getting_started/coupling_optimizer_with_problem"
+    "permalink": "/modopt/docs/getting_started/coupling_optimizer_with_problem"
   },
   "next": {
     "title": "Interfacing Existing Optimizers",
-    "permalink": "/lsdo_optimizer/docs/interfacing_existing_optimizers"
+    "permalink": "/modopt/docs/interfacing_existing_optimizers"
   }
 }

@@ -7,8 +7,8 @@
   "source": "@site/docs/benchmarking.mdx",
   "sourceDirName": ".",
   "slug": "/benchmarking",
-  "permalink": "/lsdo_optimizer/docs/benchmarking",
-  "editUrl": "https://github.com/lsdolab/lsdo_optimizer/edit/main/website/docs/benchmarking.mdx",
+  "permalink": "/modopt/docs/benchmarking",
+  "editUrl": "https://github.com/lsdolab/modopt/edit/main/website/docs/benchmarking.mdx",
   "tags": [],
   "version": "current",
   "sidebarPosition": 7,
@@ -19,6 +19,6 @@
   "sidebar": "tutorialSidebar",
   "previous": {
     "title": "More Examples",
-    "permalink": "/lsdo_optimizer/docs/more_examples"
+    "permalink": "/modopt/docs/more_examples"
   }
 }
