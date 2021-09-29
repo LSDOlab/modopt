@@ -21,3 +21,17 @@ yarn-error.log*
 
 # worked examples
 /docs/worked_examples
+
+# worked examples
+/docs/docusaurus-plugin-*
+
+# built files
+yarn.lock
+site-metadata.json
+routesChunkNames.json
+routes.js
+registry.js
+i18n.json
+globalData.json
+codeTranslations.json
+client-modules.js
