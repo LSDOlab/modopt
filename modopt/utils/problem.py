@@ -775,5 +775,3 @@ class Problem(object):
             y block of the Hessian-vector product.
         """
         pass
-
-    # docs for user facing methods as in SMT
