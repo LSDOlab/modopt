@@ -1,5 +1,5 @@
 # TODO: create workflow to check pull requests
-name: docs_pages_workflow
+name: doc_pages_workflow
 
 on:
   pull_request:
