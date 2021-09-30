@@ -6,7 +6,7 @@ from modopt.api import Problem
 class Quadratic(Problem):
     def initialize(self, ):
         # self.options.declare('problem_name', default='x^4', types=str)
-        self.problem_name = 'x^4'
+        self.problem_name = 'x^2 + y^2'
 
     def setup(self):
         # Make optional
@@ -15,7 +15,7 @@ class Quadratic(Problem):
                                   lower=np.array([0., -np.inf]),
                                   upper=None,
                                   equals=None,
-                                  vals=np.array([5., 5.]))
+                                  vals=np.array([500., 500.]))
 
         # self.add_design_variables('y',
         #                           shape=(1, ),
@@ -48,6 +48,7 @@ class Quadratic(Problem):
 
     def setup_derivatives(self):
         self.declare_objective_gradient(wrt='x', shape=(1, ), vals=None)
+        # self.declare_objective_gradient(wrt='x', shape=(1, ), vals=None)
         self.declare_objective_hessian(of='x',
                                        wrt='x',
                                        shape=(2, 2),

@@ -3,6 +3,7 @@ import numpy as np
 from x4 import X4
 
 from modopt.optimization_algorithms import SteepestDescent, Newton, BFGS
+from modopt.scipy_library import SLSQP
 
 # nx = 25
 tol = 1E-8
@@ -15,19 +16,26 @@ prob = X4()
 optimizer = SteepestDescent(prob, opt_tol=tol, max_itr=max_itr)
 optimizer.check_first_derivatives(prob.x.get_data())
 optimizer.solve()
-optimizer.print_results(opt_summary=True)
+optimizer.print_results(summary_table=True)
 
 prob = X4()
 
 optimizer = Newton(prob, opt_tol=tol, max_itr=max_itr)
 optimizer.check_first_derivatives(prob.x.get_data())
 optimizer.solve()
-optimizer.print_results(opt_summary=True)
+optimizer.print_results(summary_table=True)
 
 prob = X4()
 
 optimizer = BFGS(prob, opt_tol=tol, max_itr=max_itr)
 optimizer.check_first_derivatives(prob.x.get_data())
 optimizer.solve()
-optimizer.print_results(opt_summary=True)
-# optimizer.print_results(opt_summary=True, compact_print=True)
+optimizer.print_results(summary_table=True)
+# optimizer.print_results(summary_table=True, compact_print=True)
+
+# tol = 1E-12
+
+# optimizer = SLSQP(prob, ftol=tol, max_itr=max_itr)
+# optimizer.check_first_derivatives(prob.x.get_data())
+# optimizer.solve()
+# optimizer.print_results(optimal_variables=True)

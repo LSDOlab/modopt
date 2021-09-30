@@ -40,8 +40,6 @@ class FEA(Problem):
         self.L = self.options['L'] / self.num_elements
         self.b = self.options['b']
 
-        # self.K = K = np.zeros((num_elements + 1, num_elements + 1))
-        # self.u = np.zeros(num_elements + 1)
         self.heights = np.ones(self.num_elements, dtype=dtype)
         self.forces = self.options['forces']
         self.bsp = np.array(
@@ -52,14 +50,14 @@ class FEA(Problem):
                                   shape=(self.num_design_variables, ),
                                   lower=0.01 * np.ones(
                                       (self.num_design_variables, )),
-                                  vals=0.1 * np.ones(
+                                  vals=.08 * np.ones(
                                       (self.num_design_variables, )))
 
-        self.add_objective('compliance', )
+        self.add_objective('compliance')
 
         self.add_constraints(
             'average_height',
-            upper=np.array([0.1]),
+            upper=np.array([0.5]),
         )
 
     def setup_derivatives(self):
@@ -154,7 +152,6 @@ class FEA(Problem):
             Displacement vector with the first, fixed degree of freedom removed.
 
         """
-        print(K.shape, self.forces.shape)
         u = np.linalg.solve(K, self.forces)
         return u
 
@@ -211,6 +208,7 @@ class FEA(Problem):
         pFpy = self._get_forces()
 
         dfdr = np.linalg.solve(pRpy.T, -pFpy)
+        # dfdr = np.linalg.solve(pRpy.T, pFpy)
         grad_aj = pFpx + pRpx.T.dot(dfdr)
         grad_aj = np.real(grad_aj)
         return grad_aj.reshape((1, self.num_design_variables))

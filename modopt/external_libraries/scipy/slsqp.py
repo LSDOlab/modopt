@@ -61,8 +61,6 @@ class SLSQP(ScipyOptimizer):
         # Call SLSQP algorithm from scipy (options are specific to SLSQP)
         # Note: f_tol is the precision tolerance for the objective(not the same as opt_tol)
 
-        print(obj(x0))
-
         result = minimize(
             obj,
             x0,
@@ -74,17 +72,17 @@ class SLSQP(ScipyOptimizer):
             bounds=bounds,
             constraints=constraints,
             tol=None,
-            # callback=callback,
-            callback=None,
+            callback=callback,
             options={
                 #   'func': obj,
                 'maxiter': maxiter,
                 'ftol': ftol,
                 'iprint': 1,
                 'disp': disp,
-                'return_all': True,
                 'eps': eps,
-                'finite_diff_rel_step': finite_diff_rel_step
             })
 
-        print(result)
+        end_time = time.time()
+        self.total_time = end_time - start_time
+
+        self.outputs = result

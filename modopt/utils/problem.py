@@ -44,8 +44,8 @@ class Problem(object):
 
         x0 = self.options['x0']
         y0 = self.options['y0']
-        nx = self.options['nx']
-        ny = self.options['ny']
+        nx = self.nx
+        ny = self.ny
 
         if nx != 0 and x0 is None:
             self.options['x0'] = np.full((nx, ), 0.)
@@ -113,11 +113,6 @@ class Problem(object):
         self.c_lower = self.constraints_dict.lower
         self.c_upper = self.constraints_dict.upper
 
-        print(self.x_lower)
-        print(self.x_upper)
-        print(self.c_lower)
-        print(self.c_upper)
-
     # user defined
     def setup_derivatives(
         self,
@@ -126,17 +121,17 @@ class Problem(object):
 
     def _setup_gradient_vector(self):
         # self.pF_px_dict = deepcopy(self.design_variables_dict)
-        # self.pF_px_dict.vals = np.zeros((self.options['nx'], ))
+        # self.pF_px_dict.vals = np.zeros((self.nx, ))
 
         self.pF_px = Vector(self.design_variables_dict)
-        self.pF_px.allocate(data=np.zeros((self.options['nx'], )),
+        self.pF_px.allocate(data=np.zeros((self.nx, )),
                             setup_views=True)
 
         if self.implicit_constrained:
             # self.pF_py_dict = deepcopy(self.state_variables_dict)
-            # self.pF_py_dict.vals = np.zeros((self.options['nx'], ))
+            # self.pF_py_dict.vals = np.zeros((self.nx, ))
             self.pF_py = Vector(self.design_variables_dict)
-            self.pF_py.allocate(data=np.zeros((self.options['nx'], )),
+            self.pF_py.allocate(data=np.zeros((self.ny, )),
                                 setup_views=True)
 
     def _setup_jacobian_dict(self):
@@ -254,7 +249,7 @@ class Problem(object):
             vals=vals,
         )
 
-        self.options['nx'] += np.prod(shape)
+        self.nx += np.prod(shape)
 
     def add_objective(self, name):
         pass
@@ -272,7 +267,7 @@ class Problem(object):
                                                upper=upper,
                                                vals=vals)
 
-        self.options['ny'] += np.prod(shape)
+        self.ny += np.prod(shape)
 
     def add_constraints(self,
                         name,
@@ -289,7 +284,7 @@ class Problem(object):
 
         self.constrained = True
 
-        self.options['nc'] += np.prod(shape)
+        self.nc += np.prod(shape)
 
     def add_residuals(self, name, shape=(1, )):
         self.residuals_dict[name] = dict(shape=shape,
@@ -297,7 +292,7 @@ class Problem(object):
                                          upper=None,
                                          equals=np.zeros(shape))
 
-        self.options['nr'] += np.prod(shape)
+        self.nr += np.prod(shape)
 
     def declare_objective_gradient(self, wrt, shape=(1, ), vals=None):
 
@@ -593,7 +588,7 @@ class Problem(object):
         pC_px_0, pC_py_0 = self.evaluate_constraint_jacobian(
             self, x, self.y)
 
-        if self.options['nc'] <= self.options9['nr']:
+        if self.nc <= self.nr:
             dc_dr_0, pR_px = self.compute_adjoint_vector(x, pC_py_0)
             self.pC_px_0 = pC_px_0 + np.matmul(dc_dr_0, pR_px)
 

@@ -18,8 +18,8 @@ prob = FEA(nx=nx, num_elements=num_elements, forces=forces)
 
 optimizer = SLSQP(prob, opt_tol=tol, max_itr=max_itr)
 # optimizer = COBYLA(prob, opt_tol=tol, max_itr=max_itr)
-# optimizer.check_first_derivatives(prob.x.get_data())
+optimizer.check_first_derivatives(prob.x.get_data())
 optimizer.solve()
-optimizer.print_results(opt_summary=True)
+optimizer.print_results(optimal_variables=True)
 
-# optimizer.print_results(opt_summary=True, compact_print=True)
+# optimizer.print_results(summary_table=True, compact_print=True)

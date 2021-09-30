@@ -18,11 +18,11 @@ class BFGS(Optimizer):
 
     def setup(self):
         self.LS = ScipyLS(f=self.obj, g=self.grad)
-        self.QN = BFGS_(nx=self.prob_options['nx'])
+        self.QN = BFGS_(nx=self.problem.nx)
 
     def solve(self):
         # Assign shorter names to variables and methods
-        nx = self.prob_options['nx']
+        nx = self.problem.nx
         # x0 = self.prob_options['x0']
         x0 = self.problem.x.get_data()
         opt_tol = self.options['opt_tol']
