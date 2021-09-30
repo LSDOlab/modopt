@@ -10,6 +10,7 @@ from io import StringIO
 class Optimizer(object):
     def __init__(self, problem, **kwargs):
         self.options = OptionsDictionary()
+        problem._setup()
         self.prob_options = problem.options
         self.problem_name = problem.problem_name
 

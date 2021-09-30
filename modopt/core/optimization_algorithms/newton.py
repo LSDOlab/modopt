@@ -22,7 +22,8 @@ class Newton(Optimizer):
 
         # Assign shorter names to variables and methods
         nx = self.prob_options['nx']
-        x0 = self.prob_options['x0']
+        # x0 = self.prob_options['x0']
+        x0 = self.problem.x.get_data()
         opt_tol = self.options['opt_tol']
         max_itr = self.options['max_itr']
 

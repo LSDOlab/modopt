@@ -34,7 +34,7 @@ class ScipyOptimizer(Optimizer):
         if self.problem.compute_objective_gradient.__func__ is not Problem.compute_objective_gradient:
             self.grad = self.problem.compute_objective_gradient
         else:
-            self.grad = self.options['grad']
+            self.grad = self.options['gradient']
 
         # Only for COBYLA, SLSQP and trust-constr
         # Used to construct:
@@ -46,7 +46,7 @@ class ScipyOptimizer(Optimizer):
             if self.problem.compute_constraint_jacobian.__func__ is not Problem.compute_constraint_jacobian:
                 self.jac = self.problem.compute_constraint_jacobian
             else:
-                self.jac = self.options['jac']
+                self.jac = self.options['jacobian']
 
         # SETUP OBJECTIVE HESSIAN OR HVP
 
@@ -130,65 +130,92 @@ class ScipyOptimizer(Optimizer):
         # Adapt constraints as a list of dictionaries with constraints = 0 or >= 0
         # For SLSQP and COBYLA
         # Note: COBYLA only supports inequality constraints
+
         if build_dict:
             eq_indices = np.where(c_upper == c_lower)[0]
             ineq_indices = np.where(c_upper != c_lower)[0]
 
-            con_dict_eq = {}
-            con_dict_eq['type'] = 'eq'
+            self.constraints = []
+            if len(eq_indices) > 0:
+                con_dict_eq = {}
+                con_dict_eq['type'] = 'eq'
 
-            def func_eq(x):
-                return self.con(
-                    x)[eq_indices] - self.problem.c_lower[eq_indices]
+                def func_eq(x):
+                    return self.con(x)[
+                        eq_indices] - self.problem.c_lower[eq_indices]
 
-            def jac_eq(x):
-                return self.jac(x)[eq_indices]
+                con_dict_eq['fun'] = func_eq
 
-            con_dict_eq['fun'] = func_eq
-            con_dict_eq['jac'] = jac_eq
+                if type(self.jac) != str:
 
-            con_dict_ineq1 = {}
-            con_dict_ineq1['type'] = 'ineq'
+                    def jac_eq(x):
+                        return self.jac(x)[eq_indices]
 
-            # Remove -np.inf constraints with -np.inf as lower bound
-            c_lower_ineq = c_lower[ineq_indices]
-            lower_ineq_indices = ineq_indices[np.where(
-                c_lower_ineq != -np.inf)[0]]
+                    con_dict_eq['jac'] = jac_eq
 
-            def func_ineq1(x):
-                return self.con(
-                    x)[lower_ineq_indices] - self.problem.c_lower[
-                        lower_ineq_indices]
+                self.constraints.append(con_dict_eq)
+                print('eq')
 
-            def jac_ineq1(x):
-                return self.jac(x)[lower_ineq_indices]
+            if len(ineq_indices) > 0:
 
-            con_dict_ineq1['fun'] = func_ineq1
-            con_dict_ineq1['jac'] = jac_ineq1
+                # Remove -np.inf constraints with -np.inf as lower bound
+                c_lower_ineq = c_lower[ineq_indices]
+                lower_ineq_indices = ineq_indices[np.where(
+                    c_lower_ineq != -np.inf)[0]]
 
-            con_dict_ineq2 = {}
-            con_dict_ineq2['type'] = 'ineq'
+                if len(lower_ineq_indices) > 0:
+                    con_dict_ineq1 = {}
+                    con_dict_ineq1['type'] = 'ineq'
 
-            # Remove np.inf constraints with -np.inf as lower bound
-            c_upper_ineq = c_upper[ineq_indices]
-            upper_ineq_indices = ineq_indices[np.where(
-                c_upper_ineq != np.inf)[0]]
+                    def func_ineq1(x):
+                        return self.con(x)[
+                            lower_ineq_indices] - self.problem.c_lower[
+                                lower_ineq_indices]
 
-            def func_ineq2(x):
-                return self.problem.c_upper[
-                    upper_ineq_indices] - self.con(
-                        x)[upper_ineq_indices]
+                    con_dict_ineq1['fun'] = func_ineq1
 
-            def jac_ineq2(x):
-                return -self.jac(x)[upper_ineq_indices]
+                    if type(self.jac) != str:
 
-            con_dict_ineq2['fun'] = func_ineq2
-            con_dict_ineq2['jac'] = jac_ineq2
+                        def jac_ineq1(x):
+                            return self.jac(x)[lower_ineq_indices]
+
+                        con_dict_ineq1['jac'] = jac_ineq1
+
+                    self.constraints.append(con_dict_ineq1)
+                    print('ineq1')
+
+                # Remove np.inf constraints with -np.inf as lower bound
+                c_upper_ineq = c_upper[ineq_indices]
+                upper_ineq_indices = ineq_indices[np.where(
+                    c_upper_ineq != np.inf)[0]]
+
+                if len(upper_ineq_indices) > 0:
+                    con_dict_ineq2 = {}
+                    con_dict_ineq2['type'] = 'ineq'
+
+                    def func_ineq2(x):
+                        return self.problem.c_upper[
+                            upper_ineq_indices] - self.con(
+                                x)[upper_ineq_indices]
+
+                    con_dict_ineq2['fun'] = func_ineq2
+
+                    if type(self.jac) != str:
+
+                        def jac_ineq2(x):
+                            print('jac:', self.jac)
+                            return -self.jac(x)[upper_ineq_indices]
+
+                        con_dict_ineq2['jac'] = jac_ineq2
+
+                    self.constraints.append(con_dict_ineq2)
+
+                    print('ineq2')
 
             # Adapt constraints as a list of dictionaries with constraints = 0 or >= 0
-            self.constraints = [
-                con_dict_eq, con_dict_ineq1, con_dict_ineq2
-            ]
+            # self.constraints = [
+            #     con_dict_eq, con_dict_ineq1, con_dict_ineq2
+            # ]
 
         else:
             # Adapt constraints a single/list of scipy LinearConstraint() or NonlinearConstraint() objects
