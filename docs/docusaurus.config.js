@@ -51,7 +51,7 @@ const katex = require('rehype-katex');
         ({
             navbar: {
                 // logo: {
-                //     alt: 'LSDO-ODF',
+                //     alt: 'modOpt',
                 //     src: 'img/logo.svg',
                 // },
                 items: [

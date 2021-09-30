@@ -24,7 +24,7 @@ function HomepageHeader() {
 export default function Home() {
     const { siteConfig } = useDocusaurusContext();
     return (
-        <Layout title={`LSDO-ODF | ${siteConfig.title}`} description="Description will go into a meta tag in <head />">
+        <Layout title={`modOpt | ${siteConfig.title}`} description="Description will go into a meta tag in <head />">
             <HomepageHeader />
             <main>
                 <HomepageFeatures />
@@ -33,5 +33,5 @@ export default function Home() {
     );
 }
 
-// Projects using LSDO-ODF
+// Projects using modOpt
 // Publications
