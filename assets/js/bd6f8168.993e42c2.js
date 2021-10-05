@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkmy_website=self.webpackChunkmy_website||[]).push([[7690],{5378:function(t){t.exports=JSON.parse('{"/modopt/blog/tags/test":{"allTagsPath":"/modopt/blog/tags","slug":"/modopt/blog/tags/test","name":"test","count":1,"permalink":"/modopt/blog/tags/test"}}')}}]);

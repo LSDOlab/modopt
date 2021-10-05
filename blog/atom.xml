@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lsdolab.github.io/modopt/blog</id>
-    <title>The Computational System Design Language Blog</title>
+    <title>modOpt Blog</title>
     <updated>2019-05-28T00:00:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lsdolab.github.io/modopt/blog"/>
-    <subtitle>The Computational System Design Language Blog</subtitle>
-    <icon>https://lsdolab.github.io/modopt/img/favicon.svg</icon>
+    <subtitle>modOpt Blog</subtitle>
+    <icon>https://lsdolab.github.io/modopt/img/favicon.ico</icon>
     <entry>
-        <title type="html"><![CDATA[CSDL Blog Post]]></title>
-        <id>csdl-blog-post</id>
-        <link href="https://lsdolab.github.io/modopt/blog/csdl-blog-post"/>
+        <title type="html"><![CDATA[First Blog Post]]></title>
+        <id>first-blog-post</id>
+        <link href="https://lsdolab.github.io/modopt/blog/first-blog-post"/>
         <updated>2019-05-28T00:00:00.000Z</updated>
-        <summary type="html"><![CDATA[My first blog about CSDL.]]></summary>
         <author>
-            <name>Victor Gandarillas</name>
-            <uri>https://github.com/vgandari</uri>
+            <name>Anugrah Jo Joshy</name>
+            <uri>https://github.com/anugrahjo</uri>
         </author>
     </entry>
 </feed>

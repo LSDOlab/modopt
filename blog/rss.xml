@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0">
     <channel>
-        <title>The Computational System Design Language Blog</title>
+        <title>modOpt Blog</title>
         <link>https://lsdolab.github.io/modopt/blog</link>
-        <description>The Computational System Design Language Blog</description>
+        <description>modOpt Blog</description>
         <lastBuildDate>Tue, 28 May 2019 00:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <item>
-            <title><![CDATA[CSDL Blog Post]]></title>
-            <link>https://lsdolab.github.io/modopt/blog/csdl-blog-post</link>
-            <guid>csdl-blog-post</guid>
+            <title><![CDATA[First Blog Post]]></title>
+            <link>https://lsdolab.github.io/modopt/blog/first-blog-post</link>
+            <guid>first-blog-post</guid>
             <pubDate>Tue, 28 May 2019 00:00:00 GMT</pubDate>
-            <description><![CDATA[My first blog about CSDL.]]></description>
         </item>
     </channel>
 </rss>
