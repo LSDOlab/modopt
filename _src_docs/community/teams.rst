@@ -1,9 +1,14 @@
 Developer Teams
 ===============
 
-Solver Team
------------
+Compiler Team
+-------------
 
+Language Team
+-------------
+
+Library Team
+------------
 
 Documentation Team
 ------------------
