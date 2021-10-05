@@ -4,8 +4,10 @@ build/
 *.egg*
 __pycache__
 .vscode
-.pyc
-.out
+*.pyc
+*.out
 
 # File systems
-**/*.DS_Store
+*.DS_Store
+# **/*.DS_Store
+

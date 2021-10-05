@@ -1,12 +1,14 @@
 import numpy as np
 from utils import get_bspline_mtx
 
+from modopt.api import Problem
 
-dtype = complex
+# dtype = complex
+dtype = float
+
 
 class FEA(Problem):
-
-    def initialize(self, **kwargs):
+    def initialize(self):
         """
         Instantiate the FEA object.
 
@@ -24,6 +26,7 @@ class FEA(Problem):
         b : float
             Width of the bar elements.
         """
+        self.problem_name = 'fea'
         self.options.declare('num_elements', default=40, types=int)
         self.options.declare('E', default=1., types=float)
         self.options.declare('L', default=1., types=float)
@@ -37,14 +40,36 @@ class FEA(Problem):
         self.L = self.options['L'] / self.num_elements
         self.b = self.options['b']
 
-        # self.K = K = np.zeros((num_elements + 1, num_elements + 1))
-        # self.u = np.zeros(num_elements + 1)
         self.heights = np.ones(self.num_elements, dtype=dtype)
         self.forces = self.options['forces']
         self.bsp = np.array(
-            get_bspline_mtx(self.num_design_variables, self.num_elements).todense()
+            get_bspline_mtx(self.num_design_variables,
+                            self.num_elements).todense())
+
+        self.add_design_variables('heights',
+                                  shape=(self.num_design_variables, ),
+                                  lower=0.01 * np.ones(
+                                      (self.num_design_variables, )),
+                                  vals=.08 * np.ones(
+                                      (self.num_design_variables, )))
+
+        self.add_objective('compliance')
+
+        self.add_constraints(
+            'average_height',
+            upper=np.array([0.5]),
         )
 
+    def setup_derivatives(self):
+        self.declare_objective_gradient(
+            wrt='heights', shape=(self.num_design_variables, ))
+        self.declare_constraint_jacobian(
+            of='average_height',
+            wrt='heights',
+            shape=(1, self.num_design_variables),
+            vals=1 / self.num_design_variables * np.ones(
+                (1, self.num_design_variables)),
+        )
 
     def _set_dvs(self, dvs):
         """
@@ -96,7 +121,7 @@ class FEA(Problem):
         """
         num_elements = self.num_elements
         pKph = np.zeros(
-            (num_elements + 1, num_elements + 1, num_elements), 
+            (num_elements + 1, num_elements + 1, num_elements),
             dtype=dtype,
         )
         Eb_L = self.E * self.b / self.L
@@ -157,34 +182,44 @@ class FEA(Problem):
         """
         return np.array(self.forces)
 
-    def _evaluate(self, dvs):
-        """
-        Compute the compliance as a function of the design variables.
-
-        Parameters
-        ----------
-        dvs : np.ndarray[num_design_variables]
-            Design variables vector.
-
-        Returns
-        -------
-        float
-            Compliance.
-        """
-        self._set_dvs(dvs)
+    def compute_objective(self, x):
+        self._set_dvs(x)
         K = self._compute_K()
         u = self._solve(K)
         c = self._compute_compliance(u)
         return c
 
-    def compute_objective(self, x):
+    def compute_constraints(self, h):
+        return np.array([np.sum(h / self.num_design_variables)])
 
-    def compute_constraints(self, x):
-        
-    def compute_objective_gradient(self, x):
+    def solve_residual_equations(self, h):
+        self._set_dvs(h)
+        pRpy = self._compute_K()
+        u = self._solve(pRpy)
+        return u
 
-    
-    
-    def declare_bounds(self, x_lower, x_upper):
+    def compute_objective_gradient(self, h):
+        self._set_dvs(h)
+        K = self._compute_K()
+        u = self._solve(K)
+        pRpx = self._compute_pRph(u)
+        pRpy = self._compute_K()
+        pFpx = 0.
+        pFpy = self._get_forces()
 
-    def declare_constraint_bounds(self, c_lower, c_upper):
+        dfdr = np.linalg.solve(pRpy.T, -pFpy)
+        # dfdr = np.linalg.solve(pRpy.T, pFpy)
+        grad_aj = pFpx + pRpx.T.dot(dfdr)
+        grad_aj = np.real(grad_aj)
+        return grad_aj.reshape((1, self.num_design_variables))
+
+    def evaluate_residual_jacobian(self, h, u):
+        self._set_dvs(h)
+        pRpx = self._compute_pRph(u)
+        pRpy = self._compute_K()
+        return pRpx, pRpy
+
+    def evaluate_constraint_jacobian(self, h, u):
+        pCpx = 0.1 * np.ones((1, self.num_design_variables))
+        pCpy = np.zeros((1, self.num_elements))
+        return pCpx, pCpy

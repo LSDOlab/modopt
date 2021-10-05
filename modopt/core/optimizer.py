@@ -10,6 +10,7 @@ from io import StringIO
 class Optimizer(object):
     def __init__(self, problem, **kwargs):
         self.options = OptionsDictionary()
+        problem._setup()
         self.prob_options = problem.options
         self.problem_name = problem.problem_name
 
@@ -40,6 +41,13 @@ class Optimizer(object):
             'time_array': None,
         }
 
+        # Initialize a new file for saving xk eg., from callback() save_xk()
+        name = self.problem_name
+        nx = self.problem.nx
+        x = self.problem.x.get_data()
+        with open(name + '_x.out', 'w') as f:
+            np.savetxt(f, x.reshape(1, nx))
+
         self.setup()
 
     def setup(self):
@@ -49,7 +57,7 @@ class Optimizer(object):
         # Saving new x iterate on file
         name = self.problem_name
         x = kwargs['x']
-        nx = self.prob_options['nx']
+        nx = self.problem.nx
         if 'x' in kwargs:
             with open(name + '_x.out', 'a') as f:
                 np.savetxt(f, x.reshape(1, nx))
@@ -57,7 +65,7 @@ class Optimizer(object):
         # Saving new constraints on file
         if 'con' in kwargs:
             c = kwargs['con']
-            nc = self.prob_options['nc']
+            nc = self.problem.nc
             if 'con' in kwargs:
                 with open(name + '_con.out', 'a') as f:
                     np.savetxt(f, c.reshape(1, nc))
@@ -120,44 +128,57 @@ class Optimizer(object):
     def print_results(self, **kwargs):
         # Testing to verify the design variable data
         # print(np.loadtxt(self.problem_name+'_x.out') - self.outputs['x_array'])
-        print("Problem:", self.problem_name)
-        print("Solver:", self.solver_name)
-        print("Objective:", self.outputs['obj_array'][-1])
-        print("Optimality:", self.outputs['opt_array'][-1])
+        print("\n", "\t" * 1, "modOpt summary:")
+        print("\t" * 1, "===============", "\n")
+        print("\t" * 1, "Problem", "\t" * 3, ':', self.problem_name)
+        print("\t" * 1, "Solver", "\t" * 3, ':', self.solver_name)
+        print("\t" * 1, "Objective", "\t" * 3, ':',
+              self.outputs['obj_array'][-1])
+        print("\t" * 1, "Optimality", "\t" * 3, ':',
+              self.outputs['opt_array'][-1])
 
         if self.outputs['feas_array'] is not None:
-            print("Feasibility:", self.outputs['feas_array'][-1])
+            print("\t" * 1, "Feasibility", "\t" * 2, ':',
+                  self.outputs['feas_array'][-1])
 
-        print("Total time:", self.total_time)
-        print("Major iterations:", self.outputs['itr_array'][-1])
+        print("\t" * 1, "Total time:", "\t" * 3, ':', self.total_time)
+        print("\t" * 1, "Major iterations", "\t" * 2, ':',
+              self.outputs['itr_array'][-1])
 
         if self.outputs['num_f_evals_array'] is not None:
-            print("Total function evaluations:",
+            print("\t" * 1, "Total function evaluations", "\t" * 1, ':',
                   self.outputs['num_f_evals_array'][-1])
         if self.outputs['num_g_evals_array'] is not None:
-            print("Total gradient evaluations:",
+            print("\t" * 1, "Total gradient evaluations", "\t" * 1, ':',
                   self.outputs['num_g_evals_array'][-1])
 
         allowed_keys = {
             'optimal_variables', 'optimal_constraints',
-            'optimal_lag_mult', 'opt_summary', 'compact_print'
+            'optimal_lag_mult', 'summary_table', 'compact_print'
         }
         self.__dict__.update((key, False) for key in allowed_keys)
         self.__dict__.update((key, val) for key, val in kwargs.items()
                              if key in allowed_keys)
 
         if self.optimal_variables:
-            print("Optimal variables:", self.outputs['x_array'][-1])
+            print("\t" * 1, "Optimal variables", "\t" * 2, ':',
+                  self.outputs['x_array'][-1])
 
         if self.optimal_constraints:
-            print("Optimal constraints:", self.outputs['con_array'][-1])
+            print("\t" * 1, "Optimal constraints", "\t" * 2, ':',
+                  self.outputs['con_array'][-1])
 
         if self.optimal_lag_mult:
-            print("Optimal Lagrange multipliers:",
-                  self.outputs['lag_mult_array'][-1])
+            print("\t" * 1, "Optimal Lagrange multipliers", "\t" * 1,
+                  ':', self.outputs['lag_mult_array'][-1])
+
+        print("\n", "\t", "===== End of summary =====", "\n")
 
         # Print optimization summary table
-        if self.opt_summary:
+        if self.summary_table:
+
+            print("\n", "\t" * 2, "modOpt summary table:")
+            print("\t" * 2, "=====================", "\n")
             name = self.problem_name
             with open(name + '_print.out', 'r') as f:
                 # lines = f.readlines()
@@ -193,8 +214,8 @@ class Optimizer(object):
         obj = self.obj
         grad = self.grad
 
-        nx = self.prob_options['nx']
-        nc = self.prob_options['nc']
+        nx = self.problem.nx
+        nc = self.problem.nc
         constrained = False
         if nc != 0:
             constrained = True
@@ -224,6 +245,11 @@ class Optimizer(object):
             jac_exact = jac(x)
 
         EPSILON = 1e-10
+
+        # print('grad_exact:', grad_exact)
+        # print('grad_fd:', grad_fd)
+        # print('jac_exact:', jac_exact)
+        # print('jac_fd:', jac_fd)
 
         grad_abs_error = np.absolute(grad_fd - grad_exact)
         grad_rel_error = grad_abs_error / (
