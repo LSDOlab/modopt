@@ -99,11 +99,11 @@ const katex = require('rehype-katex');
                     title: 'Docs',
                     items: [
                         {
-                            label: 'Getting Started',
-                            to: '/docs/getting_started/simple_example',
+                            label: 'Tutorial',
+                            to: '/docs/tutorial/simple_example',
                         },
                         // {
-                        //     label: 'CSDL by Example',
+                        //     label: 'modOpt by Example',
                         //     to: '/docs/examples/intro',
                         // },
                         // {
@@ -137,6 +137,10 @@ const katex = require('rehype-katex');
                     {
                         label: 'GitHub',
                         href: 'https://github.com/lsdolab/modopt',
+                    },
+                    {
+                        label: 'LSDO Lab',
+                        href: 'https://https://lsdo.eng.ucsd.edu',
                     },
                     ],
                 },

@@ -25,6 +25,16 @@ yarn-error.log*
 # worked examples
 /docs/docusaurus-plugin-*
 
+# local website
+/website
+/node_modules
+/docs-examples-from-docusaurus
+Dockerfile
+docker-compose.yml
+package-lock.json
+.dockerignore
+
+
 # built files
 yarn.lock
 site-metadata.json

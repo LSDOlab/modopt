@@ -21,8 +21,8 @@ const FeatureList = [
     description: (
       <>
         {/* Speed-up optimizer development by breaking down optimization algorithms into independent components and */}
-        Speed-up optimizer development by reusing standard components that are already available
-        and testing with standard problems available for benchmarking.
+        Speed-up optimizer development by reusing standard components already available
+        and testing with problems from test-suites.
       </>
     ),
   },
