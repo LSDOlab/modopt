@@ -2,21 +2,21 @@
 sidebar_position: 1
 ---
 
-# A Simple example to get started
+# A simple example (unconstrained)
 
 ## Define your problem
 
-Let's start with a simple problem of minimizing $x_1^2 + x_2^2$ with respect to $x_1$ and $x_2$.
+Let's start with a simple problem of minimizing $x_1^4 + x_2^4$ with respect to $x_1$ and $x_2$.
 
-The numerical problem statement is : 
+The mathematical problem statement is : 
 
 
 $$
-\underset{x_1, x_2 \in \mathbb{R}}{\text{minimize}} \quad x_1^2 + x_2^2
+\underset{x_1, x_2 \in \mathbb{R}}{\text{minimize}} \quad x_1^4 + x_2^4
 $$
 
-We know the solution for this problem is $x_1=0$ and $x_2=0$.
-However, we start from an intial guess of $x_1=5$ and $x_2=10$ for the purposes of this tutorial.
+We know the solution of this problem is $x_1=0$, and $x_2=0$.
+However, we start from an intial guess of $x_1=0.3$, and $x_2=0.3$ for the purposes of this tutorial.
 
 The problem is written in modOpt using the **Problem()** class as follows:
 
@@ -26,7 +26,7 @@ import numpy as np
 
 from modopt.api import Problem
 
-class X2(Problem):
+class X4(Problem):
     def initialize(self, ):
         # Name your problem
         self.problem_name = 'x^4'
@@ -35,25 +35,24 @@ class X2(Problem):
         # Add design variables of your problem
         self.add_design_variables('x',
                                   shape=(2, ),
-                                  vals=np.array([5., 10.])
-                                  )
+                                  vals=np.array([.3, .3]))
 
         # # Add the objective your problem
         # self.add_objective('obj')
 
     def setup_derivatives(self):
         # Declare objective gradient and it's shape
-        self.declare_objective_gradient(wrt='x',
-                                        shape=(2, ),
-                                        )
+        self.declare_objective_gradient(
+            wrt='x',
+            shape=(2, ),
+        )
 
     # Compute the value of the objective with given design variable values
     def compute_objective(self, x):
-        return x[0] ** 2 + x[1] ** 2
+        return np.sum(x**4)
 
     def compute_objective_gradient(self, x):
-        return 2 * x
-
+        return 4 * x**3
 ```
 
 ## Develop/Build your optimization algorithm
@@ -83,13 +82,18 @@ from modopt.api import Optimizer
 
 
 class SteepestDescent(Optimizer):
-
     def initialize(self):
         # Name your algorithm
         self.solver = 'steepest_descent'
 
-    def run(self):
-        nx = self.nx
+        self.obj = self.problem.compute_objective
+        self.grad = self.problem.compute_objective_gradient
+
+        self.options.declare('opt_tol', types=float)
+        # self.declare_outputs(x=2, f=1, opt=1, time=1)
+
+    def solve(self):
+        nx = self.problem.nx
         x0 = x0 = self.problem.x.get_data()
         opt_tol = self.options['opt_tol']
         max_itr = self.options['max_itr']
@@ -103,49 +107,38 @@ class SteepestDescent(Optimizer):
         x_k = x0 * 1.
         f_k = obj(x_k)
         g_k = grad(x_k)
-        
-        # Setting intial values for computed new iterates
-        f_new = f_k * 1
-        g_new = g_k * 1
-        
+
         itr = 0
 
-        # Initializing result arrays
-        num_f_evals_array = np.array([1])
-        num_g_evals_array = np.array([1])
-        x_array = x0.reshape(1, nx)
-        obj_array = np.array([f_k * 1.])
-        opt_array = np.array([np.linalg.norm(g_k)])
-        step_array = np.array([0.,])
-        time_array = np.array([time.time() - start_time])
-        
-        while (opt_array[-1] > opt_tol and itr < max_itr):
-            start = time.time()
+        opt = np.linalg.norm(g_k)
+
+        # Initializing outputs
+        self.update_outputs(itr=0,
+                            x=x0,
+                            obj=f_k,
+                            opt=opt,
+                            time=time.time() - start_time)
+
+        while (opt > opt_tol and itr < max_itr):
+            itr_start = time.time()
             itr += 1
 
-            p_k =  -g_k   
-        
+            p_k = -g_k
             x_k += p_k
             f_k = obj(x_k)
             g_k = grad(x_k)
 
-            x_array = np.append(x_array, x_k.reshape(1, nx), axis=0)
-            obj_array = np.append(obj_array, f_k)
-            opt_array = np.append(opt_array, np.linalg.norm(g_k))
-            end = time.time()
-            time_array = np.append(time_array, [time_array[-1] + end - start])
+            opt = np.linalg.norm(g_k)
+
+            # Append outputs dict with new values from the current iteration
+            self.update_outputs(itr=itr,
+                                x=x_k,
+                                obj=f_k,
+                                opt=opt,
+                                time=time.time() - itr_start)
 
         end_time = time.time()
-        itr_array = np.arange(itr + 1)
         self.total_time = end_time - start_time
-
-        self.results['x_array'] = x_array
-        self.results['itr_array'] = itr_array
-        self.results['obj_array'] = obj_array
-        self.results['opt_array'] = opt_array
-        self.results['time_array'] = time_array
-
-
 ```
 
 The **Optimizer()** class records all the data needed using the `results` dictionary.
@@ -161,12 +154,22 @@ Default values will be assumed if the optimizer parameters are not passed in.
 # Set your optimality tolerance
 opt_tol = 1E-8
 # Set maximum optimizer iteration limit
-max_itr = 500
+max_itr = 1000
 
-prob = X2()
+prob = X4()
 
 # Set up your optimizer with your problem and pass in optimizer parameters
-optimizer = SteepestDescent(prob, opt_tol=opt_tol, max_itr=max_itr)
+# And declare outputs (np.ndarray) and their dimension (1 or 2)
+optimizer = SteepestDescent(prob,
+                            opt_tol=opt_tol,
+                            max_itr=max_itr,
+                            outputs={
+                                'itr': 1,
+                                'obj': 1,
+                                'x': 2,
+                                'opt': 1,
+                                'time': 1,
+                            })
 
 # Check first derivatives at the initial guess, if needed
 optimizer.check_first_derivatives(prob.x.get_data())
@@ -176,6 +179,15 @@ optimizer.solve()
 
 # Print results of optimization (summary_table contains information from each iteration)
 optimizer.print_results(summary_table=True)
+
+# Print any output that were declared
+# Since the arrays are long, here we only print the last entry and
+# verify it with the print_results() above
+
+print(optimizer.outputs['itr'][-1])
+print(np.sum(optimizer.outputs['time']))
+print(optimizer.outputs['obj'][-1])
+print(optimizer.outputs['opt'][-1])
 
 ```
 

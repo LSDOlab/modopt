@@ -17,6 +17,7 @@ class Optimizer(object):
         # try methods required for a specific optimizer are available inside the Problem subclass (inspect package)
 
         self.problem = problem
+        self.options.declare('outputs', types=dict)
         self.options.declare('max_itr', default=1000, types=int)
         self.options.declare('formulation', default='rs', types=str)
         self.options.declare('opt_tol', default=1e-8, types=float)
@@ -25,21 +26,13 @@ class Optimizer(object):
         self.initialize()
         self.options.update(kwargs)
 
-        self.outputs = {
-            'itr_array': None,
-            'num_f_evals_array': None,
-            'num_g_evals_array': None,
-            'obj_array': None,
-            'con_array': None,
-            'x_array': None,
-            'lag_mult_array': None,
-            'opt_array': None,
-            'feas_array': None,
-            'penalty_array': None,
-            'step_array': None,
-            'merit_array': None,
-            'time_array': None,
-        }
+        self.outputs = self.options['outputs']
+        for key in self.outputs:
+            self.outputs[key] = np.array([])
+        # for key, value in kwargs.items():
+        #     self.outputs[key] = np.array([])
+        # if value == 2:
+        #     self.outputs[key] = np.array([])
 
         # Initialize a new file for saving xk eg., from callback() save_xk()
         name = self.problem_name
@@ -53,53 +46,79 @@ class Optimizer(object):
     def setup(self):
         pass
 
-    def update_output_files(self, **kwargs):
-        # Saving new x iterate on file
+    # # only supports arrays
+    # # key is the name of the output, and
+    # # value is the dimension (1 or 2 ?) of the array input in each iteration
+    # def declare_outputs(self, **kwargs):
+    #     self.outputs = {}
+    #     for key, value in kwargs.items():
+    #         self.outputs[key] = np.array([])
+    #         # if value == 2:
+    #         #     self.outputs[key] = np.array([])
+
+    def update_outputs(self, **kwargs):
         name = self.problem_name
-        x = kwargs['x']
-        nx = self.problem.nx
-        if 'x' in kwargs:
-            with open(name + '_x.out', 'a') as f:
-                np.savetxt(f, x.reshape(1, nx))
 
-        # Saving new constraints on file
-        if 'con' in kwargs:
-            c = kwargs['con']
-            nc = self.problem.nc
-            if 'con' in kwargs:
-                with open(name + '_con.out', 'a') as f:
-                    np.savetxt(f, c.reshape(1, nc))
+        for key, value in kwargs.items():
+            if isinstance(value, np.ndarray):
 
-            # Saving new Lagrange multipliers on file
-            lag = kwargs['lag_mult']
-            if 'lag_mult' in kwargs:
-                with open(name + '_lag_mult.out', 'a') as f:
-                    np.savetxt(f, lag.reshape(1, nc))
+                with open(name + '_' + key + '.out', 'a') as f:
+                    np.savetxt(f, value.reshape(1, len(value)))
+                self.outputs[key] = np.append(
+                    self.outputs[key], value.reshape(1, len(value)))
+            else:
+                self.outputs[key] = np.append(self.outputs[key], value)
+                '''save to table'''
 
-        # Saving optimization progress on file (Modify to append one row at the end. Instead of storing all the arrays, we only store the current iteration and save everything else on file)
-        pandas.set_option('display.float_format', '{:.2E}'.format)
-        table = pandas.DataFrame({
-            "Major": kwargs['itr'],
-            "Obj": kwargs['obj'],
-            "Opt": kwargs['opt'],
-            "Time": kwargs['time']
-        })
+        # Saving new x iterate on file
 
-        if 'num_f_evals' in kwargs:
-            table['f_evals'] = kwargs['num_f_evals']
-        if 'num_g_evals' in kwargs:
-            table['g_evals'] = kwargs['num_g_evals']
-        if 'step' in kwargs:
-            table['Step'] = kwargs['step']
-        if 'feas' in kwargs:
-            table['Feas'] = kwargs['feas']
-        if 'penalty' in kwargs:
-            table['Penalty'] = kwargs['penalty']
-        if 'merit' in kwargs:
-            table['Merit'] = kwargs['merit']
+        # name = self.problem_name
+        # for key, value in kwargs:
 
-        with open(name + '_print.out', 'w') as f:
-            f.writelines(table.to_string(index=False))
+        # x = kwargs['x']
+        # nx = self.problem.nx
+        # if 'x' in kwargs:
+        #     with open(name + '_x.out', 'a') as f:
+        #         np.savetxt(f, x.reshape(1, nx))
+
+        # # Saving new constraints on file
+        # if 'con' in kwargs:
+        #     c = kwargs['con']
+        #     nc = self.problem.nc
+        #     if 'con' in kwargs:
+        #         with open(name + '_con.out', 'a') as f:
+        #             np.savetxt(f, c.reshape(1, nc))
+
+        #     # Saving new Lagrange multipliers on file
+        #     lag = kwargs['lag_mult']
+        #     if 'lag_mult' in kwargs:
+        #         with open(name + '_lag_mult.out', 'a') as f:
+        #             np.savetxt(f, lag.reshape(1, nc))
+
+        # # Saving optimization progress on file (Modify to append one row at the end. Instead of storing all the arrays, we only store the current iteration and save everything else on file)
+        # pandas.set_option('display.float_format', '{:.2E}'.format)
+        # table = pandas.DataFrame({
+        #     "Major": kwargs['itr'],
+        #     "Obj": kwargs['obj'],
+        #     "Opt": kwargs['opt'],
+        #     "Time": kwargs['time']
+        # })
+
+        # if 'num_f_evals' in kwargs:
+        #     table['f_evals'] = kwargs['num_f_evals']
+        # if 'num_g_evals' in kwargs:
+        #     table['g_evals'] = kwargs['num_g_evals']
+        # if 'step' in kwargs:
+        #     table['Step'] = kwargs['step']
+        # if 'feas' in kwargs:
+        #     table['Feas'] = kwargs['feas']
+        # if 'penalty' in kwargs:
+        #     table['Penalty'] = kwargs['penalty']
+        # if 'merit' in kwargs:
+        #     table['Merit'] = kwargs['merit']
+
+        # with open(name + '_print.out', 'w') as f:
+        #     f.writelines(table.to_string(index=False))
 
     def update_outputs_dict(self, **kwargs):
         self.outputs['itr_array'] = kwargs['itr']
