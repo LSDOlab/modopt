@@ -41,6 +41,8 @@ class Optimizer(object):
             else:
                 self.outputs[key] = np.array([], dtype=fmt[key])
 
+        self.setup()
+
     def setup(self):
         pass
 

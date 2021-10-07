@@ -15,8 +15,8 @@ class X4(Problem):
                                   shape=(2, ),
                                   vals=np.array([.3, .3]))
 
-        # # Name the objective your problem (optional)
-        # self.name_objective('obj')
+        # Name the objective of your problem (optional)
+        self.name_objective('obj')
 
     def setup_derivatives(self):
         # Declare objective gradient and its shape
@@ -31,6 +31,9 @@ class X4(Problem):
 
     def compute_objective_gradient(self, x):
         return 4 * x**3
+
+    # def compute_objective_hessian(self, x):
+    #     return np.diag(12 * x**2)
 
 
 import numpy as np
@@ -50,7 +53,7 @@ class SteepestDescent(Optimizer):
 
         self.options.declare('opt_tol', types=float)
 
-        # Specify format of outputs available from each optimizer iteration
+        # Specify format of outputs available from your optimizer after each iteration
         self.default_outputs_format = {
             'itr': int,
             'obj': float,
@@ -59,6 +62,9 @@ class SteepestDescent(Optimizer):
             'opt': float,
             'time': float,
         }
+
+        # Enable user to specify, as a list, which among the available outputs
+        # need to be stored in memory and written to output files
         self.options.declare('outputs',
                              types=list,
                              default=['itr', 'obj', 'x', 'opt', 'time'])
@@ -74,7 +80,7 @@ class SteepestDescent(Optimizer):
 
         start_time = time.time()
 
-        # Setting intial values for current iterates
+        # Setting intial values for initial iterates
         x_k = x * 1.
         f_k = obj(x_k)
         g_k = grad(x_k)
@@ -82,9 +88,10 @@ class SteepestDescent(Optimizer):
         # Iteration counter
         itr = 0
 
+        # Optimality
         opt = np.linalg.norm(g_k)
 
-        # Initializing declared outputs
+        # Initializing outputs
         self.update_outputs(itr=0,
                             x=x_k,
                             obj=f_k,
@@ -109,7 +116,7 @@ class SteepestDescent(Optimizer):
             # <<<<<<<<<<<<<<<<<<<
             # ALGORITHM ENDS HERE
 
-            # Update arrays inside outputs dict with new values from the current iteration
+            # Append arrays inside outputs dict with new values from the current iteration
             self.update_outputs(itr=itr,
                                 x=x_k,
                                 obj=f_k,
@@ -135,6 +142,8 @@ max_itr = 100
 
 prob = X4()
 
+# from modopt.optimization_algorithms import Newton, QuasiNewton
+
 # Set up your optimizer with your problem and pass in optimizer parameters
 optimizer = SteepestDescent(prob,
                             opt_tol=opt_tol,
@@ -157,7 +166,7 @@ optimizer.print_results(summary_table=True, compact_print=True)
 
 print('\n')
 print(optimizer.outputs['itr'][-1])
-print(optimizer.outputs['x'])
+print(optimizer.outputs['x'][-1])
 print(optimizer.outputs['time'][-1])
 print(optimizer.outputs['obj'][-1])
 print(optimizer.outputs['opt'][-1])

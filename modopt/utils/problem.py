@@ -38,6 +38,8 @@ class Problem(object):
         self.c_lower = None
         self.c_upper = None
 
+        self.outputs = {}
+
         # self.initialize(**kwargs)
         self.initialize()
         self.options.update(kwargs)
@@ -232,7 +234,7 @@ class Problem(object):
 
         self.nx += np.prod(shape)
 
-    def add_objective(self, name):
+    def name_objective(self, name):
         self.outputs[name] = None
 
     def add_state_variables(self,

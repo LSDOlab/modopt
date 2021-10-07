@@ -37,7 +37,7 @@ An example is shown below for the Newton optimizer.
 
 from my_problem import MyProblem
 
-from modopt.optimization_algorithms import SteepestDescent # can be Newton, or QuasiNewton
+from modopt.optimization_algorithms import Newton # can be SteepestDescent, or QuasiNewton
 
 tol = 1E-8
 max_itr = 500
@@ -78,7 +78,7 @@ All libraries containing only a single optimizer is located in the
 While using any external library you can follow the 
 same process as in the first section except when importing the optimizer.
 
-You need to import the optimizer as shown the following code:
+You need to import the optimizer as shown in the following code:
 
 ```py
 from modopt.external_libraries import SNOPT

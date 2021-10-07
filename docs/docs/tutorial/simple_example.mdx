@@ -37,12 +37,11 @@ class X4(Problem):
                                   shape=(2, ),
                                   vals=np.array([.3, .3]))
 
-        # # Name the objective your problem (optional)
-        # self.name_objective('obj')
-        '''Name objective'''
+        # Name the objective of your problem (optional)
+        self.name_objective('obj')
 
     def setup_derivatives(self):
-        # Declare objective gradient and it's shape
+        # Declare objective gradient and its shape
         self.declare_objective_gradient(
             wrt='x',
             shape=(2, ),
@@ -91,7 +90,22 @@ class SteepestDescent(Optimizer):
         self.grad = self.problem.compute_objective_gradient
 
         self.options.declare('opt_tol', types=float)
-        # self.declare_outputs(x=2, f=1, opt=1, time=1)
+        
+        # Specify format of outputs available from your optimizer after each iteration
+        self.default_outputs_format = {
+            'itr': int,
+            'obj': float,
+            # for arrays from each iteration, shapes need to be declared
+            'x': (float, (self.problem.nx, )),
+            'opt': float,
+            'time': float,
+        }
+        
+        # Enable user to specify, as a list, which among the available outputs 
+        # need to be stored in memory and written to output files
+        self.options.declare('outputs',
+                             types=list,
+                             default=['itr', 'obj', 'x', 'opt', 'time'])
 
     def solve(self):
         nx = self.problem.nx
@@ -104,13 +118,15 @@ class SteepestDescent(Optimizer):
 
         start_time = time.time()
 
-        # Setting intial values for current iterates
+        # Setting intial values for initial iterates
         x_k = x0 * 1.
         f_k = obj(x_k)
         g_k = grad(x_k)
 
+        # Iteration counter
         itr = 0
 
+        # Optimality
         opt = np.linalg.norm(g_k)
 
         # Initializing outputs
@@ -124,6 +140,9 @@ class SteepestDescent(Optimizer):
             itr_start = time.time()
             itr += 1
 
+            # ALGORITHM STARTS HERE
+            # >>>>>>>>>>>>>>>>>>>>>
+
             p_k = -g_k
             x_k += p_k
             f_k = obj(x_k)
@@ -131,12 +150,18 @@ class SteepestDescent(Optimizer):
 
             opt = np.linalg.norm(g_k)
 
-            # Append outputs dict with new values from the current iteration
+            # <<<<<<<<<<<<<<<<<<<
+            # ALGORITHM ENDS HERE
+
+            # Append arrays inside outputs dict with new values from the current iteration
             self.update_outputs(itr=itr,
                                 x=x_k,
                                 obj=f_k,
                                 opt=opt,
                                 time=time.time() - itr_start)
+
+        # Run post-processing from the Optimizer() base class
+        self.run_post_processing()
 
         end_time = time.time()
         self.total_time = end_time - start_time
@@ -164,13 +189,7 @@ prob = X4()
 optimizer = SteepestDescent(prob,
                             opt_tol=opt_tol,
                             max_itr=max_itr,
-                            outputs={
-                                'itr': 1,
-                                'obj': 1,
-                                'x': 2,
-                                'opt': 1,
-                                'time': 1,
-                            })
+                            outputs=['itr', 'obj', 'x', 'opt', 'time'])
 
 # Check first derivatives at the initial guess, if needed
 optimizer.check_first_derivatives(prob.x.get_data())
@@ -185,8 +204,10 @@ optimizer.print_results(summary_table=True)
 # Since the arrays are long, here we only print the last entry and
 # verify it with the print_results() above
 
+print('\n')
 print(optimizer.outputs['itr'][-1])
-print(np.sum(optimizer.outputs['time']))
+print(optimizer.outputs['x'][-1])
+print(optimizer.outputs['time'][-1])
 print(optimizer.outputs['obj'][-1])
 print(optimizer.outputs['opt'][-1])
 
