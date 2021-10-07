@@ -15,6 +15,37 @@ class Newton(Optimizer):
 
         self.options.declare('opt_tol', types=float)
 
+        self.default_outputs_format = {
+            'itr': int,
+            'obj': float,
+            # for arrays from each iteration, shapes need to be declared
+            'x': (float, (self.problem.nx, )),
+            'opt': float,
+            'time': float,
+            'num_f_evals': int,
+            'num_g_evals': int,
+            'step': float,
+        }
+
+        # self.default_outputs_format = {
+        #     'itr': ('Iteration number', int),
+        #     'obj': ('Objective values', float),
+        #     # for arrays from each iteration, shapes need to be declared
+        #     'x': ('Design variable values', float, (self.problem.nx, )),
+        #     'opt': ('Optimality', float),
+        #     'time': ('Time', float),
+        #     'num_f_evals': ('Number of objective evaluations', int),
+        #     'num_g_evals': ('Number of gradient evaluations', int),
+        #     'step': ('Step lengths from line search', float),
+        # }
+
+        self.options.declare('outputs',
+                             types=list,
+                             default=[
+                                 'itr', 'obj', 'x', 'opt', 'time',
+                                 'num_f_evals', 'num_g_evals', 'step'
+                             ])
+
     def setup(self):
         self.LS = ScipyLS(f=self.obj, g=self.grad)
 
@@ -44,21 +75,21 @@ class Newton(Optimizer):
         # Iteration counter
         itr = 0
 
-        # Initialize output arrays
-        itr_array = np.array([
-            0,
-        ])
-        x_array = x0.reshape(1, nx)
-        obj_array = np.array([f_k * 1.])
-        opt_array = np.array([np.linalg.norm(g_k)])
-        num_f_evals_array = np.array([1])
-        num_g_evals_array = np.array([1])
-        step_array = np.array([
-            0.,
-        ])
-        time_array = np.array([time.time() - start_time])
+        opt = np.linalg.norm(g_k)
+        num_f_evals = 1
+        num_g_evals = 1
 
-        while (opt_array[-1] > opt_tol and itr < max_itr):
+        # Initializing declared outputs
+        self.update_outputs(itr=0,
+                            x=x_k,
+                            obj=f_k,
+                            opt=opt,
+                            time=time.time() - start_time,
+                            num_f_evals=num_f_evals,
+                            num_g_evals=num_g_evals,
+                            step=0.)
+
+        while (opt > opt_tol and itr < max_itr):
             itr_start = time.time()
             itr += 1
 
@@ -69,8 +100,11 @@ class Newton(Optimizer):
             p_k = np.linalg.solve(H_k, -g_k)
 
             # Compute the step length along the search direction via a line search
-            alpha, f_k, g_k, slope_new, num_f_evals, num_g_evals, converged = LS.search(
+            alpha, f_k, g_k, slope_new, new_f_evals, new_g_evals, converged = LS.search(
                 x=x_k, p=p_k, f0=f_k, g0=g_k)
+
+            num_f_evals += new_f_evals
+            num_g_evals += new_g_evals
 
             # A step of length 1e-4 is taken along p_k if line search does not converge
             if not converged:
@@ -85,43 +119,23 @@ class Newton(Optimizer):
 
             H_k = hess(x_k)
 
+            opt = np.linalg.norm(g_k)
+
             # <<<<<<<<<<<<<<<<<<<
             # ALGORITHM ENDS HERE
 
-            # Append output arrays with new values from the current iteration
-            itr_array = np.append(itr_array, itr)
-            x_array = np.append(x_array, x_k.reshape(1, nx), axis=0)
-            obj_array = np.append(obj_array, f_k)
-            opt_array = np.append(opt_array, np.linalg.norm(g_k))
-            num_f_evals_array = np.append(
-                num_f_evals_array, num_f_evals_array[-1] + num_f_evals)
-            num_g_evals_array = np.append(
-                num_g_evals_array, num_g_evals_array[-1] + num_g_evals)
-            step_array = np.append(step_array, alpha)
-            itr_end = time.time()
-            time_array = np.append(
-                time_array, [time_array[-1] + itr_end - itr_start])
+            # Update arrays inside outputs dict with new values from the current iteration
+            self.update_outputs(itr=itr,
+                                x=x_k,
+                                obj=f_k,
+                                opt=opt,
+                                time=time.time() - start_time,
+                                num_f_evals=num_f_evals,
+                                num_g_evals=num_g_evals,
+                                step=alpha)
 
-            # Update output files with new values from the current iteration (passing the whole updated array rather than new values)
-            # Note: We pass only x_k and not x_array (since x_array could be deprecated later)
-            self.update_output_files(itr=itr_array,
-                                     obj=obj_array,
-                                     opt=opt_array,
-                                     num_f_evals=num_f_evals_array,
-                                     num_g_evals=num_g_evals_array,
-                                     step=step_array,
-                                     time=time_array,
-                                     x=x_k)
+        # Run post-processing for the Optimizer() base class
+        self.run_post_processing()
 
         end_time = time.time()
         self.total_time = end_time - start_time
-
-        # Update outputs_dict attribute at the end of optimization with the complete optimization history
-        self.update_outputs_dict(itr=itr_array,
-                                 x=x_array,
-                                 obj=obj_array,
-                                 opt=opt_array,
-                                 num_f_evals=num_f_evals_array,
-                                 num_g_evals=num_g_evals_array,
-                                 step=step_array,
-                                 time=time_array)

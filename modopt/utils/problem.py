@@ -63,19 +63,7 @@ class Problem(object):
         self.constraints_dict = VectorComponentsDict()
         self.residuals_dict = VectorComponentsDict()
 
-    # def evaluate_constraints_and_residuals(self, x):
-    #     pass
-
-    # def compute_states(self, x):
-    #     pass
-
-    # def compute_adjoint_vector(self, x):
-    #     pass
-
-    # def compute_constraint_and_residual_jacobian(self, x):
-    #     pass
-
-    # Called before any partial declaration, after all variables and constraints are declared
+        self._setup()
 
     def _setup(self):
         # user setup() for the problem
@@ -92,19 +80,13 @@ class Problem(object):
 
     def setup(self):
         pass
-        # self.declare_variable_bounds()
-        # self.declare_constraint_bounds()
-
-    # all compute() and evaluate() after _setup()
 
     def _run(self):
         # user evaluate_model() for the problem
         self.evaluate_model()  #(call compute_() and evaluate() inside)
 
-    # user defined
-    def setup(
-        self,
-    ):  #(call add_design_variables() and add_state_variables() inside)
+    # user defined (call add_design_variables() and add_state_variables() inside)
+    def setup(self, ):
         pass
 
     def _setup_bounds(self):
@@ -113,10 +95,9 @@ class Problem(object):
         self.c_lower = self.constraints_dict.lower
         self.c_upper = self.constraints_dict.upper
 
-    # user defined
-    def setup_derivatives(
-        self,
-    ):  #(call declare_gradients() and declare_jacobians() inside, can later include declare_hessians())
+    # user defined #(call declare_gradients() and declare_jacobians() inside,
+    # can later include declare_hessians())
+    def setup_derivatives(self, ):
         pass
 
     def _setup_gradient_vector(self):
@@ -252,7 +233,7 @@ class Problem(object):
         self.nx += np.prod(shape)
 
     def add_objective(self, name):
-        pass
+        self.outputs[name] = None
 
     def add_state_variables(self,
                             name,

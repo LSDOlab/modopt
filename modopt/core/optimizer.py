@@ -10,14 +10,14 @@ from io import StringIO
 class Optimizer(object):
     def __init__(self, problem, **kwargs):
         self.options = OptionsDictionary()
-        problem._setup()
+        # problem._setup()
         self.prob_options = problem.options
         self.problem_name = problem.problem_name
 
         # try methods required for a specific optimizer are available inside the Problem subclass (inspect package)
 
         self.problem = problem
-        self.options.declare('outputs', types=dict)
+
         self.options.declare('max_itr', default=1000, types=int)
         self.options.declare('formulation', default='rs', types=str)
         self.options.declare('opt_tol', default=1e-8, types=float)
@@ -26,186 +26,147 @@ class Optimizer(object):
         self.initialize()
         self.options.update(kwargs)
 
-        self.outputs = self.options['outputs']
-        for key in self.outputs:
-            self.outputs[key] = np.array([])
-        # for key, value in kwargs.items():
-        #     self.outputs[key] = np.array([])
-        # if value == 2:
-        #     self.outputs[key] = np.array([])
-
-        # Initialize a new file for saving xk eg., from callback() save_xk()
         name = self.problem_name
-        nx = self.problem.nx
-        x = self.problem.x.get_data()
-        with open(name + '_x.out', 'w') as f:
-            np.savetxt(f, x.reshape(1, nx))
+        self.outputs = {}
+        fmt = self.default_outputs_format
 
-        self.setup()
+        # Only user-specified outputs will be stored
+        for key in self.options['outputs']:
+            if isinstance(fmt[key], tuple):
+                self.outputs[key] = np.empty((1, ) + fmt[key][1],
+                                             dtype=fmt[key][0])
+
+                with open(name + '_' + key + '.out', 'w') as f:
+                    pass
+            else:
+                self.outputs[key] = np.array([], dtype=fmt[key])
 
     def setup(self):
         pass
 
-    # # only supports arrays
-    # # key is the name of the output, and
-    # # value is the dimension (1 or 2 ?) of the array input in each iteration
-    # def declare_outputs(self, **kwargs):
-    #     self.outputs = {}
-    #     for key, value in kwargs.items():
-    #         self.outputs[key] = np.array([])
-    #         # if value == 2:
-    #         #     self.outputs[key] = np.array([])
+    # def print_available_outputs(self, ): works only after initialization
+    #     print(self.default_output_format)
+    #  along with
+
+
+# the outputs you wish to be stored in the outputs dictionary after each iteration
+
+#         # Only user-specified outputs will be stored
+#     for key in self.options['outputs']:
+#         if len(fmt[key]) == 3:
+#             self.outputs[key] = np.empty((1, ) + fmt[key][2],
+#                                          dtype=fmt[key][1])
+
+#             with open(name + '_' + key + '.out', 'w') as f:
+#                 pass
+#         else:
+#             self.outputs[key] = np.array([], dtype=fmt[key[0]])
+
+# def setup(self):
+#     pass
+
+# def print_available_outputs(self, ):
+#     print(self.default_output_format[])
+
+    def run_post_processing(self):
+        for key, value in self.outputs.items():
+            if len(value.shape) >= 2:
+                self.outputs[key] = self.outputs[key][1:]
 
     def update_outputs(self, **kwargs):
         name = self.problem_name
+        pandas.set_option('display.float_format', '{:.2E}'.format)
+        table = pandas.DataFrame({})
 
         for key, value in kwargs.items():
-            if isinstance(value, np.ndarray):
+            # Only user-specified outputs will be stored
+            if key in self.outputs:
+                if isinstance(value, np.ndarray):
+                    with open(name + '_' + key + '.out', 'a') as f:
+                        np.savetxt(f, value)
 
-                with open(name + '_' + key + '.out', 'a') as f:
-                    np.savetxt(f, value.reshape(1, len(value)))
-                self.outputs[key] = np.append(
-                    self.outputs[key], value.reshape(1, len(value)))
-            else:
-                self.outputs[key] = np.append(self.outputs[key], value)
-                '''save to table'''
+                    self.outputs[key] = np.append(
+                        self.outputs[key],
+                        value.reshape((1, ) + value.shape),
+                        axis=0)
+                else:
+                    self.outputs[key] = np.append(self.outputs[key],
+                                                  value)
 
-        # Saving new x iterate on file
+                    table[key] = self.outputs[key]
 
-        # name = self.problem_name
-        # for key, value in kwargs:
-
-        # x = kwargs['x']
-        # nx = self.problem.nx
-        # if 'x' in kwargs:
-        #     with open(name + '_x.out', 'a') as f:
-        #         np.savetxt(f, x.reshape(1, nx))
-
-        # # Saving new constraints on file
-        # if 'con' in kwargs:
-        #     c = kwargs['con']
-        #     nc = self.problem.nc
-        #     if 'con' in kwargs:
-        #         with open(name + '_con.out', 'a') as f:
-        #             np.savetxt(f, c.reshape(1, nc))
-
-        #     # Saving new Lagrange multipliers on file
-        #     lag = kwargs['lag_mult']
-        #     if 'lag_mult' in kwargs:
-        #         with open(name + '_lag_mult.out', 'a') as f:
-        #             np.savetxt(f, lag.reshape(1, nc))
-
-        # # Saving optimization progress on file (Modify to append one row at the end. Instead of storing all the arrays, we only store the current iteration and save everything else on file)
-        # pandas.set_option('display.float_format', '{:.2E}'.format)
-        # table = pandas.DataFrame({
-        #     "Major": kwargs['itr'],
-        #     "Obj": kwargs['obj'],
-        #     "Opt": kwargs['opt'],
-        #     "Time": kwargs['time']
-        # })
-
-        # if 'num_f_evals' in kwargs:
-        #     table['f_evals'] = kwargs['num_f_evals']
-        # if 'num_g_evals' in kwargs:
-        #     table['g_evals'] = kwargs['num_g_evals']
-        # if 'step' in kwargs:
-        #     table['Step'] = kwargs['step']
-        # if 'feas' in kwargs:
-        #     table['Feas'] = kwargs['feas']
-        # if 'penalty' in kwargs:
-        #     table['Penalty'] = kwargs['penalty']
-        # if 'merit' in kwargs:
-        #     table['Merit'] = kwargs['merit']
-
-        # with open(name + '_print.out', 'w') as f:
-        #     f.writelines(table.to_string(index=False))
-
-    def update_outputs_dict(self, **kwargs):
-        self.outputs['itr_array'] = kwargs['itr']
-        self.outputs['x_array'] = kwargs['x']
-        self.outputs['obj_array'] = kwargs['obj']
-        self.outputs['opt_array'] = kwargs['opt']
-        self.outputs['time_array'] = kwargs['time']
-
-        if 'con' in kwargs:
-            self.outputs['lag_mult_array'] = kwargs['con']
-        if 'lag_mult' in kwargs:
-            self.outputs['con_array'] = kwargs['lag_mult']
-        if 'num_f_evals' in kwargs:
-            self.outputs['num_f_evals_array'] = kwargs['num_f_evals']
-        if 'num_g_evals' in kwargs:
-            self.outputs['num_g_evals_array'] = kwargs['num_g_evals']
-        if 'step' in kwargs:
-            self.outputs['step_array'] = kwargs['step']
-        if 'feas' in kwargs:
-            self.outputs['feas_array'] = kwargs['feas']
-        if 'penalty' in kwargs:
-            self.outputs['penalty_array'] = kwargs['penalty']
-        if 'merit' in kwargs:
-            self.outputs['merit_array'] = kwargs['merit']
+                with open(name + '_print.out', 'w') as f:
+                    f.writelines(table.to_string(index=False))
 
     def print_results(self, **kwargs):
         # Testing to verify the design variable data
         # print(np.loadtxt(self.problem_name+'_x.out') - self.outputs['x_array'])
-        print("\n", "\t" * 1, "modOpt summary:")
-        print("\t" * 1, "===============", "\n")
-        print("\t" * 1, "Problem", "\t" * 3, ':', self.problem_name)
-        print("\t" * 1, "Solver", "\t" * 3, ':', self.solver_name)
-        print("\t" * 1, "Objective", "\t" * 3, ':',
-              self.outputs['obj_array'][-1])
-        print("\t" * 1, "Optimality", "\t" * 3, ':',
-              self.outputs['opt_array'][-1])
+        print("\n", "\t" * 1, "modOpt last iteration data:")
+        print("\t" * 1, "===========================", "\n")
 
-        if self.outputs['feas_array'] is not None:
-            print("\t" * 1, "Feasibility", "\t" * 2, ':',
-                  self.outputs['feas_array'][-1])
+        max_string_length = 7
+        for key in self.outputs:
+            if len(key) > max_string_length:
+                max_string_length = len(key)
 
-        print("\t" * 1, "Total time:", "\t" * 3, ':', self.total_time)
-        print("\t" * 1, "Major iterations", "\t" * 2, ':',
-              self.outputs['itr_array'][-1])
+        total_length = max_string_length + 5
 
-        if self.outputs['num_f_evals_array'] is not None:
-            print("\t" * 1, "Total function evaluations", "\t" * 1, ':',
-                  self.outputs['num_f_evals_array'][-1])
-        if self.outputs['num_g_evals_array'] is not None:
-            print("\t" * 1, "Total gradient evaluations", "\t" * 1, ':',
-                  self.outputs['num_g_evals_array'][-1])
+        print("\t" * 1, "Problem", " " * (total_length - 7), ':',
+              self.problem_name)
+        print("\t" * 1, "Solver", " " * (total_length - 6), ':',
+              self.solver_name)
+
+        for key, value in self.outputs.items():
+            print("\t" * 1, key, " " * (total_length - len(key)), ':',
+                  value[-1])
+
+        # print("\t" * 1, "Total time:", "\t" * 3, ':', self.total_time)
 
         allowed_keys = {
-            'optimal_variables', 'optimal_constraints',
-            'optimal_lag_mult', 'summary_table', 'compact_print'
+            # 'optimal_variables', 'optimal_constraints', 'optimal_lag_mult',
+            'summary_table',
+            'compact_print'
         }
         self.__dict__.update((key, False) for key in allowed_keys)
         self.__dict__.update((key, val) for key, val in kwargs.items()
                              if key in allowed_keys)
 
-        if self.optimal_variables:
-            print("\t" * 1, "Optimal variables", "\t" * 2, ':',
-                  self.outputs['x_array'][-1])
+        # if self.optimal_variables:
+        #     print("\t" * 1, "Optimal variables", "\t" * 2, ':',
+        #           self.outputs['x_array'][-1])
 
-        if self.optimal_constraints:
-            print("\t" * 1, "Optimal constraints", "\t" * 2, ':',
-                  self.outputs['con_array'][-1])
+        # if self.optimal_constraints:
+        #     print("\t" * 1, "Optimal constraints", "\t" * 2, ':',
+        #           self.outputs['con_array'][-1])
 
-        if self.optimal_lag_mult:
-            print("\t" * 1, "Optimal Lagrange multipliers", "\t" * 1,
-                  ':', self.outputs['lag_mult_array'][-1])
+        # if self.optimal_lag_mult:
+        #     print("\t" * 1, "Optimal Lagrange multipliers", "\t" * 1,
+        #           ':', self.outputs['lag_mult_array'][-1])
 
-        print("\n", "\t", "===== End of summary =====", "\n")
+        # print("\n", "\t", "===== End of summary =====", "\n")
 
         # Print optimization summary table
         if self.summary_table:
 
-            print("\n", "\t" * 2, "modOpt summary table:")
-            print("\t" * 2, "=====================", "\n")
             name = self.problem_name
             with open(name + '_print.out', 'r') as f:
                 # lines = f.readlines()
                 lines = f.read().splitlines()
 
+            line_length = len(lines[0])
+            pad_length = 0
+            if line_length > 21:
+                pad_length = int(0.5 * (line_length - 21))
+
+            print("\n", " " * pad_length, "modOpt summary table:")
+            print(" " * (pad_length + 1), "=====================", "\n")
+
+            # Number of iterations including zeroth iteration (after removing column label)
+            num_itr = len(lines) - 1
+
             # Print all iterations
             if not (self.compact_print):
-                for i in range(len(lines)):
+                for i in range(num_itr):
                     print(lines[i])
 
             # Print only itrs_to_print above the itr_threshold
@@ -213,16 +174,15 @@ class Optimizer(object):
                 itr_threshold = 10
                 itrs_to_print = 5
 
-                if np.size(self.outputs['itr_array']) <= itr_threshold:
-                    for i in range(len(lines)):
+                if len(lines) <= itr_threshold:
+                    for i in range(num_itr):
                         print(lines[i])
 
                 else:
-                    idx = np.linspace(
-                        0,
-                        np.size(self.outputs['itr_array']) - 1,
-                        itrs_to_print,
-                        dtype='int')
+                    idx = np.linspace(0,
+                                      num_itr - 1,
+                                      itrs_to_print,
+                                      dtype='int')
 
                     # Account for the column label index
                     idx = np.append(0, idx + 1)

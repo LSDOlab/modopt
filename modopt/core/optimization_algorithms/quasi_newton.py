@@ -3,11 +3,13 @@ import time
 
 from modopt.api import Optimizer
 from modopt.line_search_algorithms import ScipyLS
+from modopt.approximate_hessians import BFGS
+# from modopt.approximate_hessians import BFGSM1 as BFGS
 
 
-class SteepestDescent(Optimizer):
+class QuasiNewton(Optimizer):
     def initialize(self):
-        self.solver_name = 'steepest_descent'
+        self.solver_name = 'bfgs'
 
         self.obj = self.problem.compute_objective
         self.grad = self.problem.compute_objective_gradient
@@ -17,7 +19,7 @@ class SteepestDescent(Optimizer):
         self.default_outputs_format = {
             'itr': int,
             'obj': float,
-            # for arrays from each iteration, shapes need to be declared
+            # for arrays from each iteration, sizes need to be declared
             'x': (float, (self.problem.nx, )),
             'opt': float,
             'time': float,
@@ -25,7 +27,6 @@ class SteepestDescent(Optimizer):
             'num_g_evals': int,
             'step': float,
         }
-
         self.options.declare('outputs',
                              types=list,
                              default=[
@@ -35,9 +36,9 @@ class SteepestDescent(Optimizer):
 
     def setup(self):
         self.LS = ScipyLS(f=self.obj, g=self.grad)
+        self.QN = BFGS(nx=self.problem.nx)
 
     def solve(self):
-
         # Assign shorter names to variables and methods
         nx = self.problem.nx
         # x0 = self.prob_options['x0']
@@ -49,6 +50,7 @@ class SteepestDescent(Optimizer):
         grad = self.grad
 
         LS = self.LS
+        QN = self.QN
 
         start_time = time.time()
 
@@ -78,28 +80,43 @@ class SteepestDescent(Optimizer):
             itr_start = time.time()
             itr += 1
 
+            # Hessian approximation
+            B_k = QN.B_k
+
             # ALGORITHM STARTS HERE
             # >>>>>>>>>>>>>>>>>>>>>
 
-            # Compute the search direction toward the next iterate as the negative of the gradient
-            p_k = -g_k
+            # Compute the search direction toward the next iterate
+            p_k = np.linalg.solve(B_k, -g_k)
 
             # Compute the step length along the search direction via a line search
-            alpha, f_k, g_k, slope_new, num_f_evals, num_g_evals, converged = LS.search(
+            alpha, f_k, g_new, slope_new, num_f_evals, num_g_evals, converged = LS.search(
                 x=x_k, p=p_k, f0=f_k, g0=g_k)
 
             # A step of length 1e-4 is taken along p_k if line search does not converge
             if not converged:
-                x_k += p_k * 1e-4
+                d_k = p_k * 1e-4
+
+                x_k += d_k
                 f_k = obj(x_k)
-                g_k = grad(x_k)
+
+                g_new = grad(x_k)
+                w_k = g_new - g_k
+                g_k = g_new
 
             else:
-                x_k += alpha * p_k
-                if g_k == 'Unavailable':
-                    g_k = grad(x_k)
+                d_k = alpha * p_k
+                x_k += d_k
+
+                if g_new == 'Unavailable':
+                    g_new = grad(x_k)
+                w_k = g_new - g_k
+                g_k = g_new
 
             opt = np.linalg.norm(g_k)
+
+            # Update the Hessian approximation
+            QN.update(d_k, w_k)
 
             # <<<<<<<<<<<<<<<<<<<
             # ALGORITHM ENDS HERE

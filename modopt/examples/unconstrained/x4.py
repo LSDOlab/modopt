@@ -5,7 +5,6 @@ from modopt.api import Problem
 
 class X4(Problem):
     def initialize(self, ):
-        # self.options.declare('problem_name', default='x^4', types=str)
         self.problem_name = 'x^4'
 
     def setup(self):

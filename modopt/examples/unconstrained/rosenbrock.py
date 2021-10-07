@@ -9,6 +9,23 @@ class Rosenbrock(Problem):
     def initialize(self, ):
         self.problem_name = 'rosenbrock'
 
+    def setup(self):
+        self.add_design_variables('x',
+                                  shape=(2, ),
+                                  lower=None,
+                                  upper=None,
+                                  equals=None,
+                                  vals=np.array([-1.2, 1.]))
+
+        self.add_objective('obj')
+
+    def setup_derivatives(self):
+        # Declare objective gradient and its shape
+        self.declare_objective_gradient(
+            wrt='x',
+            shape=(2, ),
+        )
+
     def compute_objective(self, x):
         f = (1 - x[0])**2 + 100 * (x[1] - x[0]**2)**2
         return f

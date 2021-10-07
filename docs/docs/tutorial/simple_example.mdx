@@ -37,8 +37,9 @@ class X4(Problem):
                                   shape=(2, ),
                                   vals=np.array([.3, .3]))
 
-        # # Add the objective your problem
-        # self.add_objective('obj')
+        # # Name the objective your problem (optional)
+        # self.name_objective('obj')
+        '''Name objective'''
 
     def setup_derivatives(self):
         # Declare objective gradient and it's shape
@@ -141,7 +142,7 @@ class SteepestDescent(Optimizer):
         self.total_time = end_time - start_time
 ```
 
-The **Optimizer()** class records all the data needed using the `results` dictionary.
+The **Optimizer()** class records all the data needed using the `outputs` dictionary.
 
 ## Solve your problem using your optimizer
 
