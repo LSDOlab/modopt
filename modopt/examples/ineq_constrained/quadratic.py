@@ -24,7 +24,7 @@ class Quadratic(Problem):
         #                           equals=None,
         #                           vals=np.full((1, ), 5))
 
-        # self.add_objective('obj')
+        # self.name_objective('obj')
 
         self.add_constraints(
             'x+y',

@@ -6,6 +6,8 @@ __pycache__
 .vscode
 *.pyc
 *.out
+*.pdf
+*_hw*
 
 # File systems
 *.DS_Store

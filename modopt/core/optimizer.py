@@ -168,7 +168,7 @@ class Optimizer(object):
 
             # Print all iterations
             if not (self.compact_print):
-                for i in range(num_itr):
+                for i in range(num_itr + 1):
                     print(lines[i])
 
             # Print only itrs_to_print above the itr_threshold

@@ -15,7 +15,7 @@ class X4(Problem):
                                   equals=None,
                                   vals=np.full((25), 0.1))
 
-        self.add_objective('obj')
+        self.name_objective('obj')
 
     def setup_derivatives(self):
         self.declare_objective_gradient(wrt='x',

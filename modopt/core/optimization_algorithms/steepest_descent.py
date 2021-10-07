@@ -85,8 +85,11 @@ class SteepestDescent(Optimizer):
             p_k = -g_k
 
             # Compute the step length along the search direction via a line search
-            alpha, f_k, g_k, slope_new, num_f_evals, num_g_evals, converged = LS.search(
+            alpha, f_k, g_k, slope_new, new_f_evals, new_g_evals, converged = LS.search(
                 x=x_k, p=p_k, f0=f_k, g0=g_k)
+
+            num_f_evals += new_f_evals
+            num_g_evals += new_g_evals
 
             # A step of length 1e-4 is taken along p_k if line search does not converge
             if not converged:

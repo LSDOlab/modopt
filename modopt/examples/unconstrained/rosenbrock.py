@@ -17,7 +17,7 @@ class Rosenbrock(Problem):
                                   equals=None,
                                   vals=np.array([-1.2, 1.]))
 
-        self.add_objective('obj')
+        self.name_objective('obj')
 
     def setup_derivatives(self):
         # Declare objective gradient and its shape

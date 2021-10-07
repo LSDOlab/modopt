@@ -53,7 +53,7 @@ class FEA(Problem):
                                   vals=.08 * np.ones(
                                       (self.num_design_variables, )))
 
-        self.add_objective('compliance')
+        self.name_objective('compliance')
 
         self.add_constraints(
             'average_height',
