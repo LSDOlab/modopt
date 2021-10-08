@@ -82,10 +82,11 @@ class Optimizer(object):
 
         for key, value in kwargs.items():
             # Only user-specified outputs will be stored
+            # Multidimensional arrays will be flattened before writing to a file
             if key in self.outputs:
                 if isinstance(value, np.ndarray):
                     with open(name + '_' + key + '.out', 'a') as f:
-                        np.savetxt(f, value)
+                        np.savetxt(f, value.reshape(1, value.size))
 
                     self.outputs[key] = np.append(
                         self.outputs[key],
