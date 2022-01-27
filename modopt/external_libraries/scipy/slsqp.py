@@ -21,25 +21,114 @@ class SLSQP(ScipyOptimizer):
         # Objective precision
         self.options.declare('ftol', default=1e-6, types=float)
 
+    def declare_outputs(self, ):
+        self.default_outputs_format = {
+            # for arrays from each iteration, shapes need to be declared
+            'x': (float, (self.problem.nx, )),
+        }
+
+        self.options.declare('outputs', types=list, default=['x'])
+
     def setup(self):
         # Adapt bounds as scipy Bounds() object
         self.setup_bounds()
 
         # Adapt constraints as a list of dictionaries with constraints = 0 or >= 0
-        self.setup_constraints(build_dict=True)
+        self.setup_constraints()
+
+    def setup_constraints(self, ):
+
+        # print(self.problem.c_lower)
+
+        c_lower = self.problem.c_lower
+        c_upper = self.problem.c_upper
+
+        if c_lower.size == 0:
+            # print('No constraints')
+            self.constraints = ()
+            return None
+
+        # Adapt constraints as a list of dictionaries with constraints = 0 or >= 0 for SLSQP
+        eq_indices = np.where(c_upper == c_lower)[0]
+        ineq_indices = np.where(c_upper != c_lower)[0]
+
+        self.constraints = []
+        if len(eq_indices) > 0:
+            con_dict_eq = {}
+            con_dict_eq['type'] = 'eq'
+
+            def func_eq(x):
+                return self.con(x)[eq_indices] - c_lower[eq_indices]
+
+            con_dict_eq['fun'] = func_eq
+
+            if type(self.jac) != str:
+
+                def jac_eq(x):
+                    return self.jac(x)[eq_indices]
+
+                con_dict_eq['jac'] = jac_eq
+
+            self.constraints.append(con_dict_eq)
+
+        if len(ineq_indices) > 0:
+            # Remove constraints with -np.inf as lower bound
+            c_lower_ineq = c_lower[ineq_indices]
+            lower_ineq_indices = ineq_indices[np.where(
+                c_lower_ineq != -np.inf)[0]]
+
+            if len(lower_ineq_indices) > 0:
+                con_dict_ineq1 = {}
+                con_dict_ineq1['type'] = 'ineq'
+
+                def func_ineq1(x):
+                    return self.con(x)[lower_ineq_indices] - c_lower[
+                        lower_ineq_indices]
+
+                con_dict_ineq1['fun'] = func_ineq1
+
+                if type(self.jac) != str:
+
+                    def jac_ineq1(x):
+                        return self.jac(x)[lower_ineq_indices]
+
+                    con_dict_ineq1['jac'] = jac_ineq1
+
+                self.constraints.append(con_dict_ineq1)
+
+            # Remove constraints with np.inf as upper bound
+            c_upper_ineq = c_upper[ineq_indices]
+            upper_ineq_indices = ineq_indices[np.where(
+                c_upper_ineq != np.inf)[0]]
+
+            if len(upper_ineq_indices) > 0:
+                con_dict_ineq2 = {}
+                con_dict_ineq2['type'] = 'ineq'
+
+                def func_ineq2(x):
+                    return c_upper[upper_ineq_indices] - self.con(
+                        x)[upper_ineq_indices]
+
+                con_dict_ineq2['fun'] = func_ineq2
+
+                if type(self.jac) != str:
+
+                    def jac_ineq2(x):
+                        return -self.jac(x)[upper_ineq_indices]
+
+                    con_dict_ineq2['jac'] = jac_ineq2
+
+                self.constraints.append(con_dict_ineq2)
 
     def solve(self):
         # Assign shorter names to variables and methods
         method = 'SLSQP'
-        # nx = self.prob_options['nx']
-        # nc = self.options['nc']
 
-        # x0 = self.prob_options['x0']
-        x0 = self.problem.x.get_data()
+        x0 = self.problem.x0
+
+        self.update_outputs(x0)
 
         ftol = self.options['ftol']
-        # opt_tol = self.options['opt_tol']
-        # feas_tol = self.options['feas_tol']
 
         maxiter = self.options['maxiter']
         eps = self.options['eps']
@@ -47,14 +136,13 @@ class SLSQP(ScipyOptimizer):
 
         obj = self.obj
         grad = self.grad
-        # Note: SLSQP does not take hessians
+        # Note: SLSQP does not take Hessians
 
         bounds = self.bounds
         constraints = self.constraints  # (contains eq,ineq constraints and jacobian)
-        callback = self.save_xk
+        callback = self.update_outputs
+
         disp = self.options['disp']
-        # con = self.con
-        # jac = self.jac
 
         start_time = time.time()
 
@@ -85,4 +173,4 @@ class SLSQP(ScipyOptimizer):
         end_time = time.time()
         self.total_time = end_time - start_time
 
-        self.outputs = result
+        self.scipy_output = result

@@ -20,13 +20,17 @@ class ScipyLS(LineSearch):
                              lower=eps)
         # Maximum step length
         self.options.declare('max_step',
-                             default=10**5,
+                             default=1.,
                              types=(int, float),
-                             upper=(1e10),
+                             upper=(50.),
                              lower=eps)
 
         # Maximum number of iterations allowed before convergence
-        self.options.declare('max_itr', default=10, types=int, lower=3)
+        self.options.declare('max_itr',
+                             default=8,
+                             types=int,
+                             lower=2,
+                             upper=100)
 
     def search(self, x, p, f0=None, g0=None):
 

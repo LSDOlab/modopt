@@ -56,8 +56,8 @@ class QuasiNewton(Optimizer):
 
         # Set intial values for current iterates
         x_k = x0 * 1.
-        f_k = self.obj(x_k)
-        g_k = self.grad(x_k)
+        f_k = obj(x_k)
+        g_k = grad(x_k)
 
         # Iteration counter
         itr = 0

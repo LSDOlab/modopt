@@ -1,4 +1,5 @@
 import numpy as np
+import scipy as sp
 import pandas
 import time
 
@@ -9,8 +10,8 @@ from io import StringIO
 
 class Optimizer(object):
     def __init__(self, problem, **kwargs):
+
         self.options = OptionsDictionary()
-        # problem._setup()
         self.prob_options = problem.options
         self.problem_name = problem.problem_name
 
@@ -26,6 +27,10 @@ class Optimizer(object):
         self.initialize()
         self.options.update(kwargs)
 
+        self._setup()
+
+    def _setup(self):
+        self.setup()
         name = self.problem_name
         self.outputs = {}
         fmt = self.default_outputs_format
@@ -41,9 +46,7 @@ class Optimizer(object):
             else:
                 self.outputs[key] = np.array([], dtype=fmt[key])
 
-        self.setup()
-
-    def setup(self):
+    def setup():
         pass
 
     # def print_available_outputs(self, ): works only after initialization
@@ -70,6 +73,8 @@ class Optimizer(object):
 # def print_available_outputs(self, ):
 #     print(self.default_output_format[])
 
+# Removes the first entry of the array when it was initialized as empty
+
     def run_post_processing(self):
         for key, value in self.outputs.items():
             if len(value.shape) >= 2:
@@ -87,7 +92,6 @@ class Optimizer(object):
                 if isinstance(value, np.ndarray):
                     with open(name + '_' + key + '.out', 'a') as f:
                         np.savetxt(f, value.reshape(1, value.size))
-
                     self.outputs[key] = np.append(
                         self.outputs[key],
                         value.reshape((1, ) + value.shape),
@@ -104,8 +108,9 @@ class Optimizer(object):
     def print_results(self, **kwargs):
         # Testing to verify the design variable data
         # print(np.loadtxt(self.problem_name+'_x.out') - self.outputs['x_array'])
-        print("\n", "\t" * 1, "modOpt last iteration data:")
-        print("\t" * 1, "===========================", "\n")
+        print("\n", "\t" * 1, "===============================")
+        print("\t" * 1, "ModOpt final iteration summary:")
+        print("\t" * 1, "===============================")
 
         max_string_length = 7
         for key in self.outputs:
@@ -120,33 +125,21 @@ class Optimizer(object):
               self.solver_name)
 
         for key, value in self.outputs.items():
-            print("\t" * 1, key, " " * (total_length - len(key)), ':',
-                  value[-1])
+            if len(value.shape) == 1:
+                print("\t" * 1, key, " " * (total_length - len(key)),
+                      ':', value[-1])
+            # if key == 'rho':
+            #     print("\t" * 1, key, " " * (total_length - len(key)),
+            #           ':', value[:, 0])
 
-        # print("\t" * 1, "Total time:", "\t" * 3, ':', self.total_time)
-
-        allowed_keys = {
-            # 'optimal_variables', 'optimal_constraints', 'optimal_lag_mult',
-            'summary_table',
-            'compact_print'
-        }
+        allowed_keys = {'summary_table', 'compact_print'}
         self.__dict__.update((key, False) for key in allowed_keys)
         self.__dict__.update((key, val) for key, val in kwargs.items()
                              if key in allowed_keys)
 
-        # if self.optimal_variables:
-        #     print("\t" * 1, "Optimal variables", "\t" * 2, ':',
-        #           self.outputs['x_array'][-1])
-
-        # if self.optimal_constraints:
-        #     print("\t" * 1, "Optimal constraints", "\t" * 2, ':',
-        #           self.outputs['con_array'][-1])
-
-        # if self.optimal_lag_mult:
-        #     print("\t" * 1, "Optimal Lagrange multipliers", "\t" * 1,
-        #           ':', self.outputs['lag_mult_array'][-1])
-
-        # print("\n", "\t", "===== End of summary =====", "\n")
+        print("\t", "===============================")
+        # print("\t", "End of final iteration summary")
+        # print("\t", "==============================", "\n")
 
         # Print optimization summary table
         if self.summary_table:
@@ -157,12 +150,11 @@ class Optimizer(object):
                 lines = f.read().splitlines()
 
             line_length = len(lines[0])
-            pad_length = 0
-            if line_length > 21:
-                pad_length = int(0.5 * (line_length - 21))
 
-            print("\n", " " * pad_length, "modOpt summary table:")
-            print(" " * (pad_length + 1), "=====================", "\n")
+            print("\n")
+            print("=" * max(line_length, 21), )
+            print("modOpt summary table:".center(max(line_length, 21)))
+            print("=" * max(line_length, 21), )
 
             # Number of iterations including zeroth iteration (after removing column label)
             num_itr = len(lines) - 1
@@ -192,17 +184,36 @@ class Optimizer(object):
                     for i in idx:
                         print(lines[i])
 
-    def check_first_derivatives(self, x):
+            print("=" * max(line_length, 21), )
+
+    def check_first_derivatives(self, x, method='rs'):
         obj = self.obj
         grad = self.grad
 
-        nx = self.problem.nx
-        nc = self.problem.nc
+        if self.problem.ny == 0:
+            nx = self.problem.nx
+            nc = self.problem.nc
+        else:
+            nx = self.problem.n
+            nc = self.problem.m
+
         constrained = False
         if nc != 0:
             constrained = True
             con = self.con
             jac = self.jac
+
+        if method in ('cfs', 'surf'):
+            print("INSIDE IF =================")
+            y = self.problem.solve_residual_equations(
+                x[:self.problem.nx])
+            x[self.problem.nx:] = y
+
+            self.problem.formulation = 'fs'
+
+        grad_exact = grad(x)
+        if constrained:
+            jac_exact = jac(x)
 
         h = 1e-9
 
@@ -220,11 +231,11 @@ class Optimizer(object):
                 jac_fd[:, i] -= con(x + e)
 
         grad_fd /= -h
-        grad_exact = grad(x)
+        # grad_exact = grad(x)
 
         if constrained:
             jac_fd /= -h
-            jac_exact = jac(x)
+            # jac_exact = jac(x)
 
         EPSILON = 1e-10
 
@@ -234,6 +245,8 @@ class Optimizer(object):
         # print('jac_fd:', jac_fd)
 
         grad_abs_error = np.absolute(grad_fd - grad_exact)
+        # print('pf_px', grad_abs_error[:self.problem.nx])
+        # print('pf_py', grad_abs_error[self.problem.nx:])
         grad_rel_error = grad_abs_error / (
             np.absolute(grad_fd) + EPSILON
         )  # fd is assumed to give the actual gradient
@@ -242,6 +255,55 @@ class Optimizer(object):
             jac_abs_error = np.absolute(jac_fd - jac_exact)
             jac_rel_error = jac_abs_error / np.linalg.norm(
                 jac_fd, 'fro')
+            # print('pC_px', jac_abs_error[0, :self.problem.nx])
+            # print(
+            #     'pB+_px',
+            #     np.linalg.norm(jac_abs_error[1:145, :self.problem.nx]))
+            # print(
+            #     'pB-_px',
+            #     np.linalg.norm(
+            #         jac_abs_error[145:289, :self.problem.nx]))
+            # print(
+            #     'pB+_py',
+            #     np.linalg.norm(jac_abs_error[1:145, self.problem.nx:]))
+            # print(
+            #     'pB-_py',
+            #     np.linalg.norm(jac_abs_error[145:289,
+            #                                  self.problem.nx:]))
+
+            # print(
+            #     'pR+_px',
+            #     np.linalg.norm(
+            #         jac_abs_error[289:639, :self.problem.nx]))
+            # print(jac_abs_error.shape)
+            # print(
+            #     'pR-_px',
+            #     np.linalg.norm(
+            #         jac_abs_error[639:989, :self.problem.nx]))
+            # print(
+            #     'pR+_py',
+            #     np.linalg.norm(jac_abs_error[289:639,
+            #                                  self.problem.nx:]))
+            # print(
+            #     'pR-_py',
+            #     np.linalg.norm(jac_abs_error[639:989,
+            #                                  self.problem.nx:]))
+
+            # print('pR+_py_fd',
+            #       np.linalg.norm(jac_fd[289:639, self.problem.nx:]))
+            # print('pR-_py_fd',
+            #       np.linalg.norm(jac_fd[639:989, self.problem.nx:]))
+
+            # print(
+            #     'pR+_py_exact',
+            #     sp.sparse.linalg.norm(jac_exact[289:639,
+            #                                     self.problem.nx:]))
+            # print(
+            #     'pR-_py_exact',
+            #     sp.sparse.linalg.norm(jac_exact[639:989,
+            #                                     self.problem.nx:]))
+
+            # print('pC_py', jac_abs_error[0, self.problem.nx:])
             # jac_rel_error = jac_abs_error / (np.absolute(jac_fd) + EPSILON)
             # jac_rel_error = jac_abs_error / (np.absolute(jac_exact.toarray()) + EPSILON)
 
@@ -269,10 +331,12 @@ class Optimizer(object):
         )
 
         out_buffer.write(grad_line + '\n')
+
         if constrained:
             jac_line = deriv_line.format(
                 pad_name('Jacobian', 15, quotes=False),
                 np.linalg.norm(jac_exact),
+                # sp.sparse.linalg.norm(jac_exact),
                 np.linalg.norm(jac_fd),
                 np.linalg.norm(jac_abs_error),
                 np.linalg.norm(jac_rel_error),
@@ -280,4 +344,4 @@ class Optimizer(object):
 
             out_buffer.write(jac_line + '\n')
 
-        print(out_buffer.getvalue())
+        # print(out_buffer.getvalue())

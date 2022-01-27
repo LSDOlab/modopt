@@ -3,7 +3,14 @@ from modopt.api import MeritFunction
 
 
 class LInfIneq(MeritFunction):
-    def evaluate_function(self, x, rho):
+    def setup(self):
+        self.rho = 0.
+
+    def set_rho(self, rho):
+        self.rho = rho * 1.
+
+    def compute_function(self, x):
+        rho = self.rho
         obj = self.options['f'](x)
         con = self.options['c'](x)
 
@@ -11,7 +18,14 @@ class LInfIneq(MeritFunction):
 
         return obj + rho * np.max(con_violations)
 
-    def evaluate_gradient(self, x, g, j, rho):
+    def evaluate_function(self, x, f, c):
+        rho = self.rho
+        con_violations = np.maximum(-c, 0)
+
+        return f + rho * np.max(con_violations)
+
+    def compute_gradient(self, x, g, j):
+        rho = self.rho
         con = self.options['c'](x)
         grad = self.options['g'](x)
         jac = self.options['j'](x)

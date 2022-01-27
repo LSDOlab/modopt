@@ -25,13 +25,17 @@ class ScipyOptimizer(Optimizer):
             default='2-point',
             values=['2-point', '3-point', 'cs', 'bfgs', 'sr1'])
 
-        # Method specific options are declared here
+        # Declare method specific options (implemented in the respective algorithm)
         self.declare_options()
+        self.declare_outputs()
 
-        # fun : callable
         self.obj = self.problem.compute_objective
-        # jac : callable
-        # Only for CG, BFGS, Newton-CG, L-BFGS-B, TNC, SLSQP, dogleg, trust-ncg, trust-krylov, trust-exact and trust-constr
+        # Restore back after teting sqp optzr. with atomics lite
+        # self.x0 = self.problem.x.get_data()
+        self.x0 = self.problem.x0
+
+        # Gradient only for CG, BFGS, Newton-CG, L-BFGS-B, TNC, SLSQP, dogleg, trust-ncg,
+        # trust-krylov, trust-exact and trust-constr
         if self.problem.compute_objective_gradient.__func__ is not Problem.compute_objective_gradient:
             self.grad = self.problem.compute_objective_gradient
         else:
@@ -43,18 +47,15 @@ class ScipyOptimizer(Optimizer):
         # 2. a list of dictionaries for COBYLA and SLSQP
 
         if self.problem.nc > 0:
-            pC_px = DenseMatrix(self.problem.pC_px).numpy_array()
+            # Uncomment the line below after testing our sqp_optimizer with atomics_lite
+            # pC_px = DenseMatrix(self.problem.pC_px).numpy_array()
             self.con = self.problem.compute_constraints
             if self.problem.compute_constraint_jacobian.__func__ is not Problem.compute_constraint_jacobian:
                 self.jac = self.problem.compute_constraint_jacobian
+
+            # Uncomment the 2 lines below after testing our sqp_optimizer with atomics_lite
             elif pC_px.any() != 0:
-
-                # def jac(x):
-                #     return pC_px
-
-                # self.jac = jac
                 self.jac = lambda x: pC_px
-                # self.jac = lambda x: np.zeros((1, 10))
             else:
                 self.jac = self.options['jacobian']
 
@@ -98,7 +99,12 @@ class ScipyOptimizer(Optimizer):
     def setup_bounds(self):
         # Adapt bounds as scipy Bounds() object
         # Only for Nelder-Mead, L-BFGS-B, TNC, SLSQP, Powell, and trust-constr methods
-        if self.problem.x_lower is None:
+
+        # TODO: check for bugs for the if condition from 2 lines below
+        # if self.problem.x_lower.all(
+        # ) != -np.inf and self.problem.x_upper.all() != np.inf:
+        if self.problem.x_lower.any(
+        ) != -np.inf or self.problem.x_upper.any() != np.inf:
             self.bounds = None
             return None
 
@@ -108,34 +114,14 @@ class ScipyOptimizer(Optimizer):
         self.bounds = Bounds(x_lower, x_upper, keep_feasible=False)
 
     def setup_constraints(self, build_dict=True):
-        # Adapt constraints as a list of dictionaries with constraints = 0 or >= 0
-        # for SLSQP and COBYLA
-
-        # self.constraints = []
-        # self.constraints += []
-        # self.constraints += []
-
-        # # TODO: avoid loop of length nc
-        # for i in range(self.options['nc']):
-        #     con_dict = {}
-        #     if self.problem.c_lower[i] == self.problem.c_upper[i]:
-        #         con_dict['type'] = 'eq'
-        #         def func(x):
-        #             return self.con(x)[i] - self.problem.c_lower[i]
-
-        #         def jac(x):
-        #             return self.jac(x)[i]
-
-        #     else:
-        #         con_dict['type'] = 'ineq'
-
-        if self.problem.c_lower is None:
-            self.constraints = ()
-            return None
 
         # To avoid can give as one eq and one ineq constraint
         c_lower = self.problem.c_lower
         c_upper = self.problem.c_upper
+
+        if c_lower.size == 0:
+            self.constraints = ()
+            return None
 
         # Adapt constraints as a list of dictionaries with constraints = 0 or >= 0
         # For SLSQP and COBYLA
@@ -231,6 +217,18 @@ class ScipyOptimizer(Optimizer):
 
     # For callback, for every method except trust-constr
     # trust-constr can call with more information
+    # Overrides base class update_outputs()
+    def update_outputs(self, xk):
+        name = self.problem_name
+        with open(name + '_x.out', 'a') as f:
+            np.savetxt(f, xk.reshape(1, xk.size))
+
+        self.outputs['x'] = np.append(
+            self.outputs['x'],
+            #   xk.reshape((1, ) + (xk.size,)),
+            xk.reshape((1, ) + xk.shape),
+            axis=0)
+
     def save_xk(self, x):
         # Saving new x iterate on file
         name = self.problem_name
@@ -240,41 +238,40 @@ class ScipyOptimizer(Optimizer):
             np.savetxt(f, x.reshape(1, nx))
 
     # print_results for scipy_library overrides print_results from Optimizer()
+    # summary table and compact print does not work
     def print_results(self, **kwargs):
         # Testing to verify the design variable data
         # print(np.loadtxt(self.problem_name+'_x.out') - self.outputs['x_array'])
-        print("\n", "\t" * 1, "modOpt summary:")
-        print("\t" * 1, "===============", "\n")
+        print("\n", "\t" * 1, "==============")
+        print("\t" * 1, "Scipy summary:")
+        print("\t" * 1, "==============", "\n")
         print("\t" * 1, "Problem", "\t" * 3, ':', self.problem_name)
         print("\t" * 1, "Solver", "\t" * 3, ':', self.solver_name)
         print("\t" * 1, "Success", "\t" * 3, ':',
-              self.outputs['success'])
+              self.scipy_output['success'])
         print("\t" * 1, "Message", "\t" * 3, ':',
-              self.outputs['message'])
-        print("\t" * 1, "Objective", "\t" * 3, ':', self.outputs['fun'])
-        # print("Optimality:", self.outputs['opt'])
-        print("\t" * 1, "Gradient norm", "\t" * 3, ':',
-              np.linalg.norm(self.outputs['jac']))
-
-        # if self.outputs['feas_array'] is not None:
-        #     print("Feasibility:", self.outputs['feas_array'])
+              self.scipy_output['message'])
+        print("\t" * 1, "Objective", "\t" * 3, ':',
+              self.scipy_output['fun'])
+        if 'njev' in self.scipy_output:
+            print("\t" * 1, "Gradient norm", "\t" * 3, ':',
+                  np.linalg.norm(self.scipy_output['jac']))
 
         print("\t" * 1, "Total time", "\t" * 3, ':', self.total_time)
-        print("\t" * 1, "Major iterations", "\t" * 2, ':',
-              self.outputs['nit'])
+        if 'nit' in self.scipy_output:
+            print("\t" * 1, "Major iterations", "\t" * 2, ':',
+                  self.scipy_output['nit'])
 
-        if self.outputs['nfev'] is not None:
-            print("\t" * 1, "Total function evaluations", "\t" * 1, ':',
-                  self.outputs['nfev'])
-        if self.outputs['njev'] is not None:
+        # if self.scipy_output['nfev'] is not None:
+        print("\t" * 1, "Total function evaluations", "\t" * 1, ':',
+              self.scipy_output['nfev'])
+        if 'njev' in self.scipy_output:
             print("\t" * 1, "Total gradient evaluations", "\t" * 1, ':',
-                  self.outputs['njev'])
+                  self.scipy_output['njev'])
 
         allowed_keys = {
             'optimal_variables',
-            # 'optimal_constraints',
-            # 'optimal_lag_mult',
-            # 'opt_summary',
+            # 'summary_table',
             # 'compact_print'
         }
         self.__dict__.update((key, False) for key in allowed_keys)
@@ -283,13 +280,6 @@ class ScipyOptimizer(Optimizer):
 
         if self.optimal_variables:
             print("\t" * 1, "Optimal variables", "\t" * 2, ':',
-                  self.outputs['x'])
+                  self.scipy_output['x'])
 
-        print("\n", "\t", "===== End of summary =====", "\n")
-
-        # if self.optimal_constraints:
-        #     print("Optimal constraints:", self.outputs['con_array'])
-
-        # if self.optimal_lag_mult:
-        #     print("Optimal Lagrange multipliers:",
-        #           self.outputs['lag_mult_array'][-1])
+        print("\t", "===========================================")

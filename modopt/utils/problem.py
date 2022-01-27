@@ -12,27 +12,48 @@ class Problem(object):
 
         self.options = OptionsDictionary()
 
-        self.options.declare('problem_name',
-                             default='unnamed_problem',
-                             types=str)
-        self.options.declare('nx', default=0, types=(int, np.int64))
-        self.options.declare('ny', default=0, types=(int, np.int64))
-        self.options.declare('nc', default=0, types=(int, np.int64))
-        self.options.declare('nr', default=0, types=(int, np.int64))
-        self.options.declare('x0',
-                             default=None,
-                             types=(np.ndarray, float, type(None)))
-        self.options.declare('y0',
-                             default=None,
-                             types=(np.ndarray, float, type(None)))
+        self.problem_name = 'unnamed_problem'
 
+        # self.options.declare('problem_name',
+        #                      default='unnamed_problem',
+        #                      types=str)
+        # self.options.declare('nx',
+        #                      default=0,
+        #                      types=(int, np.int32, np.int64))
+        # self.options.declare('nc',
+        #                      default=0,
+        #                      types=(int, np.int32, np.int64))
+        # self.options.declare('x0',
+        #                      default=None,
+        #                      types=(np.ndarray, float, type(None)))
+
+        # self.options.declare('nr',
+        #                      default=0,
+        #                      types=(int, np.int32, np.int64))
+        # self.options.declare('ny',
+        #                      default=0,
+        #                      types=(int, np.int32, np.int64))
+        # self.options.declare('y0',
+        #                      default=None,
+        #                      types=(np.ndarray, float, type(None)))
+
+        self.x0 = None
         self.nx = 0
-        self.ny = 0
         self.nc = 0
-        self.nr = 0
         self.constrained = False
-        self.implicit_constrained = False
         self.second_order = False
+
+        ###############################
+        # Only for the SURF algorithm #
+        ###############################
+
+        self.y0 = None
+        self.ny = 0
+        self.nr = 0
+        self.implicit_constrained = False
+
+        ###########################
+
         self.x_lower = None
         self.x_upper = None
         self.c_lower = None
@@ -44,32 +65,41 @@ class Problem(object):
         self.initialize()
         self.options.update(kwargs)
 
-        x0 = self.options['x0']
-        y0 = self.options['y0']
-        nx = self.nx
-        ny = self.ny
+        # x0 = self.options['x0']
+        # y0 = self.options['y0']
+        # nx = self.nx
+        # ny = self.ny
 
-        if nx != 0 and x0 is None:
-            self.options['x0'] = np.full((nx, ), 0.)
+        # self._pre_setup()
 
-        if ny != 0 and y0 is None:
-            self.options['y0'] = np.full((ny, ), 0.)
+        # if nx != 0 and x0 is None:
+        #     self.options['x0'] = np.full((nx, ), 0.)
+
+        # if ny != 0 and y0 is None:
+        #     self.options['y0'] = np.full((ny, ), 0.)
 
         # Needed only if using the second method
         self.design_variables_dict = VectorComponentsDict()
         self.pF_px_dict = VectorComponentsDict()
+        self.constraints_dict = VectorComponentsDict()
+
+        ###############################
+        # Only for the SURF algorithm #
+        ###############################
 
         self.state_variables_dict = VectorComponentsDict()
         self.pF_py_dict = VectorComponentsDict()
-
-        self.constraints_dict = VectorComponentsDict()
         self.residuals_dict = VectorComponentsDict()
+
+        ###########################
 
         self._setup()
 
     def _setup(self):
         # user setup() for the problem
         self.setup()
+
+        # CSDLProblem() overrides this method in Problem()
         self._setup_bounds()
         self._setup_gradient_vector()
         self._setup_jacobian_dict()
@@ -80,17 +110,18 @@ class Problem(object):
         self._setup_vectors()
         self._setup_matrices()
 
+        # When problem is not defined as CSDLProblem()
+        if self.x0 is None:
+            self.x0 = self.x.get_data()
+
+    def _pre_setup(self):
+        pass
+
+    # user defined (call add_design_variables() and add_state_variables() inside)
     def setup(self):
         pass
 
-    def _run(self):
-        # user evaluate_model() for the problem
-        self.evaluate_model()  #(call compute_() and evaluate() inside)
-
-    # user defined (call add_design_variables() and add_state_variables() inside)
-    def setup(self, ):
-        pass
-
+    # Overridden in CSDLProblem()
     def _setup_bounds(self):
         self.x_lower = self.design_variables_dict.lower
         self.x_upper = self.design_variables_dict.upper
@@ -153,10 +184,6 @@ class Problem(object):
             self.p2F_pyy_dict = MatrixComponentsDict(
                 self.state_variables_dict, self.state_variables_dict)
 
-    def _run(self):
-        # user evaluate_model() for the problem
-        self.evaluate_model()  #(call compute_() and evaluate() inside)
-
     def _setup_vectors(self):
         self.x = Vector(self.design_variables_dict)
         self.x.allocate(setup_views=True)
@@ -216,7 +243,7 @@ class Problem(object):
             self.pR_py.allocate()
 
     def add_design_variables(self,
-                             name,
+                             name=None,
                              shape=(1, ),
                              lower=None,
                              upper=None,
@@ -224,6 +251,11 @@ class Problem(object):
                              vals=None):
         if vals is None:
             vals == np.zeros(shape)
+
+        # Autonaming index starts from 0
+        if name is None:
+            name = len(self.design_variables_dict)
+
         self.design_variables_dict[name] = dict(
             shape=shape,
             lower=lower,
@@ -234,23 +266,8 @@ class Problem(object):
 
         self.nx += np.prod(shape)
 
-    def name_objective(self, name):
-        self.outputs[name] = None
-
-    def add_state_variables(self,
-                            name,
-                            shape=(1, ),
-                            lower=None,
-                            upper=None,
-                            vals=None):
-        if vals is None:
-            vals == np.zeros(shape)
-        self.state_variables_dict[name] = dict(shape=shape,
-                                               lower=lower,
-                                               upper=upper,
-                                               vals=vals)
-
-        self.ny += np.prod(shape)
+    # def name_objective(self, name):
+    #     self.outputs[name] = None
 
     def add_constraints(self,
                         name,
@@ -269,14 +286,6 @@ class Problem(object):
 
         self.nc += np.prod(shape)
 
-    def add_residuals(self, name, shape=(1, )):
-        self.residuals_dict[name] = dict(shape=shape,
-                                         lower=None,
-                                         upper=None,
-                                         equals=np.zeros(shape))
-
-        self.nr += np.prod(shape)
-
     def declare_objective_gradient(self, wrt, shape=(1, ), vals=None):
 
         if wrt not in self.design_variables_dict:
@@ -290,55 +299,6 @@ class Problem(object):
             #     vals=vals,
             # )
             self.pF_px[wrt] = vals
-
-    def declare_objective_hessian(self,
-                                  of,
-                                  wrt,
-                                  shape=(1, 1),
-                                  vals=None,
-                                  rows=None,
-                                  cols=None,
-                                  ind_ptr=None):
-
-        if wrt not in self.design_variables_dict or of not in self.design_variables_dict:
-            raise Exception(
-                'Undeclared design variable {} with respect to which hessian of F is declared'
-                .format(wrt))
-
-        else:
-            self.p2F_pxx_dict[of, wrt] = dict(
-                vals=vals,
-                rows=rows,
-                cols=cols,
-                ind_ptr=ind_ptr,
-                vals_shape=shape,
-            )
-
-    def declare_pF_px_gradient(self, wrt, shape=(1, ), vals=None):
-
-        if wrt not in self.design_variables_dict:
-            raise Exception(
-                'Undeclared design variable {} with respect to which gradient of F is declared'
-                .format(wrt))
-
-        else:
-            self.pF_px_dict[wrt] = dict(
-                shape=shape,
-                vals=vals,
-            )
-
-    def declare_pF_py_gradient(self, wrt, shape=(1, ), vals=None):
-
-        if wrt not in self.state_variables_dict:
-            raise Exception(
-                'Undeclared state variable {} with respect to which gradient of F is declared'
-                .format(wrt))
-
-        else:
-            self.pF_py_dict[wrt] = dict(
-                shape=shape,
-                vals=vals,
-            )
 
     # if not declared, zero for partials and gradients. If declared with no values, method = cs, fd (user should provide the partials if using Problem() class since the functions must be fairly simple in order to use only the Problem() class or must be coupled through advanced frameworks like OpenMDAO/csdl for complex models and the frameworks already implement cs/fd appriximations)
 
@@ -367,6 +327,114 @@ class Problem(object):
                 cols=cols,
                 ind_ptr=ind_ptr,
                 vals_shape=shape,
+            )
+
+    def declare_objective_hessian(self,
+                                  of,
+                                  wrt,
+                                  shape=(1, 1),
+                                  vals=None,
+                                  rows=None,
+                                  cols=None,
+                                  ind_ptr=None):
+
+        if wrt not in self.design_variables_dict or of not in self.design_variables_dict:
+            raise Exception(
+                'Undeclared design variable {} with respect to which hessian of F is declared'
+                .format(wrt))
+
+        else:
+            self.p2F_pxx_dict[of, wrt] = dict(
+                vals=vals,
+                rows=rows,
+                cols=cols,
+                ind_ptr=ind_ptr,
+                vals_shape=shape,
+            )
+
+    def compute_objective(self, x):
+        pass
+
+    def compute_constraints(self, x):
+        pass
+
+    # def compute_objective_gradient(self, x):
+    #     pass
+
+    # def compute_constraint_jacobian(self, x):
+    #     pass
+
+    def compute_objective_hessian(self, x):
+        pass
+
+    def compute_constraint_hessian(self, x, idx):
+        pass
+
+    def compute_lagrangian_hessian(self, x, lag_mult):
+        pass
+
+    def compute_objective_hvp(self, x, v):
+        pass
+
+    def compute_constraint_hvp(self, x, v):
+        pass
+
+    def compute_lagrangian_hvp(self, x, lag_mult, v):
+        pass
+
+    ###########################################################################
+    # Everything below is applicable only for SURF algorithm for optimization #
+    ###########################################################################
+
+    def add_state_variables(self,
+                            name,
+                            shape=(1, ),
+                            lower=None,
+                            upper=None,
+                            equals=None,
+                            vals=None):
+        if vals is None:
+            vals == np.zeros(shape)
+        self.state_variables_dict[name] = dict(shape=shape,
+                                               lower=lower,
+                                               upper=upper,
+                                               equals=equals,
+                                               vals=vals)
+
+        self.ny += np.prod(shape)
+
+    def add_residuals(self, name, shape=(1, )):
+        self.residuals_dict[name] = dict(shape=shape,
+                                         lower=None,
+                                         upper=None,
+                                         equals=np.zeros(shape))
+
+        self.nr += np.prod(shape)
+
+    def declare_pF_px_gradient(self, wrt, shape=(1, ), vals=None):
+
+        if wrt not in self.design_variables_dict:
+            raise Exception(
+                'Undeclared design variable {} with respect to which gradient of F is declared'
+                .format(wrt))
+
+        else:
+            self.pF_px_dict[wrt] = dict(
+                shape=shape,
+                vals=vals,
+            )
+
+    def declare_pF_py_gradient(self, wrt, shape=(1, ), vals=None):
+
+        if wrt not in self.state_variables_dict:
+            raise Exception(
+                'Undeclared state variable {} with respect to which gradient of F is declared'
+                .format(wrt))
+
+        else:
+            self.pF_py_dict[wrt] = dict(
+                shape=shape,
+                vals=vals,
             )
 
     def declare_pR_px_jacobian(self,
@@ -477,11 +545,9 @@ class Problem(object):
                 vals_shape=shape,
             )
 
-    def compute_objective(self, x):
-        pass
-
-    def compute_constraints(self, x):
-        pass
+    def _run(self):
+        # user evaluate_model() for the problem
+        self.evaluate_model()  #(call compute_() and evaluate() inside)
 
     # # Override for specific problems if bounds are not available in this format, eg. csdl
     # def declare_variable_bounds(self, x_lower, x_upper):
@@ -580,24 +646,6 @@ class Problem(object):
             self.pC_px_0 = pC_px_0 - np.matmul(pC_py_0, dy_dx)
 
         return self.pC_px_0
-
-    def compute_objective_hessian(self, x):
-        pass
-
-    def compute_objective_hvp(self, x, v):
-        pass
-
-    def compute_constraint_hessians(self, x):
-        pass
-
-    def compute_lagrangian_hessian(self, x, lag_mult, v):
-        pass
-
-    def compute_lagrangian_hvp(self, x, lag_mult):
-        pass
-
-    def compute_hvp(self, x, coeffs, vx):
-        pass
 
     def evaluate_objective(self, x, y):
         """

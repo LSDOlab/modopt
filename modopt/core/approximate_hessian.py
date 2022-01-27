@@ -7,7 +7,7 @@ class ApproximateHessian(object):
     def __init__(self, **kwargs):
         self.options = OptionsDictionary()
 
-        self.options.declare('nx', types=(int, np.int64))
+        self.options.declare('nx', types=(int, np.int32, np.int64))
         self.initialize()
 
         self.options.update(kwargs)
