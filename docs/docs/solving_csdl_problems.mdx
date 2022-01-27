@@ -134,7 +134,7 @@ For example, we can set the maximum number of iterations `max_itr`
 and the optimality tolerance `opt_tol` shown below.
 
 ```py
-optimizer = SLSQP(prob, max_itr=20, opt_tol=1e-8)
+optimizer = SQP(prob, max_itr=20, opt_tol=1e-8)
 ```
 
 
@@ -148,4 +148,10 @@ from modopt.snopt_library import SNOPT
 Options could be set by just passing them as kwargs when 
 instantiating the SNOPT optimizer object.
 
+```py
+optimizer = SNOPT(  prob, 
+                    Major_iterations = 100, 
+                    Major_optimality=1e-9, 
+                    Major_feasibility=1e-8)
+```
 
