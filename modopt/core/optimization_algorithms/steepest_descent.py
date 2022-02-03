@@ -12,7 +12,7 @@ class SteepestDescent(Optimizer):
         self.obj = self.problem.compute_objective
         self.grad = self.problem.compute_objective_gradient
 
-        self.options.declare('opt_tol', types=float)
+        self.options.declare('opt_tol', default=1e-5, types=float)
 
         self.default_outputs_format = {
             'itr': int,
@@ -26,12 +26,10 @@ class SteepestDescent(Optimizer):
             'step': float,
         }
 
-        self.options.declare('outputs',
-                             types=list,
-                             default=[
-                                 'itr', 'obj', 'x', 'opt', 'time',
-                                 'num_f_evals', 'num_g_evals', 'step'
-                             ])
+        self.options.declare(
+            'outputs',
+            types=list,
+            default=[self.default_outputs_format.keys()])
 
     def setup(self):
         self.LS = ScipyLS(f=self.obj, g=self.grad)

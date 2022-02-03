@@ -1,24 +1,23 @@
 import numpy as np
 import scipy as sp
 import pandas
-import time
+import os
 
 from modopt.utils.options_dictionary import OptionsDictionary
 from modopt.utils.general_utils import pad_name
-from io import StringIO
+# from io import StringIO
 
 
 class Optimizer(object):
     def __init__(self, problem, **kwargs):
 
         self.options = OptionsDictionary()
+        self.problem = problem
         self.prob_options = problem.options
         self.problem_name = problem.problem_name
-
         # try methods required for a specific optimizer are available inside the Problem subclass (inspect package)
 
-        self.problem = problem
-
+        self.solver_name = 'unnamed_solver'
         self.options.declare('max_itr', default=1000, types=int)
         self.options.declare('formulation', default='rs', types=str)
         self.options.declare('opt_tol', default=1e-8, types=float)
@@ -26,97 +25,120 @@ class Optimizer(object):
 
         self.initialize()
         self.options.update(kwargs)
-
         self._setup()
 
     def _setup(self):
+
+        # Call user-defined setup
         self.setup()
+
         name = self.problem_name
         self.outputs = {}
         fmt = self.default_outputs_format
+        dirName = name + '_outputs'
+
+        # Create new directory for all the outputs of optimization
+        try:
+            os.mkdir(dirName)
+        except FileExistsError:
+            print("Directory ", dirName, " already exists")
 
         # Only user-specified outputs will be stored
         for key in self.options['outputs']:
+            # TODO: Add a test for this
+            if key not in fmt:
+                raise ValueError(
+                    'Declared unavailable output "{}"'.format(key))
+
+            # Create new dictionaries for all user-specified outputs
             if isinstance(fmt[key], tuple):
                 self.outputs[key] = np.empty((1, ) + fmt[key][1],
                                              dtype=fmt[key][0])
 
-                with open(name + '_' + key + '.out', 'w') as f:
+                with open(dirName + '/' + key + '.out', 'w') as f:
                     pass
             else:
                 self.outputs[key] = np.array([], dtype=fmt[key])
+                with open(dirName + '/' + key + '.out', 'w') as f:
+                    pass
 
     def setup():
         pass
 
-    # def print_available_outputs(self, ): works only after initialization
-    #     print(self.default_output_format)
-    #  along with
-
-
-# the outputs you wish to be stored in the outputs dictionary after each iteration
-
-#         # Only user-specified outputs will be stored
-#     for key in self.options['outputs']:
-#         if len(fmt[key]) == 3:
-#             self.outputs[key] = np.empty((1, ) + fmt[key][2],
-#                                          dtype=fmt[key][1])
-
-#             with open(name + '_' + key + '.out', 'w') as f:
-#                 pass
-#         else:
-#             self.outputs[key] = np.array([], dtype=fmt[key[0]])
-
-# def setup(self):
-#     pass
-
-# def print_available_outputs(self, ):
-#     print(self.default_output_format[])
-
-# Removes the first entry of the array when it was initialized as empty
+    def print_available_outputs(self, ):
+        print(self.default_output_format)
 
     def run_post_processing(self):
+        # Removes the first entry of the array when it was initialized as empty
         for key, value in self.outputs.items():
             if len(value.shape) >= 2:
                 self.outputs[key] = self.outputs[key][1:]
 
+        # TODO: Add lsdo_dashboard processing
+
     def update_outputs(self, **kwargs):
         name = self.problem_name
+        dirName = name + '_outputs'
         pandas.set_option('display.float_format', '{:.2E}'.format)
         table = pandas.DataFrame({})
 
         for key, value in kwargs.items():
             # Only user-specified outputs will be stored
-            # Multidimensional arrays will be flattened before writing to a file
+            # Multidim. arrays will be flattened (c-major/row major) before writing to a file
             if key in self.outputs:
                 if isinstance(value, np.ndarray):
-                    with open(name + '_' + key + '.out', 'a') as f:
+                    # Update output file
+                    with open(dirName + '/' + key + '.out', 'a') as f:
                         np.savetxt(f, value.reshape(1, value.size))
+                    # Update outputs dict
                     self.outputs[key] = np.append(
                         self.outputs[key],
                         value.reshape((1, ) + value.shape),
                         axis=0)
                 else:
+                    # Update output file
+                    with open(dirName + '/' + key + '.out', 'a') as f:
+                        # Avoid appending None for a failed line search
+                        try:
+                            np.savetxt(f, [value])
+                        except:
+                            np.savetxt(f, [1.])
+
+                    # Update outputs dict
                     self.outputs[key] = np.append(self.outputs[key],
                                                   value)
 
+                    # Create new summary_table from updated outputs dict
                     table[key] = self.outputs[key]
 
-                with open(name + '_print.out', 'w') as f:
+                # Print updated summary_table file
+                with open(dirName + '/' + 'print.out', 'w') as f:
                     f.writelines(table.to_string(index=False))
 
+            # Raise error if user tries to update ouptput not available in default outputs
+            # for an optimizer
+            elif key not in self.default_outputs_format:
+                raise ValueError(
+                    'Unavailable output "{}" is passed in to be updated'
+                    .format(key))
+
     def print_results(self, **kwargs):
-        # Testing to verify the design variable data
-        # print(np.loadtxt(self.problem_name+'_x.out') - self.outputs['x_array'])
-        print("\n", "\t" * 1, "===============================")
-        print("\t" * 1, "ModOpt final iteration summary:")
-        print("\t" * 1, "===============================")
 
-        max_string_length = 7
-        for key in self.outputs:
-            if len(key) > max_string_length:
-                max_string_length = len(key)
+        # TODO: Testing to verify the design variable data
+        # print(
+        #     np.loadtxt(self.problem_name + '_outputs/x.out') -
+        #     self.outputs['x'])
 
+        # Print modopt final iteration summary
+
+        title = "ModOpt final iteration summary:"
+
+        print("\n", "\t" * 1, "=" * len(title))
+        print("\t" * 1, title)
+        print("\t" * 1, "=" * len(title))
+
+        longest_key = max(self.outputs, key=len)
+        max_string_length = max(7, len(longest_key))
         total_length = max_string_length + 5
 
         print("\t" * 1, "Problem", " " * (total_length - 7), ':',
@@ -128,74 +150,79 @@ class Optimizer(object):
             if len(value.shape) == 1:
                 print("\t" * 1, key, " " * (total_length - len(key)),
                       ':', value[-1])
-            # if key == 'rho':
-            #     print("\t" * 1, key, " " * (total_length - len(key)),
-            #           ':', value[:, 0])
+
+        print("\t", "=" * len(title))
+
+        # Print optimization summary table
 
         allowed_keys = {'summary_table', 'compact_print'}
         self.__dict__.update((key, False) for key in allowed_keys)
         self.__dict__.update((key, val) for key, val in kwargs.items()
                              if key in allowed_keys)
 
-        print("\t", "===============================")
-        # print("\t", "End of final iteration summary")
-        # print("\t", "==============================", "\n")
-
-        # Print optimization summary table
         if self.summary_table:
 
-            name = self.problem_name
-            with open(name + '_print.out', 'r') as f:
+            dirName = self.problem_name + '_outputs'
+
+            with open(dirName + '/print.out', 'r') as f:
                 # lines = f.readlines()
                 lines = f.read().splitlines()
 
-            line_length = len(lines[0])
+            title = "modOpt summary table:"
+            row_length = len(lines[0])
+            line_length = max(row_length, len(title))
 
             print("\n")
-            print("=" * max(line_length, 21), )
-            print("modOpt summary table:".center(max(line_length, 21)))
-            print("=" * max(line_length, 21), )
+            print("=" * line_length)
+            print(title.center(line_length))
+            print("=" * line_length)
 
-            # Number of iterations including zeroth iteration (after removing column label)
-            num_itr = len(lines) - 1
+            # Number of iterations including zeroth iteration
+            # (after removing column label)
+            total_itr = len(lines) - 1
 
             # Print all iterations
             if not (self.compact_print):
-                for i in range(num_itr + 1):
-                    print(lines[i])
+                print(*lines, sep="\n")
 
             # Print only itrs_to_print above the itr_threshold
             else:
-                itr_threshold = 10
-                itrs_to_print = 5
+                itr_threshold = 20
+                itrs_to_print = 10
 
-                if len(lines) <= itr_threshold:
-                    for i in range(num_itr):
-                        print(lines[i])
+                if total_itr <= itr_threshold:
+                    print(*lines, sep="\n")
 
                 else:
                     idx = np.linspace(0,
-                                      num_itr - 1,
+                                      total_itr - 1,
                                       itrs_to_print,
                                       dtype='int')
 
                     # Account for the column label index
                     idx = np.append(0, idx + 1)
-                    for i in idx:
-                        print(lines[i])
 
-            print("=" * max(line_length, 21), )
+                    # Lines to print
+                    compact_lines = [lines[i] for i in idx]
+                    print(*compact_lines, sep="\n")
 
-    def check_first_derivatives(self, x, method='rs'):
+            print("=" * line_length)
+
+    def check_first_derivatives(self, x, formulation='rs'):
         obj = self.obj
         grad = self.grad
 
         if self.problem.ny == 0:
             nx = self.problem.nx
             nc = self.problem.nc
+
+        ###############################
+        # Only for the SURF algorithm #
+        ###############################
         else:
-            nx = self.problem.n
-            nc = self.problem.m
+            nx = self.problem.nx + self.problem.ny
+            nc = self.problem.nc + self.problem.nr
+        ###############################
 
         constrained = False
         if nc != 0:
@@ -203,13 +230,17 @@ class Optimizer(object):
             con = self.con
             jac = self.jac
 
-        if method in ('cfs', 'surf'):
-            print("INSIDE IF =================")
+        ###############################
+        # Only for the SURF algorithm #
+        ###############################
+        if formulation in ('cfs', 'surf'):
+            print("INSIDE cfs or surf")
             y = self.problem.solve_residual_equations(
                 x[:self.problem.nx])
             x[self.problem.nx:] = y
 
             self.problem.formulation = 'fs'
+        ###############################
 
         grad_exact = grad(x)
         if constrained:
@@ -226,16 +257,12 @@ class Optimizer(object):
             e[i] = h
 
             grad_fd[i] -= obj(x + e)
-
             if constrained:
                 jac_fd[:, i] -= con(x + e)
 
         grad_fd /= -h
-        # grad_exact = grad(x)
-
         if constrained:
             jac_fd /= -h
-            # jac_exact = jac(x)
 
         EPSILON = 1e-10
 
@@ -245,69 +272,20 @@ class Optimizer(object):
         # print('jac_fd:', jac_fd)
 
         grad_abs_error = np.absolute(grad_fd - grad_exact)
-        # print('pf_px', grad_abs_error[:self.problem.nx])
-        # print('pf_py', grad_abs_error[self.problem.nx:])
-        grad_rel_error = grad_abs_error / (
-            np.absolute(grad_fd) + EPSILON
-        )  # fd is assumed to give the actual gradient
+
+        # FD is assumed to give the actual gradient
+        grad_rel_error = grad_abs_error / (np.absolute(grad_fd) +
+                                           EPSILON)
 
         if constrained:
             jac_abs_error = np.absolute(jac_fd - jac_exact)
             jac_rel_error = jac_abs_error / np.linalg.norm(
                 jac_fd, 'fro')
-            # print('pC_px', jac_abs_error[0, :self.problem.nx])
-            # print(
-            #     'pB+_px',
-            #     np.linalg.norm(jac_abs_error[1:145, :self.problem.nx]))
-            # print(
-            #     'pB-_px',
-            #     np.linalg.norm(
-            #         jac_abs_error[145:289, :self.problem.nx]))
-            # print(
-            #     'pB+_py',
-            #     np.linalg.norm(jac_abs_error[1:145, self.problem.nx:]))
-            # print(
-            #     'pB-_py',
-            #     np.linalg.norm(jac_abs_error[145:289,
-            #                                  self.problem.nx:]))
 
-            # print(
-            #     'pR+_px',
-            #     np.linalg.norm(
-            #         jac_abs_error[289:639, :self.problem.nx]))
-            # print(jac_abs_error.shape)
-            # print(
-            #     'pR-_px',
-            #     np.linalg.norm(
-            #         jac_abs_error[639:989, :self.problem.nx]))
-            # print(
-            #     'pR+_py',
-            #     np.linalg.norm(jac_abs_error[289:639,
-            #                                  self.problem.nx:]))
-            # print(
-            #     'pR-_py',
-            #     np.linalg.norm(jac_abs_error[639:989,
-            #                                  self.problem.nx:]))
-
-            # print('pR+_py_fd',
-            #       np.linalg.norm(jac_fd[289:639, self.problem.nx:]))
-            # print('pR-_py_fd',
-            #       np.linalg.norm(jac_fd[639:989, self.problem.nx:]))
-
-            # print(
-            #     'pR+_py_exact',
-            #     sp.sparse.linalg.norm(jac_exact[289:639,
-            #                                     self.problem.nx:]))
-            # print(
-            #     'pR-_py_exact',
-            #     sp.sparse.linalg.norm(jac_exact[639:989,
-            #                                     self.problem.nx:]))
-
-            # print('pC_py', jac_abs_error[0, self.problem.nx:])
             # jac_rel_error = jac_abs_error / (np.absolute(jac_fd) + EPSILON)
             # jac_rel_error = jac_abs_error / (np.absolute(jac_exact.toarray()) + EPSILON)
 
-        out_buffer = StringIO()
+        # out_buffer = StringIO()
 
         header = "{0} | {1} | {2} | {3} | {4} "\
                             .format(
@@ -318,8 +296,12 @@ class Optimizer(object):
                                 pad_name('Rel error norm', 10),
                             )
 
-        out_buffer.write('\n' + header + '\n')
-        out_buffer.write('-' * len(header) + '\n' + '\n')
+        # out_buffer.write('\n' + header + '\n')
+        print('\n' + '-' * len(header))
+        print(header)
+
+        # out_buffer.write('-' * len(header) + '\n' + '\n')
+        print('-' * len(header) + '\n')
 
         deriv_line = "{0} | {1:.4e} | {2:.4e} | {3:.4e}     | {4:.4e}    "
         grad_line = deriv_line.format(
@@ -330,18 +312,26 @@ class Optimizer(object):
             np.linalg.norm(grad_rel_error),
         )
 
-        out_buffer.write(grad_line + '\n')
+        # out_buffer.write(grad_line + '\n')
+        print(grad_line)
 
         if constrained:
+            if isinstance(jac_exact, np.ndarray):
+                jac_exact_norm = np.linalg.norm(jac_exact)
+            else:
+                jac_exact_norm = sp.sparse.linalg.norm(jac_exact)
+
             jac_line = deriv_line.format(
                 pad_name('Jacobian', 15, quotes=False),
-                np.linalg.norm(jac_exact),
+                jac_exact_norm,
+                # np.linalg.norm(jac_exact),
                 # sp.sparse.linalg.norm(jac_exact),
                 np.linalg.norm(jac_fd),
                 np.linalg.norm(jac_abs_error),
                 np.linalg.norm(jac_rel_error),
             )
 
-            out_buffer.write(jac_line + '\n')
+            # out_buffer.write(jac_line + '\n')
+            print(jac_line)
 
-        # print(out_buffer.getvalue())
+        print('-' * len(header) + '\n')

@@ -107,11 +107,10 @@ class SNOPTOptimizer(Optimizer):
         }
 
         for option in self.SNOPT_options:
-            print(option)
-            print(self.SNOPT_options[option][1])
-            print(self.SNOPT_options[option][2])
+            # New option replaces spaces with underscores in option names
+            new_option = option.replace(' ', '_')
             self.options.declare(
-                option,
+                new_option,
                 default=self.SNOPT_options[option][1],
                 types=self.SNOPT_options[option][2],
             )
@@ -149,11 +148,13 @@ class SNOPTOptimizer(Optimizer):
     def update_SNOPT_options_object(self):
         self.SNOPT_options_object = SNOPT_options()
         for option in self.SNOPT_options:
-            self.SNOPT_options_object.setOption(option,
-                                                self.options[option])
+            # New option replaces spaces with underscores in option names
+            new_option = option.replace(' ', '_')
+            self.SNOPT_options_object.setOption(
+                option, self.options[new_option])
 
     def setup_bounds(self):
-        inf = self.options['Infinite bound']
+        inf = self.options['Infinite_bound']
         self.x_lower = np.where(self.problem.x_lower == -np.inf, -inf,
                                 self.problem.x_lower)
         self.x_upper = np.where(self.problem.x_upper == np.inf, inf,
@@ -164,7 +165,7 @@ class SNOPTOptimizer(Optimizer):
         if self.problem.c_lower.size == 0:
             return None
 
-        inf = self.options['Infinite bound']
+        inf = self.options['Infinite_bound']
         self.c_lower = np.where(self.problem.c_lower == -np.inf, -inf,
                                 self.problem.c_lower)
         self.c_upper = np.where(self.problem.c_upper == np.inf, inf,

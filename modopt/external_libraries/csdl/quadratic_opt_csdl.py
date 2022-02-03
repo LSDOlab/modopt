@@ -33,43 +33,43 @@ class QuadraticFunc(Model):
 if __name__ == "__main__":
     from csdl_om import Simulator
 
-    from modopt.csdl_library import CSDLProblem
-    # from modopt.external_libraries.snopt.snoptc import SNOPTc
-    from modopt.optimization_algorithms import SQP
-    from modopt.scipy_library import SLSQP
-    from modopt.snopt_library import SNOPT
-    # from modopt.optimization_algorithms import SQP
-
     sim = Simulator(QuadraticFunc())
+
+    from modopt.csdl_library import CSDLProblem
 
     prob = CSDLProblem(
         problem_name='quadratic',
         simulator=sim,
     )
 
+    from modopt.optimization_algorithms import SQP
+    from modopt.scipy_library import SLSQP
+    from modopt.snopt_library import SNOPT
+
     optimizer = SLSQP(
         prob,
-        # ftol=1e-6,
+        ftol=1e-6,
         maxiter=20,
-        # )
-        outputs=['x'])
+        outputs=['x'],
+    )
+    # optimizer.options['ftol'] = 1e-6
 
     optimizer = SQP(prob, max_itr=20)
 
-    # optimizer = SNOPTc(prob, )
+    optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3)
     # ftol=1e-6,
     # maxiter=20,
     # )
     # outputs=['x'])
 
     # Check first derivatives at the initial guess, if needed
-    optimizer.check_first_derivatives(prob.x0)
+    # optimizer.check_first_derivatives(prob.x0)
 
     # Solve your optimization problem
     optimizer.solve()
 
     # Print results of optimization (summary_table contains information from each iteration)
-    optimizer.print_results(summary_table=True)
+    # optimizer.print_results(summary_table=True)
 
     # # sim.prob.set_val('v', val=0.)
     # sim.prob.driver = om.ScipyOptimizeDriver()

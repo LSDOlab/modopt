@@ -5,6 +5,82 @@ from array_manager.api import DenseMatrix
 
 from modopt.api import Optimizer, Problem
 
+# scipy.optimize.minimize(fun,
+#                         x0,
+#                         args=(),
+#
+#                         method=None,
+#                         # If not given, chosen to be one of BFGS, L-BFGS-B, SLSQP,
+#                         # depending if the problem has constraints or bounds.
+#
+#                         jac=None,
+#                         # method returning gradient vector
+#                         # Only for CG, BFGS, Newton-CG, L-BFGS-B, TNC, SLSQP, dogleg,
+#                         # trust-ncg, trust-krylov, trust-exact and trust-constr.
+#                         # If None or False, the gradient will be estimated using 2-point
+#                         # finite difference estimation with an absolute step size.
+#                         # Alternatively, the keywords {‘2-point’, ‘3-point’, ‘cs’} can be used.
+#
+#                         hess=None,
+#                         # method returning Hessian matrix
+#                         # Only for Newton-CG, dogleg, trust-ncg, trust-krylov, trust-exact
+#                         # and trust-constr
+#
+#                         hessp=None,
+#                         # Hessian of objective function times an arbitrary vector p.
+#                         # Only for Newton-CG, trust-ncg, trust-krylov, trust-constr.
+#                         # Only one of hessp or hess needs to be given.
+#                         # If hess is provided, then hessp will be ignored.
+#
+#                         bounds=None,
+#                         # Bounds on variables for Nelder-Mead, L-BFGS-B, TNC, SLSQP,
+#                         # Powell, and trust-constr methods.
+#                         # There are two ways to specify the bounds:
+#                         # Instance of Bounds() class.
+#                         # Sequence of (min, max) pairs for each element in x.
+#                         # None is used to specify no bound.
+#
+#                         constraints=(),
+#                         # Constraints definition (only for COBYLA, SLSQP and trust-constr).
+#                         # ‘trust-constr’: single object (LinearConstraint or NonlinearConstraint) or
+#                         # a list of objects specifying constraints to the optimization problem.
+#                         # 'COBYLA', 'SLSQP': Constraints are defined as a list of dictionaries.
+#                         # {type : 'eq' or 'ineq', fun : callable constraint function,
+#                         #  jac : callable Jacobian of fun (optional),
+#                         #  args : Extra arguments to be passed to fun and jac.}
+#                         # Equality constraint mans c(x) = 0
+#                         # whereas inequality means c(x) >= 0
+#                         # Note that COBYLA only supports inequality constraints.
+#
+#                         tol=None,
+#                         # solver-specific tolerance(s) for termination.
+#                         # For detailed control, use solver-specific options.
+#
+#                         callback=None,
+#                         # Called after each iteration. For ‘trust-constr’, callable with the signature:
+#                         # callback(xk, OptimizeResult state) -> bool
+#                         # where xk is the current d.v. and state is an OptimizeResult() object, with the
+#                         # same fields as the ones from the return.
+#                         # If callback returns True, the algorithm execution is terminated.
+#                         # For all the other methods, the signature is:
+#                         # callback(xk)
+#                         # where xk is the current parameter vector.
+#
+#                         options=None)
+#                         # A dictionary of solver options.
+#                         # options = {maxiter:int, disp:bool (True to print convergence messages),
+#                         # +solver_specific_options}, given by
+#                         # scipy.optimize.show_options(solver=None, method=None, disp=True)
+
+# Returns : OptimizeResult() object
+# Important attributes are: x the solution array,
+# success a Boolean flag indicating if the optimizer exited successfully and
+# message which describes the cause of the termination.
+# See OptimizeResult for a description of other attributes (x, success, status, messsage, fun, jac, hess,
+# hess_inv, nfev, njev, nhev, nit, maxcv).
+# There may be additional attributes not listed above depending of the specific solver.
+# View available atributes using keys() method of dict eg. result_obj.keys() .
+
 
 class ScipyOptimizer(Optimizer):
     def initialize(self):
@@ -30,8 +106,6 @@ class ScipyOptimizer(Optimizer):
         self.declare_outputs()
 
         self.obj = self.problem.compute_objective
-        # Restore back after teting sqp optzr. with atomics lite
-        # self.x0 = self.problem.x.get_data()
         self.x0 = self.problem.x0
 
         # Gradient only for CG, BFGS, Newton-CG, L-BFGS-B, TNC, SLSQP, dogleg, trust-ncg,
@@ -218,7 +292,7 @@ class ScipyOptimizer(Optimizer):
     # For callback, for every method except trust-constr
     # trust-constr can call with more information
     # Overrides base class update_outputs()
-    def update_outputs(self, xk):
+    def update_outputs(self, xk, optimize_result=None):
         name = self.problem_name
         with open(name + '_x.out', 'a') as f:
             np.savetxt(f, xk.reshape(1, xk.size))
@@ -228,6 +302,10 @@ class ScipyOptimizer(Optimizer):
             #   xk.reshape((1, ) + (xk.size,)),
             xk.reshape((1, ) + xk.shape),
             axis=0)
+
+        # For 'trust-constr', OptimizeResult() object state is available after each iteration
+        if (optimize_result is not None) and (optimize_result != True):
+            pass
 
     def save_xk(self, x):
         # Saving new x iterate on file

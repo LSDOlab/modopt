@@ -7,7 +7,6 @@ from csdl import Model
 
 class CSDLProblem(OptProblem):
     def initialize(self, ):
-        # self.problem_name = 'csdl_problem'
         self.options.declare('problem_name',
                              default='unnamed_problem',
                              types=str)
@@ -15,10 +14,6 @@ class CSDLProblem(OptProblem):
         # TODO:
         # self.options.declare('simulator', types=type(Simulator()))
 
-        # self.model_x = np.zeros(self.options['nx'])
-        # self.derivative_x = np.zeros(self.options['nx'])
-
-    # def _pre_setup(self, ):
     def setup(self, ):
 
         # Only for csdl problems

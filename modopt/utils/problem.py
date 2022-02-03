@@ -14,29 +14,6 @@ class Problem(object):
 
         self.problem_name = 'unnamed_problem'
 
-        # self.options.declare('problem_name',
-        #                      default='unnamed_problem',
-        #                      types=str)
-        # self.options.declare('nx',
-        #                      default=0,
-        #                      types=(int, np.int32, np.int64))
-        # self.options.declare('nc',
-        #                      default=0,
-        #                      types=(int, np.int32, np.int64))
-        # self.options.declare('x0',
-        #                      default=None,
-        #                      types=(np.ndarray, float, type(None)))
-
-        # self.options.declare('nr',
-        #                      default=0,
-        #                      types=(int, np.int32, np.int64))
-        # self.options.declare('ny',
-        #                      default=0,
-        #                      types=(int, np.int32, np.int64))
-        # self.options.declare('y0',
-        #                      default=None,
-        #                      types=(np.ndarray, float, type(None)))
-
         self.x0 = None
         self.nx = 0
         self.nc = 0
@@ -61,22 +38,8 @@ class Problem(object):
 
         self.outputs = {}
 
-        # self.initialize(**kwargs)
         self.initialize()
         self.options.update(kwargs)
-
-        # x0 = self.options['x0']
-        # y0 = self.options['y0']
-        # nx = self.nx
-        # ny = self.ny
-
-        # self._pre_setup()
-
-        # if nx != 0 and x0 is None:
-        #     self.options['x0'] = np.full((nx, ), 0.)
-
-        # if ny != 0 and y0 is None:
-        #     self.options['y0'] = np.full((ny, ), 0.)
 
         # Needed only if using the second method
         self.design_variables_dict = VectorComponentsDict()
@@ -96,7 +59,7 @@ class Problem(object):
         self._setup()
 
     def _setup(self):
-        # user setup() for the problem
+        # user setup() for the problem (call add_design_variables())
         self.setup()
 
         # CSDLProblem() overrides this method in Problem()
@@ -105,21 +68,40 @@ class Problem(object):
         self._setup_jacobian_dict()
         self._setup_hessian_dict()
 
-        # user setup() for the problem
+        # user setup() for the problem derivatives
         self.setup_derivatives()
         self._setup_vectors()
         self._setup_matrices()
 
         # When problem is not defined as CSDLProblem()
         if self.x0 is None:
+            # array_manger puts np.zeros as the initial guess if no initial guess is provided
             self.x0 = self.x.get_data()
-
-    def _pre_setup(self):
-        pass
 
     # user defined (call add_design_variables() and add_state_variables() inside)
     def setup(self):
         pass
+
+    def _compute_objective(self, x):
+        self.x.set_data(x)
+        self.compute_objective()
+        return self.f
+
+    def _compute_objective_gradient(self, x):
+        self.x.set_data(x)
+        self.compute_objective_gradient()
+        return self.pF_px.get_data()
+
+    def _compute_constraints(self, x):
+        self.x.set_data(x)
+        self.compute_constraints()
+        return self.constraints.get_data()
+
+    def _compute_constraint_jacobian(self, x):
+        self.x.set_data(x)
+        self.compute_constraint_jacobian()
+
+        return self.f
 
     # Overridden in CSDLProblem()
     def _setup_bounds(self):
@@ -157,7 +139,7 @@ class Problem(object):
                 self.pC_py_dict = MatrixComponentsDict(
                     self.constraints_dict, self.state_variables_dict)
 
-        elif self.implicit_constrained:
+        if self.implicit_constrained:
             self.pR_px_dict = MatrixComponentsDict(
                 self.residuals_dict, self.design_variables_dict)
             self.pR_py_dict = MatrixComponentsDict(
@@ -249,8 +231,9 @@ class Problem(object):
                              upper=None,
                              equals=None,
                              vals=None):
-        if vals is None:
-            vals == np.zeros(shape)
+        # array_manager automatically sets vals = np.zeros(size) if vals is None
+        # if vals is None:
+        #     vals = np.zeros(shape)
 
         # Autonaming index starts from 0
         if name is None:
@@ -270,11 +253,15 @@ class Problem(object):
     #     self.outputs[name] = None
 
     def add_constraints(self,
-                        name,
+                        name=None,
                         shape=(1, ),
                         lower=None,
                         upper=None,
                         equals=None):
+        # Autonaming index starts from 0
+        if name is None:
+            name = len(self.constraints_dict)
+
         self.constraints_dict[name] = dict(
             shape=shape,
             lower=lower,
@@ -283,10 +270,10 @@ class Problem(object):
         )
 
         self.constrained = True
-
         self.nc += np.prod(shape)
 
-    def declare_objective_gradient(self, wrt, shape=(1, ), vals=None):
+    # def declare_objective_gradient(self, wrt, shape=(1, ), vals=None):
+    def declare_objective_gradient(self, wrt, vals=None):
 
         if wrt not in self.design_variables_dict:
             raise Exception(

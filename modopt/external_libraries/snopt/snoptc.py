@@ -31,7 +31,7 @@ class SNOPTc(SNOPTOptimizer):
     def solve(self):
         # Assign shorter names to variables and methods
         x0 = self.x0
-
+        x0c0 = x0.copy()
         # self.update_outputs(x0)
 
         # ObjRow = 1
@@ -76,7 +76,7 @@ class SNOPTc(SNOPTOptimizer):
         # J = np.array([[100.0, 100.0, 1.0, 0], [0.0, 100.0, 0, 1.0],
         #               [2.0, 4.0, 0, 0], [0.0, 0.0, 3.0, 5.0]])
 
-        inf = self.options['Infinite bound']
+        inf = self.options['Infinite_bound']
 
         def snopta_objconFG(mode, nnjac, x, fObj, gObj, fCon, gCon,
                             nState):
@@ -85,9 +85,7 @@ class SNOPTc(SNOPTOptimizer):
 
             if self.problem.nc > 0:
                 fCon = con(x)
-                gCon = jac(x)
-
-            print(fObj, gObj, fCon, gCon)
+                gCon = jac(x).flatten('f')
 
             return mode, fObj, gObj, fCon, gCon
 
@@ -97,7 +95,7 @@ class SNOPTc(SNOPTOptimizer):
                         nnJac=nnJac,
                         x0=x0c0,
                         J=J,
-                        name='  sntoyc',
+                        name=self.problem_name,
                         iObj=0,
                         bl=bl,
                         bu=bu,
@@ -106,6 +104,6 @@ class SNOPTc(SNOPTOptimizer):
         end_time = time.time()
         self.total_time = end_time - start_time
 
-        print(result)
+        # print(result)
 
         self.snopt_output = result

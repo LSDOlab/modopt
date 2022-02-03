@@ -8,24 +8,24 @@ class X4(Problem):
         self.problem_name = 'x^4'
 
     def setup(self):
-        self.add_design_variables('x',
-                                  shape=(25, ),
-                                  lower=None,
-                                  upper=None,
-                                  equals=None,
-                                  vals=np.full((25), 0.1))
+        self.add_design_variables(
+            # 'x',
+            shape=(25, ),
+            lower=None,
+            upper=None,
+            equals=None,
+            # )
+            vals=np.full((25), 0.1))
 
-        # self.name_objective('obj')
-
-    def setup_derivatives(self):
-        self.declare_objective_gradient(wrt='x',
-                                        shape=(25, ),
-                                        vals=None)
-        self.declare_objective_hessian(of='x',
-                                       wrt='x',
-                                       shape=(25, 25),
-                                       vals=None)
-        # self.declare_objective_hvp(wrt='x', shape=(25, ), vals=None)
+    # def setup_derivatives(self):
+    #     self.declare_objective_gradient(wrt='x',
+    #                                     shape=(25, ),
+    #                                     vals=None)
+    #     self.declare_objective_hessian(of='x',
+    #                                    wrt='x',
+    #                                    shape=(25, 25),
+    #                                    vals=None)
+    # self.declare_objective_hvp(wrt='x', shape=(25, ), vals=None)
 
     def compute_objective(self, x):
         x4 = np.power(x, 4)
