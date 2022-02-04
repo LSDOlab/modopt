@@ -1,7 +1,5 @@
 import numpy as np
-
 from modopt.api import Problem
-from modopt.examples.unconstrained.rosenbrock import Rosenbrock
 
 
 class X4(Problem):
@@ -21,7 +19,7 @@ class X4(Problem):
 
     # Compute the value of the objective with given design variable values
     def compute_objective(self, dvs, obj):
-        obj = np.sum(dvs['x']**4)
+        obj[0] = np.sum(dvs['x']**4)
 
     def compute_objective_gradient(self, dvs, grad):
         grad['x'] = 4 * dvs['x']**3
@@ -117,11 +115,6 @@ class SteepestDescent(Optimizer):
                                 opt=opt,
                                 time=time.time() - start_time)
 
-            # # Update problem data
-            # self.problem.x.set_data() = x_k
-            # self.problem.obj = f_k
-            # self.problem.grad = g_k
-
         # Run post-processing for the Optimizer() base class
         self.run_post_processing()
 
@@ -136,7 +129,7 @@ max_itr = 100
 
 prob = X4()
 
-# from modopt.optimization_algorithms import Newton, QuasiNewton
+# from modopt.optimization_algorithms import Newton, QuasiNewton, SQP
 
 # Set up your optimizer with your problem and pass in optimizer parameters
 optimizer = SteepestDescent(prob,

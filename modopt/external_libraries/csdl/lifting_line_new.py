@@ -6,6 +6,11 @@ Nicholas Orndorff
 import openmdao.api as om
 import csdl
 import csdl_om
+from csdl_om import Simulator
+from modopt.csdl_library import CSDLProblem
+from modopt.scipy_library import SLSQP
+from modopt.optimization_algorithms import SQP
+from modopt.snopt_library import SNOPT
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -170,11 +175,34 @@ class opt(csdl.Model):
 # run optimization problem
 N = 20  # define number of vortices
 sim = csdl_om.Simulator(opt(N=N), mode='auto')  # mode='rev'
-sim.prob.driver = om.ScipyOptimizeDriver()
-sim.prob.driver.options['optimizer'] = 'SLSQP'
-sim.prob.driver.options['tol'] = 1.0e-10
-sim.prob.driver.options['maxiter'] = 100
-sim.prob.run_driver()
+
+# Setup your optimization problem
+prob = CSDLProblem(
+    problem_name='lifing_line',
+    simulator=sim,
+)
+
+# Setup your optimizer with the problem
+# optimizer = SLSQP(prob, maxiter=20)
+optimizer = SQP(prob, max_itr=20)
+# optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3)
+
+# Check first derivatives at the initial guess, if needed
+optimizer.check_first_derivatives(prob.x0)
+
+# Solve your optimization problem
+optimizer.solve()
+
+# Print results of optimization
+# (summary_table contains information from each iteration)
+optimizer.print_results(summary_table=True)
+
+# sim.prob.driver = om.ScipyOptimizeDriver()
+# sim.prob.driver.options['optimizer'] = 'SLSQP'
+# sim.prob.driver.options['tol'] = 1.0e-10
+# sim.prob.driver.options['maxiter'] = 100
+# sim.prob.run_driver()
+
 print('chord: ', sim['c'])
 print('span: ', sim['b'])
 print('CL: ', sim['Cl'])

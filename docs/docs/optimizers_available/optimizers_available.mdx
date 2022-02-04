@@ -1,14 +1,11 @@
 ---
-title: Using available optimizers
-sidebar_position: 8
+sidebar_position: 1
 ---
-
-# Using available optimizers
 
 ## Standard optimization algorithms implemented
 
 Currently, modOpt has a fully transparent library of optimization algorithms 
-implemented for unconstrained problems.
+implemented for different types of optimization problems.
 The following are the algorithms implemented:
 
 ### 1. Steepest-Descent
@@ -24,20 +21,28 @@ The implementation can be found
 The implementation can be found 
 **[here](https://github.com/LSDOlab/modopt/blob/main/modopt/core/optimization_algorithms/quasi_newton.py)**.
 
+### 4. Newton-Lagrange
+The implementation can be found 
+**[here](https://github.com/LSDOlab/modopt/blob/main/modopt/core/optimization_algorithms/newton_lagrange.py)**.
+
+### 5. l2-Penalty
+The implementation can be found 
+**[here](https://github.com/LSDOlab/modopt/blob/main/modopt/core/optimization_algorithms/quadratic_penalty_eq.py)**.
+
 ## Usage instructions
-In order to use these algorithms with any of the unconstrained problems written using
-the **Problem()** class, you should first import your problem from the coresponding file
+In order to use these algorithms with any of the  problems written using
+the **Problem()** class, you should first import your problem from the corresponding file
 and also import the optimizer of your choice from the library.
 After that, set tolerances and other parameters for the chosen optimizer.
 Solve the problem and then print results.
 
-An example is shown below for the Newton optimizer.
+An example is shown below for the SteepestDescent optimizer.
 
 ```py
 
 from my_problem import MyProblem
 
-from modopt.optimization_algorithms import Newton # can be SteepestDescent, or QuasiNewton
+from modopt.optimization_algorithms import SteepestDescent
 
 tol = 1E-8
 max_itr = 500
@@ -54,33 +59,3 @@ optimizer.check_first_derivatives(prob.x.get_data())
 optimizer.solve()
 optimizer.print_results(summary_table=True)
 ```
-
-
-## External Libraries
-
-### 1 . Scipy library
-
-While using scipy library you can follow the same process as in the previous section
-except when importing the optimizer.
-
-You need to import the optimizer as shown in the following code 
-(here we use the SLSQP optimizer):
-
-```py
-from modopt.scipy_library import SLSQP
-```
-
-
-### 2. SNOPT library
-
-All libraries containing only a single optimizer is located in the 
-`external_libraries` module.
-While using any external library you can follow the 
-same process as in the first section except when importing the optimizer.
-
-You need to import the optimizer as shown in the following code:
-
-```py
-from modopt.external_libraries import SNOPT
-```
-

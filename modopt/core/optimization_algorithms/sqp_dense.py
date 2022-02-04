@@ -670,6 +670,13 @@ class SQP(Optimizer):
             tol_satisfied = (opt_satisfied and feas_satisfied)
 
             # Update arrays inside outputs dict with new values from the current iteration
+
+            # print(itr)
+            # print('opt', opt)
+            # print('feas', feas)
+            # print('x', x_k)
+            # print('obj', f_k)
+            # print('cons', c_k)
             self.update_outputs(
                 major=itr,
                 x=x_k,

@@ -24,7 +24,8 @@ class Problem(object):
         self.x0 = None
         self.nx = 0
         self.nc = 0
-        self.obj = 0.
+        # TODO: Fix this
+        self.obj = [0.]
         self.constrained = False
         self.second_order = False
 
@@ -93,11 +94,13 @@ class Problem(object):
     def objective(self, x):
         self.x.set_data(x)
         self.compute_objective(self.x, self.obj)
+        # print('obj', self.obj)
         return self.obj
 
     def objective_gradient(self, x):
         self.x.set_data(x)
         self.compute_objective_gradient(self.x, self.pF_px)
+        # print('grad', self.pF_px.get_data())
         return self.pF_px.get_data()
 
     def objective_hessian(self, x):
@@ -109,12 +112,14 @@ class Problem(object):
     def constraints(self, x):
         self.x.set_data(x)
         self.compute_constraints(self.x, self.con)
+        # print('con', self.con.get_data())
         return self.con.get_data()
 
     def constraint_jacobian(self, x):
         self.x.set_data(x)
         self.compute_constraint_jacobian(self.x, self.pC_px)
         self.jac.update_bottom_up()
+        # print('jac', self.jac.get_std_array())
         return self.jac.get_std_array()
 
     # Overridden in CSDLProblem()

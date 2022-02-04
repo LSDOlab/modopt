@@ -31,7 +31,7 @@ const FeatureList = [
     Svg: require('../../static/img/scalability_icon.svg').default,
     description: (
       <>Sparsity structures could be specified for sub-Jacobians and
-        the framework automatically computes the full Jacobian in the most efficient way.</>
+        the framework automatically computes the full Jacobian in the specified format in the most efficient way.</>
     ),
   },
 ];

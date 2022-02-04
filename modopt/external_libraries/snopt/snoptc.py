@@ -100,6 +100,4 @@ class SNOPTc(SNOPTOptimizer):
         end_time = time.time()
         self.total_time = end_time - start_time
 
-        # print(result)
-
         self.snopt_output = result

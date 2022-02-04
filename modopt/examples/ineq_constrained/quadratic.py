@@ -12,7 +12,9 @@ class Quadratic(Problem):
         # Make optional
         self.add_design_variables('x',
                                   shape=(1, ),
-                                  lower=np.array([0., -np.inf]),
+                                  lower=np.array([
+                                      0.,
+                                  ]),
                                   upper=None,
                                   equals=None,
                                   vals=np.array([
@@ -49,10 +51,26 @@ class Quadratic(Problem):
     def setup_derivatives(self):
         self.declare_objective_gradient(wrt='x', vals=None)
         self.declare_objective_gradient(wrt='y', vals=None)
-        self.declare_constraint_jacobian(of='x+y', wrt='x', vals=None)
-        self.declare_constraint_jacobian(of='x+y', wrt='y', vals=None)
-        self.declare_constraint_jacobian(of='x-y', wrt='x', vals=None)
-        self.declare_constraint_jacobian(of='x-y', wrt='y', vals=None)
+        self.declare_constraint_jacobian(of='x+y',
+                                         wrt='x',
+                                         vals=np.array([
+                                             1.,
+                                         ]))
+        self.declare_constraint_jacobian(of='x+y',
+                                         wrt='y',
+                                         vals=np.array([
+                                             1.,
+                                         ]))
+        self.declare_constraint_jacobian(of='x-y',
+                                         wrt='x',
+                                         vals=np.array([
+                                             1.,
+                                         ]))
+        self.declare_constraint_jacobian(of='x-y',
+                                         wrt='y',
+                                         vals=np.array([
+                                             -1.,
+                                         ]))
         # self.declare_objective_hessian(of='x',
         #                                wrt='x',
         #                                shape=(2, 2),
@@ -70,7 +88,7 @@ class Quadratic(Problem):
     #     self.f = dv['x']**2 + dv['y']**2
 
     def compute_objective(self, dvs, obj):
-        obj = dvs['x']**2 + dvs['y']**2
+        obj[0] = dvs['x']**2 + dvs['y']**2
 
     # def compute_objective_gradient(self, x):
     #     g = 2 * x
@@ -93,10 +111,11 @@ class Quadratic(Problem):
     #     return j
 
     def compute_constraint_jacobian(self, dvs, jac):
-        jac['x+y', 'x'] = 1.
-        jac['x+y', 'y'] = 1.
-        jac['x-y', 'x'] = 1.
-        jac['x-y', 'y'] = -1.
+        pass
+        # jac['x+y', 'x'] = 1.
+        # jac['x+y', 'y'] = 1.
+        # jac['x-y', 'x'] = 1.
+        # jac['x-y', 'y'] = -1.
 
     # def compute_objective_hessian(self, x):
     #     nx = x.shape[0]
