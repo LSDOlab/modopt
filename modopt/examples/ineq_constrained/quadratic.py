@@ -15,16 +15,16 @@ class Quadratic(Problem):
                                   lower=np.array([0., -np.inf]),
                                   upper=None,
                                   equals=None,
-                                  vals=np.array([500., 500.]))
+                                  vals=np.array([
+                                      500.,
+                                  ]))
 
         self.add_design_variables('y',
                                   shape=(1, ),
                                   lower=None,
                                   upper=None,
                                   equals=None,
-                                  vals=np.full((1, ), 5))
-
-        # self.name_objective('obj')
+                                  vals=np.full((1, ), 5.))
 
         self.add_constraints(
             'x+y',
@@ -60,39 +60,37 @@ class Quadratic(Problem):
         #                                                         2.]]))
         # self.declare_objective_hvp(wrt='x', shape=(25, ), vals=None)
 
-    def compute_objective(self, x, f):
-        f = x[0]**2 + x[1]**2
+    # def compute_objective(self, x, f):
+    #     f = x[0]**2 + x[1]**2
 
-        return f
+    #     return f
 
-    def compute_objective(self):
-        dv = self.x
-        self.f = dv['x']**2 + dv['y']**2
+    # def compute_objective(self):
+    #     dv = self.x
+    #     self.f = dv['x']**2 + dv['y']**2
 
-    def compute_objective(self, dvs):
+    def compute_objective(self, dvs, obj):
         obj = dvs['x']**2 + dvs['y']**2
 
-        return obj
-
-    def compute_objective_gradient(self, x):
-        g = 2 * x
-        return g
+    # def compute_objective_gradient(self, x):
+    #     g = 2 * x
+    #     return g
 
     def compute_objective_gradient(self, dvs, grad):
         grad['x'] = 2 * dvs['x']
         grad['y'] = 2 * dvs['y']
 
-    def compute_constraints(self, x):
-        c = np.array([x[0] + x[1], x[0] - x[1]])
-        return c
+    # def compute_constraints(self, x):
+    #     c = np.array([x[0] + x[1], x[0] - x[1]])
+    #     return c
 
     def compute_constraints(self, dvs, cons):
         cons['x+y'] = dvs['x'] + dvs['y']
         cons['x-y'] = dvs['x'] - dvs['y']
 
-    def compute_constraint_jacobian(self, x):
-        j = np.array([[1., 1.], [1., -1.]])
-        return j
+    # def compute_constraint_jacobian(self, x):
+    #     j = np.array([[1., 1.], [1., -1.]])
+    #     return j
 
     def compute_constraint_jacobian(self, dvs, jac):
         jac['x+y', 'x'] = 1.

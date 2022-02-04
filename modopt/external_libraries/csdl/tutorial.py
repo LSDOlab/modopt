@@ -22,11 +22,11 @@ class QuadraticFunc(Model):
         self.register_output('constraint_2', constraint_2)
 
         # define optimization problem
-        self.add_design_variable('x', lower=0.)
-        self.add_design_variable('y')
+        self.add_design_variable('x', lower=1.5)
+        self.add_design_variable('y', lower=-1.)
         self.add_objective('z')
-        # self.add_constraint('constraint_1', equals=1.)
-        # self.add_constraint('constraint_2', lower=1.)
+        self.add_constraint('constraint_1', equals=1.)
+        self.add_constraint('constraint_2', lower=1.)
 
 
 if __name__ == "__main__":
@@ -43,6 +43,8 @@ if __name__ == "__main__":
     )
 
     from modopt.scipy_library import SLSQP
+    from modopt.optimization_algorithms import SQP
+    from modopt.snopt_library import SNOPT
 
     # Setup your optimizer with the problem
     optimizer = SLSQP(prob, maxiter=20)
@@ -58,3 +60,13 @@ if __name__ == "__main__":
     # Print results of optimization
     # (summary_table contains information from each iteration)
     optimizer.print_results(summary_table=True)
+
+    # import openmdao.api as om
+    # sim.prob.driver = om.ScipyOptimizeDriver()
+    # sim.prob.driver.options['optimizer'] = 'SLSQP'
+
+    # # sim.prob.run_model()
+    # sim.prob.run_driver()
+
+    print(sim['x'])
+    print(sim['y'])

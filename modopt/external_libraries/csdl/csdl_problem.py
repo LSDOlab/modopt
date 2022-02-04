@@ -64,14 +64,14 @@ class CSDLProblem(OptProblem):
         self.c_lower = np.where(c_l == -1.0e30, -np.inf, c_l)
         self.c_upper = np.where(c_u == 1.0e30, np.inf, c_u)
 
-    def compute_objective(self, x):
+    def objective(self, x):
         sim = self.options['simulator']
         sim.update_design_variables(x)
         sim.run()
 
         return sim.objective()
 
-    def compute_objective_gradient(self, x):
+    def objective_gradient(self, x):
         sim = self.options['simulator']
         sim.update_design_variables(x)
         sim.run()
@@ -79,14 +79,14 @@ class CSDLProblem(OptProblem):
 
         return sim.objective_gradient()
 
-    def compute_constraints(self, x):
+    def constraints(self, x):
         sim = self.options['simulator']
         sim.update_design_variables(x)
         sim.run()
 
         return sim.constraints()
 
-    def compute_constraint_jacobian(self, x):
+    def constraint_jacobian(self, x):
         sim = self.options['simulator']
         sim.update_design_variables(x)
         sim.run()

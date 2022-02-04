@@ -62,7 +62,7 @@ class Optimizer(object):
                 with open(dirName + '/' + key + '.out', 'w') as f:
                     pass
 
-    def setup():
+    def setup(self, ):
         pass
 
     def print_available_outputs(self, ):
@@ -86,7 +86,9 @@ class Optimizer(object):
             # Only user-specified outputs will be stored
             # Multidim. arrays will be flattened (c-major/row major) before writing to a file
             if key in self.outputs:
-                if isinstance(value, np.ndarray):
+                # if isinstance(value, np.ndarray):
+                try:
+                    value.size == 1
                     # Update output file
                     with open(dirName + '/' + key + '.out', 'a') as f:
                         np.savetxt(f, value.reshape(1, value.size))
@@ -95,7 +97,8 @@ class Optimizer(object):
                         self.outputs[key],
                         value.reshape((1, ) + value.shape),
                         axis=0)
-                else:
+                # else:
+                except:
                     # Update output file
                     with open(dirName + '/' + key + '.out', 'a') as f:
                         # Avoid appending None for a failed line search

@@ -9,9 +9,9 @@ class Newton(Optimizer):
     def initialize(self):
         self.solver_name = 'newton'
 
-        self.obj = self.problem.compute_objective
-        self.grad = self.problem.compute_objective_gradient
-        self.hess = self.problem.compute_objective_hessian
+        self.obj = self.problem.objective
+        self.grad = self.problem.objective_gradient
+        self.hess = self.problem.objective_hessian
 
         self.options.declare('opt_tol', default=1e-7, types=float)
 

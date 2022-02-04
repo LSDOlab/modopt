@@ -21,10 +21,10 @@ class SQP(Optimizer):
 
         self.nx = self.problem.nx
 
-        self.obj = self.problem.compute_objective
-        self.grad = self.problem.compute_objective_gradient
-        self.con_in = self.problem.compute_constraints
-        self.jac_in = self.problem.compute_constraint_jacobian
+        self.obj = self.problem.objective
+        self.grad = self.problem.objective_gradient
+        self.con_in = self.problem.constraints
+        self.jac_in = self.problem.constraint_jacobian
 
         self.options.declare('opt_tol', default=1e-7, types=float)
         self.options.declare('feas_tol', default=1e-7, types=float)

@@ -42,6 +42,8 @@ class SLSQP(ScipyOptimizer):
 
         c_lower = self.problem.c_lower
         c_upper = self.problem.c_upper
+        # print(c_lower)
+        # print(c_upper)
 
         if c_lower.size == 0:
             # print('No constraints')
@@ -58,6 +60,10 @@ class SLSQP(ScipyOptimizer):
             con_dict_eq['type'] = 'eq'
 
             def func_eq(x):
+                # print('EQ:')
+                # print(self.con(x)[eq_indices])
+                # print(c_lower[eq_indices])
+
                 return self.con(x)[eq_indices] - c_lower[eq_indices]
 
             con_dict_eq['fun'] = func_eq
@@ -82,6 +88,10 @@ class SLSQP(ScipyOptimizer):
                 con_dict_ineq1['type'] = 'ineq'
 
                 def func_ineq1(x):
+                    # print('INEQ1:')
+                    # print(self.con(x)[lower_ineq_indices])
+                    # print(c_lower[lower_ineq_indices])
+
                     return self.con(x)[lower_ineq_indices] - c_lower[
                         lower_ineq_indices]
 
@@ -106,6 +116,9 @@ class SLSQP(ScipyOptimizer):
                 con_dict_ineq2['type'] = 'ineq'
 
                 def func_ineq2(x):
+                    # print('INEQ2:')
+                    # print(self.con(x)[upper_ineq_indices])
+                    # print(c_upper[upper_ineq_indices])
                     return c_upper[upper_ineq_indices] - self.con(
                         x)[upper_ineq_indices]
 

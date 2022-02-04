@@ -11,8 +11,8 @@ class QuasiNewton(Optimizer):
     def initialize(self):
         self.solver_name = 'bfgs'
 
-        self.obj = self.problem.compute_objective
-        self.grad = self.problem.compute_objective_gradient
+        self.obj = self.problem.objective
+        self.grad = self.problem.objective_gradient
 
         self.options.declare('opt_tol', types=float)
 

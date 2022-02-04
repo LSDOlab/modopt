@@ -15,25 +15,19 @@ class X4(Problem):
                                   shape=(2, ),
                                   vals=np.array([.3, .3]))
 
-        # Name the objective of your problem (optional)
-        self.name_objective('obj')
-
     def setup_derivatives(self):
         # Declare objective gradient and its shape
-        self.declare_objective_gradient(
-            wrt='x',
-            shape=(2, ),
-        )
+        self.declare_objective_gradient(wrt='x', )
 
     # Compute the value of the objective with given design variable values
-    def compute_objective(self, x):
-        return np.sum(x**4)
+    def compute_objective(self, dvs, obj):
+        obj = np.sum(dvs['x']**4)
 
-    def compute_objective_gradient(self, x):
-        return 4 * x**3
+    def compute_objective_gradient(self, dvs, grad):
+        grad['x'] = 4 * dvs['x']**3
 
-    # def compute_objective_hessian(self, x):
-    #     return np.diag(12 * x**2)
+    # def compute_objective_hessian(self, dvs, hess):
+    #     hess['x', 'x'] = np.diag(12 * dvs['x']**2)
 
 
 import numpy as np
@@ -48,8 +42,8 @@ class SteepestDescent(Optimizer):
         # Name your algorithm
         self.solver_name = 'steepest_descent'
 
-        self.obj = self.problem.compute_objective
-        self.grad = self.problem.compute_objective_gradient
+        self.obj = self.problem.objective
+        self.grad = self.problem.objective_gradient
 
         self.options.declare('opt_tol', types=float)
 

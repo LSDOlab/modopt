@@ -1,4 +1,5 @@
 from array_manager.api import VectorComponentsDict, MatrixComponentsDict, Vector, Matrix, BlockMatrix
+from array_manager.api import DenseMatrix, COOMatrix, CSRMatrix, CSCMatrix
 
 from modopt.utils.options_dictionary import OptionsDictionary
 
@@ -13,10 +14,17 @@ class Problem(object):
         self.options = OptionsDictionary()
 
         self.problem_name = 'unnamed_problem'
+        self.options.declare('jac_format',
+                             default='dense',
+                             values=('dense', 'coo', 'csr', 'csc'))
+        self.options.declare('hess_format',
+                             default='dense',
+                             values=('dense', 'coo', 'csr', 'csc'))
 
         self.x0 = None
         self.nx = 0
         self.nc = 0
+        self.obj = 0.
         self.constrained = False
         self.second_order = False
 
@@ -82,26 +90,32 @@ class Problem(object):
     def setup(self):
         pass
 
-    def _compute_objective(self, x):
+    def objective(self, x):
         self.x.set_data(x)
-        self.compute_objective()
-        return self.f
+        self.compute_objective(self.x, self.obj)
+        return self.obj
 
-    def _compute_objective_gradient(self, x):
+    def objective_gradient(self, x):
         self.x.set_data(x)
-        self.compute_objective_gradient()
+        self.compute_objective_gradient(self.x, self.pF_px)
         return self.pF_px.get_data()
 
-    def _compute_constraints(self, x):
+    def objective_hessian(self, x):
         self.x.set_data(x)
-        self.compute_constraints()
-        return self.constraints.get_data()
+        self.compute_objective_hessian(self.x, self.p2F_pxx)
+        self.hess.update_bottom_up()
+        return self.hess.get_std_array()
 
-    def _compute_constraint_jacobian(self, x):
+    def constraints(self, x):
         self.x.set_data(x)
-        self.compute_constraint_jacobian()
+        self.compute_constraints(self.x, self.con)
+        return self.con.get_data()
 
-        return self.f
+    def constraint_jacobian(self, x):
+        self.x.set_data(x)
+        self.compute_constraint_jacobian(self.x, self.pC_px)
+        self.jac.update_bottom_up()
+        return self.jac.get_std_array()
 
     # Overridden in CSDLProblem()
     def _setup_bounds(self):
@@ -184,8 +198,8 @@ class Problem(object):
             # self.pF_py.allocate(setup_views=True)
 
         if self.constrained:
-            self.constraints = Vector(self.constraints_dict)
-            self.constraints.allocate(setup_views=True)
+            self.con = Vector(self.constraints_dict)
+            self.con.allocate(setup_views=True)
 
         # self.constraint_duals = Vector(self.constraints_dict)
         # self.residual_duals = Vector(self.residuals_dict)
@@ -193,10 +207,27 @@ class Problem(object):
     def _setup_matrices(self):
         self.p2F_pxx = Matrix(self.p2F_pxx_dict, setup_views=True)
         self.p2F_pxx.allocate()
+        if self.options['hess_format'] == 'dense':
+            self.hess = DenseMatrix(self.p2F_pxx)
+        elif self.options['hess_format'] == 'coo':
+            self.hess = COOMatrix(self.p2F_pxx)
+        elif self.options['hess_format'] == 'csr':
+            self.hess = CSRMatrix(self.p2F_pxx)
+        else:
+            self.hess = CSCMatrix(self.p2F_pxx)
 
         if self.constrained:
             self.pC_px = Matrix(self.pC_px_dict, setup_views=True)
             self.pC_px.allocate()
+            # TODO: add standard matrices for all jac and hess
+            if self.options['jac_format'] == 'dense':
+                self.jac = DenseMatrix(self.pC_px)
+            elif self.options['jac_format'] == 'coo':
+                self.jac = COOMatrix(self.pC_px)
+            elif self.options['jac_format'] == 'csr':
+                self.jac = CSRMatrix(self.pC_px)
+            else:
+                self.jac = CSCMatrix(self.pC_px)
 
             self.p2L_pxx = Matrix(self.p2L_pxx_dict, setup_views=True)
             self.p2L_pxx.allocate()

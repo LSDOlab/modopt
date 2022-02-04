@@ -4,6 +4,7 @@ from scipy.optimize import BFGS, SR1
 from array_manager.api import DenseMatrix
 
 from modopt.api import Optimizer, Problem
+from modopt.csdl_library import CSDLProblem
 
 # scipy.optimize.minimize(fun,
 #                         x0,
@@ -105,15 +106,18 @@ class ScipyOptimizer(Optimizer):
         self.declare_options()
         self.declare_outputs()
 
-        self.obj = self.problem.compute_objective
+        self.obj = self.problem.objective
         self.x0 = self.problem.x0
 
         # Gradient only for CG, BFGS, Newton-CG, L-BFGS-B, TNC, SLSQP, dogleg, trust-ncg,
         # trust-krylov, trust-exact and trust-constr
-        if self.problem.compute_objective_gradient.__func__ is not Problem.compute_objective_gradient:
-            self.grad = self.problem.compute_objective_gradient
+        if not isinstance(self.problem, CSDLProblem):
+            if self.problem.compute_objective_gradient.__func__ is not Problem.compute_objective_gradient:
+                self.grad = self.problem.objective_gradient
+            else:
+                self.grad = self.options['gradient']
         else:
-            self.grad = self.options['gradient']
+            self.grad = self.problem.objective_gradient
 
         # Only for COBYLA, SLSQP and trust-constr
         # Used to construct:
@@ -123,20 +127,23 @@ class ScipyOptimizer(Optimizer):
         if self.problem.nc > 0:
             # Uncomment the line below after testing our sqp_optimizer with atomics_lite
             # pC_px = DenseMatrix(self.problem.pC_px).numpy_array()
-            self.con = self.problem.compute_constraints
-            if self.problem.compute_constraint_jacobian.__func__ is not Problem.compute_constraint_jacobian:
-                self.jac = self.problem.compute_constraint_jacobian
+            self.con = self.problem.constraints
+            if not isinstance(self.problem, CSDLProblem):
+                if self.problem.compute_constraint_jacobian.__func__ is not Problem.compute_constraint_jacobian:
+                    self.jac = self.problem.constraint_jacobian
 
-            # Uncomment the 2 lines below after testing our sqp_optimizer with atomics_lite
-            elif pC_px.any() != 0:
-                self.jac = lambda x: pC_px
+                # Uncomment the 2 lines below after testing our sqp_optimizer with atomics_lite
+                # elif pC_px.any() != 0:
+                #     self.jac = lambda x: pC_px
+                else:
+                    self.jac = self.options['jacobian']
             else:
-                self.jac = self.options['jacobian']
+                self.jac = self.problem.constraint_jacobian
 
         # SETUP OBJECTIVE HESSIAN OR HVP
 
         if self.problem.compute_objective_hessian.__func__ is not Problem.compute_objective_hessian:
-            self.hess = self.problem.compute_objective_hessian
+            self.hess = self.problem.objective_hessian
         elif self.options['hessian'] == 'BFGS':
             # Users will have to manually modify this if needed
             self.hess = BFGS(exception_strategy='skip_update',
@@ -149,7 +156,7 @@ class ScipyOptimizer(Optimizer):
         # Only for Newton-CG, trust-ncg, trust-krylov, trust-constr.
         # Note: This is always Objective hessian even for trust-constr (Constraint hessians defined in constraints)
         elif self.problem.compute_objective_hvp.__func__ is not Problem.compute_objective_hvp:
-            self.hvp = self.problem.compute_objective_hvp
+            self.hvp = self.problem.objective_hvp
         else:
             self.hess = self.options['hessian']
 
@@ -175,10 +182,8 @@ class ScipyOptimizer(Optimizer):
         # Only for Nelder-Mead, L-BFGS-B, TNC, SLSQP, Powell, and trust-constr methods
 
         # TODO: check for bugs for the if condition from 2 lines below
-        # if self.problem.x_lower.all(
-        # ) != -np.inf and self.problem.x_upper.all() != np.inf:
-        if self.problem.x_lower.any(
-        ) != -np.inf or self.problem.x_upper.any() != np.inf:
+        if self.problem.x_lower.all(
+        ) == -np.inf and self.problem.x_upper.all() == np.inf:
             self.bounds = None
             return None
 

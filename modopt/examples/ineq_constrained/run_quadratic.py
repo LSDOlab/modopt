@@ -3,6 +3,8 @@ import numpy as np
 from quadratic import Quadratic
 
 from modopt.scipy_library import SLSQP
+from modopt.optimization_algorithms import SQP
+from modopt.snopt_library import SNOPT
 
 # nx = 25
 tol = 1E-8
@@ -10,9 +12,13 @@ max_itr = 500
 # x0 = np.full((nx), 0.1)
 
 # prob = X4(nx=nx, x0=x0)
-prob = Quadratic()
+prob = Quadratic(jac_format='dense')
 
-optimizer = SLSQP(prob, opt_tol=tol, max_itr=max_itr)
+# Setup your optimizer with the problem
+# optimizer = SLSQP(prob, maxiter=20)
+optimizer = SQP(prob, max_itr=20)
+# optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3)
+
 optimizer.check_first_derivatives(prob.x.get_data())
 optimizer.solve()
 optimizer.print_results(optimal_variables=True)

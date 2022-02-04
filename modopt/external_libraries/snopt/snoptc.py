@@ -37,16 +37,17 @@ class SNOPTc(SNOPTOptimizer):
         # ObjRow = 1
         n = self.problem.nx
         m = self.problem.nc
+        # print(m)
         # nF = self.problem.nc + 1
 
         obj = self.obj
         grad = self.grad
-        G = grad(x0)
+        G = np.ones((n, ))
 
         if self.problem.nc > 0:
             con = self.con
             jac = self.jac
-            J = jac(x0)
+            J = np.ones((m, n))
             x0c0 = np.concatenate((x0, con(x0)))
         # callback = self.update_outputs
 
@@ -54,11 +55,6 @@ class SNOPTc(SNOPTOptimizer):
 
         bl = np.concatenate((self.x_lower, self.c_lower))
         bu = np.concatenate((self.x_upper, self.c_upper))
-
-        print(bl.shape)
-        print(bu.shape)
-        print(n)
-        print(m)
 
         # options = SNOPT_options()
         inf = 1.0e+20
