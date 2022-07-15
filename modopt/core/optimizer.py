@@ -18,18 +18,14 @@ class Optimizer(object):
         # try methods required for a specific optimizer are available inside the Problem subclass (inspect package)
 
         self.solver_name = 'unnamed_solver'
-        self.options.declare('max_itr', default=1000, types=int)
         self.options.declare('formulation', default='rs', types=str)
-        self.options.declare('opt_tol', default=1e-8, types=float)
-        self.options.declare('feas_tol', default=1e-8, types=float)
 
         self.initialize()
         self.options.update(kwargs)
         self._setup()
 
     def _setup(self):
-
-        # Call user-defined setup
+        # User defined optimizer-specific setup
         self.setup()
 
         name = self.problem_name
@@ -66,7 +62,7 @@ class Optimizer(object):
         pass
 
     def print_available_outputs(self, ):
-        print(self.default_output_format)
+        print(self.default_outputs_format)
 
     def run_post_processing(self):
         # Removes the first entry of the array when it was initialized as empty
@@ -87,8 +83,9 @@ class Optimizer(object):
             # Multidim. arrays will be flattened (c-major/row major) before writing to a file
             if key in self.outputs:
                 # if isinstance(value, np.ndarray):
-                try:
-                    value.size == 1
+                # try:
+                #     value.size == 1
+                if not isinstance(value, (int, float, list)):
                     # Update output file
                     with open(dirName + '/' + key + '.out', 'a') as f:
                         np.savetxt(f, value.reshape(1, value.size))
@@ -98,7 +95,8 @@ class Optimizer(object):
                         value.reshape((1, ) + value.shape),
                         axis=0)
                 # else:
-                except:
+                # except:
+                else:
                     # Update output file
                     with open(dirName + '/' + key + '.out', 'a') as f:
                         # Avoid appending None for a failed line search
@@ -126,6 +124,11 @@ class Optimizer(object):
                     .format(key))
 
     def print_results(self, **kwargs):
+        self._print_results(**kwargs)
+
+    def _print_results(self,
+                       title="ModOpt final iteration summary:",
+                       **kwargs):
 
         # TODO: Testing to verify the design variable data
         # print(
@@ -134,7 +137,7 @@ class Optimizer(object):
 
         # Print modopt final iteration summary
 
-        title = "ModOpt final iteration summary:"
+        # title = "ModOpt final iteration summary:"
 
         print("\n", "\t" * 1, "=" * len(title))
         print("\t" * 1, title)
@@ -154,7 +157,9 @@ class Optimizer(object):
                 print("\t" * 1, key, " " * (total_length - len(key)),
                       ':', value[-1])
 
-        print("\t", "=" * len(title))
+        bottom_line_length = total_length + 25
+        # bottom_line_length = len(title)
+        print("\t", "=" * bottom_line_length)
 
         # Print optimization summary table
 

@@ -12,8 +12,8 @@ class BFGS(ApproximateHessian):
         if self.options['store_hessian']:
             Bd = np.dot(self.B_k, dk)
 
-            self.B_k += -np.outer(Bd, Bd) / np.inner(Bd, dk)
-            +np.outer(wk, wk) / np.inner(wk, dk)
+            self.B_k += -np.outer(Bd, Bd) / np.inner(Bd, dk) + np.outer(
+                wk, wk) / np.inner(wk, dk)
 
         if self.options['store_inverse']:
             Mw = np.dot(self.M_k, wk)
@@ -22,6 +22,5 @@ class BFGS(ApproximateHessian):
 
             vec = dk / dTw - Mw / wTMw
 
-            self.M_k += -np.outer(Mw, Mw) / wTMw + np.outer(dk,
-                                                            dk) / dTw
-            +wTMw * np.outer(vec, vec)
+            self.M_k += -np.outer(Mw, Mw) / wTMw + np.outer(
+                dk, dk) / dTw + wTMw * np.outer(vec, vec)

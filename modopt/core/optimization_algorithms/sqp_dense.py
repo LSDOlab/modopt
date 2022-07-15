@@ -11,7 +11,8 @@ from modopt.line_search_algorithms import ScipyLS, BacktrackingArmijo, Minpack2L
 from modopt.merit_functions import AugmentedLagrangianIneq, ModifiedLagrangianIneq
 # from modopt.approximate_hessians import BFGS as BFGS
 
-from modopt.approximate_hessians import BFGSM1 as BFGS
+# from modopt.approximate_hessians import BFGSM1 as BFGS
+from modopt.approximate_hessians import BFGSScipy as BFGS
 
 
 # This optimizer takes constraints in all-inequality form
@@ -26,6 +27,7 @@ class SQP(Optimizer):
         self.con_in = self.problem.constraints
         self.jac_in = self.problem.constraint_jacobian
 
+        self.options.declare('max_itr', default=1000, types=int)
         self.options.declare('opt_tol', default=1e-7, types=float)
         self.options.declare('feas_tol', default=1e-7, types=float)
 
@@ -72,7 +74,9 @@ class SQP(Optimizer):
         self.delta_rho = 1.
         self.num_rho_changes = 0
 
-        self.QN = BFGS(nx=self.problem.nx)
+        # self.QN = BFGS(nx=self.problem.nx)
+        self.QN = BFGS(nx=self.problem.nx,
+                       exception_strategy='damp_update')
         self.MF = AugmentedLagrangianIneq(nx=nx,
                                           nc=nc,
                                           f=self.obj,
@@ -87,7 +91,8 @@ class SQP(Optimizer):
                                          j=self.jac)
 
         self.LSS = ScipyLS(f=self.MF.compute_function,
-                           g=self.MF.compute_gradient)
+                           g=self.MF.compute_gradient,
+                           max_step=2.0)
         # self.LS = Minpack2LS(f=self.MF.compute_function,
         #                      g=self.MF.compute_gradient)
         self.LSB = BacktrackingArmijo(f=self.MF.compute_function,
@@ -491,13 +496,21 @@ class SQP(Optimizer):
                 sp.csc_matrix(dummy_A),
                 l_k,
                 u_k,
-                verbose=False,
+                max_iter=5000,
+                # verbose=False,
+                verbose=True,
                 # warm_start=False,
+                # polish=False,
                 # polish=True,
-                # eps_prim_inf=min(opt_tol, feas_tol) * 1e-2,
-                # eps_dual_inf=min(opt_tol, feas_tol) * 1e-2,
-                eps_abs=max(min(opt_tol, feas_tol) * 1e-2, 1e-8),
-                eps_rel=max(min(opt_tol, feas_tol) * 1e-2, 1e-8))
+                # polish_refine_iter=3,
+                # linsys_solver='qdldl',
+                # eps_prim_inf=1e-4,
+                # eps_dual_inf=1e-4,
+                # eps_abs=1e-6,
+                # eps_rel=1e-6,
+                # eps_abs=max(min(opt_tol, feas_tol) * 1e-2, 1e-8),
+                # eps_rel=max(min(opt_tol, feas_tol) * 1e-2, 1e-8),
+            )
             qp_prob.update(Ax=A_k.flatten('F'))
 
             dummy_A = None
@@ -538,6 +551,8 @@ class SQP(Optimizer):
             # Search direction for pi_k:
             # (-qp_sol.y) is the new estimate for pi
             # p_k[nx:(nx + nc)] = (-qp_sol.y) - pi_k
+            # print(p_k[nx:nx + nc])
+            # print(-qp_sol.y)
             p_k[nx:(nx + nc)] = (-qp_sol.y) - v_k[nx:nx + nc]
 
             # Search direction for s_k :
@@ -560,11 +575,11 @@ class SQP(Optimizer):
                                          J_k)
 
             # Compute the step length along the search direction via a line search
-            # alpha, mf_new, mfg_new, mf_slope_new, new_f_evals, new_g_evals, converged = LSS.search(
-            #     x=v_k, p=p_k, f0=mf_k, g0=mfg_k)
-
-            alpha, mf_new, new_f_evals, new_g_evals, converged = LSB.search(
+            alpha, mf_new, mfg_new, mf_slope_new, new_f_evals, new_g_evals, converged = LSS.search(
                 x=v_k, p=p_k, f0=mf_k, g0=mfg_k)
+
+            # alpha, mf_new, new_f_evals, new_g_evals, converged = LSB.search(
+            #     x=v_k, p=p_k, f0=mf_k, g0=mfg_k)
 
             num_f_evals += new_f_evals
             num_g_evals += new_g_evals
@@ -582,8 +597,8 @@ class SQP(Optimizer):
                 # print('not converged, px_norm=', np.linalg.norm(p_x))
                 # print('not converged, ppi_norm=', np.linalg.norm(p_pi))
                 # print('not converged, ps_norm=', np.linalg.norm(p_s))
-                alpha = None
-                d_k = p_k * 1.
+                alpha = 0.91
+                d_k = p_k * 0.1
 
             else:
                 # print('converged, px_norm=', np.linalg.norm(p_x))

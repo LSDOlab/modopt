@@ -18,7 +18,7 @@ class Quadratic(Problem):
                                   upper=None,
                                   equals=None,
                                   vals=np.array([
-                                      500.,
+                                      acti500.,
                                   ]))
 
         self.add_design_variables('y',
@@ -27,6 +27,9 @@ class Quadratic(Problem):
                                   upper=None,
                                   equals=None,
                                   vals=np.full((1, ), 5.))
+
+        self.set_objective('f', )
+        # scaler=1.0)
 
         self.add_constraints(
             'x+y',
@@ -88,7 +91,7 @@ class Quadratic(Problem):
     #     self.f = dv['x']**2 + dv['y']**2
 
     def compute_objective(self, dvs, obj):
-        obj[0] = dvs['x']**2 + dvs['y']**2
+        obj['f'] = dvs['x']**2 + dvs['y']**2
 
     # def compute_objective_gradient(self, x):
     #     g = 2 * x

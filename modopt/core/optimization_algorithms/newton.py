@@ -13,6 +13,7 @@ class Newton(Optimizer):
         self.grad = self.problem.objective_gradient
         self.hess = self.problem.objective_hessian
 
+        self.options.declare('max_itr', default=1000, types=int)
         self.options.declare('opt_tol', default=1e-7, types=float)
 
         self.default_outputs_format = {

@@ -1,6 +1,7 @@
 # BFGS updates
 from modopt.core.approximate_hessians.bfgs import BFGS
 from modopt.core.approximate_hessians.bfgs_m1 import BFGSM1
+from modopt.core.approximate_hessians.bfgs_scipy import BFGSScipy
 
 # Rank-1 updates
 from modopt.core.approximate_hessians.broyden import Broyden

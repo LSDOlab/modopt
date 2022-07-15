@@ -82,20 +82,43 @@ class SNOPTc(SNOPTOptimizer):
             if self.problem.nc > 0:
                 fCon = con(x)
                 gCon = jac(x).flatten('f')
+            else:
+                fCon = 0.
+                gcon = [0.]
 
             return mode, fObj, gObj, fCon, gCon
 
-        result = snoptc(snopta_objconFG,
-                        nnObj=nnObj,
-                        nnCon=nnCon,
-                        nnJac=nnJac,
-                        x0=x0c0,
-                        J=J,
-                        name=self.problem_name,
-                        iObj=0,
-                        bl=bl,
-                        bu=bu,
-                        options=self.SNOPT_options_object)
+        if self.problem.nc == 0:
+            nnJac = 0
+            nnCon = 0
+            m = 1
+            locA = np.ones((n + 1, ))
+            locA[0] = 0
+            result = snoptc(snopta_objconFG,
+                            nnObj=nnObj,
+                            nnCon=nnCon,
+                            nnJac=nnJac,
+                            x0=np.append(x0, 0.),
+                            J=(np.array([0]), np.array([0]), locA),
+                            name=self.problem_name,
+                            iObj=0,
+                            bl=np.append(bl, -inf),
+                            bu=np.append(bu, inf),
+                            options=self.SNOPT_options_object,
+                            m=m,
+                            n=n)
+        else:
+            result = snoptc(snopta_objconFG,
+                            nnObj=nnObj,
+                            nnCon=nnCon,
+                            nnJac=nnJac,
+                            x0=x0c0,
+                            J=J,
+                            name=self.problem_name,
+                            iObj=0,
+                            bl=bl,
+                            bu=bu,
+                            options=self.SNOPT_options_object)
 
         end_time = time.time()
         self.total_time = end_time - start_time

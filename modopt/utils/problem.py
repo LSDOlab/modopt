@@ -45,8 +45,6 @@ class Problem(object):
         self.c_lower = None
         self.c_upper = None
 
-        self.outputs = {}
-
         self.initialize()
         self.options.update(kwargs)
 
@@ -95,13 +93,13 @@ class Problem(object):
         self.x.set_data(x)
         self.compute_objective(self.x, self.obj)
         # print('obj', self.obj)
-        return self.obj
+        return self.obj[0] * 1.
 
     def objective_gradient(self, x):
         self.x.set_data(x)
         self.compute_objective_gradient(self.x, self.pF_px)
         # print('grad', self.pF_px.get_data())
-        return self.pF_px.get_data()
+        return self.pF_px.get_data() * 1.
 
     def objective_hessian(self, x):
         self.x.set_data(x)
@@ -113,7 +111,7 @@ class Problem(object):
         self.x.set_data(x)
         self.compute_constraints(self.x, self.con)
         # print('con', self.con.get_data())
-        return self.con.get_data()
+        return self.con.get_data() * 1.
 
     def constraint_jacobian(self, x):
         self.x.set_data(x)
@@ -285,9 +283,6 @@ class Problem(object):
 
         self.nx += np.prod(shape)
 
-    # def name_objective(self, name):
-    #     self.outputs[name] = None
-
     def add_constraints(self,
                         name=None,
                         shape=(1, ),
@@ -328,7 +323,7 @@ class Problem(object):
     def declare_constraint_jacobian(self,
                                     of,
                                     wrt,
-                                    shape=(1, 1),
+                                    shape=None,
                                     vals=None,
                                     rows=None,
                                     cols=None,
@@ -355,7 +350,7 @@ class Problem(object):
     def declare_objective_hessian(self,
                                   of,
                                   wrt,
-                                  shape=(1, 1),
+                                  shape=None,
                                   vals=None,
                                   rows=None,
                                   cols=None,
@@ -375,25 +370,122 @@ class Problem(object):
                 vals_shape=shape,
             )
 
-    def compute_objective(self, x):
+    def compute_objective(self, dvs, obj):
+        """
+        Compute the objective function given the design variable vector.
+
+        Parameters
+        ----------
+        dvs : array_manager.Vector
+            Design variable vector.
+        obj : ???np.ndarray
+            Objective function value.
+
+        # Returns
+        # -------
+        # f : float
+        #     Objective function value.
+        """
         pass
 
-    def compute_constraints(self, x):
+    def compute_constraints(self, dvs, con):
+        """
+        Compute the constraint vector given the design variable vector.
+
+        Parameters
+        ----------
+        dvs : array_manager.Vector
+            Design variable vector.
+        con : array_manager.Vector
+            Vector of constraints.
+
+        # Returns
+        # -------
+        # con : np.ndarray
+        #     Vector of constraints.
+        """
         pass
 
-    # def compute_objective_gradient(self, x):
-    #     pass
+    # def compute_objective_gradient(self, dvs, grad):
+    # """
+    # Compute the objective function gradient given the design variable vector.
 
-    # def compute_constraint_jacobian(self, x):
-    #     pass
+    # Parameters
+    # ----------
+    # dvs : array_manager.Vector
+    #     Design variable vector.
+    # grad : array_manager.Vector
+    #     Gradient vector of the objective function with respect to the design variable vector.
 
-    def compute_objective_hessian(self, x):
+    # Returns
+    # -------
+    # pF_px : np.ndarray
+    #     Gradient vector of the objective function with respect to the design vector.
+    # pF_py : np.ndarray
+    #     Gradient vector of the objective function with respect to the state vector.
+
+    # """
+    # pass
+
+    # def compute_constraint_jacobian(self, dvs, jac):
+    # """
+    # Compute the constraint Jacobian with respect to the design variable vector.
+
+    # Parameters
+    # ----------
+    # dvs : array_manager.Vector
+    #     Design variable vector.
+    # jac : array_manager.Matrix
+    #     Jacobian matrix of the constraints with respect to the design vector.
+
+    # Returns
+    # -------
+    # pC_px : np.ndarray
+    #     Jacobian matrix of the constraints with respect to the design vector.
+    # pC_py : np.ndarray
+    #     Jacobian matrix of the constraints with respect to the state vector.
+    # """
+    # pass
+
+    def compute_objective_hessian(self, dvs, hess):
+        """
+        Compute the objective Hessian given the design variable vector.
+
+        Parameters
+        ----------
+        dvs : array_manager.Vector
+            Design variable vector.
+        hess : array_manager.Matrix
+            Hessian matrix of the objective function with respect to the design variable vector.
+
+        Returns
+        -------
+        hessian : np.ndarray
+            Hessian matrix of the objective function with respect to the design and state vectors.
+        """
         pass
 
     def compute_constraint_hessian(self, x, idx):
         pass
 
-    def compute_lagrangian_hessian(self, x, lag_mult):
+    def compute_lagrangian_hessian(self, dvs, lag_mult, lag_hess):
+        """
+        Compute the Lagrangian Hessian given the design variable and Lag. mult. vectors.
+
+        Parameters
+        ----------
+        dvs : array_manager.Vector
+            Design variable vector.
+        lag_mult : array_manager.Vector
+            Lagrange multiplier vector.
+        lag_hess : array_manager.Matrix
+            Hessian matrix of the Lagrangian with respect to the design variable vector.
+
+        Returns
+        -------
+        hessian : np.ndarray
+            Hessian matrix of the objective function with respect to the design and state vectors.
+        """
         pass
 
     def compute_objective_hvp(self, x, v):
@@ -592,8 +684,8 @@ class Problem(object):
         return self.f_0, self.c_0
 
     def compute_direct_vector(self, x):
-        if self.x != x:
-            self.x = x
+        if self.x.get_data() != x:
+            self.x.set_data(x)
             self.y = self.solve_residual_equations(
                 x)  # Note: assumes a single set of residual equations
 
@@ -610,8 +702,8 @@ class Problem(object):
         return self.dy_dx_0
 
     def compute_adjoint_vector(self, x, pFun_py):
-        if self.x != x:
-            self.x = x
+        if self.x.get_data() != x:
+            self.x.set_data(x)
             self.y = self.solve_residual_equations(
                 x)  # Note: assumes a single set of residual equations
 
@@ -628,8 +720,8 @@ class Problem(object):
         return self.df_dr_0, pR_px
 
     def compute_objective_gradient(self, x):
-        if self.x != x:
-            self.x = x
+        if self.x.get_data() != x:
+            self.x.set_data(x)
             self.y = self.solve_residual_equations(
                 x)  # Note: assumes a single set of residual equations
 
@@ -647,8 +739,8 @@ class Problem(object):
         return self.pF_px_0
 
     def compute_constraint_jacobian(self, x):
-        if self.x != x:
-            self.x = x
+        if self.x.get_data() != x:
+            self.x.set_data(x)
             self.y = self.solve_residual_equations(
                 x)  # Note: assumes a single set of residual equations
 

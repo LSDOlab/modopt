@@ -35,6 +35,7 @@ class SQP(Optimizer):
         # self.jac defined for check partials
         self.jac = self.problem.compute_constraint_jacobian
 
+        self.options.declare('max_itr', default=1000, types=int)
         self.options.declare('opt_tol', default=1e-7, types=float)
         self.options.declare('feas_tol', default=1e-7, types=float)
 

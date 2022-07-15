@@ -18,6 +18,7 @@ class NewtonLagrange(Optimizer):
         self.con = self.problem.constraints
         self.jac = self.problem.constraint_jacobian
 
+        self.options.declare('max_itr', default=1000, types=int)
         self.options.declare('opt_tol', default=1e-8, types=float)
         self.options.declare('feas_tol', default=1e-8, types=float)
 

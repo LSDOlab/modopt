@@ -21,13 +21,14 @@ class SNOPTOptimizer(Optimizer):
             # [Current value, default value, type]
             'Start type': ['Cold', 'Cold', str],  ##
             'Specs filename': [None, None, (str, type(None))],  ##
-            'Print filename': ['SNOPT.out', 'SNOPT.out', str],  ##
+            'Print filename': ['SNOPT_print.out', 'SNOPT.out', str],  ##
             'Print frequency': [None, None, (int, type(None))],
             'Print level': [None, None,
                             (int, type(None))],  # minor print level
             'Summary': ['yes', 'yes', str],
             'Summary frequency': [None, None, (int, type(None))],
-            'Solution file': [None, None, (int, type(None))],
+            'Solution file':
+            ['SNOPT_solution.out', None, (int, type(None))],
             'Solution print': [None, None, (bool, type(None))],
             'Major print level': [None, None, (int, type(None))],
             'Minor print level': [None, None, (int, type(None))],
@@ -104,7 +105,7 @@ class SNOPTOptimizer(Optimizer):
             'Scale option': [None, None, (int, type(None))],
             'Scale tolerance': [None, None, (float, type(None))],
             'Scale print': [None, None, (int, type(None))],
-            'Verbose': [False, False, bool]  ##
+            'Verbose': [True, True, bool]  ##
         }
 
         for option in self.SNOPT_options:
@@ -202,46 +203,14 @@ class SNOPTOptimizer(Optimizer):
     # print_results for scipy_library overrides print_results from Optimizer()
     # summary table and compact print does not work
     def print_results(self, **kwargs):
+        # TODO: Use pthon file snopt.py and mics.py and result() object to print in modopt format
         # Testing to verify the design variable data
         # print(np.loadtxt(self.problem_name+'_x.out') - self.outputs['x_array'])
-        print("\n", "\t" * 1, "==============")
-        print("\t" * 1, "Scipy summary:")
-        print("\t" * 1, "==============", "\n")
-        print("\t" * 1, "Problem", "\t" * 3, ':', self.problem_name)
-        print("\t" * 1, "Solver", "\t" * 3, ':', self.solver_name)
-        print("\t" * 1, "Success", "\t" * 3, ':',
-              self.scipy_output['success'])
-        print("\t" * 1, "Message", "\t" * 3, ':',
-              self.scipy_output['message'])
-        print("\t" * 1, "Objective", "\t" * 3, ':',
-              self.scipy_output['fun'])
-        if 'njev' in self.scipy_output:
-            print("\t" * 1, "Gradient norm", "\t" * 3, ':',
-                  np.linalg.norm(self.scipy_output['jac']))
+        # print("\n", "\t" * 1, "==============")
+        # print("\t" * 1, "SNOPT summary:")
+        # print("\t" * 1, "==============", "\n")
+        # print("\t" * 1, "Problem", "\t" * 3, ':', self.problem_name)
+        # print("\t" * 1, "Solver", "\t" * 3, ':', self.solver_name)
 
-        print("\t" * 1, "Total time", "\t" * 3, ':', self.total_time)
-        if 'nit' in self.scipy_output:
-            print("\t" * 1, "Major iterations", "\t" * 2, ':',
-                  self.scipy_output['nit'])
-
-        # if self.scipy_output['nfev'] is not None:
-        print("\t" * 1, "Total function evaluations", "\t" * 1, ':',
-              self.scipy_output['nfev'])
-        if 'njev' in self.scipy_output:
-            print("\t" * 1, "Total gradient evaluations", "\t" * 1, ':',
-                  self.scipy_output['njev'])
-
-        allowed_keys = {
-            'optimal_variables',
-            # 'summary_table',
-            # 'compact_print'
-        }
-        self.__dict__.update((key, False) for key in allowed_keys)
-        self.__dict__.update((key, val) for key, val in kwargs.items()
-                             if key in allowed_keys)
-
-        if self.optimal_variables:
-            print("\t" * 1, "Optimal variables", "\t" * 2, ':',
-                  self.scipy_output['x'])
-
-        print("\t", "===========================================")
+        # print(self.snopt_output)
+        pass

@@ -33,6 +33,7 @@ class SQP_SURF(Optimizer):
         self.states_in = self.problem.solve_residual_equations
         self.adj_in = self.problem.compute_adjoint_vector
 
+        self.options.declare('max_itr', default=1000, types=int)
         self.options.declare('opt_tol', default=1e-7, types=float)
         self.options.declare('feas_tol', default=1e-7, types=float)
 

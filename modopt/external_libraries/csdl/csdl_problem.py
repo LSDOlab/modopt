@@ -1,6 +1,7 @@
 import numpy as np
 
 from modopt.api import Problem as OptProblem
+# from csdl_lite import Simulator
 from csdl_om import Simulator
 from csdl import Model
 
@@ -84,7 +85,7 @@ class CSDLProblem(OptProblem):
         sim.update_design_variables(x)
         sim.run()
 
-        return sim.constraints()
+        return sim.constraints() * 1.e0
 
     def constraint_jacobian(self, x):
         sim = self.options['simulator']
@@ -92,4 +93,4 @@ class CSDLProblem(OptProblem):
         sim.run()
         sim.compute_total_derivatives()
 
-        return sim.constraint_jacobian()
+        return sim.constraint_jacobian() * 1.e0

@@ -25,8 +25,8 @@ class QuadraticFunc(Model):
         self.add_design_variable('x', lower=1.5)
         self.add_design_variable('y', lower=-1.)
         self.add_objective('z')
-        self.add_constraint('constraint_1', equals=1.)
-        self.add_constraint('constraint_2', lower=1.)
+        # self.add_constraint('constraint_1', equals=1.)
+        # self.add_constraint('constraint_2', lower=1.)
 
 
 if __name__ == "__main__":
@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     # Setup your optimization problem
     prob = CSDLProblem(
-        problem_name='quadratic',
+        problem_name='tutorial',
         simulator=sim,
     )
 
@@ -47,12 +47,12 @@ if __name__ == "__main__":
     from modopt.snopt_library import SNOPT
 
     # Setup your optimizer with the problem
-    optimizer = SLSQP(prob, maxiter=20)
+    # optimizer = SLSQP(prob, maxiter=20)
     # optimizer = SQP(prob, max_itr=20)
-    # optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3)
+    optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3)
 
     # Check first derivatives at the initial guess, if needed
-    optimizer.check_first_derivatives(prob.x0)
+    # optimizer.check_first_derivatives(prob.x0)
 
     # Solve your optimization problem
     optimizer.solve()

@@ -46,17 +46,17 @@ if __name__ == "__main__":
     from modopt.scipy_library import SLSQP
     from modopt.snopt_library import SNOPT
 
-    optimizer = SLSQP(
-        prob,
-        ftol=1e-6,
-        maxiter=20,
-        outputs=['x'],
-    )
+    # optimizer = SLSQP(
+    #     prob,
+    #     ftol=1e-6,
+    #     maxiter=20,
+    #     outputs=['x'],
+    # )
     # optimizer.options['ftol'] = 1e-6
 
     # optimizer = SQP(prob, max_itr=20)
 
-    # optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3)
+    optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3)
     # ftol=1e-6,
     # maxiter=20,
     # )
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     optimizer.solve()
 
     # Print results of optimization (summary_table contains information from each iteration)
-    optimizer.print_results(summary_table=True)
+    # optimizer.print_results(summary_table=True)
 
     # # sim.prob.set_val('v', val=0.)
     # sim.prob.driver = om.ScipyOptimizeDriver()

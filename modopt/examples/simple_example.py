@@ -16,6 +16,7 @@ class X4(Problem):
     def setup_derivatives(self):
         # Declare objective gradient and its shape
         self.declare_objective_gradient(wrt='x', )
+        self.declare_objective_hessian(of='x', wrt='x')
 
     # Compute the value of the objective with given design variable values
     def compute_objective(self, dvs, obj):
@@ -24,8 +25,8 @@ class X4(Problem):
     def compute_objective_gradient(self, dvs, grad):
         grad['x'] = 4 * dvs['x']**3
 
-    # def compute_objective_hessian(self, dvs, hess):
-    #     hess['x', 'x'] = np.diag(12 * dvs['x']**2)
+    def compute_objective_hessian(self, dvs, hess):
+        hess['x', 'x'] = np.diag(12 * dvs['x']**2)
 
 
 import numpy as np
@@ -129,14 +130,25 @@ max_itr = 100
 
 prob = X4()
 
-# from modopt.optimization_algorithms import Newton, QuasiNewton, SQP
+from modopt.optimization_algorithms import Newton, QuasiNewton, SQP
 
 # Set up your optimizer with your problem and pass in optimizer parameters
+
+# Earlier API
+# Options cannot be changed after instantiation, setup() happens in __init__()
 optimizer = SteepestDescent(prob,
                             opt_tol=opt_tol,
                             max_itr=max_itr,
                             outputs=['itr', 'obj', 'x', 'opt', 'time'])
-# outputs=['itr', 'obj', 'time'])
+# optimizer = Newton(prob, opt_tol=opt_tol)
+# optimizer = QuasiNewton(prob, opt_tol=opt_tol)
+
+# Proposed API
+# Additional setup() in the API
+# optimizer = Newton(prob, opt_tol=opt_tol)
+# optimizer.options['max_itr'] = max_itr
+# optimizer.options['outputs'] = ['itr', 'obj', 'x', 'opt', 'time']
+# optimizer.setup()
 
 # Check first derivatives at the initial guess, if needed
 optimizer.check_first_derivatives(prob.x.get_data())

@@ -18,6 +18,7 @@ class L2PenaltyEq(Optimizer):
         self.con = self.problem.constraints
         self.jac = self.problem.constraint_jacobian
 
+        self.options.declare('max_itr', default=1000, types=int)
         self.options.declare('opt_tol', types=float)
         self.options.declare('feas_tol', types=float)
 

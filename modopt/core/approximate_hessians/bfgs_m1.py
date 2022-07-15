@@ -35,6 +35,5 @@ class BFGSM1(ApproximateHessian):
 
             vec = dk / dTw - Mw / wTMw
 
-            self.M_k += -np.outer(Mw, Mw) / wTMw + np.outer(dk,
-                                                            dk) / dTw
-            +wTMw * np.outer(vec, vec)
+            self.M_k += -np.outer(Mw, Mw) / wTMw + np.outer(
+                dk, dk) / dTw + wTMw * np.outer(vec, vec)

@@ -323,33 +323,51 @@ class ScipyOptimizer(Optimizer):
     # print_results for scipy_library overrides print_results from Optimizer()
     # summary table and compact print does not work
     def print_results(self, **kwargs):
+
+        # self._print_results(title="ModOpt final iteration summary:", **kwargs)
+
         # Testing to verify the design variable data
         # print(np.loadtxt(self.problem_name+'_x.out') - self.outputs['x_array'])
-        print("\n", "\t" * 1, "==============")
+
+        title = "Scipy summary:"
+
+        print("\n", "\t" * 1, "=" * len(title))
         print("\t" * 1, "Scipy summary:")
-        print("\t" * 1, "==============", "\n")
-        print("\t" * 1, "Problem", "\t" * 3, ':', self.problem_name)
-        print("\t" * 1, "Solver", "\t" * 3, ':', self.solver_name)
-        print("\t" * 1, "Success", "\t" * 3, ':',
+        print("\t" * 1, "=" * len(title))
+
+        # longest_key = max(self.scipy_output, key=len)
+        # max_string_length = max(20, len(longest_key))
+        # total_length = max_string_length + 5
+        total_length = 20 + 5
+
+        print("\t" * 1, "Problem", " " * (total_length - 7), ':',
+              self.problem_name)
+        print("\t" * 1, "Solver", " " * (total_length - 6), ':',
+              self.solver_name)
+
+        print("\t" * 1, "Success", " " * (total_length - 7), ':',
               self.scipy_output['success'])
-        print("\t" * 1, "Message", "\t" * 3, ':',
+        print("\t" * 1, "Message", " " * (total_length - 7), ':',
               self.scipy_output['message'])
-        print("\t" * 1, "Objective", "\t" * 3, ':',
+        print("\t" * 1, "Objective", " " * (total_length - 9), ':',
               self.scipy_output['fun'])
         if 'njev' in self.scipy_output:
-            print("\t" * 1, "Gradient norm", "\t" * 3, ':',
-                  np.linalg.norm(self.scipy_output['jac']))
+            print("\t" * 1, "Gradient norm", " " * (total_length - 13),
+                  ':', np.linalg.norm(self.scipy_output['jac']))
 
-        print("\t" * 1, "Total time", "\t" * 3, ':', self.total_time)
+        print("\t" * 1, "Total time", " " * (total_length - 10), ':',
+              self.total_time)
         if 'nit' in self.scipy_output:
-            print("\t" * 1, "Major iterations", "\t" * 2, ':',
+            print("\t" * 1, "Major iterations",
+                  " " * (total_length - 16), ':',
                   self.scipy_output['nit'])
 
         # if self.scipy_output['nfev'] is not None:
-        print("\t" * 1, "Total function evaluations", "\t" * 1, ':',
-              self.scipy_output['nfev'])
+        print("\t" * 1, "Total function evals",
+              " " * (total_length - 20), ':', self.scipy_output['nfev'])
         if 'njev' in self.scipy_output:
-            print("\t" * 1, "Total gradient evaluations", "\t" * 1, ':',
+            print("\t" * 1, "Total gradient evals",
+                  " " * (total_length - 20), ':',
                   self.scipy_output['njev'])
 
         allowed_keys = {
@@ -362,7 +380,11 @@ class ScipyOptimizer(Optimizer):
                              if key in allowed_keys)
 
         if self.optimal_variables:
-            print("\t" * 1, "Optimal variables", "\t" * 2, ':',
+            print("\t" * 1, "Optimal variables",
+                  " " * (total_length - 10), ':',
                   self.scipy_output['x'])
 
-        print("\t", "===========================================")
+        bottom_line_length = total_length + 25
+        print("\t", "=" * bottom_line_length)
+
+        # print("\t", "===========================================")
