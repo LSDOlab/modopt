@@ -26,9 +26,14 @@ class SNOPTOptimizer(Optimizer):
             'Print level': [None, None,
                             (int, type(None))],  # minor print level
             'Summary': ['yes', 'yes', str],
+            'Summary filename':
+            ['SNOPT_summary.out', 'SNOPT_summary.out', str],
             'Summary frequency': [None, None, (int, type(None))],
-            'Solution file':
-            ['SNOPT_solution.out', None, (int, type(None))],
+            'Solution file': [None, None, (int, type(None))],
+            'Solution filename': [
+                'SNOPT_solution.out', 'SNOPT_solution.out',
+                (str, type(None))
+            ],
             'Solution print': [None, None, (bool, type(None))],
             'Major print level': [None, None, (int, type(None))],
             'Minor print level': [None, None, (int, type(None))],
