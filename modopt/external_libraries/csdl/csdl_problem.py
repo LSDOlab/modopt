@@ -69,45 +69,55 @@ class CSDLProblem(OptProblem):
     def objective(self, x):
         sim = self.options['simulator']
         sim.update_design_variables(x)
+        print('Computing objective >>>>>>>>>>')
+        # print('=============================')
         failure_flag = sim.run(check_failure=True)
-        print('Computing objective..........')
+        print('---------Computed objective---------')
         return sim.objective()
         # return failure_flag, sim.objective()
 
     def objective_gradient(self, x):
         sim = self.options['simulator']
         sim.update_design_variables(x)
+        print('Computing gradient >>>>>>>>>>')
+        # print('============================')
         f1 = sim.run(check_failure=True)
         f2 = sim.compute_total_derivatives(check_failure=True)
         failure_flag = (f1 and f2)
-        print('Computing gradient..........')
+        print('---------Computed gradient---------')
         return sim.objective_gradient()
         # return failure_flag, sim.objective_gradient()
 
     def constraints(self, x):
         sim = self.options['simulator']
         sim.update_design_variables(x)
+        print('Computing constraints >>>>>>>>>>')
+        # print('==============================')
         failure_flag = sim.run(check_failure=True)
-        print('Computing constraints..........')
+        print('---------Computed constraints---------')
         return sim.constraints()
         # return failure_flag, sim.constraints()
 
     def constraint_jacobian(self, x):
         sim = self.options['simulator']
         sim.update_design_variables(x)
+        print('Computing Jacobian >>>>>>>>>>')
+        # print('============================')
         f1 = sim.run(check_failure=True)
         f2 = sim.compute_total_derivatives(check_failure=True)
         failure_flag = (f1 and f2)
-        print('Computing jacobian..........')
+        print('---------Computed Jacobian---------')
         return sim.constraint_jacobian()
         # return failure_flag, sim.constraint_jacobian()
 
     def compute_all(self, x):
         sim = self.options['simulator']
         sim.update_design_variables(x)
+        print('Computing all at once >>>>>>>>>>')
+        # print('===============================')
         f1 = sim.run(check_failure=True)
         f2 = sim.compute_total_derivatives(check_failure=True)
         failure_flag = (f1 and f2)
 
-        print('Computing all at once..........')
+        print('---------Computed all at once---------')
         return failure_flag, sim.objective(), sim.constraints(), sim.objective_gradient(), sim.constraint_jacobian()
