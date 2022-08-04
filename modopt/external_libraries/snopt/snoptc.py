@@ -29,6 +29,7 @@ class SNOPTc(SNOPTOptimizer):
     #     pass
 
     def solve(self):
+        append=self.options['append2file']
         # Assign shorter names to variables and methods
         x0 = self.x0
         x0c0 = x0.copy()
@@ -74,17 +75,32 @@ class SNOPTc(SNOPTOptimizer):
 
         inf = self.options['Infinite_bound']
 
-        def snopta_objconFG(mode, nnjac, x, fObj, gObj, fCon, gCon,
+        def snoptc_objconFG(mode, nnjac, x, fObj, gObj, fCon, gCon,
                             nState):
-            fObj = obj(x)
-            gObj = grad(x)
+            if hasattr(self, "compute_all"):
+                if callable(self.compute_all):
+                    failure_flag, fObj, fCon, gObj, gCon = self.compute_all(x)
+                    # Note that if the function fails at the initial point then optimization fails
+                    if failure_flag:
+                        mode = -1
+                        print('Failed model/derivative evaluation!!!')
 
-            if self.problem.nc > 0:
-                fCon = con(x)
-                gCon = jac(x).flatten('f')
+                    if self.problem.nc == 0:
+                        fCon = 0.
+                        gCon = [0.]
+                    else:
+                        gCon = gCon.flatten('f')
+
             else:
-                fCon = 0.
-                gcon = [0.]
+                fObj = obj(x)
+                gObj = grad(x)
+
+                if self.problem.nc > 0:
+                    fCon = con(x)
+                    gCon = jac(x).flatten('f')
+                else:
+                    fCon = 0.
+                    gCon = [0.]
 
             return mode, fObj, gObj, fCon, gCon
 
@@ -94,7 +110,7 @@ class SNOPTc(SNOPTOptimizer):
             m = 1
             locA = np.ones((n + 1, ))
             locA[0] = 0
-            result = snoptc(snopta_objconFG,
+            result = snoptc(snoptc_objconFG,
                             nnObj=nnObj,
                             nnCon=nnCon,
                             nnJac=nnJac,
@@ -106,9 +122,10 @@ class SNOPTc(SNOPTOptimizer):
                             bu=np.append(bu, inf),
                             options=self.SNOPT_options_object,
                             m=m,
-                            n=n)
+                            n=n,
+                            append2file=append)
         else:
-            result = snoptc(snopta_objconFG,
+            result = snoptc(snoptc_objconFG,
                             nnObj=nnObj,
                             nnCon=nnCon,
                             nnJac=nnJac,
@@ -118,7 +135,8 @@ class SNOPTc(SNOPTOptimizer):
                             iObj=0,
                             bl=bl,
                             bu=bu,
-                            options=self.SNOPT_options_object)
+                            options=self.SNOPT_options_object,
+                            append2file=append)
 
         end_time = time.time()
         self.total_time = end_time - start_time

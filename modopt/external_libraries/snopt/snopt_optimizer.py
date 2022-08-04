@@ -10,6 +10,9 @@ from modopt.csdl_library import CSDLProblem
 class SNOPTOptimizer(Optimizer):
     def initialize(self):
         self.solver_name = 'snopt_'
+        self.options.declare('append2file',
+                             default=False,
+                             types=bool)
         self.options.declare('gradient',
                              default='exact',
                              values=['exact', 'fd'])
@@ -21,7 +24,8 @@ class SNOPTOptimizer(Optimizer):
             # [Current value, default value, type]
             'Start type': ['Cold', 'Cold', str],  ##
             'Specs filename': [None, None, (str, type(None))],  ##
-            'Print filename': ['SNOPT_print.out', 'SNOPT.out', str],  ##
+            'Print filename':
+            ['SNOPT_print.out', 'SNOPT_print.out', str],  ##
             'Print frequency': [None, None, (int, type(None))],
             'Print level': [None, None,
                             (int, type(None))],  # minor print level
@@ -125,6 +129,10 @@ class SNOPTOptimizer(Optimizer):
         # Declare method specific options (implemented in the respective algorithm)
         self.declare_options()
         self.declare_outputs()
+
+        if hasattr(self.problem, "compute_all"):
+            if callable(self.problem.compute_all):
+                self.compute_all = self.problem.compute_all
 
         self.obj = self.problem.objective
         # Restore back after teting sqp optzr. with atomics lite
