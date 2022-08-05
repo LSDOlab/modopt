@@ -74,7 +74,8 @@ if __name__ == "__main__":
     optimizer = SNOPT(prob,
                       Infinite_bound=1.0e20,
                       Verify_level=-1,
-                      append2file=True)
+                    #   append2file=True)
+                      append2file=False)
 
     # Check first derivatives at the initial guess, if needed
     # optimizer.check_first_derivatives(prob.x0)

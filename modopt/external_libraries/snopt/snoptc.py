@@ -1,5 +1,6 @@
 import numpy as np
 from optimize import snoptc
+from optimize.solvers          import snopt7_python as fsnopt
 import time
 
 from .snopt_optimizer import SNOPTOptimizer
@@ -101,6 +102,11 @@ class SNOPTc(SNOPTOptimizer):
                 else:
                     fCon = 0.
                     gCon = [0.]
+
+            # Flush the summary file
+            fsnopt.pyflush(6)
+            # Flush the print file
+            fsnopt.pyflush(9)
 
             return mode, fObj, gObj, fCon, gCon
 
