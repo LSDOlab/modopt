@@ -1,5 +1,7 @@
 import numpy as np
 from optimize import SNOPT_options
+from types import FunctionType, MethodType
+
 
 from array_manager.api import DenseMatrix
 
@@ -10,9 +12,9 @@ from modopt.csdl_library import CSDLProblem
 class SNOPTOptimizer(Optimizer):
     def initialize(self):
         self.solver_name = 'snopt_'
-        self.options.declare('append2file',
-                             default=False,
-                             types=bool)
+        self.options.declare('append2file', default=False, types=bool)
+        self.options.declare('optvars2save', default=[], types=(list,))
+        self.options.declare('snstop_function_handle', default=None, types=(type(None), FunctionType, MethodType))
         self.options.declare('gradient',
                              default='exact',
                              values=['exact', 'fd'])

@@ -5,6 +5,12 @@ import os
 
 from modopt.utils.options_dictionary import OptionsDictionary
 from modopt.utils.general_utils import pad_name
+try:
+    import lsdo_dash
+    from lsdo_dash.data_recorder import DataRecorder
+except ImportError:
+    import modopt
+    from modopt.core.data_recorder import DataRecorder
 # from io import StringIO
 
 
@@ -15,6 +21,7 @@ class Optimizer(object):
         self.problem = problem
         self.prob_options = problem.options
         self.problem_name = problem.problem_name
+        self.recorder = None
         # try methods required for a specific optimizer are available inside the Problem subclass (inspect package)
 
         self.solver_name = 'unnamed_solver'
@@ -125,6 +132,18 @@ class Optimizer(object):
 
     def print_results(self, **kwargs):
         self._print_results(**kwargs)
+
+    def add_recorder(self, recorder):
+        """
+        For dashboard.
+        """
+        self.recorder = recorder
+        if isinstance(recorder, lsdo_dash.data_recorder.DataRecorder):
+            for var_name in self.recorder.dash_instance.vars['optimizer']['var_names']:
+                if var_name not in self.options['optvars2save']:
+                    raise KeyError(f'Cannot find variable \'{var_name}\'')
+        elif isinstance(recorder, modopt.core.data_recorder.DataRecorder):
+            raise NotImplementedError
 
     def _print_results(self,
                        title="ModOpt final iteration summary:",

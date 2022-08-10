@@ -29,6 +29,101 @@ class SNOPTc(SNOPTOptimizer):
     # def setup_constraints(self, ):
     #     pass
 
+    def _getPenaltyParam(self, iw, rw):
+        """
+        Retrieves the full penalty parameter vector from the work arrays.
+        """
+        nnCon = iw[23 - 1]
+        lxPen = iw[304 - 1] - 1
+        xPen = rw[lxPen : lxPen + nnCon]
+        return xPen
+
+    def _snstop(self, ktcond, mjrprtlvl, minimize, m, maxs, n, nb, nncon0, nncon, nnobj0, nnobj, ns, 
+                itn, nmajor, nminor, nswap, ninfe, sinfe, condzhz, iobj, scaleobj, objadd, fobj, fmerit, penparm, step,
+                primalinf, dualinf, maxvi, maxvirel, hs, nej, nlocj, locj, indj, jcol, negcon, scales, bl, bu, fx, fcon, gcon, gobj, 
+                ycon, pi, rc, rg, x, cu, iu, ru, cw, iw, rw):
+        print('Inside snstop')
+#                 iAbort,
+# &     KTcond, mjrPrtlvl, minimize,
+# &     m, maxS, n, nb, nnCon0, nnCon, nnObj0, nnObj, nS,
+# &     itn, nMajor, nMinor, nSwap, nInfE, sInfE,
+# &     condZHZ, iObj, scaleObj, objAdd,
+# &     fObj, fMerit, penParm, step,
+# &     primalInf, dualInf, maxVi, maxViRel, hs,
+# &     neJ, nlocJ, locJ, indJ, Jcol, negCon,
+# &     scales, bl, bu, Fx, fCon, gCon, gObj,
+# &     yCon, pi, rc, rg, x,
+# &     cu, lencu, iu, leniu, ru, lenru,
+# &     cw, lencw, iw, leniw, rw, lenrw )
+        # fmt: on
+        """
+        This routine is called every major iteration in SNOPT, after solving QP but before line search
+        We use it to determine the correct major iteration counting, and save some parameters in the history file.
+        If 'snSTOP function handle' is set to a function handle, then the callback is performed at the end of this function.
+
+        returning with iabort != 0 will terminate SNOPT immediately
+        """
+        iterDict = {
+            "isMajor": True,
+            "nMajor": nmajor,
+            "nMinor": nminor,
+        }
+        for saveVar in self.options['optvars2save']:
+            if saveVar == "merit":
+                iterDict[saveVar] = fmerit
+            elif saveVar == "feas":
+                iterDict[saveVar] = primalinf
+            elif saveVar == "opt":
+                iterDict[saveVar] = dualinf
+            elif saveVar == "penalty":
+                penParam = self._getPenaltyParam(iw, rw)
+                iterDict[saveVar] = penParam
+            # elif saveVar == "Hessian":
+            #     H = self._getHessian(iw, rw)
+            #     iterDict[saveVar] = H
+            elif saveVar == "step":
+                iterDict[saveVar] = step
+            elif saveVar == "condZHZ":
+                iterDict[saveVar] = condzhz
+            elif saveVar == "slacks":
+                iterDict[saveVar] = x[n:]
+            elif saveVar == "lag_mult":
+                iterDict[saveVar] = ycon
+        
+        if self.recorder:
+            save_dict = {}
+            for var_name in self.recorder.dash_instance.vars['optimizer']['var_names']:
+                save_dict[var_name] = iterDict[var_name]
+            self.recorder.record(save_dict, 'optimizer')
+
+        # if self.storeHistory:
+        #     currX = x[:n]  # only the first n component is x, the rest are the slacks
+        #     if nmajor == 0:
+        #         callCounter = 0
+        #     else:
+        #         xuser_vec = self.optProb._mapXtoUser(currX)
+        #         callCounter = self.hist._searchCallCounter(xuser_vec)
+        #     if callCounter is not None:
+        #         self.hist.write(callCounter, iterDict)
+        #         # this adds funcs etc. to the iterDict by fetching it from the history file
+        #         iterDict = self.hist.read(callCounter)
+        #         # update funcs with any additional entries that may be added
+        #         if "funcs" in self.cache.keys():
+        #             iterDict["funcs"].update(self.cache["funcs"])
+
+        # perform callback if requested
+        snstop_handle = self.options['snstop_function_handle']
+        if snstop_handle is not None:
+            if len(self.options['optvars2save']) == 0:
+                raise KeyError("snstop_function_handle must be used with a nonempty list 'optvars2save'")
+            iabort = snstop_handle(iterDict)
+            # if no return, assume everything went fine
+            if iabort is None:
+                iabort = 0
+        else:
+            iabort = 0
+        return iabort
+
     def solve(self):
         append=self.options['append2file']
         # Assign shorter names to variables and methods
@@ -76,8 +171,9 @@ class SNOPTc(SNOPTOptimizer):
 
         inf = self.options['Infinite_bound']
 
-        def snoptc_objconFG(mode, nnjac, x, fObj, gObj, fCon, gCon,
-                            nState):
+        def snoptc_objconFG(mode, nnjac, x, fObj, gObj, fCon, gCon, nState):
+            if nState>=2:
+                return
             if hasattr(self, "compute_all"):
                 if callable(self.compute_all):
                     failure_flag, fObj, fCon, gObj, gCon = self.compute_all(x)
@@ -117,6 +213,7 @@ class SNOPTc(SNOPTOptimizer):
             locA = np.ones((n + 1, ))
             locA[0] = 0
             result = snoptc(snoptc_objconFG,
+                            self._snstop,
                             nnObj=nnObj,
                             nnCon=nnCon,
                             nnJac=nnJac,
@@ -132,6 +229,7 @@ class SNOPTc(SNOPTOptimizer):
                             append2file=append)
         else:
             result = snoptc(snoptc_objconFG,
+                            self._snstop,
                             nnObj=nnObj,
                             nnCon=nnCon,
                             nnJac=nnJac,
