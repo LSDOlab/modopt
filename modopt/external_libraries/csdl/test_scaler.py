@@ -100,7 +100,7 @@ if __name__ == "__main__":
     # print(sim['constraint_1'])
     # print(sim['constraint_2'])
     print(sim['constraint'])
-    print(optimizer.snopt_output)
+    # print(optimizer.snopt_output)
 
     # numpy.testing.assert_almost_equal(actual=optimizer.outputs['x'][-1,0], desired=sim['x']*5)
     # numpy.testing.assert_almost_equal(actual=optimizer.outputs['x'][-1,1], desired=sim['y']*7)

@@ -115,6 +115,8 @@ class CSDLProblem(OptProblem):
         sim.update_design_variables(x)
         print('Computing all at once >>>>>>>>>>')
         # print('===============================')
+        # save = not(linesearch)
+        # f1 = sim.run(check_failure=True, save=save or self.save)
         f1 = sim.run(check_failure=True)
         f2 = sim.compute_total_derivatives(check_failure=True)
         failure_flag = (f1 and f2)
