@@ -5,6 +5,12 @@ import os
 
 from modopt.utils.options_dictionary import OptionsDictionary
 from modopt.utils.general_utils import pad_name
+from modopt.utils.data_recorder import DataRecorder
+try:
+    from modopt.utils.data_recorder import DataRecorder as DataRecorderDash
+except:
+    DataRecorderDash = None
+
 # from io import StringIO
 
 
@@ -13,6 +19,7 @@ class Optimizer(object):
 
         self.options = OptionsDictionary()
         self.problem = problem
+        self.recorder = None
         self.prob_options = problem.options
         self.problem_name = problem.problem_name
         # try methods required for a specific optimizer are available inside the Problem subclass (inspect package)
@@ -23,6 +30,22 @@ class Optimizer(object):
         self.initialize()
         self.options.update(kwargs)
         self._setup()
+    
+    def __str__(self):
+        pass
+    
+    def add_recorder(self, recorder):
+        self.recorder = recorder
+        if isinstance(recorder, DataRecorderDash):
+            for var_name in self.recorder.dash_instance.vars['optimizer']['var_names']:
+                if var_name not in self.options['optvars2save']:
+                    raise KeyError(f'Cannot find variable \'{var_name}\'')
+        elif isinstance(recorder, modopt.core.data_recorder.DataRecorder):
+             for var_name in self.recorder.dash_instance.vars['optimizer']['var_names']:
+                if var_name not in self.options['optvars2save']:
+                    raise KeyError(f'Cannot find variable \'{var_name}\'')
+        else:
+            raise TypeError("Recorder type added is unsupported -> Supported types are 1) default modopt DataRecorder(), and 2) lsdo_dash DataRecorder()")
 
     def _setup(self):
         # User defined optimizer-specific setup

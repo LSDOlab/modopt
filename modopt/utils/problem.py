@@ -65,6 +65,81 @@ class Problem(object):
 
         self._setup()
 
+    def __str__(self):
+        """
+        Print the details of the optimization problem.
+        """
+        name = self.problem_name
+        obj  = self.obj
+        dvs  = self.x
+        x_l  = self.x_lower; x_u  = self.x_upper; 
+        cons = self.con
+        c_l  = self.c_lower; c_u  = self.c_upper; 
+
+        # Print title : optimization problem name
+        title   = f'Optimization problem : {name}'
+        output  = f'\n\n{title}\n'
+        output += '='*100
+        
+        # PROBLEM OVERVIEW BEGINS
+        # >>>>>>>>>>>>>>>>>>>>>>>
+        subtitle1 = 'Problem Overview :'
+        output  = f'\n\n\t{subtitle1}\n'
+        output += '-'*100
+        
+        # Print objective name
+        if len(obj) > 1:
+            raise TypeError(f'More than one objective defined for the optimization problem: {", ".join(obj)}.')
+        output += f'\n\tObjective: {list(obj.keys())[0]}'
+        
+        # Print design variables list with their dimensions
+        dv_list = ''
+        for dv_name, dv in dvs.dict_.items():
+            dv_list += f'{dv_name}{dv.shape}, '
+        dv_list = dv_list[:-2]
+        output += f'\n\tDesign variables:{dv_list}'
+        
+        #  Print constraints and their dimensions
+        con_list = ''
+        for con_name, con in cons.dict_.items():
+            con_list += f'{con_name}{con.shape}, '
+        con_list = con_list[:-2]
+        output += f'\n\tConstraints: {con_list}'
+
+        # <<<<<<<<<<<<<<<<<<<<<
+        # PROBLEM OVERVIEW ENDS
+
+        # # PROBLEM DETAILS BEGINS
+        # # >>>>>>>>>>>>>>>>>>>>>>>
+        # subtitle2 = 'Problem Details :'
+        # output  = f'\n\n\n\t{subtitle2}\n'
+        # output += '-'*100
+        
+        # # Print objective details
+        # output += f'\n\tObjective:'
+        # obj_template = 
+        # output += f'
+        
+        # # Print design variable details
+        # output += f'\n\n\tDesign Variables:'
+        # for dv_name, dv in dvs.dict_.items():
+        #     for i, x in enumerate(dv.flatten()):
+        #         dv_info = .format()
+        #         output += dv_info
+        
+        # #  Print constraint details
+        # output += f'\n\n\tConstraints:'
+        # for con_name, con in cons.dict_.items():
+        #     for i, x in enumerate(con.flatten()):
+        #         dv_info = .format()
+        #         output += dv_info
+
+        # # <<<<<<<<<<<<<<<<<<<<<
+        # # PROBLEM DETAILS ENDS
+
+
+
+
     def _setup(self):
         # user setup() for the problem (call add_design_variables())
         self.setup()
