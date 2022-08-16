@@ -66,7 +66,7 @@ class CSDLProblem(OptProblem):
         self.c_lower = np.where(c_l == -1.0e30, -np.inf, c_l)
         self.c_upper = np.where(c_u == 1.0e30, np.inf, c_u)
 
-    def objective(self, x):
+    def _compute_objective(self, x):
         sim = self.options['simulator']
         sim.update_design_variables(x)
         print('Computing objective >>>>>>>>>>')
@@ -76,7 +76,7 @@ class CSDLProblem(OptProblem):
         return sim.objective()
         # return failure_flag, sim.objective()
 
-    def objective_gradient(self, x):
+    def _compute_objective_gradient(self, x):
         sim = self.options['simulator']
         sim.update_design_variables(x)
         print('Computing gradient >>>>>>>>>>')
@@ -88,7 +88,7 @@ class CSDLProblem(OptProblem):
         return sim.objective_gradient()
         # return failure_flag, sim.objective_gradient()
 
-    def constraints(self, x):
+    def _compute_constraints(self, x):
         sim = self.options['simulator']
         sim.update_design_variables(x)
         print('Computing constraints >>>>>>>>>>')
@@ -98,7 +98,7 @@ class CSDLProblem(OptProblem):
         return sim.constraints()
         # return failure_flag, sim.constraints()
 
-    def constraint_jacobian(self, x):
+    def _compute_constraint_jacobian(self, x):
         sim = self.options['simulator']
         sim.update_design_variables(x)
         print('Computing Jacobian >>>>>>>>>>')
@@ -110,7 +110,7 @@ class CSDLProblem(OptProblem):
         return sim.constraint_jacobian()
         # return failure_flag, sim.constraint_jacobian()
 
-    def compute_all(self, x):
+    def _compute_all(self, x):
         sim = self.options['simulator']
         sim.update_design_variables(x)
         print('Computing all at once >>>>>>>>>>')
