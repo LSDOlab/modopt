@@ -25,7 +25,7 @@ class Problem(object):
         self.nx = 0
         self.nc = 0
         # TODO: Fix this
-        self.obj = [0.]
+        self.obj = {}
         self.constrained = False
         self.second_order = False
 
@@ -82,38 +82,41 @@ class Problem(object):
 
         # When problem is not defined as CSDLProblem()
         if self.x0 is None:
-            # array_manger puts np.zeros as the initial guess if no initial guess is provided
+            # array_manager puts np.zeros as the initial guess if no initial guess is provided
             self.x0 = self.x.get_data()
 
     # user defined (call add_design_variables() and add_state_variables() inside)
     def setup(self):
         pass
 
-    def objective(self, x):
+    def _compute_objective(self, x):
         self.x.set_data(x)
         self.compute_objective(self.x, self.obj)
         # print('obj', self.obj)
-        return self.obj[0] * 1.
+        return list(self.obj.values())[0] * 1.
 
-    def objective_gradient(self, x):
+    def _compute_objective_gradient(self, x):
         self.x.set_data(x)
         self.compute_objective_gradient(self.x, self.pF_px)
         # print('grad', self.pF_px.get_data())
         return self.pF_px.get_data() * 1.
 
-    def objective_hessian(self, x):
+    def _compute_objective_hessian(self, x):
         self.x.set_data(x)
         self.compute_objective_hessian(self.x, self.p2F_pxx)
         self.hess.update_bottom_up()
         return self.hess.get_std_array()
 
-    def constraints(self, x):
+    def _compute_objective_hvp(self, x, v):
+        pass
+
+    def _compute_constraints(self, x):
         self.x.set_data(x)
         self.compute_constraints(self.x, self.con)
         # print('con', self.con.get_data())
         return self.con.get_data() * 1.
 
-    def constraint_jacobian(self, x):
+    def _compute_constraint_jacobian(self, x):
         self.x.set_data(x)
         self.compute_constraint_jacobian(self.x, self.pC_px)
         self.jac.update_bottom_up()
@@ -269,9 +272,9 @@ class Problem(object):
         # if vals is None:
         #     vals = np.zeros(shape)
 
-        # Autonaming index starts from 0
+        # Autonaming index starts from x0; for entries inside: xi_j (i dv_index, j dv_sub_index)
         if name is None:
-            name = len(self.design_variables_dict)
+            name = 'x' + str(len(self.design_variables_dict))
 
         self.design_variables_dict[name] = dict(
             shape=shape,
@@ -282,6 +285,14 @@ class Problem(object):
         )
 
         self.nx += np.prod(shape)
+
+    def add_objective(self, name='obj'):
+        # Setting objective name and initializing it with key=name and value=1.
+        if len(self.obj)>0:
+            raise KeyError('Only one objective is allowed for a problem.')
+
+        print(f'Setting objective name as "{name}".')
+        self.obj[name] = 1.
 
     def add_constraints(self,
                         name=None,

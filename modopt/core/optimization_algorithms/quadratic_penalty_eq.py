@@ -13,10 +13,10 @@ class L2PenaltyEq(Optimizer):
     def initialize(self):
         self.solver_name = 'penalty_l2_eq'
 
-        self.obj = self.problem.objective
-        self.grad = self.problem.objective_gradient
-        self.con = self.problem.constraints
-        self.jac = self.problem.constraint_jacobian
+        self.obj = self.problem._compute_objective
+        self.grad = self.problem._compute_objective_gradient
+        self.con = self.problem._compute_constraints
+        self.jac = self.problem._compute_constraint_jacobian
 
         self.options.declare('max_itr', default=1000, types=int)
         self.options.declare('opt_tol', types=float)

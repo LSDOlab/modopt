@@ -106,18 +106,19 @@ class ScipyOptimizer(Optimizer):
         self.declare_options()
         self.declare_outputs()
 
-        self.obj = self.problem.objective
+        self.obj = self.problem._compute_objective
         self.x0 = self.problem.x0
 
         # Gradient only for CG, BFGS, Newton-CG, L-BFGS-B, TNC, SLSQP, dogleg, trust-ncg,
         # trust-krylov, trust-exact and trust-constr
-        if not isinstance(self.problem, CSDLProblem):
-            if self.problem.compute_objective_gradient.__func__ is not Problem.compute_objective_gradient:
-                self.grad = self.problem.objective_gradient
-            else:
-                self.grad = self.options['gradient']
+        # TODO: A recent change, look into this and see if there are any issues, test this for auto-FD capability
+        # if not isinstance(self.problem, CSDLProblem):
+        if self.problem.compute_objective_gradient.__func__ is not Problem.compute_objective_gradient:
+            self.grad = self.problem._compute_objective_gradient
         else:
-            self.grad = self.problem.objective_gradient
+            self.grad = self.options['gradient']
+        # else:     
+        #     self.grad = self.problem._compute_objective_gradient
 
         # Only for COBYLA, SLSQP and trust-constr
         # Used to construct:
@@ -127,23 +128,24 @@ class ScipyOptimizer(Optimizer):
         if self.problem.nc > 0:
             # Uncomment the line below after testing our sqp_optimizer with atomics_lite
             # pC_px = DenseMatrix(self.problem.pC_px).numpy_array()
-            self.con = self.problem.constraints
-            if not isinstance(self.problem, CSDLProblem):
-                if self.problem.compute_constraint_jacobian.__func__ is not Problem.compute_constraint_jacobian:
-                    self.jac = self.problem.constraint_jacobian
+            self.con = self.problem._compute_constraints
+        # TODO: A recent change, look into this and see if there are any issues, test this for auto-FD capability
+            # if not isinstance(self.problem, CSDLProblem):
+            if self.problem.compute_constraint_jacobian.__func__ is not Problem.compute_constraint_jacobian:
+                self.jac = self.problem._compute_constraint_jacobian
 
-                # Uncomment the 2 lines below after testing our sqp_optimizer with atomics_lite
-                # elif pC_px.any() != 0:
-                #     self.jac = lambda x: pC_px
-                else:
-                    self.jac = self.options['jacobian']
+            # Uncomment the 2 lines below after testing our sqp_optimizer with atomics_lite
+            # elif pC_px.any() != 0:
+            #     self.jac = lambda x: pC_px
             else:
-                self.jac = self.problem.constraint_jacobian
+                self.jac = self.options['jacobian']
+            # else:
+            #     self.jac = self.problem._compute_constraint_jacobian
 
         # SETUP OBJECTIVE HESSIAN OR HVP
 
         if self.problem.compute_objective_hessian.__func__ is not Problem.compute_objective_hessian:
-            self.hess = self.problem.objective_hessian
+            self.hess = self.problem._compute_objective_hessian
         elif self.options['hessian'] == 'BFGS':
             # Users will have to manually modify this if needed
             self.hess = BFGS(exception_strategy='skip_update',
@@ -156,7 +158,7 @@ class ScipyOptimizer(Optimizer):
         # Only for Newton-CG, trust-ncg, trust-krylov, trust-constr.
         # Note: This is always Objective hessian even for trust-constr (Constraint hessians defined in constraints)
         elif self.problem.compute_objective_hvp.__func__ is not Problem.compute_objective_hvp:
-            self.hvp = self.problem.objective_hvp
+            self.hvp = self.problem._compute_objective_hvp
         else:
             self.hess = self.options['hessian']
 

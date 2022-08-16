@@ -9,8 +9,8 @@ class SteepestDescent(Optimizer):
     def initialize(self):
         self.solver_name = 'steepest_descent'
 
-        self.obj = self.problem.objective
-        self.grad = self.problem.objective_gradient
+        self.obj = self.problem._compute_objective
+        self.grad = self.problem._compute_objective_gradient
 
         self.options.declare('max_itr', default=1000, types=int)
         self.options.declare('opt_tol', default=1e-5, types=float)

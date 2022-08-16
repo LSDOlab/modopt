@@ -130,11 +130,11 @@ class SNOPTOptimizer(Optimizer):
         self.declare_options()
         self.declare_outputs()
 
-        if hasattr(self.problem, "compute_all"):
-            if callable(self.problem.compute_all):
-                self.compute_all = self.problem.compute_all
+        if hasattr(self.problem, "_compute_all"):
+            if callable(self.problem._compute_all):
+                self.compute_all = self.problem._compute_all
 
-        self.obj = self.problem.objective
+        self.obj = self.problem._compute_objective
         # Restore back after teting sqp optzr. with atomics lite
         # self.x0 = self.problem.x.get_data()
         self.x0 = self.problem.x0
@@ -142,21 +142,21 @@ class SNOPTOptimizer(Optimizer):
         # Exact gradient if provided else FD gradient
         if not isinstance(self.problem, CSDLProblem):
             if self.problem.compute_objective_gradient.__func__ is not Problem.compute_objective_gradient:
-                self.grad = self.problem.objective_gradient
+                self.grad = self.problem._compute_objective_gradient
             else:
                 self.grad = self.options['gradient']
         else:
-            self.grad = self.problem.objective_gradient
+            self.grad = self.problem._compute_objective_gradient
 
         if self.problem.nc > 0:
             # Uncomment the line below after testing our sqp_optimizer with atomics_lite
             # pC_px = DenseMatrix(self.problem.pC_px).numpy_array()
-            self.con = self.problem.constraints
+            self.con = self.problem._compute_constraints
 
             # Exact jac if provided else FD jac
             if not isinstance(self.problem, CSDLProblem):
                 if self.problem.compute_constraint_jacobian.__func__ is not Problem.compute_constraint_jacobian:
-                    self.jac = self.problem.constraint_jacobian
+                    self.jac = self.problem._compute_constraint_jacobian
 
                 # Uncomment the 2 lines below after testing our sqp_optimizer with atomics_lite
                 # elif pC_px.any() != 0:
@@ -164,7 +164,7 @@ class SNOPTOptimizer(Optimizer):
                 else:
                     self.jac = self.options['jacobian']
             else:
-                self.jac = self.problem.constraint_jacobian
+                self.jac = self.problem._compute_constraint_jacobian
 
     def update_SNOPT_options_object(self):
         self.SNOPT_options_object = SNOPT_options()
