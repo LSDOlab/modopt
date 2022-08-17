@@ -19,7 +19,8 @@ class X4(Problem):
         self.declare_objective_gradient(wrt='x', )
         self.declare_objective_hessian(of='x', wrt='x')
 
-    # Compute the value of the objective with given design variable values
+    # Compute the value of the objective, gradient and Hessian 
+    # with the given design variable values
     def compute_objective(self, dvs, obj):
         obj['f'] = np.sum(dvs['x']**4)
 
@@ -27,14 +28,12 @@ class X4(Problem):
         grad['x'] = 4 * dvs['x']**3
 
     def compute_objective_hessian(self, dvs, hess):
-        hess['x', 'x'] = np.diag(12 * dvs['x']**2)
+        hess['x', 'x'] = 12 * np.diag(dvs['x']**2)
 
 
 import numpy as np
 import time
-
 from modopt.api import Optimizer
-
 
 class SteepestDescent(Optimizer):
     def initialize(self):
@@ -139,8 +138,8 @@ optimizer = SteepestDescent(prob,
                             opt_tol=opt_tol,
                             max_itr=max_itr,
                             outputs=['itr', 'obj', 'x', 'opt', 'time'])
-# optimizer = Newton(prob, opt_tol=opt_tol)
-# optimizer = QuasiNewton(prob, opt_tol=opt_tol)
+optimizer = Newton(prob, opt_tol=opt_tol)
+optimizer = QuasiNewton(prob, opt_tol=opt_tol)
 
 # Check first derivatives at the initial guess, if needed
 optimizer.check_first_derivatives(prob.x.get_data())

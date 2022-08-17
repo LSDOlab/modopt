@@ -2,7 +2,6 @@ from csdl import Model
 
 # minimize x^2 + y^2 subject to x>=0, x+y=1, x-y>=1.
 
-
 class QuadraticFunc(Model):
     def initialize(self):
         pass
@@ -34,19 +33,20 @@ if __name__ == "__main__":
     # from csdl_om import Simulator
     from python_csdl_backend import Simulator
 
+    # Create a Simulator object for your model
     sim = Simulator(QuadraticFunc())
 
     from modopt.csdl_library import CSDLProblem
 
-    prob = CSDLProblem(
-        problem_name='quartic',
-        simulator=sim,
-    )
+    # Instantiate your problem using the csdl Simulator object and name your problem
+    prob = CSDLProblem(problem_name='quartic',simulator=sim)
 
     from modopt.optimization_algorithms import SQP
     from modopt.scipy_library import SLSQP
     from modopt.snopt_library import SNOPT
 
+    # Setup your preferred optimizer (here, SLSQP) with the Problem object 
+    # Pass in the options for your chosen optimizer
     optimizer = SLSQP(prob, ftol=1e-6, maxiter=20,outputs=['x'])
     optimizer = SQP(prob, max_itr=20)
     optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3, Verbose=True)

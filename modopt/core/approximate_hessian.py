@@ -22,5 +22,5 @@ class ApproximateHessian(object):
             if self.options['store_inverse']:
                 self.M_k = np.identity(self.options['nx'])
 
-    def setup():
+    def setup(self,):
         pass

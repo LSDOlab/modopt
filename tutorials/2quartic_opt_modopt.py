@@ -1,7 +1,5 @@
 import numpy as np
-
 from modopt.api import Problem
-
 
 class Quartic(Problem):
     def initialize(self, ):
@@ -52,13 +50,11 @@ class Quartic(Problem):
                                          vals=np.array([-1.,]))
 
     def compute_objective(self, dvs, obj):
-        obj['f'] = dvs['x']**2 + dvs['y']**2
+        obj['f'] = dvs['x']**4 + dvs['y']**4
 
- 
     def compute_objective_gradient(self, dvs, grad):
-        grad['x'] = 2 * dvs['x']
-        grad['y'] = 2 * dvs['y']
-
+        grad['x'] = 4 * dvs['x'] ** 3
+        grad['y'] = 4 * dvs['y'] ** 3
 
     def compute_constraints(self, dvs, cons):
         cons['x+y'] = dvs['x'] + dvs['y']
@@ -83,8 +79,8 @@ prob = Quartic(jac_format='dense')
 
 # Set up your optimizer with the problem
 optimizer = SLSQP(prob, maxiter=20)
-optimizer = SQP(prob, max_itr=20)
-optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3)
+# optimizer = SQP(prob, max_itr=20)
+# optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3)
 
 optimizer.check_first_derivatives(prob.x.get_data())
 optimizer.solve()

@@ -2,11 +2,10 @@ import numpy as np
 import time
 
 from modopt.api import Optimizer
-from modopt.line_search_algorithms import ScipyLS, BacktrackingArmijo, Minpack2LS, BacktrackingWolfe
+from modopt.line_search_algorithms import ScipyLS, BacktrackingArmijo, Minpack2LS
 from modopt.merit_functions import AugmentedLagrangianEq, LagrangianEq
 # from modopt.approximate_hessians import BFGS, BFGSScipy, BFGSM1, Broyden, DFP, PSB, SR1
 from modopt.approximate_hessians import BFGSM1 as BFGS
-from modopt.core.approximate_hessians.bfgs_function import bfgs_update
 
 
 class NewtonLagrange(Optimizer):
@@ -146,7 +145,6 @@ class NewtonLagrange(Optimizer):
 
             # Compute the SEARCH DIRECTION toward the next iterate
             p_k = np.linalg.solve(A, b)
-            print((v_k + p_k)[-1])
 
             # Compute the STEP LENGTH along the search direction via a LINE SEARCH
             alpha, mf_k, new_f_evals, new_g_evals, converged = LS.search(
