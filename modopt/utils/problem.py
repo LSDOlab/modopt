@@ -92,8 +92,9 @@ class Problem(object):
     def _compute_objective(self, x):
         self.x.set_data(x)
         self.compute_objective(self.x, self.obj)
-        # print('obj', self.obj)
-        return list(self.obj.values())[0] * 1.
+        if isinstance(list(self.obj.values())[0], np.ndarray):
+            return list(self.obj.values())[0][0]
+        return list(self.obj.values())[0] *1.
 
     def _compute_objective_gradient(self, x):
         self.x.set_data(x)
