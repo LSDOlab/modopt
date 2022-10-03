@@ -78,7 +78,7 @@ if __name__ == "__main__":
                       append2file=False)
 
     # Check first derivatives at the initial guess, if needed
-    # optimizer.check_first_derivatives(prob.x0)
+    optimizer.check_first_derivatives(prob.x0)
 
     # Solve your optimization problem
     optimizer.solve()

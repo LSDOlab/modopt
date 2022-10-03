@@ -2,6 +2,7 @@ from array_manager.api import VectorComponentsDict, MatrixComponentsDict, Vector
 from array_manager.api import DenseMatrix, COOMatrix, CSRMatrix, CSCMatrix
 
 from modopt.utils.options_dictionary import OptionsDictionary
+from modopt.utils.general_utils import pad_name
 
 import numpy as np
 
@@ -25,7 +26,7 @@ class Problem(object):
         self.nx = 0
         self.nc = 0
         # TODO: Fix this
-        self.obj = [0.]
+        self.obj = {}
         self.constrained = False
         self.second_order = False
 
@@ -40,10 +41,17 @@ class Problem(object):
 
         ###########################
 
+        # Numpy vectors for bounds
         self.x_lower = None
         self.x_upper = None
         self.c_lower = None
         self.c_upper = None
+
+        # Abstract vectors for bounds
+        self.x_l = None
+        self.x_u = None
+        self.c_l = None
+        self.c_u = None
 
         self.initialize()
         self.options.update(kwargs)
@@ -72,9 +80,9 @@ class Problem(object):
         name = self.problem_name
         obj  = self.obj
         dvs  = self.x
-        x_l  = self.x_lower; x_u  = self.x_upper; 
+        x_l  = self.x_l; x_u  = self.x_u
         cons = self.con
-        c_l  = self.c_lower; c_u  = self.c_upper; 
+        c_l  = self.c_l; c_u  = self.c_u
 
         # Print title : optimization problem name
         title   = f'Optimization problem : {name}'
@@ -109,19 +117,39 @@ class Problem(object):
         # <<<<<<<<<<<<<<<<<<<<<
         # PROBLEM OVERVIEW ENDS
 
-        # # PROBLEM DETAILS BEGINS
-        # # >>>>>>>>>>>>>>>>>>>>>>>
-        # subtitle2 = 'Problem Details :'
-        # output  = f'\n\n\n\t{subtitle2}\n'
-        # output += '-'*100
+        # PROBLEM DETAILS BEGINS
+        # >>>>>>>>>>>>>>>>>>>>>>>
+        subtitle2 = 'Problem Details :'
+        output  = f'\n\n\n\t{subtitle2}\n'
+        output += '-'*100
         
-        # # Print objective details
-        # output += f'\n\tObjective:'
-        # obj_template = 
-        # output += f'
+        # Print objective details
+        output += f'\n\tObjectives:\n'
+        header = "\t{0} | {1} | {2} ".format(
+                                            pad_name('Index', 5),
+                                            pad_name('Name', 12),
+                                            pad_name('Value', 12),
+                                        )
+        output += header
+        obj_template = "\t{idx:>{l_idx}} | {name:^{l_name}} | {value:<.6e} \n"
+        for i, obj_name in enumerate(obj.keys()):
+            obj_value = obj[obj_name]
+            obj_name = obj_name[:12] if (len(obj_name)>12) else obj_name
+            output += obj_template.format(idx=i, l_idx=5, name=obj_name, l_name=12, value=obj_value)
         
-        # # Print design variable details
-        # output += f'\n\n\tDesign Variables:'
+        # Print design variable details
+        output += f'\n\n\tDesign Variables:'
+        header = "\t{0} | {1} | {2} ".format(
+                                            pad_name('Index', 8),
+                                            pad_name('Name', 10),
+                                            pad_name('Lower Limit', 10),
+                                            pad_name('Value', 10),
+                                            pad_name('Upper Limit', 10),
+                                            )
+        output += header
+        for obj_name, obj_value in obj.items():
+            output += obj_template.format(idx=i, l_idx=5, 
+                                        )
         # for dv_name, dv in dvs.dict_.items():
         #     for i, x in enumerate(dv.flatten()):
         #         dv_info = .format()
@@ -129,6 +157,14 @@ class Problem(object):
         
         # #  Print constraint details
         # output += f'\n\n\tConstraints:'
+        header = "{0} | {1} | {2} | {3} | {4} "\
+                            .format(
+                                pad_name('Derivative type', 8),
+                                pad_name('Calc norm', 10),
+                                pad_name('FD norm', 10),
+                                pad_name('Abs error norm', 10),
+                                pad_name('Rel error norm', 10),
+                            )
         # for con_name, con in cons.dict_.items():
         #     for i, x in enumerate(con.flatten()):
         #         dv_info = .format()
@@ -158,49 +194,62 @@ class Problem(object):
         # When problem is not defined as CSDLProblem()
         if self.x0 is None:
             # array_manger puts np.zeros as the initial guess if no initial guess is provided
-            self.x0 = self.x.get_data()
+            self.x0 = self.x.get_data() * self.x.design_variables_dict.scaler
 
     # user defined (call add_design_variables() and add_state_variables() inside)
     def setup(self):
         pass
 
     def objective(self, x):
-        self.x.set_data(x)
+        self.x.set_data(x/self.x_scaler)
         self.compute_objective(self.x, self.obj)
         # print('obj', self.obj)
-        return self.obj[0] * 1.
+        return self.obj[0] * self.obj_scaler
 
     def objective_gradient(self, x):
-        self.x.set_data(x)
+        self.x.set_data(x/self.x_scaler)
         self.compute_objective_gradient(self.x, self.pF_px)
         # print('grad', self.pF_px.get_data())
-        return self.pF_px.get_data() * 1.
+        return self.pF_px.get_data() * self.obj_scaler / self.x_scaler
 
     def objective_hessian(self, x):
-        self.x.set_data(x)
+        self.x.set_data(x/self.x_scaler)
         self.compute_objective_hessian(self.x, self.p2F_pxx)
         self.hess.update_bottom_up()
-        return self.hess.get_std_array()
+        return self.hess.get_std_array() * self.obj_scaler / (np.outer(self.x_scaler, self.x_scaler))
 
     def constraints(self, x):
-        self.x.set_data(x)
+        self.x.set_data(x/self.x_scaler)
         self.compute_constraints(self.x, self.con)
         # print('con', self.con.get_data())
-        return self.con.get_data() * 1.
+        return self.con.get_data() * self.c_scaler
 
     def constraint_jacobian(self, x):
         self.x.set_data(x)
         self.compute_constraint_jacobian(self.x, self.pC_px)
         self.jac.update_bottom_up()
         # print('jac', self.jac.get_std_array())
-        return self.jac.get_std_array()
+        return self.jac.get_std_array() * np.outer(self.c_scaler, 1/self.x_scaler)
 
     # Overridden in CSDLProblem()
     def _setup_bounds(self):
-        self.x_lower = self.design_variables_dict.lower
-        self.x_upper = self.design_variables_dict.upper
-        self.c_lower = self.constraints_dict.lower
-        self.c_upper = self.constraints_dict.upper
+        self.x_scaler = self.design_variables_dict.scaler
+        self.x_lower  = self.design_variables_dict.lower * self.x_scaler
+        self.x_upper  = self.design_variables_dict.upper * self.x_scaler
+        
+        self.c_scaler = self.constraints_dict.scaler
+        self.c_lower  = self.constraints_dict.lower * self.c_scaler
+        self.c_upper  = self.constraints_dict.upper * self.c_scaler
+
+        # Abstract vectors for bounds
+        self.x_l = Vector(self.design_variables_dict)
+        self.x_l.allocate(data=self.design_variables_dict.lower, setup_views=True)
+        self.x_u = Vector(self.design_variables_dict)
+        self.x_u.allocate(data=self.design_variables_dict.upper, setup_views=True)
+        self.c_l = Vector(self.constraints_dict)
+        self.c_l.allocate(data=self.constraints_dict.lower, setup_views=True)
+        self.c_u = Vector(self.constraints_dict)
+        self.c_u.allocate(data=self.constraints_dict.upper, setup_views=True)
 
     # user defined #(call declare_gradients() and declare_jacobians() inside,
     # can later include declare_hessians())
@@ -339,14 +388,15 @@ class Problem(object):
                              lower=None,
                              upper=None,
                              equals=None,
-                             vals=None):
+                             vals=None,
+                             scaler=None):
         # array_manager automatically sets vals = np.zeros(size) if vals is None
         # if vals is None:
         #     vals = np.zeros(shape)
 
         # Autonaming index starts from 0
         if name is None:
-            name = len(self.design_variables_dict)
+            name = f'dv{len(self.design_variables_dict)}'
 
         self.design_variables_dict[name] = dict(
             shape=shape,
@@ -354,16 +404,27 @@ class Problem(object):
             upper=upper,
             equals=equals,
             vals=vals,
+            scaler=scaler,
         )
 
         self.nx += np.prod(shape)
+
+    def add_objective(self, name='obj',scaler=1.0):
+        # Setting objective name and initializing it with key=name and value=1.
+        if len(self.obj)>0:
+            raise KeyError('Only one objective is allowed for a problem.')
+
+        print(f'Setting objective name as "{name}".')
+        self.obj[name] = 1.
+        self.obj_scaler = scaler
 
     def add_constraints(self,
                         name=None,
                         shape=(1, ),
                         lower=None,
                         upper=None,
-                        equals=None):
+                        equals=None,
+                        scaler=None,):
         # Autonaming index starts from 0
         if name is None:
             name = len(self.constraints_dict)
@@ -373,6 +434,7 @@ class Problem(object):
             lower=lower,
             upper=upper,
             equals=equals,
+            scaler=scaler,
         )
 
         self.constrained = True
