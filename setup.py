@@ -1,10 +1,9 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='modopt',
-    packages=[
-        'modopt',
-    ],
+    packages=find_packages(),
+    #packages=['modopt'],
     version='0.1',
     install_requires=[
         'numpy',
