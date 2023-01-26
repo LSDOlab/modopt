@@ -10,6 +10,7 @@ setup(
         'scipy',
         'pint',
         'pandas',
+        'osqp',
     ],
     version_config=True,
     setup_requires=['setuptools-git-versioning'],
