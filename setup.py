@@ -11,6 +11,7 @@ setup(
         'pint',
         'pandas',
         'osqp',
+        'dill',
     ],
     version_config=True,
     setup_requires=['setuptools-git-versioning'],
