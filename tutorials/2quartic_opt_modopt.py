@@ -78,9 +78,9 @@ max_itr = 500
 prob = Quartic(jac_format='dense')
 
 # Set up your optimizer with the problem
-# optimizer = SLSQP(prob, maxiter=20)
+optimizer = SLSQP(prob, maxiter=20)
 # optimizer = SQP(prob, max_itr=20)
-optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3)
+# optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3)
 
 optimizer.check_first_derivatives(prob.x.get_data())
 optimizer.solve()

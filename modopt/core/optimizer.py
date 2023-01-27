@@ -254,7 +254,7 @@ class Optimizer(object):
         if constrained:
             jac_exact = jac(x)
 
-        h = 1e-9
+        h = 1e-6
 
         grad_fd = np.full((nx, ), obj(x), dtype=float)
         if constrained:

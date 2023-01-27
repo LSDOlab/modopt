@@ -1,6 +1,12 @@
 import numpy as np
-from optimize import snoptc
-from optimize.solvers          import snopt7_python as fsnopt
+try:
+    from optimize import snoptc
+except:
+    print("Warning: snoptc from 'optimize' could not be imported")
+try:
+    from optimize.solvers          import snopt7_python as fsnopt
+except:
+    print("Warning: snopt7_python from 'optimize.solvers' could not be imported")
 import time
 
 from .snopt_optimizer import SNOPTOptimizer

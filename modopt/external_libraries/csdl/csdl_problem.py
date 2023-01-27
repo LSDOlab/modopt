@@ -3,8 +3,15 @@ import numpy as np
 from modopt.api import Problem as OptProblem
 # from csdl_lite import Simulator
 # from csdl_om import Simulator
-from python_csdl_backend import Simulator
-from csdl import Model
+try:
+    from python_csdl_backend import Simulator
+except:
+    print("Warning: Simulator() from 'python_csdl_backend' could not be imported")
+
+try:
+    from csdl import Model
+except:
+    print("Warning: Model() from 'csdl' could not be imported")
 
 
 class CSDLProblem(OptProblem):
