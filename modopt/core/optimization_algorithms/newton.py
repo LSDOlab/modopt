@@ -109,7 +109,8 @@ class Newton(Optimizer):
 
             # A step of length 1e-4 is taken along p_k if line search does not converge
             if not converged:
-                x_k += p_k * 1e-4
+                alpha = 1e-4
+                x_k += p_k * alpha
                 f_k = obj(x_k)
                 g_k = grad(x_k)
 

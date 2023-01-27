@@ -81,7 +81,7 @@ class ScipyLS(LineSearch):
         g2 = "Unavailable"
 
         converged = True
-        if alpha == None:
+        if alpha is None:
             converged = False
 
         return alpha, f2, g2, slope2, num_f_evals, num_g_evals, converged

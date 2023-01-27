@@ -98,7 +98,8 @@ class QuasiNewton(Optimizer):
 
             # A step of length 1e-4 is taken along p_k if line search does not converge
             if not converged:
-                d_k = p_k * 1e-4
+                alpha = 1e-4
+                d_k = p_k * alpha
 
                 x_k += d_k
                 f_k = obj(x_k)

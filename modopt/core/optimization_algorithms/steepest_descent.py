@@ -30,10 +30,10 @@ class SteepestDescent(Optimizer):
         self.options.declare(
             'outputs',
             types=list,
-            default=[self.default_outputs_format.keys()])
+            default=list(self.default_outputs_format.keys()))
 
     def setup(self):
-        self.LS = ScipyLS(f=self.obj, g=self.grad)
+        self.LS = ScipyLS(f=self.obj, g=self.grad, max_step=50.)
 
     def solve(self):
 
@@ -92,7 +92,8 @@ class SteepestDescent(Optimizer):
 
             # A step of length 1e-4 is taken along p_k if line search does not converge
             if not converged:
-                x_k += p_k * 1e-4
+                alpha = 1e-4
+                x_k += p_k * alpha
                 f_k = obj(x_k)
                 g_k = grad(x_k)
 

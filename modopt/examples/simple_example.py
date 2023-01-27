@@ -12,7 +12,7 @@ class X4(Problem):
         self.add_design_variables('x',
                                   shape=(2, ),
                                   vals=np.array([.3, .3]))
-        self.add_design_variables('f',)
+        self.add_objective('f')
 
     def setup_derivatives(self):
         # Declare objective gradient and its shape
@@ -46,7 +46,7 @@ class SteepestDescent(Optimizer):
         self.grad = self.problem._compute_objective_gradient
 
         self.options.declare('max_itr', default=1000, types=int)
-        self.options.declare('opt_tol', types=float)
+        self.options.declare('opt_tol', default=1e-5, types=float)
 
         # Specify format of outputs available from your optimizer after each iteration
         self.default_outputs_format = {

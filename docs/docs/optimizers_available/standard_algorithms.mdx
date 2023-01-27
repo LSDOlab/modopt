@@ -1,10 +1,9 @@
 ---
+title: Standard algorithms
 sidebar_position: 1
 ---
 
-## Standard optimization algorithms implemented
-
-Currently, modOpt has a fully transparent library of optimization algorithms 
+<!-- Currently, modOpt has a fully transparent library of optimization algorithms 
 implemented for different types of optimization problems.
 The following are the algorithms implemented:
 
@@ -27,10 +26,10 @@ The implementation can be found
 
 ### 5. l2-Penalty
 The implementation can be found 
-**[here](https://github.com/LSDOlab/modopt/blob/main/modopt/core/optimization_algorithms/quadratic_penalty_eq.py)**.
+**[here](https://github.com/LSDOlab/modopt/blob/main/modopt/core/optimization_algorithms/quadratic_penalty_eq.py)**. -->
 
 ## Usage instructions
-In order to use these algorithms with any of the  problems written using
+In order to use the standard algorithms with any of the  problems written using
 the **Problem()** class, you should first import your problem from the corresponding file
 and also import the optimizer of your choice from the library.
 After that, set tolerances and other parameters for the chosen optimizer.
@@ -42,18 +41,16 @@ An example is shown below for the SteepestDescent optimizer.
 
 from my_problem import MyProblem
 
-from modopt.optimization_algorithms import SteepestDescent
+from modopt.optimization_algorithms import SteepestDescent, Newton, QuasiNewton
 
 tol = 1E-8
 max_itr = 500
 
 prob = MyProblem()
 
-optimizer = SteepestDescent(
-    prob,
-    opt_tol=tol,
-    max_itr=max_itr,
-    )
+optimizer = SteepestDescent(prob,opt_tol=tol,max_itr=max_itr)
+# optimizer = Newton(prob,opt_tol=tol,max_itr=max_itr)
+# optimizer = QuasiNewton(prob,opt_tol=tol,max_itr=max_itr)
 
 optimizer.check_first_derivatives(prob.x.get_data())
 optimizer.solve()
