@@ -85,7 +85,7 @@ class SteepestDescent(Optimizer):
         self.grad = self.problem._compute_objective_gradient
 
         self.options.declare('max_itr', default=1000, types=int)
-        self.options.declare('opt_tol', default=1e-5, types=int)
+        self.options.declare('opt_tol', default=1e-5, types=float)
 
         # Specify format of outputs available from your optimizer after each iteration
         self.default_outputs_format = {
