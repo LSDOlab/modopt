@@ -13,3 +13,5 @@ __pycache__
 *.DS_Store
 # **/*.DS_Store
 
+# Directory with files generated before building documentation
+_temp
