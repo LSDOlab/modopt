@@ -9,13 +9,15 @@ class X4(Problem):
 
     def setup(self):
         self.add_design_variables(
-            # 'x',
-            shape=(25, ),
+            'x',
+            shape=(2, ),
             lower=None,
             upper=None,
             equals=None,
             # )
-            vals=np.full((25), 0.1))
+            vals=np.full((2), 0.1))
+
+        self.add_objective('f')
 
     # def setup_derivatives(self):
     #     self.declare_objective_gradient(wrt='x',
@@ -27,25 +29,22 @@ class X4(Problem):
     #                                    vals=None)
     # self.declare_objective_hvp(wrt='x', shape=(25, ), vals=None)
 
-    def compute_objective(self, x):
-        x4 = np.power(x, 4)
-        f = np.sum(x4)
-        return f
+    def compute_objective(self, dvs, obj):
+        x4 = np.power(dvs['x'], 4)
+        obj['f'] = np.sum(x4)
 
-    def compute_objective_gradient(self, x):
-        grad = 4 * np.power(x, 3)
-        return grad
+    def compute_objective_gradient(self, dvs, grad):
+        grad['x'] = 4 * np.power(dvs['x'], 3)
 
-    def compute_objective_hessian(self, x):
-        nx = x.shape[0]
-        diag = 12 * np.power(x, 2).reshape(nx, )
-        hess = np.diag(diag)
-        return hess
+    def compute_objective_hessian(self, dvs, hess):
+        nx = dvs['x'].shape[0]
+        diag = 12 * np.power(dvs['x'], 2).reshape(nx, )
+        hess['x', 'x'] = np.diag(diag)
 
-    def compute_objective_hvp(self, x, p):
-        nx = x.shape[0]
-        diag = 12 * np.power(x, 2).reshape(nx, )
-        hess = np.diag(diag)
-        hvp = np.matmul(hess, p)
+    # def compute_objective_hvp(self, x, p):
+    #     nx = x.shape[0]
+    #     diag = 12 * np.power(x, 2).reshape(nx, )
+    #     hess = np.diag(diag)
+    #     hvp = np.matmul(hess, p)
 
-        return hvp
+    #     return hvp
