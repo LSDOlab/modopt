@@ -12,6 +12,7 @@ setup(
         'pandas',
         'osqp',
         'dill',
+        'array_manager @ git+https://github.com/anugrahjo/array_manager.git@modopt',
     ],
     version_config=True,
     setup_requires=['setuptools-git-versioning'],
