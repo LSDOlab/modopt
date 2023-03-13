@@ -15,3 +15,6 @@ __pycache__
 
 # Directory with files generated before building documentation
 _temp
+
+# Sphinx documentation
+docs/_build/
