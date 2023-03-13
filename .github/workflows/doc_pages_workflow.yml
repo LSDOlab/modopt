@@ -44,7 +44,7 @@ jobs:
           # ls ${here}/docs/docs/worked_examples
           # echo "Worked Examples:"
           # ls ${here}/docs/docs/worked_examples
-          cd docs
+          cd old_docs
           pwd
           ls
 
