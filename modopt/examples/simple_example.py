@@ -171,3 +171,5 @@ print(optimizer.outputs['x'][-1])
 print(optimizer.outputs['time'][-1])
 print(optimizer.outputs['obj'][-1])
 print(optimizer.outputs['opt'][-1])
+
+# if assert(): Test successful else: test failed

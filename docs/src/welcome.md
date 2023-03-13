@@ -15,6 +15,10 @@ algorithms and testing with built-in problems and interfaces with test-suites.
 ## Modopt as a development environment for optimization algorithms
 
 ![modopt_env](/images/modopt_env.png "Modopt as a development environment")
+<!-- <img src="/images/modopt_env.png" alt='modopt_env' title="Modopt as a development environment" width="150" height="100"/> -->
+<!-- <p align="center"> -->
+<!-- <img src="images/modopt_env.png" alt='modopt_env'> -->
+<!-- </p> -->
 
 Benchmarking with built-in standard algorithms or interfaced external optimizer
 libraries are also possible.
@@ -44,8 +48,8 @@ Optimization problems written in csdl modeling language is also supported.
 
 getting_started
 tutorials
-custom_1
-custom_2
+csdl
+opt_algs
 examples
 api
 autoapi/index
