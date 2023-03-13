@@ -6,7 +6,7 @@ Please visit the [Documentation](https://lsdolab.github.io/modopt/) for installa
 
 # Modopt
 
-Please visit the [Documentation](https://lsdolab.github.io/modopt/) for usage instructions.
+Please visit the [documentation](https://lsdolab.github.io/modopt/) for usage instructions.
 
 ## Installation
 

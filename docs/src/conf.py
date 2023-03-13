@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.abspath('../../lsdo_project_template/core'))     # fo
 
 # -- Project information -----------------------------------------------------
 
-project = 'lsdo_project_template'
+project = 'modopt'
 copyright = '2023, Anugrah'
 author = 'Anugrah'
 version = '0.1'
