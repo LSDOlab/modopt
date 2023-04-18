@@ -5,21 +5,21 @@ import osqp
 import scipy.sparse as sp
 import time
 
-from array_manager.api import VectorComponentsDict, Vector
 from modopt.api import Optimizer
 from modopt.line_search_algorithms import ScipyLS, BacktrackingArmijo, Minpack2LS
 from modopt.merit_functions import AugmentedLagrangianIneq, ModifiedLagrangianIneq
 # from modopt.approximate_hessians import BFGS as BFGS
 
-from modopt.approximate_hessians import BFGSM1 as BFGS
+# from modopt.approximate_hessians import BFGSM1 as BFGS
+from modopt.approximate_hessians import BFGSScipy as BFGS
 
 import pickle
 
 
-# This optimizer takes constraints in all-inequality form
+# This optimizer takes constraints in all-inequality form, C(x) >= 0
 class SQP_SURF(Optimizer):
     def initialize(self):
-        self.solver_name = 'sqp'
+        self.solver_name = 'sqp_surf'
 
         self.obj_in = self.problem.evaluate_objective
         self.grad_in = self.problem.evaluate_objective_gradient
@@ -130,7 +130,9 @@ class SQP_SURF(Optimizer):
         self.delta_rho = 1.
         self.num_rho_changes = 0
 
-        self.QN = BFGS(nx=n)
+        # self.QN = BFGS(nx=n)
+        self.QN = BFGS(nx=n,
+                       exception_strategy='damp_update')
         self.MF = AugmentedLagrangianIneq(nx=n,
                                           nc=m,
                                           f=self.obj,
@@ -145,7 +147,8 @@ class SQP_SURF(Optimizer):
                                          j=self.jac)
 
         self.LSS = ScipyLS(f=self.MF.compute_function,
-                           g=self.MF.compute_gradient)
+                           g=self.MF.compute_gradient,
+                           max_step=2.0)
         # self.LS = Minpack2LS(f=self.MF.compute_function,
         #                      g=self.MF.compute_gradient)
         self.LSB = BacktrackingArmijo(f=self.MF.compute_function,
@@ -559,29 +562,27 @@ class SQP_SURF(Optimizer):
         # print('mlg_k:', mlg_k)
 
         # Initializing declared outputs
-        self.update_outputs(
-            major=0,
-            x=x_k,
-            y=y_k,
-            lag_mult=pi_k,
-            # lam=lam_k,
-            # psi_k=psi_k,
-            slacks=s_k,
-            # residuals=c_k[nc:nc + nr],
-            obj=f_k,
-            constraints=c_k,
-            # constraints=c_k[:nc],
-            opt=opt,
-            feas=feas,
-            time=time.time() - start_time,
-            num_f_evals=num_f_evals,
-            num_g_evals=num_g_evals,
-            step=0.,
-            rho=rho_k,
-            merit=mf_k)
+        self.update_outputs(major=0,
+                            x=x_k,
+                            y=y_k,
+                            lag_mult=pi_k,
+                            # lam=lam_k,
+                            # psi_k=psi_k,
+                            slacks=s_k,
+                            # residuals=c_k[nc:nc + nr],
+                            obj=f_k,
+                            constraints=c_k,
+                            # constraints=c_k[:nc],
+                            opt=opt,
+                            feas=feas,
+                            time=time.time() - start_time,
+                            num_f_evals=num_f_evals,
+                            num_g_evals=num_g_evals,
+                            step=0.,
+                            rho=rho_k,
+                            merit=mf_k)
 
         # Create scipy csc_matrix for Hk
-
         Bk_rows = np.triu(
             np.outer(np.arange(1, n + 1),
                      np.ones(n, dtype='int'))).flatten('f')
@@ -761,9 +762,9 @@ class SQP_SURF(Optimizer):
 
             else:
                 self.consecutive_ls_failures = 0
-                print('converged, px_norm=', np.linalg.norm(p_z))
-                print('converged, ppi_norm=', np.linalg.norm(p_pi))
-                print('converged, ps_norm=', np.linalg.norm(p_s))
+                # print('converged, px_norm=', np.linalg.norm(p_z))
+                # print('converged, ppi_norm=', np.linalg.norm(p_pi))
+                # print('converged, ps_norm=', np.linalg.norm(p_s))
                 d_k = alpha * p_k
 
             v_k += d_k
@@ -820,7 +821,7 @@ class SQP_SURF(Optimizer):
             #     v_k[nx + nc:] = np.maximum(
             #         0, c_k - v_k[nx:nx + nc] / rho_k)
 
-            v_k[n + m:] = self.reset_slacks(c_k, pi_k, rho_k)
+            v_k[(n + m):] = self.reset_slacks(c_k, pi_k, rho_k)
 
             # Note: MF changes (decreases) after slack reset
             mf_k = MF.evaluate_function(z_k, pi_k, s_k, f_k, c_k)
@@ -852,9 +853,9 @@ class SQP_SURF(Optimizer):
 
             # Update the QP problem
             if isinstance(A_k, np.ndarray):
-                print(np.linalg.norm(g_k), np.linalg.norm(l_k),
-                      np.linalg.norm(Bk_data), np.linalg.norm(A_k))
-                print(g_k[0])
+                # print(np.linalg.norm(g_k), np.linalg.norm(l_k),
+                #       np.linalg.norm(Bk_data), np.linalg.norm(A_k))
+                # print(g_k[0])
                 # print(l_k)
                 # print(Bk_data)
                 # print(A_k)
@@ -873,6 +874,13 @@ class SQP_SURF(Optimizer):
             tol_satisfied = (opt_satisfied and feas_satisfied)
 
             # Update arrays inside outputs dict with new values from the current iteration
+
+            # print(itr)
+            # print('opt', opt)
+            # print('feas', feas)
+            # print('x', x_k)
+            # print('obj', f_k)
+            # print('cons', c_k)
             self.update_outputs(
                 major=itr,
                 x=x_k,
@@ -900,19 +908,16 @@ class SQP_SURF(Optimizer):
                     pickle.dump(self.options['callback'](), outp,
                                 pickle.HIGHEST_PROTOCOL)
 
-            print('rho_k', rho_k[0])
-            print('alpha_k', alpha)
-            print('x_k', x_k[0])
-            print('y_k', y_k[0])
-            print('pi_k', pi_k[0])
-            print('c_k', c_k[0])
-            print('J_k_norm', sp.linalg.norm(J_k))
-            print('g_k_norm', np.linalg.norm(g_k))
-            print('s_k', s_k[0])
-            print('B_k_norm', np.linalg.norm(B_k))
-
-            # if itr == 11:
-            #     break
+            # print('rho_k', rho_k[0])
+            # print('alpha_k', alpha)
+            # print('x_k', x_k[0])
+            # print('y_k', y_k[0])
+            # print('pi_k', pi_k[0])
+            # print('c_k', c_k[0])
+            # print('J_k_norm', sp.linalg.norm(J_k))
+            # print('g_k_norm', np.linalg.norm(g_k))
+            # print('s_k', s_k[0])
+            # print('B_k_norm', np.linalg.norm(B_k))
 
         # Run post-processing for the Optimizer() base class
         self.run_post_processing()

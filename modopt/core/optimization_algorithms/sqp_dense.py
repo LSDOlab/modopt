@@ -64,17 +64,16 @@ class SQP(Optimizer):
         self.setup_constraints()
         nx = self.nx
         nc = self.nc
-        self.default_outputs_format['lag_mult'] = (float, (self.nc, ))
-        self.default_outputs_format['rho'] = (float, (self.nc, ))
-        self.default_outputs_format['slacks'] = (float, (self.nc, ))
-        self.default_outputs_format['constraints'] = (float,
-                                                      (self.nc, ))
+        self.default_outputs_format['lag_mult'] = (float, (nc, ))
+        self.default_outputs_format['rho'] = (float, (nc, ))
+        self.default_outputs_format['slacks'] = (float, (nc, ))
+        self.default_outputs_format['constraints'] = (float, (nc, ))
         # Damping parameters
         self.delta_rho = 1.
         self.num_rho_changes = 0
 
-        # self.QN = BFGS(nx=self.problem.nx)
-        self.QN = BFGS(nx=self.problem.nx,
+        # self.QN = BFGS(nx=nx)
+        self.QN = BFGS(nx=nx,
                        exception_strategy='damp_update')
         self.MF = AugmentedLagrangianIneq(nx=nx,
                                           nc=nc,
@@ -173,7 +172,7 @@ class SQP(Optimizer):
         # Compute problem constraint Jacobian
         j_in = self.jac_in(x)
 
-        nx = self.problem.nx
+        nx = self.nx
         lbi = self.lower_bound_indices
         ubi = self.upper_bound_indices
         lci = self.lower_constraint_indices
@@ -191,12 +190,6 @@ class SQP(Optimizer):
             j_out = np.append(j_out, -j_in[uci], axis=0)
 
         return j_out[1:]
-
-    # Define qp constraint function:
-    # TODO: see if c and j could be passed instead of x,
-    #       to avoid duplicate computation
-    # def qp_con(self, x, p):
-    #     return self.con(x) + self.jac(x) @ p
 
     # Minimize A.L. w.r.t. slacks s.t. s >= 0
     def reset_slacks(self, c, pi, rho):
@@ -263,7 +256,6 @@ class SQP(Optimizer):
 
     def update_vector_rho(self, rho_k, dir_deriv_al, pTHp, p_pi, c_k,
                           s_k):
-        nc = self.nc
         delta_rho = self.delta_rho
         num_rho_changes = self.num_rho_changes
 
@@ -377,15 +369,12 @@ class SQP(Optimizer):
 
         # x0 = self.problem.x.get_data()
         x0 = self.problem.x0
-        opt_tol = self.options['opt_tol']
-        feas_tol = self.options['feas_tol']
         max_itr = self.options['max_itr']
 
         obj = self.obj
         grad = self.grad
         con = self.con
         jac = self.jac
-        # qp_con = self.qp_con
 
         LSS = self.LSS
         LSB = self.LSB
@@ -470,7 +459,6 @@ class SQP(Optimizer):
                             merit=mf_k)
 
         # Create scipy csc_matrix for Hk
-
         Bk_rows = np.triu(
             np.outer(np.arange(1, nx + 1),
                      np.ones(nx, dtype='int'))).flatten('f')

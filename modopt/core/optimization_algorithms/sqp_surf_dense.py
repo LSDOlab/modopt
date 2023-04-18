@@ -29,6 +29,7 @@ class SQP_SURF(Optimizer):
         self.state = self.problem.solve_residual_equations
         self.adjoint = self.problem.compute_residual_adjoints
 
+        self.options.declare('max_itr', default=1000, types=int)
         self.options.declare('opt_tol', default=1e-7, types=float)
         self.options.declare('feas_tol', default=1e-7, types=float)
 
@@ -89,7 +90,9 @@ class SQP_SURF(Optimizer):
         self.delta_rho = 1.
         self.num_rho_changes = 0
 
-        self.QN = BFGS(nx=n)
+        # self.QN = BFGS(nx=n)
+        self.QN = BFGS(nx=n,
+                       exception_strategy='damp_update')
         self.MF = AugmentedLagrangianIneq(nx=n,
                                           nc=m,
                                           f=self.obj,
@@ -103,12 +106,13 @@ class SQP_SURF(Optimizer):
                                          g=self.grad,
                                          j=self.jac)
 
-        # self.LS = ScipyLS(f=self.MF.compute_function,
-        #                   g=self.MF.compute_gradient)
+        self.LSS = ScipyLS(f=self.MF.compute_function,
+                           g=self.MF.compute_gradient,
+                           max_step=2.0)
         # self.LS = Minpack2LS(f=self.MF.compute_function,
         #                      g=self.MF.compute_gradient)
-        self.LS = BacktrackingArmijo(f=self.MF.compute_function,
-                                     g=self.MF.compute_gradient)
+        self.LSB = BacktrackingArmijo(f=self.MF.compute_function,
+                                      g=self.MF.compute_gradient)
 
         # For u_k of QP solver
         self.u_k = np.full((m, ), np.inf)
@@ -187,7 +191,7 @@ class SQP_SURF(Optimizer):
 
     def jac(self, x, y):
         # Compute problem constraint Jacobian
-        j_in = self.jac_in(x, y)
+        j_in = self.con_jac(x, y)
 
         n = self.n
         lbi = self.lower_bound_indices
@@ -401,9 +405,9 @@ class SQP_SURF(Optimizer):
         con = self.con
         jac = self.jac
         adj = self.adj
-        # qp_con = self.qp_con
 
-        LS = self.LS
+        LSS = self.LSS
+        LSB = self.LSB
         QN = self.QN
         MF = self.MF
         ML = self.ML
@@ -448,6 +452,9 @@ class SQP_SURF(Optimizer):
         pi_k = v_k[n:(n + m)]
         s_k = v_k[(n + m):]
 
+        x_k = v_k[:nx]
+        y_k = v_k[nx:n]
+        
         p_k = np.zeros((len(v_k), ))
         p_z = p_k[:n]
         p_pi = p_k[n:(n + m)]
@@ -500,7 +507,6 @@ class SQP_SURF(Optimizer):
                             merit=mf_k)
 
         # Create scipy csc_matrix for Hk
-
         Bk_rows = np.triu(
             np.outer(np.arange(1, n + 1),
                      np.ones(n, dtype='int'))).flatten('f')
@@ -543,6 +549,7 @@ class SQP_SURF(Optimizer):
 
             # Solve QP problem
             qp_sol = qp_prob.solve()
+            # print("qp_px,qp_y", qp_sol.x[0], qp_sol.y[0])
 
             # Search direction for z_k:
             # (qp_sol.x) is the direction toward the next iterate for z
@@ -551,6 +558,8 @@ class SQP_SURF(Optimizer):
             # Search direction for pi_k:
             # (-qp_sol.y) is the new estimate for pi
             # TODO: p_k[nx:(nx + nc)] = (-qp_sol.y) - pi_k
+            # print(p_k[nx:nx + nc])
+            # print(-qp_sol.y)
             p_k[n:(n + m)] = (-qp_sol.y) - v_k[n:n + m]
 
             # Search direction for s_k :
@@ -573,9 +582,9 @@ class SQP_SURF(Optimizer):
                                          J_k)
 
             # Compute the step length along the search direction via a line search
-            # alpha, mf_new, mfg_new, mf_slope_new, new_f_evals, new_g_evals, converged = LS.search(
+            # alpha, mf_new, mfg_new, mf_slope_new, new_f_evals, new_g_evals, converged = LSS.search(
             #     x=v_k, p=p_k, f0=mf_k, g0=mfg_k)
-            alpha, mf_new, new_f_evals, new_g_evals, converged = LS.search(
+            alpha, mf_new, new_f_evals, new_g_evals, converged = LSB.search(
                 x=v_k, p=p_k, f0=mf_k, g0=mfg_k)
 
             num_f_evals += new_f_evals
