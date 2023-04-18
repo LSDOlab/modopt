@@ -5,28 +5,27 @@ import osqp
 import scipy.sparse as sp
 import time
 
-from array_manager.api import VectorComponentsDict, Vector
 from modopt.api import Optimizer
 from modopt.line_search_algorithms import ScipyLS, BacktrackingArmijo, Minpack2LS
 from modopt.merit_functions import AugmentedLagrangianIneq, ModifiedLagrangianIneq
 # from modopt.approximate_hessians import BFGS as BFGS
 
-from modopt.approximate_hessians import BFGSM1 as BFGS
+# from modopt.approximate_hessians import BFGSM1 as BFGS
+from modopt.approximate_hessians import BFGSScipy as BFGS
 
 
-# This optimizer takes constraints in all-inequality form
+# This optimizer takes constraints in all-inequality form, C(x) >= 0
 class SQP_SURF(Optimizer):
     def initialize(self):
-        self.solver_name = 'sqp'
+        self.solver_name = 'sqp_surf'
 
-        self.obj = self.problem.evaluate_objective
-        self.grad = self.problem.evaluate_objective_gradient
+        self.obj = self.problem._compute_objective
+        self.grad = self.problem._compute_objective_gradient
+        self.con_in = self.problem._compute_constraints
+        self.con_jac = self.problem._compute_constraint_jacobian
 
-        self.con_in = self.problem.evaluate_constraints
-        self.con_jac = self.problem.evaluate_constraint_jacobian
-
-        self.residual = self.problem.evaluate_residuals
-        self.res_jac = self.problem.evaluate_residual_jacobian
+        self.res = self.problem._compute_hybrid_residuals
+        self.res_jac = self.problem._compute_hybrid_residual_jacobian
         self.state = self.problem.solve_residual_equations
         self.adjoint = self.problem.compute_residual_adjoints
 
@@ -181,7 +180,7 @@ class SQP_SURF(Optimizer):
             c_out = np.append(c_out,
                               self.problem.c_upper[uci] - c_in[uci])
 
-        res = self.residuals(x, y)
+        res = self.res(x, y)
         c_out = np.concatenate((c_out, res, -res))
 
         return c_out
@@ -582,19 +581,26 @@ class SQP_SURF(Optimizer):
             num_f_evals += new_f_evals
             num_g_evals += new_g_evals
 
+            # if not converged:  # Backup: Backtracking LS
+            #     alpha, mf_new, new_f_evals, new_g_evals, converged = LSB.search(
+            #         x=v_k, p=p_k, f0=mf_k, g0=mfg_k)
+
+            #     num_f_evals += new_f_evals
+            #     num_g_evals += new_g_evals
+
             # A step of length 1e-4 is taken along p_k if line search does not converge
             if not converged:
                 "Compute this factor heuristically"
-                print('not converged, px_norm=', np.linalg.norm(p_x))
-                print('not converged, ppi_norm=', np.linalg.norm(p_pi))
-                print('not converged, ps_norm=', np.linalg.norm(p_s))
+                # print('not converged, px_norm=', np.linalg.norm(p_x))
+                # print('not converged, ppi_norm=', np.linalg.norm(p_pi))
+                # print('not converged, ps_norm=', np.linalg.norm(p_s))
                 alpha = None
                 d_k = p_k * 1.
 
             else:
-                print('converged, px_norm=', np.linalg.norm(p_x))
-                print('converged, ppi_norm=', np.linalg.norm(p_pi))
-                print('converged, ps_norm=', np.linalg.norm(p_s))
+                # print('converged, px_norm=', np.linalg.norm(p_x))
+                # print('converged, ppi_norm=', np.linalg.norm(p_pi))
+                # print('converged, ps_norm=', np.linalg.norm(p_s))
                 d_k = alpha * p_k
 
             v_k += d_k
@@ -655,9 +661,9 @@ class SQP_SURF(Optimizer):
 
             # Update the QP problem
             if isinstance(A_k, np.ndarray):
-                print(np.linalg.norm(g_k), np.linalg.norm(l_k),
-                      np.linalg.norm(Bk_data), np.linalg.norm(A_k))
-                print(g_k[0])
+                # print(np.linalg.norm(g_k), np.linalg.norm(l_k),
+                #       np.linalg.norm(Bk_data), np.linalg.norm(A_k))
+                # print(g_k[0])
                 # print(l_k)
                 # print(Bk_data)
                 # print(A_k)
@@ -676,6 +682,13 @@ class SQP_SURF(Optimizer):
             tol_satisfied = (opt_satisfied and feas_satisfied)
 
             # Update arrays inside outputs dict with new values from the current iteration
+
+            # print(itr)
+            # print('opt', opt)
+            # print('feas', feas)
+            # print('x', x_k)
+            # print('obj', f_k)
+            # print('cons', c_k)
             self.update_outputs(
                 major=itr,
                 x=x_k,
@@ -695,19 +708,16 @@ class SQP_SURF(Optimizer):
                 step=alpha,
                 # merit=mf_new)
                 merit=mf_k)
-            print('rho_k', rho_k[0])
-            print('alpha_k', alpha)
-            print('x_k', x_k[0])
-            print('y_k', y_k[0])
-            print('pi_k', pi_k[0])
-            print('c_k', c_k[0])
-            print('J_k_norm', np.linalg.norm(J_k))
-            print('g_k_norm', np.linalg.norm(g_k))
-            print('s_k', s_k[0])
-            print('B_k_norm', np.linalg.norm(B_k))
-
-            # if itr == 11:
-            #     break
+            # print('rho_k', rho_k[0])
+            # print('alpha_k', alpha)
+            # print('x_k', x_k[0])
+            # print('y_k', y_k[0])
+            # print('pi_k', pi_k[0])
+            # print('c_k', c_k[0])
+            # print('J_k_norm', np.linalg.norm(J_k))
+            # print('g_k_norm', np.linalg.norm(g_k))
+            # print('s_k', s_k[0])
+            # print('B_k_norm', np.linalg.norm(B_k))
 
         # Run post-processing for the Optimizer() base class
         self.run_post_processing()

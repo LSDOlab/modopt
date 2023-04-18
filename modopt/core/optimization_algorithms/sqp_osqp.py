@@ -10,9 +10,9 @@ import sys
 
 sys.path.append("..")
 
-from lsdo_optimizer.core.optimizers.optimizer import Optimizer
-from lsdo_optimizer.core.line_search.line_search import wolfe_line_search
-from lsdo_optimizer.utils.problem import Problem
+from modopt.core.optimizer import Optimizer
+# from lsdo_optimizer.core.line_search.line_search import wolfe_line_search
+from modopt.utils.problem import Problem
 
 
 class AL(object):

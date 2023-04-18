@@ -182,37 +182,6 @@ class SQP(Optimizer):
 
         # c_out = np.array([])
 
-        # if self.lower_bounds:
-        #     c_out = np.append(c_out, x[lbi] - self.problem.x_lower[lbi])
-        # if self.upper_bounds:
-        #     c_out = np.append(c_out, self.problem.x_upper[ubi] - x[ubi])
-        # if self.lower_constraint_bounds:
-        #     c_out = np.append(c_out,
-        #                       c_in[lci] - self.problem.c_lower[lci])
-        # if self.upper_constraint_bounds:
-        #     c_out = np.append(c_out,
-        #                       self.problem.c_upper[uci] - c_in[uci])
-
-        # # Compute problem constraint Jacobian
-        # j_in = self.jac_in(x)
-
-        # nx = self.problem.nx
-        # lbi = self.lower_bound_indices
-        # ubi = self.upper_bound_indices
-        # lci = self.lower_constraint_indices
-        # uci = self.upper_constraint_indices
-
-        # j_out = np.empty((1, nx), dtype=float)
-
-        # if self.lower_bounds:
-        #     j_out = np.append(j_out, np.identity(nx)[lbi], axis=0)
-        # if self.upper_bounds:
-        #     j_out = np.append(j_out, -np.identity(nx)[ubi], axis=0)
-        # if self.lower_constraint_bounds:
-        #     j_out = np.append(j_out, j_in[lci], axis=0)
-        # if self.upper_constraint_bounds:
-        #     j_out = np.append(j_out, -j_in[uci], axis=0)
-
         # vals = np.ones(self.nx)
         # indices = np.arange(self.nx)
 
@@ -227,53 +196,7 @@ class SQP(Optimizer):
         #             rows=indices,
         #             cols=indices)
 
-    # def con(self, x):
-    #     # Compute problem constraints
-    #     c_in = self.con_in(x)
-
-    #     lbi = self.lower_bound_indices
-    #     ubi = self.upper_bound_indices
-    #     lci = self.lower_constraint_indices
-    #     uci = self.upper_constraint_indices
-
-    #     c_out = np.array([])
-
-    #     if self.lower_bounds:
-    #         c_out = np.append(c_out, x[lbi] - self.problem.x_lower[lbi])
-    #     if self.upper_bounds:
-    #         c_out = np.append(c_out, self.problem.x_upper[ubi] - x[ubi])
-    #     if self.lower_constraint_bounds:
-    #         c_out = np.append(c_out,
-    #                           c_in[lci] - self.problem.c_lower[lci])
-    #     if self.upper_constraint_bounds:
-    #         c_out = np.append(c_out,
-    #                           self.problem.c_upper[uci] - c_in[uci])
-
-    #     return c_out
-
-    # def jac(self, x):
-    #     # Compute problem constraint Jacobian
-    #     j_in = self.jac_in(x)
-
-    #     nx = self.problem.nx
-    #     lbi = self.lower_bound_indices
-    #     ubi = self.upper_bound_indices
-    #     lci = self.lower_constraint_indices
-    #     uci = self.upper_constraint_indices
-
-    #     j_out = np.empty((1, nx), dtype=float)
-
-    #     if self.lower_bounds:
-    #         j_out = np.append(j_out, np.identity(nx)[lbi], axis=0)
-    #     if self.upper_bounds:
-    #         j_out = np.append(j_out, -np.identity(nx)[ubi], axis=0)
-    #     if self.lower_constraint_bounds:
-    #         j_out = np.append(j_out, j_in[lci], axis=0)
-    #     if self.upper_constraint_bounds:
-    #         j_out = np.append(j_out, -j_in[uci], axis=0)
-
-    #     return j_out[1:]
-
+   
     # Define qp constraint function:
     # TODO: see if c and j could be passed instead of x,
     #       to avoid duplicate computation

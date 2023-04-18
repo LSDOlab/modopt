@@ -5,7 +5,6 @@ import osqp
 import scipy.sparse as sp
 import time
 
-from array_manager.api import VectorComponentsDict, MatrixComponentsDict, Matrix, CSCMatrix
 from modopt.api import Optimizer
 from modopt.line_search_algorithms import ScipyLS, BacktrackingArmijo, Minpack2LS
 from modopt.merit_functions import AugmentedLagrangianIneq, ModifiedLagrangianIneq
@@ -15,7 +14,7 @@ from modopt.merit_functions import AugmentedLagrangianIneq, ModifiedLagrangianIn
 from modopt.approximate_hessians import BFGSScipy as BFGS
 
 
-# This optimizer takes constraints in all-inequality form
+# This optimizer takes constraints in all-inequality form, C(x) >= 0
 class SQP(Optimizer):
     def initialize(self):
         self.solver_name = 'sqp'
@@ -717,9 +716,6 @@ class SQP(Optimizer):
             # print('g_k_norm', np.linalg.norm(g_k))
             # print('s_k', s_k[0])
             # print('B_k_norm', np.linalg.norm(B_k))
-
-            # if itr == 11:
-            #     break
 
         # Run post-processing for the Optimizer() base class
         self.run_post_processing()
