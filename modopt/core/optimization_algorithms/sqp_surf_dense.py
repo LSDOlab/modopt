@@ -27,7 +27,7 @@ class SQP_SURF(Optimizer):
         self.res = self.problem._compute_hybrid_residuals
         self.res_jac = self.problem._compute_hybrid_residual_jacobian
         self.state = self.problem.solve_residual_equations
-        self.adjoint = self.problem.compute_residual_adjoints
+        self.adj_in = self.problem.compute_residual_adjoint
 
         self.options.declare('max_itr', default=1000, types=int)
         self.options.declare('opt_tol', default=1e-7, types=float)
@@ -454,7 +454,7 @@ class SQP_SURF(Optimizer):
 
         x_k = v_k[:nx]
         y_k = v_k[nx:n]
-        
+
         p_k = np.zeros((len(v_k), ))
         p_z = p_k[:n]
         p_pi = p_k[n:(n + m)]
