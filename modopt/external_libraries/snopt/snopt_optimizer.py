@@ -1,8 +1,9 @@
 import numpy as np
+import warnings
 try:
     from optimize import SNOPT_options
 except:
-    print("Warning: SNOPT_options from 'optimize' could not be imported")
+    warnings.warn("SNOPT_options from 'optimize' could not be imported")
 
 from array_manager.api import DenseMatrix
 

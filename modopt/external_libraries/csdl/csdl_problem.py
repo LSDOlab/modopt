@@ -1,27 +1,22 @@
 import numpy as np
-
+import warnings
 from modopt.api import Problem as OptProblem
-# from csdl_lite import Simulator
-# from csdl_om import Simulator
+
 try:
     from python_csdl_backend import Simulator
 except:
-    print("Warning: Simulator() from 'python_csdl_backend' could not be imported")
+    warnings.warn("Simulator() from 'python_csdl_backend' could not be imported")
 
 try:
     from csdl import Model
 except:
-    print("Warning: Model() from 'csdl' could not be imported")
+    warnings.warn("Model() from 'csdl' could not be imported")
 
 
 class CSDLProblem(OptProblem):
     def initialize(self, ):
-        self.options.declare('problem_name',
-                             default='unnamed_problem',
-                             types=str)
-        self.options.declare('simulator')
-        # TODO:
-        # self.options.declare('simulator', types=type(Simulator()))
+        self.options.declare('problem_name', default='unnamed_problem', types=str)
+        self.options.declare('simulator', types=Simulator)
 
     def setup(self, ):
 
