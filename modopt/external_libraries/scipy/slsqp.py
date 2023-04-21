@@ -137,7 +137,7 @@ class SLSQP(ScipyOptimizer):
         # Assign shorter names to variables and methods
         method = 'SLSQP'
 
-        x0 = self.problem.x0
+        x0 = self.problem.x0 * 1.
 
         self.update_outputs(x0)
 
