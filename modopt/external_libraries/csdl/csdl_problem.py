@@ -26,18 +26,48 @@ class CSDLProblem(OptProblem):
 
         # Set problem dimensions
         sim = self.options['simulator']
+        try:
+            self.hstate_to_res = sim.get_hybrid_state_and_residual_names()
+            self.SURF_mode = True if self.hstate_to_res else False
+        except:
+            self.SURF_mode = False
+            warnings.warn('This version of CSDL or python_csdl_backend does not support SURF paradigm.')
+
         self.x0 = sim.design_variables()
+        self.model_evals = 0                      # failure of functions
+        self.deriv_evals = 0                      # failure of functions
         self.fail1 = False                      # failure of functions
         self.fail2 = False                      # failure of functions or derivatives
         self.warm_x         = self.x0 - 1.      # (x0 - 1.) to keep it differernt from initial dv values
         self.warm_x_deriv   = self.x0 - 2.      # (x0 - 2.)to keep it differernt from initial dv and warm_x values
         self.nx = len(self.x0)
         self.nc = len(sim.constraints())
+    
+    def check_if_warm_and_run_model(self, x):
+        sim = self.options['simulator']
+        if not self.SURF_mode:
+            if not np.array_equal(self.warm_x, x):
+                sim.update_design_variables(x)
+                self.fail1 = sim.run(check_failure=True)
+                self.model_evals += 1
+                self.warm_x[:] = x
+            return
+        else:
+            pass
+                
 
-    def check_if_warm_x(self, x, deriv=False):
-        if not(deriv):
-            return np.array_equal(self.warm_x, x)
-        return np.array_equal(self.warm_x_deriv, x)
+    def check_if_warm_and_compute_derivatives(self, x):
+        sim = self.options['simulator']
+        if not self.SURF_mode:
+            if not np.array_equal(self.warm_x_deriv, x):
+                self.check_if_warm_and_run_model(x)
+                f2 = sim.compute_total_derivatives(check_failure=True)
+                self.deriv_evals += 1
+                self.fail2 = (self.fail1 and f2)
+                self.warm_x_deriv[:] = x
+            return
+        else:
+            pass
 
     def _setup_bounds(self):
         sim = self.options['simulator']
@@ -90,10 +120,7 @@ class CSDLProblem(OptProblem):
     def _compute_objective(self, x):
         sim = self.options['simulator']
         print('Computing objective >>>>>>>>>>')
-        if not (self.check_if_warm_x(x)):
-            sim.update_design_variables(x)
-            self.fail1 = sim.run(check_failure=True)
-            self.warm_x[:] = x
+        self.check_if_warm_and_run_model(x)
         print('---------Computed objective---------')
         return sim.objective()[0]
         # return failure_flag, sim.objective()
@@ -101,14 +128,7 @@ class CSDLProblem(OptProblem):
     def _compute_objective_gradient(self, x):
         sim = self.options['simulator']
         print('Computing gradient >>>>>>>>>>')
-        if not (self.check_if_warm_x(x, deriv=True)):
-            if not (self.check_if_warm_x(x,)):
-                sim.update_design_variables(x)
-                self.fail1 = sim.run(check_failure=True)
-                self.warm_x[:] = x
-            f2 = sim.compute_total_derivatives(check_failure=True)
-            self.fail2 = (self.fail1 and f2)
-            self.warm_x_deriv[:] = x
+        self.check_if_warm_and_compute_derivatives(x)
         print('---------Computed gradient---------')
         return sim.objective_gradient()
         # return failure_flag, sim.objective_gradient()
@@ -116,10 +136,7 @@ class CSDLProblem(OptProblem):
     def _compute_constraints(self, x):
         sim = self.options['simulator']
         print('Computing constraints >>>>>>>>>>')
-        if not (self.check_if_warm_x(x)):
-            sim.update_design_variables(x)
-            self.fail1 = sim.run(check_failure=True)
-            self.warm_x[:] = x
+        self.check_if_warm_and_run_model(x)
         print('---------Computed constraints---------')
         return sim.constraints()
         # return failure_flag, sim.constraints()
@@ -127,14 +144,7 @@ class CSDLProblem(OptProblem):
     def _compute_constraint_jacobian(self, x):
         sim = self.options['simulator']
         print('Computing Jacobian >>>>>>>>>>')
-        if not (self.check_if_warm_x(x, deriv=True)):
-            if not (self.check_if_warm_x(x,)):
-                sim.update_design_variables(x)
-                self.fail1 = sim.run(check_failure=True)
-                self.warm_x[:] = x
-            f2 = sim.compute_total_derivatives(check_failure=True)
-            self.fail2 = (self.fail1 and f2)
-            self.warm_x_deriv[:] = x
+        self.check_if_warm_and_compute_derivatives(x)
         print('---------Computed Jacobian---------')
         return sim.constraint_jacobian()
         # return failure_flag, sim.constraint_jacobian()
@@ -142,14 +152,8 @@ class CSDLProblem(OptProblem):
     def _compute_all(self, x):
         sim = self.options['simulator']
         print('Computing all at once >>>>>>>>>>')
-        if not (self.check_if_warm_x(x, deriv=True) and self.check_if_warm_x(x,)):
-            sim.update_design_variables(x)
-            self.fail1 = sim.run(check_failure=True)
-            self.warm_x[:] = x
-            f2 = sim.compute_total_derivatives(check_failure=True)
-            self.fail2 = (self.fail1 and f2)
-            self.warm_x_deriv[:] = x
-
+        self.check_if_warm_and_run_model(x)                 # This is rqd, ow warm derivs skip model evals
+        self.check_if_warm_and_compute_derivatives(x)
         print('---------Computed all at once---------')
         return self.fail2, sim.objective(), sim.constraints(), sim.objective_gradient(), sim.constraint_jacobian()
     
