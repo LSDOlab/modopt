@@ -90,7 +90,7 @@ class SQP(Optimizer):
 
         self.LSS = ScipyLS(f=self.MF.compute_function,
                            g=self.MF.compute_gradient,
-                           max_step=1.99)
+                           max_step=2.0)
         # self.LS = Minpack2LS(f=self.MF.compute_function,
         #                      g=self.MF.compute_gradient)
         self.LSB = BacktrackingArmijo(f=self.MF.compute_function,
