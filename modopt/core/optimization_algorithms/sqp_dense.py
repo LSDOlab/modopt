@@ -90,7 +90,7 @@ class SQP(Optimizer):
 
         self.LSS = ScipyLS(f=self.MF.compute_function,
                            g=self.MF.compute_gradient,
-                           max_step=2.0)
+                           max_step=1.99)
         # self.LS = Minpack2LS(f=self.MF.compute_function,
         #                      g=self.MF.compute_gradient)
         self.LSB = BacktrackingArmijo(f=self.MF.compute_function,
@@ -213,7 +213,6 @@ class SQP(Optimizer):
                           s_k):
         nc = self.nc
         delta_rho = self.delta_rho
-        num_rho_changes = self.num_rho_changes
 
         # rho_ref = np.linalg.norm(rho_k)
         rho_ref = rho_k[0] * 1.
@@ -238,26 +237,25 @@ class SQP(Optimizer):
 
         # Increasing rho
         if rho_k[0] > rho_ref:
-            if num_rho_changes >= 0:
-                num_rho_changes += 1
+            if self.num_rho_changes >= 0:
+                self.num_rho_changes += 1
             else:
-                delta_rho *= 2.
-                num_rho_changes = 0
+                self.delta_rho *= 2.
+                self.num_rho_changes = 0
 
         # Decreasing rho
         elif rho_k[0] < rho_ref:
-            if num_rho_changes <= 0:
-                num_rho_changes -= 1
+            if self.num_rho_changes <= 0:
+                self.num_rho_changes -= 1
             else:
-                delta_rho *= 2.
-                num_rho_changes = 0
+                self.delta_rho *= 2.
+                self.num_rho_changes = 0
 
         return rho_k
 
     def update_vector_rho(self, rho_k, dir_deriv_al, pTHp, p_pi, c_k,
                           s_k):
         delta_rho = self.delta_rho
-        num_rho_changes = self.num_rho_changes
 
         rho_ref = np.linalg.norm(rho_k)
         # rho_ref = rho_k[0] * 1.
@@ -308,19 +306,19 @@ class SQP(Optimizer):
         rho_norm = np.linalg.norm(rho_k)
         # Increasing rho
         if rho_norm > rho_ref:
-            if num_rho_changes >= 0:
-                num_rho_changes += 1
+            if self.num_rho_changes >= 0:
+                self.num_rho_changes += 1
             else:
-                delta_rho *= 2.
-                num_rho_changes = 0
+                self.delta_rho *= 2.
+                self.num_rho_changes = 0
 
         # Decreasing rho
         elif rho_norm < rho_ref:
-            if num_rho_changes <= 0:
-                num_rho_changes -= 1
+            if self.num_rho_changes <= 0:
+                self.num_rho_changes -= 1
             else:
-                delta_rho *= 2.
-                num_rho_changes = 0
+                self.delta_rho *= 2.
+                self.num_rho_changes = 0
 
         return rho_k
 
@@ -392,6 +390,10 @@ class SQP(Optimizer):
         g_k = grad(x_k)
         c_k = con(x_k)
         J_k = jac(x_k)
+
+        num_f_evals = 1
+        num_g_evals = 1
+
         B_k = np.identity(nx)
 
         # Vector of penalty parameters
@@ -426,8 +428,6 @@ class SQP(Optimizer):
         opt_satisfied, opt = self.opt_check(pi_k, c_k, g_k, J_k)
         feas_satisfied, feas = self.feas_check(x_k, c_k)
         tol_satisfied = (opt_satisfied and feas_satisfied)
-        num_f_evals = 1
-        num_g_evals = 1
 
         # Evaluate merit function value
         MF.set_rho(rho_k)
@@ -586,6 +586,9 @@ class SQP(Optimizer):
                 # print('not converged, ps_norm=', np.linalg.norm(p_s))
                 alpha = 0.91
                 d_k = p_k * 0.1
+                print("###### FAILED LINE SEARCH #######")
+                num_f_evals += 1  # Commented because of bug in Scipy line search: calls f twice with amax before failure
+                num_g_evals += 1
 
             else:
                 # print('converged, px_norm=', np.linalg.norm(p_x))
@@ -612,6 +615,11 @@ class SQP(Optimizer):
             g_k = grad(x_k)
             c_k = con(x_k)
             J_k = jac(x_k)
+
+            print('after LS model evals:', self.problem.model_evals)
+            print('after LS deriv evals:', self.problem.deriv_evals)
+            print('after LS num_f_evals:', num_f_evals)
+            print('after LS num_g_evals:', num_g_evals)
 
             # Slack reset
             # if rho_k[0] == 0:
@@ -663,6 +671,8 @@ class SQP(Optimizer):
                                Ax=A_k.flatten('F'))
             else:
                 qp_prob.update(q=g_k, l=l_k, Px=Bk_data, Ax=A_k.data)
+
+            print('########### MAJOR ITERATION ENDS ############')
 
             # <<<<<<<<<<<<<<<<<<<
             # ALGORITHM ENDS HERE
