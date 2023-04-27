@@ -72,7 +72,7 @@ class Minpack2LS(LineSearch):
         else:
             g1 = g0 * 1.
 
-        alpha, num_f_evals, num_g_evals, f2, f1, g2 = line_search(
+        alpha, new_f_evals, new_g_evals, f2, f1, g2 = line_search(
             f,
             g,
             x,
@@ -92,5 +92,8 @@ class Minpack2LS(LineSearch):
         converged = True
         if alpha == None:
             converged = False
+
+        num_f_evals += new_f_evals
+        num_g_evals += new_g_evals
 
         return alpha, f2, g2, slope2, num_f_evals, num_g_evals, converged
