@@ -38,6 +38,7 @@ class SNOPTc(SNOPTOptimizer):
 
     def solve(self):
         append=self.options['append2file']
+        check_failure = self.options['continue_on_failure']
         # Assign shorter names to variables and methods
         x0 = self.x0
         x0c0 = x0.copy()
@@ -87,11 +88,11 @@ class SNOPTc(SNOPTOptimizer):
                             nState):
             if hasattr(self, "compute_all"):
                 if callable(self.compute_all):
-                    failure_flag, fObj, fCon, gObj, gCon = self.compute_all(x)
+                    failure_flag, fObj, fCon, gObj, gCon = self.compute_all(x, check_failure=check_failure)
                     # Note that if the function fails at the initial point then optimization fails
                     if failure_flag:
                         mode = -1
-                        print('Failed model/derivative evaluation!!!')
+                        warnings.warn("Failed model/derivative evaluation!!! Shortening step in line search ...")
 
                     if self.problem.nc == 0:
                         fCon = 0.

@@ -17,6 +17,9 @@ class SNOPTOptimizer(Optimizer):
         self.options.declare('append2file',
                              default=False,
                              types=bool)
+        self.options.declare('continue_on_failure',
+                             default=False,
+                             types=bool)
         self.options.declare('gradient',
                              default='exact',
                              values=['exact', 'fd'])
