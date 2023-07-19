@@ -10,7 +10,6 @@ setup(
         'scipy',
         'pint',
         'pandas',
-        'osqp',
         'dill',
         'array_manager @ git+https://github.com/anugrahjo/array_manager.git@modopt',
     ],
