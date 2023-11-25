@@ -318,3 +318,67 @@ class CSDLProblem(OptProblem):
     def reset_eval_counts(self, ):
         self.model_evals = 0
         self.deriv_evals = 0
+
+
+class CSDLOUUProblem(CSDLProblem):
+    def _compute_objective(self, x, guess_dict=None, tol_dict=None, 
+                           force_rerun=False, check_failure=False):
+        sim = self.options['simulator']
+        sim.update_design_variables(x)
+        obj = np.zeros((len(U)))
+        print('---------Computing objective---------')
+        for u in U:
+            sim['U'] = u
+            self.fail1 = sim.run(check_failure=check_failure)
+            self.model_evals += 1
+            obj[i] = sim.objective()[0] 
+        print('---------Computed objective---------')
+
+        return np.mean(obj) + np.sd(obj)
+
+    def _compute_objective_gradient(self, x, guess_dict=None, tol_dict=None, 
+                                    force_rerun=False, check_failure=False):
+        sim = self.options['simulator']
+        sim.update_design_variables(x)
+        grad = np.zeros((len(U)))
+        print('Computing gradient >>>>>>>>>>')
+        for u in U:
+            self.fail1 = sim.run(check_failure=check_failure)
+            self.model_evals += 1
+            f2 = sim.compute_total_derivatives(check_failure=check_failure)
+            self.deriv_evals += 1
+            self.fail2 = (self.fail1 and f2)
+            grad[i] = sim.objective_gradient()
+        print('---------Computed gradient---------')
+        return np.mean(grad) + np.sd(grad)
+
+    def _compute_constraints(self, x, guess_dict=None, tol_dict=None, 
+                             force_rerun=False, check_failure=False):
+        sim = self.options['simulator']
+        sim.update_design_variables(x)
+        con = np.zeros((len(U)))
+        print('---------Computing constraints---------')
+        for u in U:
+            sim['U'] = u
+            self.fail1 = sim.run(check_failure=check_failure)
+            self.model_evals += 1
+            con[i] = sim.constraints()
+        print('---------Computed constraints---------')
+
+        return np.mean(con) + np.sd(con)
+
+    def _compute_constraint_jacobian(self, x, guess_dict=None, tol_dict=None, 
+                                     force_rerun=False, check_failure=False):
+        sim = self.options['simulator']
+        sim.update_design_variables(x)
+        jac = np.zeros((len(U)))
+        print('Computing gradient >>>>>>>>>>')
+        for u in U:
+            self.fail1 = sim.run(check_failure=check_failure)
+            self.model_evals += 1
+            f2 = sim.compute_total_derivatives(check_failure=check_failure)
+            self.deriv_evals += 1
+            self.fail2 = (self.fail1 and f2)
+            jac[i] = sim.constraint_jacobian()
+        print('---------Computed gradient---------')
+        return np.mean(jac) + np.sd(jac)
