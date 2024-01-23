@@ -8,3 +8,8 @@ from modopt.core.optimization_algorithms.quadratic_penalty_eq import L2PenaltyEq
 from modopt.core.optimization_algorithms.sqp import SQP as SQPSparse
 from modopt.core.optimization_algorithms.sqp_dense import SQP
 from modopt.core.optimization_algorithms.sqp_surf import SQP_SURF
+
+
+from modopt.core.optimization_algorithms.nelder_mead import NelderMead
+from modopt.core.optimization_algorithms.pso import PSO
+from modopt.core.optimization_algorithms.simulated_annealing import SimulatedAnnealing
