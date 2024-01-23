@@ -28,6 +28,7 @@ class FEA(Problem):
         """
         self.problem_name = 'fea'
         self.options.declare('num_elements', default=40, types=int)
+        self.options.declare('nx', default=10, types=int)
         self.options.declare('E', default=1., types=float)
         self.options.declare('L', default=1., types=float)
         self.options.declare('b', default=1., types=float)
@@ -42,9 +43,10 @@ class FEA(Problem):
 
         self.heights = np.ones(self.num_elements, dtype=dtype)
         self.forces = self.options['forces']
-        self.bsp = np.array(
-            get_bspline_mtx(self.num_design_variables,
-                            self.num_elements).todense())
+        # self.bsp = np.array(
+        #     get_bspline_mtx(self.num_design_variables,
+        #                     self.num_elements).todense())
+        self.bsp = np.identity(self.num_elements)
 
         self.add_design_variables('heights',
                                   shape=(self.num_design_variables, ),
@@ -53,7 +55,7 @@ class FEA(Problem):
                                   vals=.08 * np.ones(
                                       (self.num_design_variables, )))
 
-        self.name_objective('compliance')
+        self.add_objective('compliance')
 
         self.add_constraints(
             'average_height',
@@ -61,8 +63,7 @@ class FEA(Problem):
         )
 
     def setup_derivatives(self):
-        self.declare_objective_gradient(
-            wrt='heights', shape=(self.num_design_variables, ))
+        self.declare_objective_gradient(wrt='heights',)
         self.declare_constraint_jacobian(
             of='average_height',
             wrt='heights',
@@ -80,7 +81,7 @@ class FEA(Problem):
         dvs : np.ndarray[num_design_variables]
             Design variables vector.
         """
-        self.heights = self.bsp.dot(dvs).flatten()
+        self.heights = dvs
 
     def _compute_K(self):
         """
@@ -182,24 +183,28 @@ class FEA(Problem):
         """
         return np.array(self.forces)
 
-    def compute_objective(self, x):
-        self._set_dvs(x)
+    def compute_objective(self, dvs, obj):
+        self._set_dvs(dvs['heights'])
         K = self._compute_K()
         u = self._solve(K)
         c = self._compute_compliance(u)
-        return c
 
-    def compute_constraints(self, h):
-        return np.array([np.sum(h / self.num_design_variables)])
+        print('objective:', c)
 
-    def solve_residual_equations(self, h):
-        self._set_dvs(h)
+        obj['compliance'] = c
+        
+
+    def compute_constraints(self, dvs, con):
+        con['average_height'] = np.array([np.sum(dvs['heights'] / self.num_design_variables)])
+
+    def solve_residual_equations(self, dvs):
+        self._set_dvs(dvs['heights'])
         pRpy = self._compute_K()
         u = self._solve(pRpy)
         return u
 
-    def compute_objective_gradient(self, h):
-        self._set_dvs(h)
+    def compute_objective_gradient(self, dvs, grad):
+        self._set_dvs(dvs['heights'])
         K = self._compute_K()
         u = self._solve(K)
         pRpx = self._compute_pRph(u)
@@ -211,15 +216,34 @@ class FEA(Problem):
         # dfdr = np.linalg.solve(pRpy.T, pFpy)
         grad_aj = pFpx + pRpx.T.dot(dfdr)
         grad_aj = np.real(grad_aj)
-        return grad_aj.reshape((1, self.num_design_variables))
 
-    def evaluate_residual_jacobian(self, h, u):
-        self._set_dvs(h)
+        grad['heights'] = grad_aj.reshape((1, self.num_design_variables))
+
+    def evaluate_residual_jacobian(self, dvs, u):
+        self._set_dvs(dvs['heights'])
         pRpx = self._compute_pRph(u)
         pRpy = self._compute_K()
         return pRpx, pRpy
 
-    def evaluate_constraint_jacobian(self, h, u):
+    def evaluate_constraint_jacobian(self, dvs, u):
         pCpx = 0.1 * np.ones((1, self.num_design_variables))
         pCpy = np.zeros((1, self.num_elements))
         return pCpx, pCpy
+    
+    def compute_constraint_jacobian(self, dvs, jac):
+        pass
+    
+    # def compute_constraint_jacobian(self, dvs, jac):
+    #     u = self.solve_residual_equations(dvs)
+
+    #     jac['average_height', 'heights'] = 0.1 * np.ones((1, self.num_design_variables))
+    #     # The following also works
+
+    #     # pRpx, pRpy = self.evaluate_residual_jacobian(dvs, u)
+    #     # pCpx, pCpy = self.evaluate_constraint_jacobian(dvs, u)
+
+    #     # dcdr = np.linalg.solve(pRpy.T, -pCpy.flatten())
+    #     # jac_aj = pCpx + pRpx.T.dot(dcdr)
+    #     # jac_aj = np.real(jac_aj)
+        
+    #     # jac['average_height', 'heights'] = jac_aj.reshape((1, self.num_design_variables))

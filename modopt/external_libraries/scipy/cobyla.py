@@ -26,6 +26,8 @@ class COBYLA(ScipyOptimizer):
         self.options.declare('outputs', types=list, default=[])
 
     def setup(self):
+        # Adapt bounds as scipy Bounds() object
+        self.setup_bounds()
         # Adapt constraints with bounds as a list of dictionaries with constraints = 0 or >= 0
         self.setup_constraints()
 
@@ -33,79 +35,94 @@ class COBYLA(ScipyOptimizer):
 
         c_lower = self.problem.c_lower
         c_upper = self.problem.c_upper
+        # print(c_lower)
+        # print(c_upper)
 
-        x_lower = self.problem.x_lower
-        x_upper = self.problem.x_upper
-
-        # Adapt bounds as ineq constraints
-        self.setup_bounds()
-
-        if c_lower is None and self.bounds is None:
+        if c_lower.size == 0:
+            # print('No constraints')
             self.constraints = ()
             return None
 
+        # Adapt constraints as a list of dictionaries with constraints = 0 or >= 0 for SLSQP
+        eq_indices = np.where(c_upper == c_lower)[0]
+        ineq_indices = np.where(c_upper != c_lower)[0]
+
         self.constraints = []
+        if len(eq_indices) > 0:
+            con_dict_eq = {}
+            con_dict_eq['type'] = 'eq'
 
-        # Adapt eq/ineq constraints and bounds as a list of dictionaries with constraints >= 0 for COBYLA
-        # Note: COBYLA only supports inequality constraints
+            def func_eq(x):
+                # print('EQ:')
+                # print(self.con(x)[eq_indices])
+                # print(c_lower[eq_indices])
 
-        if self.bounds is not None:
+                return self.con(x)[eq_indices] - c_lower[eq_indices]
+
+            con_dict_eq['fun'] = func_eq
+
+            if type(self.jac) != str:
+
+                def jac_eq(x):
+                    return self.jac(x)[eq_indices]
+
+                con_dict_eq['jac'] = jac_eq
+
+            self.constraints.append(con_dict_eq)
+
+        if len(ineq_indices) > 0:
             # Remove constraints with -np.inf as lower bound
-            lower_bound_indices = np.where(x_lower != -np.inf)[0]
-            # Remove constraints with np.inf as upper bound
-            upper_bound_indices = np.where(x_upper != np.inf)[0]
+            c_lower_ineq = c_lower[ineq_indices]
+            lower_ineq_indices = ineq_indices[np.where(
+                c_lower_ineq != -np.inf)[0]]
 
-            if len(lower_bound_indices) > 0:
-                con_dict_bound1 = {}
-                con_dict_bound1['type'] = 'ineq'
-
-                def func_bound1(x):
-                    return x[lower_bound_indices] - x_lower[
-                        lower_bound_indices]
-
-                con_dict_bound1['fun'] = con_dict_bound1
-
-                self.constraints.append(con_dict_bound1)
-
-            if len(upper_bound_indices) > 0:
-                con_dict_bound2 = {}
-                con_dict_bound2['type'] = 'ineq'
-
-                def func_bound2(x):
-                    return x_upper[upper_bound_indices] - x[
-                        upper_bound_indices]
-
-                con_dict_bound1['fun'] = con_dict_bound2
-
-                self.constraints.append(con_dict_bound2)
-
-        if c_lower is not None:
-            # Remove constraints with -np.inf as lower bound
-            lower_c_indices = np.where(c_lower != -np.inf)[0]
-            # Remove constraints with np.inf as upper bound
-            upper_c_indices = np.where(c_upper != np.inf)[0]
-
-            if len(lower_c_indices) > 0:
+            if len(lower_ineq_indices) > 0:
                 con_dict_ineq1 = {}
                 con_dict_ineq1['type'] = 'ineq'
 
                 def func_ineq1(x):
-                    return self.con(
-                        x)[lower_c_indices] - c_lower[lower_c_indices]
+                    # print('INEQ1:')
+                    # print(self.con(x)[lower_ineq_indices])
+                    # print(c_lower[lower_ineq_indices])
+
+                    return self.con(x)[lower_ineq_indices] - c_lower[
+                        lower_ineq_indices]
 
                 con_dict_ineq1['fun'] = func_ineq1
 
+                if type(self.jac) != str:
+
+                    def jac_ineq1(x):
+                        return self.jac(x)[lower_ineq_indices]
+
+                    con_dict_ineq1['jac'] = jac_ineq1
+
                 self.constraints.append(con_dict_ineq1)
 
-            if len(upper_c_indices) > 0:
+            # Remove constraints with np.inf as upper bound
+            c_upper_ineq = c_upper[ineq_indices]
+            upper_ineq_indices = ineq_indices[np.where(
+                c_upper_ineq != np.inf)[0]]
+
+            if len(upper_ineq_indices) > 0:
                 con_dict_ineq2 = {}
                 con_dict_ineq2['type'] = 'ineq'
 
                 def func_ineq2(x):
-                    return c_upper[upper_c_indices] - self.con(
-                        x)[upper_c_indices]
+                    # print('INEQ2:')
+                    # print(self.con(x)[upper_ineq_indices])
+                    # print(c_upper[upper_ineq_indices])
+                    return c_upper[upper_ineq_indices] - self.con(
+                        x)[upper_ineq_indices]
 
                 con_dict_ineq2['fun'] = func_ineq2
+
+                if type(self.jac) != str:
+
+                    def jac_ineq2(x):
+                        return -self.jac(x)[upper_ineq_indices]
+
+                    con_dict_ineq2['jac'] = jac_ineq2
 
                 self.constraints.append(con_dict_ineq2)
 
@@ -113,7 +130,7 @@ class COBYLA(ScipyOptimizer):
         # Assign shorter names to variables and methods
         method = 'COBYLA'
 
-        x0 = self.x0
+        x0 = self.problem.x0 * 1.
 
         tol = self.options['tol']
         catol = self.options['catol']

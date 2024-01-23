@@ -6,6 +6,8 @@ from array_manager.api import DenseMatrix
 from modopt.api import Optimizer, Problem
 from modopt.csdl_library import CSDLProblem
 
+import warnings
+
 # scipy.optimize.minimize(fun,
 #                         x0,
 #                         args=(),
@@ -138,6 +140,8 @@ class ScipyOptimizer(Optimizer):
             # elif pC_px.any() != 0:
             #     self.jac = lambda x: pC_px
             else:
+                warnings.warn("Empty compute_constraint_jacobian() method for Problem() needs to be defined even if your "+ 
+                              "constraint Jacobians are constants.")
                 self.jac = self.options['jacobian']
             # else:
             #     self.jac = self.problem._compute_constraint_jacobian

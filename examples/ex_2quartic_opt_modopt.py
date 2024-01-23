@@ -69,7 +69,7 @@ class Quartic(Problem):
 
 
 from modopt.scipy_library import SLSQP
-from modopt.optimization_algorithms import SQP
+# from modopt.optimization_algorithms import SQP
 from modopt.snopt_library import SNOPT
 
 tol = 1E-8
