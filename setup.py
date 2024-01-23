@@ -8,9 +8,7 @@ setup(
     install_requires=[
         'numpy',
         'scipy',
-        'pint',
         'pandas',
-        'dill',
         'array_manager @ git+https://github.com/anugrahjo/array_manager.git@modopt',
     ],
     version_config=True,

@@ -20,7 +20,6 @@ from modopt.approximate_hessians import BFGSM1 as BFGS
 
 # import pickle5 as pickle
 import pickle
-import dill
 from types import MethodType, FunctionType
 
 
