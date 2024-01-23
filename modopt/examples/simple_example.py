@@ -132,7 +132,7 @@ max_itr = 100
 
 prob = X4()
 
-from modopt.optimization_algorithms import Newton, QuasiNewton, SQP
+from modopt.optimization_algorithms import Newton, QuasiNewton
 
 # Set up your optimizer with your problem and pass in optimizer parameters
 
