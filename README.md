@@ -33,3 +33,11 @@ To update modopt to the latest version, run on the terminal or command line
 cd /path/to/modopt
 git pull
 ```
+
+# For Developers
+For updating documentation, refer to the README in `docs` directory.
+
+For details on testing/pull requests, refer to the README in `tests` directory.
+
+# License
+This project is licensed under the terms of the **GNU Lesser General Public License v3.0**.
