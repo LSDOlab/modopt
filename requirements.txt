@@ -10,7 +10,8 @@ sphinx==5.3.0
 myst-nb==0.17.2
 sphinx_rtd_theme==1.1.1 
 sphinx-copybutton==0.5.2
-sphinx-autoapi==1.9.0   # Defining exact versions to ensure things don't break
+sphinx-autoapi==2.1.0   # Defining exact versions to ensure things don't break
+astroid==2.15.5
 numpydoc==1.5.0
 gitpython==3.1.31
 git+https://github.com/anugrahjo/sphinx-collections.git
