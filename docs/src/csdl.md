@@ -63,7 +63,7 @@ from csdl_om import Simulator
 # Create a Simulator object for your model
 sim = Simulator(QuadraticFunc())
 
-from modopt.csdl_library import CSDLProblem
+from modopt import CSDLProblem
 
 # Instantiate your problem using the csdl Simulator object and name your problem
 prob = CSDLProblem(
@@ -77,7 +77,7 @@ the respective library in modOpt and solve it, following the standard procedure.
 Here we will use the `SLSQP` optimizer from the scipy library.
 
 ```py
-from modopt.scipy_library import SLSQP
+from modopt import SLSQP
 
 # Setup your preferred optimizer (SLSQP) with the Problem object 
 # Pass in the options for your chosen optimizer
@@ -101,7 +101,7 @@ optimizer.print_results()
 Import the SLSQP optimizer as shown below:
 
 ```py
-from modopt.scipy_library import SLSQP
+from modopt import SLSQP
 ```
 
 Options available can be found from the 
@@ -120,7 +120,7 @@ optimizer = SLSQP(prob, maxiter=20, ftol=1e-6)
 Import the SQP optimizer as shown below:
 
 ```py
-from modopt.optimization_algorithms import SQP
+from modopt import SQP
 ```
 Options available are: `max_iter`, `opt_tol`, and `feas_tol`.
 Options could be set by just passing them as kwargs when 
@@ -138,7 +138,7 @@ optimizer = SQP(prob, max_itr=20, opt_tol=1e-8)
 Import the SNOPT optimizer as shown below:
 
 ```py
-from modopt.snopt_library import SNOPT
+from modopt import SNOPT
 ```
 Options could be set by just passing them as kwargs when 
 instantiating the SNOPT optimizer object.

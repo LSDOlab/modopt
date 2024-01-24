@@ -2,9 +2,9 @@ import numpy as np
 
 from quadratic import Quadratic
 
-from modopt.scipy_library import SLSQP
-from modopt.optimization_algorithms import SQP
-from modopt.snopt_library import SNOPT
+from modopt import SLSQP
+from modopt import SQP
+from modopt import SNOPT
 
 # nx = 25
 tol = 1E-8

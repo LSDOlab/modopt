@@ -1,7 +1,7 @@
 import numpy as np
 import time
 
-from modopt.api import Optimizer
+from modopt import Optimizer
 from modopt.line_search_algorithms import ScipyLS
 
 

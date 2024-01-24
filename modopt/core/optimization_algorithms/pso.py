@@ -2,7 +2,7 @@ import numpy as np
 import time
 from scipy.stats import qmc
 
-from modopt.api import Optimizer
+from modopt import Optimizer
 from modopt.merit_functions import AugmentedLagrangianEq, L2Eq
 
 

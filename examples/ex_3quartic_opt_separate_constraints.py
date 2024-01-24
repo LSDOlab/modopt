@@ -1,7 +1,7 @@
 '''Example 3 : Quartic optimization with separate constraints'''
 
 import numpy as np
-from modopt.api import Problem
+from modopt import Problem
 
 class Quartic(Problem):
     def initialize(self, ):
@@ -70,9 +70,9 @@ class Quartic(Problem):
         # jac['x-y', 'y'] = -1.
 
 
-from modopt.scipy_library import SLSQP
-# from modopt.optimization_algorithms import SQP
-from modopt.snopt_library import SNOPT
+from modopt import SLSQP
+# from modopt import SQP
+from modopt import SNOPT
 
 tol = 1E-8
 max_itr = 500

@@ -7,8 +7,8 @@ except:
 
 from array_manager.api import DenseMatrix
 
-from modopt.api import Optimizer, Problem
-from modopt.csdl_library import CSDLProblem
+from modopt import Optimizer, Problem
+from modopt import CSDLProblem
 
 
 class SNOPTOptimizer(Optimizer):

@@ -1,6 +1,7 @@
-'''Example 7 : Minimizing the Bean function'''
+'''Example 8 : Minimizing the Bean function'''
+
 import numpy as np
-from modopt.api import Problem
+from modopt import Problem
 
 class BeanFunction(Problem):
     def initialize(self, ):
@@ -31,7 +32,7 @@ class BeanFunction(Problem):
         dfdx2 = 2 * (1-x2) + 2 * (2*x2 - x1**2)
         grad['f'] = np.array([dfdx1, dfdx2])
 
-from modopt.optimization_algorithms import PSO, NelderMead
+from modopt import PSO, NelderMead
 
 prob = BeanFunction()
 

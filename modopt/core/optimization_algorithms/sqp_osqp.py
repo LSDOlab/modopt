@@ -12,7 +12,7 @@ sys.path.append("..")
 
 from modopt.core.optimizer import Optimizer
 # from lsdo_optimizer.core.line_search.line_search import wolfe_line_search
-from modopt.utils.problem import Problem
+from modopt.core.problem import Problem
 
 
 class AL(object):

@@ -8,8 +8,8 @@ import sys
 
 sys.path.append("..")
 
-from modopt.api import SteepestDescent, Newton, QuasiNewton
-from modopt.api import SQP_OSQP
+from modopt import SteepestDescent, Newton, QuasiNewton
+from modopt import SQP_OSQP
 
 nx = 2
 tol = 1E-8

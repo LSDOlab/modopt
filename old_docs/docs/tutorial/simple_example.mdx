@@ -23,7 +23,7 @@ The problem is written in modOpt using the **Problem()** class as follows:
 
 ```py
 import numpy as np
-from modopt.api import Problem
+from modopt import Problem
 
 
 class X4(Problem):
@@ -72,7 +72,7 @@ Given an initial guess $x_0$, we can write an optimizer using the steepest desce
 ```py
 import numpy as np
 import time
-from modopt.api import Optimizer
+from modopt import Optimizer
 
 
 class SteepestDescent(Optimizer):

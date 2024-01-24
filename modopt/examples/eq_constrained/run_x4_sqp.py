@@ -2,8 +2,8 @@ import numpy as np
 
 from x4_sqp import X4
 
-from modopt.optimization_algorithms import SQP
-from modopt.scipy_library import SLSQP
+from modopt import SQP
+from modopt import SLSQP
 
 opt_tol = 1E-8
 feas_tol = 1E-8

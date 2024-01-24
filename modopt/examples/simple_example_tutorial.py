@@ -1,5 +1,5 @@
 import numpy as np
-from modopt.api import Problem
+from modopt import Problem
 
 
 class X4(Problem):
@@ -28,7 +28,7 @@ class X4(Problem):
 
 import numpy as np
 import time
-from modopt.api import Optimizer
+from modopt import Optimizer
 
 
 class SteepestDescent(Optimizer):

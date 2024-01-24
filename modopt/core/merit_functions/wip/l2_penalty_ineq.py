@@ -1,5 +1,5 @@
 import numpy as np
-from modopt.api import MeritFunction
+from modopt import MeritFunction
 
 
 # Note: This Merit function is for problems in all-inequality form, i.e., c(x) >= 0

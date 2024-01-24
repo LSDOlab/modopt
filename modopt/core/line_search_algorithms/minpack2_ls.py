@@ -2,7 +2,7 @@ import numpy as np
 
 eps = np.finfo(np.float64).resolution  # 1e-15
 
-from modopt.api import LineSearch
+from modopt import LineSearch
 from scipy.optimize.linesearch import line_search_wolfe1 as line_search
 
 # def line_search_wolfe1(f, fprime, xk, pk, gfk=None,

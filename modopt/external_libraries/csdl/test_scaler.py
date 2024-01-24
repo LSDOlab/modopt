@@ -50,16 +50,16 @@ if __name__ == "__main__":
 
     sim = Simulator(QuadraticFunc())
 
-    from modopt.csdl_library import CSDLProblem
+    from modopt import CSDLProblem
 
     prob = CSDLProblem(
         problem_name='quadratic',
         simulator=sim,
     )
 
-    from modopt.optimization_algorithms import SQP
-    from modopt.scipy_library import SLSQP
-    from modopt.snopt_library import SNOPT
+    from modopt import SQP
+    from modopt import SLSQP
+    from modopt import SNOPT
 
     optimizer = SLSQP(
         prob,

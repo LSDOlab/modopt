@@ -1,5 +1,5 @@
 import numpy as np
-from modopt.api import Problem
+from modopt import Problem
 
 
 class X4(Problem):
@@ -33,7 +33,7 @@ class X4(Problem):
 import numpy as np
 import time
 
-from modopt.api import Optimizer
+from modopt import Optimizer
 
 
 class SteepestDescent(Optimizer):
@@ -132,7 +132,7 @@ max_itr = 100
 
 prob = X4()
 
-from modopt.optimization_algorithms import Newton, QuasiNewton
+from modopt import Newton, QuasiNewton
 
 # Set up your optimizer with your problem and pass in optimizer parameters
 

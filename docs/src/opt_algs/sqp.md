@@ -6,7 +6,7 @@ except when importing the optimizer.
 You need to import the optimizer as shown in the following code:
 
 ```py
-from modopt.optimization_algorithms import SQP
+from modopt import SQP
 ```
 
 Options available are: `max_iter`, `opt_tol`, and `feas_tol`.

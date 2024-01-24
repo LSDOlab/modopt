@@ -1,7 +1,7 @@
 
 from simple_example import X4
 
-from modopt.optimization_algorithms import SteepestDescent, Newton, QuasiNewton
+from modopt import SteepestDescent, Newton, QuasiNewton
 
 tol = 1E-8
 max_itr = 500

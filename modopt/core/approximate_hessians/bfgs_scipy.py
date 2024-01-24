@@ -1,6 +1,6 @@
 import numpy as np
 
-from modopt.api import ApproximateHessian
+from modopt import ApproximateHessian
 
 from scipy.optimize import BFGS
 

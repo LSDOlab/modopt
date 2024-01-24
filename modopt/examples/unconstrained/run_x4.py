@@ -2,8 +2,8 @@ import numpy as np
 
 from x4 import X4
 
-from modopt.optimization_algorithms import SteepestDescent, Newton, QuasiNewton
-from modopt.scipy_library import SLSQP
+from modopt import SteepestDescent, Newton, QuasiNewton
+from modopt import SLSQP
 
 tol = 1E-8
 max_itr = 500

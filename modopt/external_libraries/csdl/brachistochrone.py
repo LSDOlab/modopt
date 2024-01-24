@@ -99,7 +99,7 @@ if __name__ == "__main__":
     # sim.prob.check_totals(compact_print=True)
     # exit()
 
-    from modopt.csdl_library import CSDLProblem
+    from modopt import CSDLProblem
 
     # Setup your optimization problem
     prob = CSDLProblem(
@@ -107,9 +107,9 @@ if __name__ == "__main__":
         simulator=sim,
     )
 
-    from modopt.scipy_library import SLSQP
-    from modopt.optimization_algorithms import SQP
-    from modopt.snopt_library import SNOPT
+    from modopt import SLSQP
+    from modopt import SQP
+    from modopt import SNOPT
 
     # Setup your optimizer with the problem
     # optimizer = SLSQP(prob, maxiter=40)

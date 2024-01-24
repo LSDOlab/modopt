@@ -3,8 +3,8 @@ from scipy.optimize import minimize, Bounds, LinearConstraint, NonlinearConstrai
 from scipy.optimize import BFGS, SR1
 from array_manager.api import DenseMatrix
 
-from modopt.api import Optimizer, Problem
-from modopt.csdl_library import CSDLProblem
+from modopt import Optimizer, Problem
+from modopt import CSDLProblem
 
 import warnings
 

@@ -2,7 +2,7 @@ import numpy as np
 
 eps = np.finfo(np.float64).resolution  # 1e-15
 
-from modopt.api import TrustRegion
+from modopt import TrustRegion
 
 
 class SteepestDescentTrustRegion(TrustRegion):

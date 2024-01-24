@@ -2,8 +2,8 @@ import numpy as np
 
 from x4_sqp import X4
 
-from modopt.api import SteepestDescent, Newton, QuasiNewton
-from modopt.api import SQP_OSQP
+from modopt import SteepestDescent, Newton, QuasiNewton
+from modopt import SQP_OSQP
 
 nx = 1000
 tol = 1E-8

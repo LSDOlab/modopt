@@ -4,7 +4,7 @@ import sys
 
 sys.path.append("..")
 
-from modopt.api import Problem
+from modopt import Problem
 
 
 class Rosenbrock2d(Problem):

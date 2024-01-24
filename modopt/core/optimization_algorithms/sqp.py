@@ -11,7 +11,7 @@ import scipy.sparse as sp
 import time
 
 from array_manager.api import VectorComponentsDict, MatrixComponentsDict, Matrix, CSCMatrix
-from modopt.api import Optimizer
+from modopt import Optimizer
 from modopt.line_search_algorithms import ScipyLS, BacktrackingArmijo, Minpack2LS
 from modopt.merit_functions import AugmentedLagrangianIneq, ModifiedLagrangianIneq
 # from modopt.approximate_hessians import BFGS as BFGS

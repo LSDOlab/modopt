@@ -2,7 +2,7 @@ import numpy as np
 
 eps = np.finfo(np.float64).resolution  # 1e-15
 
-from modopt.api import LineSearch
+from modopt import LineSearch
 
 
 class BacktrackingWolfe(LineSearch):

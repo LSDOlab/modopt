@@ -1,5 +1,5 @@
 import numpy as np
-from modopt.api import MeritFunction
+from modopt import MeritFunction
 
 
 class LInfIneq(MeritFunction):

@@ -1,7 +1,7 @@
 import numpy as np
 import scipy as sp
 import warnings
-from modopt.api import Problem as OptProblem
+from modopt import Problem as OptProblem
 
 try:
     from python_csdl_backend import Simulator

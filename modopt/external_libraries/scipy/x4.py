@@ -1,6 +1,6 @@
 import numpy as np
 
-from modopt.api import Problem
+from modopt import Problem
 
 
 class X4(Problem):

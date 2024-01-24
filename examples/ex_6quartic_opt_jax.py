@@ -1,6 +1,6 @@
-'''Example 5 : Quartic optimization using an OpenMDAO model'''
+'''Example 6 : Quartic optimization using Jax'''
 
-# TODO: ADD OpenMDAO model
+# TODO: ADD JAX model
 
 # from csdl import Model
 

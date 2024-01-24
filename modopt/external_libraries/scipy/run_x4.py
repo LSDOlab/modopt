@@ -2,7 +2,7 @@ import numpy as np
 
 from x4 import X4
 
-from modopt.scipy_library import SLSQP, COBYLA, BFGS
+from modopt import SLSQP, COBYLA, BFGS
 
 tol = 1E-8
 max_itr = 500

@@ -1,6 +1,7 @@
-'''Example 8 : Traveling Salesman Problem'''
+'''Example 9 : Traveling Salesman Problem'''
+
 import numpy as np
-from modopt.api import Problem
+from modopt import Problem
 
 class TravelingSalesman(Problem):
     def initialize(self, ):
@@ -48,7 +49,7 @@ class TravelingSalesman(Problem):
 
 
 
-from modopt.optimization_algorithms import SimulatedAnnealing
+from modopt import SimulatedAnnealing
 
 tol = 1.
 max_itr = 10000

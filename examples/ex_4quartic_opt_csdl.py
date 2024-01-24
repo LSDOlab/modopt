@@ -38,14 +38,14 @@ if __name__ == "__main__":
     # Create a Simulator object for your model
     sim = Simulator(QuadraticFunc())
 
-    from modopt.csdl_library import CSDLProblem
+    from modopt import CSDLProblem
 
     # Instantiate your problem using the csdl Simulator object and name your problem
     prob = CSDLProblem(problem_name='quartic',simulator=sim)
 
-    from modopt.optimization_algorithms import SQP
-    from modopt.scipy_library import SLSQP
-    from modopt.snopt_library import SNOPT
+    from modopt import SQP
+    from modopt import SLSQP
+    from modopt import SNOPT
 
     # Setup your preferred optimizer (here, SLSQP) with the Problem object 
     # Pass in the options for your chosen optimizer

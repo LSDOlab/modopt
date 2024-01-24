@@ -1,9 +1,9 @@
-'''Example 6 : Method of Newton Lagrange'''
+'''Example 7 : Method of Newton Lagrange'''
 
 import numpy as np
 import time
 
-from modopt.api import Optimizer
+from modopt import Optimizer
 from modopt.line_search_algorithms import ScipyLS, BacktrackingArmijo, Minpack2LS
 from modopt.merit_functions import AugmentedLagrangianEq, LagrangianEq
 # from modopt.approximate_hessians import BFGS, BFGSScipy, BFGSM1, Broyden, DFP, PSB, SR1

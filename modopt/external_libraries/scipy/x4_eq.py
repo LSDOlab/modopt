@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.sparse as sp
 
-from modopt.api import Problem
+from modopt import Problem
 
 
 class X4(Problem):

@@ -1,7 +1,7 @@
 '''Example 1 : Minimizing a Quartic function'''
 
 import numpy as np
-from modopt.api import Problem
+from modopt import Problem
 
 
 class X4(Problem):
@@ -32,10 +32,8 @@ class X4(Problem):
     def compute_objective_hessian(self, dvs, hess):
         hess['x', 'x'] = 12 * np.diag(dvs['x']**2)
 
-
-import numpy as np
 import time
-from modopt.api import Optimizer
+from modopt import Optimizer
 
 class SteepestDescent(Optimizer):
     def initialize(self):
@@ -133,7 +131,7 @@ max_itr = 100
 
 prob = X4()
 
-from modopt.optimization_algorithms import Newton, QuasiNewton, SQP
+from modopt import Newton, QuasiNewton, SQP
 
 # Set up your optimizer with your problem and pass in optimizer parameters
 optimizer = SteepestDescent(prob,

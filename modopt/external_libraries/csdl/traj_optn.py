@@ -3,10 +3,10 @@ from ozone.api import ODEProblem, Wrap, NativeSystem
 import openmdao.api as om
 import csdl
 from csdl_om import Simulator
-from modopt.csdl_library import CSDLProblem
-from modopt.scipy_library import SLSQP
-from modopt.optimization_algorithms import SQP
-from modopt.snopt_library import SNOPT
+from modopt import CSDLProblem
+from modopt import SLSQP
+from modopt import SQP
+from modopt import SNOPT
 import csdl_om
 import numpy as np
 import matplotlib.pyplot as plt
