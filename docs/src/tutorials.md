@@ -12,7 +12,6 @@ from running the script for better understanding for the users.
 
 ```{toctree}
 :maxdepth: 1
-:hidden:
 
 _temp/tutorials/simple_example
 ```

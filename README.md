@@ -1,9 +1,3 @@
-<!-- [modOpt][0]
-
-Please visit the [Documentation](https://lsdolab.github.io/modopt/) for installation instructions.
-
-[0]: https://lsdolab.github.io/modopt/ "modOpt" -->
-
 # Modopt
 
 Please visit the [documentation](https://lsdolab.github.io/modopt/) for usage instructions.
@@ -32,6 +26,11 @@ To update modopt to the latest version, run on the terminal or command line
 ```sh
 cd /path/to/modopt
 git pull
+```
+To run the tests, install and run `pytest` with
+```sh
+pip install pytest
+pytest
 ```
 
 # For Developers

@@ -16,8 +16,7 @@ pip install git+https://github.com/lsdolab/modopt.git
 ```
 
 ### Installation instructions for developers
-To install `modopt`, first clone the repository and install using pip.
-On the terminal or command line, run
+To install `modopt`, first clone the repository and install it by running
 ```sh
 git clone https://github.com/lsdolab/modopt.git
 pip install -e ./modopt
@@ -28,11 +27,17 @@ cd /path/to/modopt
 git pull
 ```
 
+To run the tests, install and run `pytest` with
+```sh
+pip install pytest
+pytest
+```
+
 ## Running a simple example
 To test if your installation was successful, run 
-`simple_example.py` in `modopt/modopt/examples`.
-If everything works correctly, the following terminal output is
-obtained.
+`simple_example.py` from `/modopt/modopt/examples/`.
+If everything works correctly, the following terminal output will
+be displayed.
 
 ```none
 Setting objective name as "f".

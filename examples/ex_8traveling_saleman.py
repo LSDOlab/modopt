@@ -1,3 +1,4 @@
+'''Example 8 : Traveling Salesman Problem'''
 import numpy as np
 from modopt.api import Problem
 

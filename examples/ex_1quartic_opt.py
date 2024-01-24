@@ -1,3 +1,5 @@
+'''Example 1 : Minimizing a Quartic function'''
+
 import numpy as np
 from modopt.api import Problem
 

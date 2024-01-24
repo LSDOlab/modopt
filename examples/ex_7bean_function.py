@@ -1,3 +1,4 @@
+'''Example 7 : Minimizing the Bean function'''
 import numpy as np
 from modopt.api import Problem
 

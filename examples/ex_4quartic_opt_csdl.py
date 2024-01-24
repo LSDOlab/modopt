@@ -1,3 +1,5 @@
+'''Example 4 : Quartic optimization using a CSDL model'''
+
 from csdl import Model
 
 # minimize x^4 + y^4 subject to x>=0, x+y=1, x-y>=1.
