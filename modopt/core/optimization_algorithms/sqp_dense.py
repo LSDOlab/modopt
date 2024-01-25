@@ -621,10 +621,10 @@ class SQP(Optimizer):
             c_k = con(x_k)
             J_k = jac(x_k)
 
-            print('after LS model evals:', self.problem.model_evals)
-            print('after LS deriv evals:', self.problem.deriv_evals)
-            print('after LS num_f_evals:', num_f_evals)
-            print('after LS num_g_evals:', num_g_evals)
+            # print('after LS model evals:', self.problem.model_evals)
+            # print('after LS deriv evals:', self.problem.deriv_evals)
+            # print('after LS num_f_evals:', num_f_evals)
+            # print('after LS num_g_evals:', num_g_evals)
 
             # Slack reset
             # if rho_k[0] == 0:

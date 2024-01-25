@@ -4,7 +4,7 @@ from csdl import Model
 
 # minimize x^4 + y^4 subject to x>=0, x+y=1, x-y>=1.
 
-class QuadraticFunc(Model):
+class QuarticFunc(Model):
     def initialize(self):
         pass
 
@@ -36,7 +36,7 @@ if __name__ == "__main__":
     from python_csdl_backend import Simulator
 
     # Create a Simulator object for your model
-    sim = Simulator(QuadraticFunc())
+    sim = Simulator(QuarticFunc())
 
     from modopt import CSDLProblem
 
