@@ -1,5 +1,14 @@
 # Modopt
 
+<!---
+[![Python](https://img.shields.io/pypi/pyversions/modopt)](https://img.shields.io/pypi/pyversions/modopt)
+[![Pypi](https://img.shields.io/pypi/v/modopt)](https://pypi.org/project/modopt/)
+[![Coveralls Badge][13]][14]
+[![PyPI version][10]][11]
+[![PyPI Monthly Downloads][12]][11]
+[![GitHub Actions Test Badge](https://github.com/LSDOlab/modopt/actions/workflows/actions.yml/badge.svg)](https://github.com/modopt/modopt/actions)
+-->
+
 [![Forks](https://img.shields.io/github/forks/LSDOlab/modopt.svg)](https://github.com/LSDOlab/modopt/network)
 [![Issues](https://img.shields.io/github/issues/LSDOlab/modopt.svg)](https://github.com/LSDOlab/modopt/issues)
 
