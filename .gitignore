@@ -8,6 +8,7 @@ __pycache__
 *.out
 *.pdf
 *_hw*
+*_junk
 
 # File systems
 *.DS_Store

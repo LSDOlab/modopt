@@ -9,13 +9,16 @@ from modopt.core.line_search import LineSearch
 from modopt.core.merit_function import MeritFunction
 from modopt.core.trust_region import TrustRegion
 
-# import csdl library interface
-from modopt.external_libraries.csdl.csdl_library import (CSDLProblem, )
-# from modopt.external_libraries.openmdao.openmdao_library import (OpenMDAOProblem, )
+# import modeling library interfaces
+from modopt.external_libraries.csdl import (CSDLProblem, )
+# from modopt.external_libraries.openmdao import (OpenMDAOProblem, )
+
+# import test-suite interfaces
+# from modopt.external_libraries.pycutest import (, )
 
 # import external optimizer library interfaces
-from modopt.external_libraries.scipy.scipy_library import (SLSQP, COBYLA, BFGS)
-from modopt.external_libraries.snopt.snopt_library import SNOPTc as SNOPT
+from modopt.external_libraries.scipy import (SLSQP, COBYLA, BFGS)
+from modopt.external_libraries.snopt import SNOPTc as SNOPT
 
 # import built-in optimizers
 # unconstrained

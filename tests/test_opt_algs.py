@@ -125,7 +125,7 @@ def test_grad_free_discrete():
     from modopt import SimulatedAnnealing
 
     # Import the problem to test with
-    from examples.ex_9traveling_saleman import TravelingSalesman
+    from examples.ex_9traveling_salesman import TravelingSalesman
 
     prob = TravelingSalesman()
     tol = 1e-6
@@ -151,7 +151,7 @@ def test_eq_constrained():
     from modopt import NewtonLagrange, L2PenaltyEq
 
     # Import the problem to test with
-    from examples.ex_9traveling_saleman import TravelingSalesman
+    from examples.ex_9traveling_salesman import TravelingSalesman
 
     prob = TravelingSalesman()
     tol = 1e-6
@@ -177,7 +177,7 @@ def test_ineq_constrained():
     from modopt import SQP
 
     # Import the problem to test with
-    from examples.ex_9traveling_saleman import TravelingSalesman
+    from examples.ex_9traveling_salesman import TravelingSalesman
 
     prob = TravelingSalesman()
     tol = 1e-6
@@ -202,7 +202,7 @@ def test_scipy_algorithms():
     from modopt import SLSQP, COBYLA
 
     # Import the problem to test with
-    from examples.ex_9traveling_saleman import TravelingSalesman
+    from examples.ex_9traveling_salesman import TravelingSalesman
 
     prob = TravelingSalesman()
     tol = 1e-6
@@ -226,7 +226,7 @@ def test_snopt():
     from modopt import SNOPT
 
     # Import the problem to test with
-    from examples.ex_9traveling_saleman import TravelingSalesman
+    from examples.ex_9traveling_salesman import TravelingSalesman
 
     prob = TravelingSalesman()
     tol = 1e-6
