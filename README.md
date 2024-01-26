@@ -1,6 +1,9 @@
 # Modopt
 
-Please visit the [documentation](https://lsdolab.github.io/modopt/) for usage instructions.
+[![Forks](https://img.shields.io/github/forks/LSDOlab/modopt.svg)](https://github.com/LSDOlab/modopt/network)
+[![Issues](https://img.shields.io/github/issues/LSDOlab/modopt.svg)](https://github.com/LSDOlab/modopt/issues)
+
+Please visit the [documentation](https://modopt.readthedocs.io/) for usage instructions.
 
 ## Installation
 
