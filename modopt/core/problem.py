@@ -26,6 +26,7 @@ class Problem(object):
         self.nc = 0
         # TODO: Fix this
         self.obj = {}
+        self.obj_scaler = {}
         self.constrained = False
         self.second_order = False
 
@@ -42,8 +43,10 @@ class Problem(object):
 
         self.x_lower = None
         self.x_upper = None
+        self.x_scaler = None
         self.c_lower = None
         self.c_upper = None
+        self.c_scaler = None
 
         self.initialize()
         self.options.update(kwargs)
@@ -69,6 +72,7 @@ class Problem(object):
         # user setup() for the problem (call add_design_variables())
         self.setup()
 
+        self._setup_scalers()
         # CSDLProblem() overrides this method in Problem()
         self._setup_bounds()
         self._setup_gradient_vector()
@@ -90,46 +94,62 @@ class Problem(object):
         pass
 
     def _compute_objective(self, x):
-        self.x.set_data(x)
+        self.x.set_data(x / self.x_scaler)
         self.compute_objective(self.x, self.obj)
-        if isinstance(list(self.obj.values())[0], np.ndarray):
-            return list(self.obj.values())[0][0]
-        return list(self.obj.values())[0] *1.
+        objectives = np.array(list(self.obj.values()))
+        objective_scalers = np.array(list(self.obj_scaler.values()))
+        if isinstance(objectives[0], np.ndarray):
+            return (objectives[0] * objective_scalers[0])[0]
+        return (objectives[0] * objective_scalers[0])
 
     def _compute_objective_gradient(self, x):
-        self.x.set_data(x)
+        self.x.set_data(x / self.x_scaler)
         self.compute_objective_gradient(self.x, self.pF_px)
         # print('grad', self.pF_px.get_data())
-        return self.pF_px.get_data() * 1.
+        objective_scaler = list(self.obj_scaler.values())[0]
+        return self.pF_px.get_data() * objective_scaler / self.x_scaler
 
     def _compute_objective_hessian(self, x):
-        self.x.set_data(x)
+        self.x.set_data(x / self.x_scaler)
         self.compute_objective_hessian(self.x, self.p2F_pxx)
         self.hess.update_bottom_up()
-        return self.hess.get_std_array()
+        objective_scaler = list(self.obj_scaler.values())[0]
+        return self.hess.get_std_array() * objective_scaler / np.outer(self.x_scaler, self.x_scaler)
 
     def _compute_objective_hvp(self, x, v):
         pass
 
     def _compute_constraints(self, x):
-        self.x.set_data(x)
+        self.x.set_data(x / self.x_scaler)
         self.compute_constraints(self.x, self.con)
         # print('con', self.con.get_data())
-        return self.con.get_data() * 1.
+        return self.con.get_data() * self.c_scaler
 
     def _compute_constraint_jacobian(self, x):
-        self.x.set_data(x)
+        self.x.set_data(x / self.x_scaler)
         self.compute_constraint_jacobian(self.x, self.pC_px)
         self.jac.update_bottom_up()
         # print('jac', self.jac.get_std_array())
-        return self.jac.get_std_array()
+        return self.jac.get_std_array() * np.outer(self.c_scaler, 1./self.x_scaler)
+    
+    def _setup_scalers(self):
+        # self.obj_scaler_array = np.array(list(self.obj_scaler.values()))
+        self.x_scaler = self.design_variables_dict.scaler
+        self.c_scaler = self.constraints_dict.scaler
+
+        # self.x_scaler_abstract = Vector(self.design_variables_dict)
+        # self.x_scaler_abstract.allocate(data=self.x_scaler, setup_views=True)
+
+        # self.c_scaler_abstract = Vector(self.constraints_dict)
+        # self.c_scaler_abstract.allocate(data=self.c_scaler, setup_views=True)
+
 
     # Overridden in CSDLProblem()
     def _setup_bounds(self):
-        self.x_lower = self.design_variables_dict.lower
-        self.x_upper = self.design_variables_dict.upper
-        self.c_lower = self.constraints_dict.lower
-        self.c_upper = self.constraints_dict.upper
+        self.x_lower = self.design_variables_dict.lower * self.x_scaler
+        self.x_upper = self.design_variables_dict.upper * self.x_scaler
+        self.c_lower = self.constraints_dict.lower * self.c_scaler
+        self.c_upper = self.constraints_dict.upper * self.c_scaler
 
     # user defined #(call declare_gradients() and declare_jacobians() inside,
     # can later include declare_hessians())
@@ -265,6 +285,7 @@ class Problem(object):
     def add_design_variables(self,
                              name=None,
                              shape=(1, ),
+                             scaler=None,
                              lower=None,
                              upper=None,
                              equals=None,
@@ -279,6 +300,7 @@ class Problem(object):
 
         self.design_variables_dict[name] = dict(
             shape=shape,
+            scaler=scaler,
             lower=lower,
             upper=upper,
             equals=equals,
@@ -287,17 +309,19 @@ class Problem(object):
 
         self.nx += np.prod(shape)
 
-    def add_objective(self, name='obj'):
+    def add_objective(self, name='obj', scaler=1.0):
         # Setting objective name and initializing it with key=name and value=1.
         if len(self.obj)>0:
             raise KeyError('Only one objective is allowed for a problem.')
 
         print(f'Setting objective name as "{name}".')
         self.obj[name] = 1.
+        self.obj_scaler[name] = scaler
 
     def add_constraints(self,
                         name=None,
                         shape=(1, ),
+                        scaler=None,
                         lower=None,
                         upper=None,
                         equals=None):
@@ -307,6 +331,7 @@ class Problem(object):
 
         self.constraints_dict[name] = dict(
             shape=shape,
+            scaler=scaler,
             lower=lower,
             upper=upper,
             equals=equals,
