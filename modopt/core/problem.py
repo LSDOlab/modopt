@@ -415,7 +415,7 @@ class Problem(object):
         ----------
         dvs : array_manager.Vector
             Design variable vector.
-        obj : ???np.ndarray
+        obj : dict
             Objective function value.
 
         # Returns

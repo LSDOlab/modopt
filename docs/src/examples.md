@@ -10,6 +10,7 @@ However, outputs/visualization from running the script is excluded.
 :maxdepth: 1
 
 _temp/examples/ex_1quartic_opt
+_temp/examples/ex_2rosenbrock2d
 _temp/examples/ex_2quartic_opt_constrained
 _temp/examples/ex_3quartic_opt_separate_constraints
 _temp/examples/ex_4quartic_opt_csdl
