@@ -11,7 +11,7 @@ from modopt.core.trust_region import TrustRegion
 
 # import modeling library interfaces
 from modopt.external_libraries.csdl import (CSDLProblem, )
-# from modopt.external_libraries.openmdao import (OpenMDAOProblem, )
+from modopt.external_libraries.openmdao import (OpenMDAOProblem, )
 
 # import test-suite interfaces
 # from modopt.external_libraries.pycutest import (, )

@@ -5,5 +5,5 @@ This section contains auto-generated API reference for the package.
 :maxdepth: 1
 
 autoapi/modopt/core/optimizer/index
-autoapi/modopt/utils/problem/index
+autoapi/modopt/core/problem/index
 ```

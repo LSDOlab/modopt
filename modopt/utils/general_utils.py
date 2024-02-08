@@ -31,3 +31,22 @@ def pad_name(name, pad_num=10, quotes=False):
             return "'{0}'".format(name)
         else:
             return '{0}'.format(name)
+        
+
+import os, sys
+
+class HiddenPrints:
+    def __enter__(self):
+        self._original_stdout = sys.stdout
+        sys.stdout = open(os.devnull, 'w')
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        sys.stdout.close()
+        sys.stdout = self._original_stdout
+
+# Usage:
+# ======
+# with HiddenPrints():
+#     print("This will not be printed")
+
+# print("This will be printed as before")
