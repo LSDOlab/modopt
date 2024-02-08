@@ -256,21 +256,20 @@ class Optimizer(object):
 
         h = 1e-6
 
-        grad_fd = np.full((nx, ), obj(x), dtype=float)
+        grad_fd = np.full((nx, ), -obj(x), dtype=float)
         if constrained:
-            jac_fd = np.outer(con(x), np.ones((nx, ), dtype=float))
+            jac_fd = np.outer(-con(x), np.ones((nx, ), dtype=float))
 
         for i in range(nx):
-            e = np.zeros((nx, ), dtype=float)
-            e[i] = h
+            e = h * np.identity(nx)[i]
 
-            grad_fd[i] -= obj(x + e)
+            grad_fd[i] += obj(x + e)
             if constrained:
-                jac_fd[:, i] -= con(x + e)
+                jac_fd[:, i] += con(x + e)
 
-        grad_fd /= -h
+        grad_fd /= h
         if constrained:
-            jac_fd /= -h
+            jac_fd /= h
 
         EPSILON = 1e-10
 
