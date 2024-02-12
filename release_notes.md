@@ -1,5 +1,5 @@
 ***********************************
-# modOpt 0.1.0 (Jan 24, 2024)
+# modOpt 0.1.0 (Feb xx, 2024)
 
 Initial Development Release
 

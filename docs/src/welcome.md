@@ -81,5 +81,7 @@ src/tutorials
 src/csdl
 src/opt_algs
 src/examples
+src/contributing
+src/changelog
 src/api
 ```
