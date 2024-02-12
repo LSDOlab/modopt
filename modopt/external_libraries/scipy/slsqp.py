@@ -38,14 +38,12 @@ class SLSQP(ScipyOptimizer):
 
     def setup_constraints(self, ):
 
-        # print(self.problem.c_lower)
-
         c_lower = self.problem.c_lower
         c_upper = self.problem.c_upper
-        # print(c_lower)
-        # print(c_upper)
 
-        if c_lower.size == 0:
+        # unconstrained problem: if c_lower=None 
+        # (in Problem(), OM, csdl, cutest problems) 
+        if not self.problem.constrained:
             # print('No constraints')
             self.constraints = ()
             return None

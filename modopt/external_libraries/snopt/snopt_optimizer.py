@@ -190,14 +190,12 @@ class SNOPTOptimizer(Optimizer):
 
     def setup_constraints(self, ):
 
-        if self.problem.c_lower.size == 0 and self.problem.c_upper.size:
-            return None
-
-        inf = self.options['Infinite_bound']
-        self.c_lower = np.where(self.problem.c_lower == -np.inf, -inf,
-                                self.problem.c_lower)
-        self.c_upper = np.where(self.problem.c_upper == np.inf, inf,
-                                self.problem.c_upper)
+        if self.problem.constrained:
+            inf = self.options['Infinite_bound']
+            self.c_lower = np.where(self.problem.c_lower == -np.inf, -inf,
+                                    self.problem.c_lower)
+            self.c_upper = np.where(self.problem.c_upper == np.inf, inf,
+                                    self.problem.c_upper)
 
     # For callback, for every method
     # Overrides base class update_outputs()

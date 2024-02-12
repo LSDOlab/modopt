@@ -62,10 +62,12 @@ class SNOPTc(SNOPTOptimizer):
         # callback = self.update_outputs
 
         start_time = time.time()
-
-        bl = np.concatenate((self.x_lower, self.c_lower))
-        bu = np.concatenate((self.x_upper, self.c_upper))
-
+        if self.problem.constrained:
+            bl = np.concatenate((self.x_lower, self.c_lower))
+            bu = np.concatenate((self.x_upper, self.c_upper))
+        else:
+            bl = self.x_lower * 1.
+            bu = self.x_upper * 1.
         # options = SNOPT_options()
         inf = 1.0e+20
 

@@ -61,6 +61,9 @@ class CSDLProblem(OptProblem):
         self.warm_x_deriv   = self.x0 - 2.      # (x0 - 2.)to keep it differernt from initial dv and warm_x values
         self.nx = len(self.x0)
         self.nc = len(sim.constraints())        # TODO: will sim.constraints() before sim.run() work?
+        if self.nc > 0:
+            self.constrained = True
+
 
     def check_if_smaller_tol(self, tol_dict):   # only for SURF    
         if not(self.warm_tol_dict):

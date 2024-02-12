@@ -144,12 +144,14 @@ class Problem(object):
         # self.c_scaler_abstract.allocate(data=self.c_scaler, setup_views=True)
 
 
-    # Overridden in CSDLProblem()
+    # Overridden in CSDLProblem(), OpenMDAOProblem(), CUTEstProblem()
     def _setup_bounds(self):
         self.x_lower = self.design_variables_dict.lower * self.x_scaler
         self.x_upper = self.design_variables_dict.upper * self.x_scaler
-        self.c_lower = self.constraints_dict.lower * self.c_scaler
-        self.c_upper = self.constraints_dict.upper * self.c_scaler
+        # When unconstrained: self.constraints_dict.lower = [], self.constraints_dict.lower = []
+        if self.constrained:
+            self.c_lower = self.constraints_dict.lower * self.c_scaler
+            self.c_upper = self.constraints_dict.upper * self.c_scaler
 
     # user defined #(call declare_gradients() and declare_jacobians() inside,
     # can later include declare_hessians())
@@ -336,8 +338,8 @@ class Problem(object):
             upper=upper,
             equals=equals,
         )
-
-        self.constrained = True
+        if not self.constrained:
+            self.constrained = True
         self.nc += np.prod(shape)
 
     # def declare_objective_gradient(self, wrt, shape=(1, ), vals=None):
