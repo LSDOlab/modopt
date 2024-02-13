@@ -1,4 +1,4 @@
-'''Example 7 : Method of Newton Lagrange'''
+'''Method of Newton Lagrange'''
 
 import numpy as np
 import time

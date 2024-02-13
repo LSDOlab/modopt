@@ -1,4 +1,4 @@
-'''Example 6 : Quartic optimization using Jax'''
+'''Quartic optimization using Jax'''
 
 import jax
 import jax.numpy as jnp 

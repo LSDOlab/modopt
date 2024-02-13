@@ -1005,33 +1005,6 @@ class Problem(object):
     def evaluate_adjoint_vector(self, ):
         pass
 
-    def evaluate_lagrangian_hessian(self, x, y, lag_mult):
-        """
-        Evaluate the Lagrangian Hessian given the design and state vectors along with the Lagrange multiplier vector.
-
-        Parameters
-        ----------
-        x : np.ndarray
-            Design variable vector.
-        y : np.ndarray
-            State variable vector.
-        lag_mult : np.ndarray
-            Lagrange multiplier vector.
-
-        Returns
-        -------
-        hessian : np.ndarray
-            Hessian matrix of the Lagrangian function with respect to the design and state vectors.
-        """
-        hessian = self.evaluate_objective_hessian(x, y)
-
-        # We cannot afford to store all the constraint Hessians for vectorizing the computation of Lagrangian Hessian so a 'for loop' is unavoidable.
-        for i in range(len(lag_mult)):
-            hessian += lag_mult[i] * self.evaluate_constraint_hessian(
-                x, y, i)
-
-        return hessian
-
     def evaluate_penalty_hessian(self, x, y, rho):
         """
         Evaluate the penalty Hessian given the design and state vectors along with the Lagrange multiplier vector.

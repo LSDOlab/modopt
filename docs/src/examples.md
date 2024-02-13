@@ -12,10 +12,12 @@ However, outputs/visualization from running the script is excluded.
 _temp/examples/ex_1quartic_opt
 _temp/examples/ex_2rosenbrock2d
 _temp/examples/ex_2quartic_opt_constrained
+_temp/examples/ex_2.1quartic_opt_scaled
 _temp/examples/ex_3quartic_opt_separate_constraints
 _temp/examples/ex_4quartic_opt_csdl
+_temp/examples/ex_6quartic_opt_jax
 _temp/examples/ex_5quartic_opt_openmdao
-_temp/examples/ex_6modularity_NewtonLagrange
-_temp/examples/ex_7bean_function
-_temp/examples/ex_8traveling_salesman
+_temp/examples/ex_7modularity_NewtonLagrange
+_temp/examples/ex_8bean_function
+_temp/examples/ex_9traveling_salesman
 ```

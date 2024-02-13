@@ -1,4 +1,4 @@
-'''Example 1 : Minimizing a Quartic function'''
+'''Minimizing a Quartic function'''
 
 import numpy as np
 from modopt import Problem

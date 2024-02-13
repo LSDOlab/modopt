@@ -1,4 +1,4 @@
-'''Example 3 : Quartic optimization with separate constraints'''
+'''Quartic optimization with separate constraints'''
 
 import numpy as np
 from modopt import Problem

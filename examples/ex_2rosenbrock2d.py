@@ -1,4 +1,4 @@
-'''Example 2 : Minimizing the Rosenbrock function'''
+'''Minimizing the Rosenbrock function'''
 
 import numpy as np
 from modopt import Problem

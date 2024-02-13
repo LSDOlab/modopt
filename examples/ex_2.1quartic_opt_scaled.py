@@ -1,4 +1,4 @@
-'''Example 2.1 : Minimizing a Quartic function with constraints - with problem scaled'''
+'''Minimizing a Quartic function with constraints and problem scaling'''
 
 import numpy as np
 from modopt import Problem

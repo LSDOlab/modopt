@@ -1,4 +1,4 @@
-'''Example 9 : Traveling Salesman Problem'''
+'''Traveling Salesman Problem'''
 
 import numpy as np
 from modopt import Problem

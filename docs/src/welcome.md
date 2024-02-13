@@ -11,7 +11,7 @@ of existing algorithms by replacing or modifying these components.
 It also enables students to perform comparative studies of their versions with a 
 standard algorithm.
 
-### Modopt as a library of optimization algorithms
+## Modopt as a library of optimization algorithms
 
 Modopt allows optimization practitioners to define the computational models that provide
 the objective, constraints, and the derivatives for their optimization problems 
@@ -33,7 +33,7 @@ library of optimization algorithms available in modOpt.
 _**Modopt as a library**_
 ```
 
-### Modopt as a development environment for optimization algorithms
+## Modopt as a development environment for optimization algorithms
 
 There are a number of transparent modules available within the package
 which users can leverage to develop new or modified optimization algorithms.

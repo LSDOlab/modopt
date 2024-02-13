@@ -1,4 +1,4 @@
-'''Example 8 : Minimizing the Bean function'''
+'''Minimizing the Bean function'''
 
 import numpy as np
 from modopt import Problem

@@ -53,13 +53,27 @@ myst_title_to_header = True
 myst_enable_extensions = ["dollarmath", "amsmath", "tasklist"]
 # nb_execution_mode = 'off'
 
+# # autoapi skip members
+# def skip_modules(app, what, name, obj, skip, options):
+#     if what == "module" and "qp_solver" in name:
+#         print(app, what, name, obj, skip, options)
+#         skip = True
+
+#     return skip
+
+# def setup(sphinx):
+#     sphinx.connect("autoapi-skip-member", skip_modules)
+
 # autoapi options
 autoapi_dirs = ["../modopt/core", "../modopt/utils"]
 autoapi_root = 'src/autoapi'
 autoapi_type = 'python'
-autoapi_file_patterns = ['*.py', '*.pyi']
-autoapi_options = [ 'members', 'undoc-members', 'private-members', 'show-inheritance', 
-                   'show-module-summary', 'special-members', 'imported-members', ]
+autoapi_file_patterns = ['*.py'] # ['*.py', '*.pyi']
+# list of patterns to ignore when finding files
+autoapi_ignore = ['*approx*', '*line*', '*merit*', '*optimization*', '*qp*', '*trust*', '*utils*'] 
+autoapi_options = ['members', 'undoc-members', 'show-inheritance', 
+                   'show-module-summary', 'imported-members', ]
+                  #  'private-members', 'special-members']
 autoapi_add_toctree_entry = False
 autoapi_member_order = 'groupwise'
 autoapi_python_class_content = 'class' # 'both' or '__init'
