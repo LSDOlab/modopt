@@ -19,7 +19,7 @@
 project = 'modopt'
 copyright = '2023, Anugrah'
 author = 'Anugrah'
-version = '0.1'
+version = '0.1.0'
 # release = 0.1.0rtc
 
 

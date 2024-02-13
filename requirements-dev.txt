@@ -1,0 +1,9 @@
+# Includes the list of all dependencies required to run setup() and  
+# use the package, along with 1. additional packages for building the docs, 
+# and, 2. interfacing packages to test interfaces on cloud.
+
+-r requirements.txt
+-r ./docs/requirements-docs.txt
+csdl @ git+https://github.com/LSDOlab/csdl.git
+openmdao
+qpsolvers

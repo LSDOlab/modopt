@@ -2,7 +2,7 @@
 # Documentation
 
 Before building the docs by running `make html` from the `/docs` directory, make sure you have 
-all the dependencies mentioned in the `requirements.txt` file installed into your current environment.
+all the dependencies mentioned in the `docs/requirements-docs.txt` file installed into your current environment.
 
 ## Writing
 Start by modifying the documentation pages by editing `.md` files in the `/src` directory.
@@ -30,8 +30,8 @@ The default website address will be generated based on your *Read the Docs* proj
 You can also customize the URL on *Read the Docs*, if needed.
 
 ### If you are just making modifications to the existing docs
-Make sure to update the `requirements.txt` with dependencies for *Read the Docs* to build the documentation exactly
-as in your local build.
+Make sure to update the `docs/requirements-docs.txt` with dependencies for *Read the Docs* to build 
+the documentation exactly as in your local build.
 Optionally, edit the `.readthedocs.yml` in the project root directory for building with specific operating systems or versions of Python.
 After you commit and push, *Read the Docs* will build your package on its servers and once its complete,
 you will see your documentation online.
