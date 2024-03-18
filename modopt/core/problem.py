@@ -310,34 +310,45 @@ class Problem(object):
                 dv_name  = dv_name[:10] if (len(dv_name)>10) else dv_name
                 l = -1.e99 if x_l[i] == -np.inf else x_l[i]
                 u = +1.e99 if x_u[i] == +np.inf else x_u[i]
-                output += dv_template.format(idx=idx, name=dv_name+f'[{i}]', scaler=x_s[i], lower=l, value=x, upper=u)
+                output += dv_template.format(idx=idx, name=dv_name+f'[{i}]', scaler=x_s[idx], lower=l, value=x, upper=u)
                 idx += 1
 
         # Print constraint details
         if self.constrained:
             output += f'\n\n\tConstraints:\n'
-            header = "\t{0} | {1} | {2} | {3} | {4} | {5}".format(
-                                                        pad_name('Index', 5),
-                                                        pad_name('Name', 10),
-                                                        pad_name('Scaler', 13),
-                                                        pad_name('Lower Limit', 13),
-                                                        pad_name('Value', 13),
-                                                        pad_name('Upper Limit', 13),
-                                                        )
+            header = "\t{0} | {1} | {2} | {3} | {4} | {5} | {6} ".format(
+                                                            pad_name('Index', 5),
+                                                            pad_name('Name', 10),
+                                                            pad_name('Scaler', 13),
+                                                            pad_name('Lower Limit', 13),
+                                                            pad_name('Value', 13),
+                                                            pad_name('Upper Limit', 13),
+                                                            pad_name('Lag. mult.', 13),
+                                                            )
             output += header
             idx = 0
+            lag = any(x in self.declared_variables for x in ['lag_grad', 'lag_hess', 'lag_hvp'])
+            if lag:
+                con_template = "\n\t{idx:>5} | {name:<10} | {scaler:<+.6e} | {lower:<+.6e} | {value:<+.6e} | {upper:<+.6e} | "
+                z = self.lag_mult
+            else:
+                con_template = "\n\t{idx:>5} | {name:<10} | {scaler:<+.6e} | {lower:<+.6e} | {value:<+.6e} | {upper:<+.6e} | {lag:<+.6e}"
+
             for con_name, con in cons.dict_.items():
                 for i, c in enumerate(con.flatten()):
                     con_name  = con_name[:10] if (len(con_name)>10) else con_name
                     l = -1.e99 if c_l[i] == -np.inf else c_l[i]
                     u = +1.e99 if c_u[i] == +np.inf else c_u[i]
-                    output += dv_template.format(idx=idx, name=con_name+f'[{i}]', scaler=c_s[i], lower=l, value=c, upper=u)
+                    if lag:
+                        output += con_template.format(idx=idx, name=con_name+f'[{i}]', scaler=c_s[idx], lower=l, value=c, upper=u)
+                    else:
+                        output += con_template.format(idx=idx, name=con_name+f'[{i}]', scaler=c_s[idx], lower=l, value=c, upper=u, lag=z[idx])
                     idx += 1
 
         # # <<<<<<<<<<<<<<<<<<<<<
         # # PROBLEM DETAILS ENDS
             
-        print(output)
+        return output
 
     def initialize(self):
         '''
