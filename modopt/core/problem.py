@@ -225,7 +225,7 @@ class Problem(object):
         Print the details of the optimization problem.
         """
         name = self.problem_name
-        obj  = self.obj; 
+        obj  = self.obj
         obj_scaler = self.obj_scaler
         dvs  = self.x
         x_l  = self.x_lower; x_u  = self.x_upper; x_s  = self.x_scaler
@@ -241,6 +241,7 @@ class Problem(object):
         # PROBLEM OVERVIEW BEGINS
         # >>>>>>>>>>>>>>>>>>>>>>>
         title1  = 'Problem Overview :'
+        # output  = '\n\t'+'-'*100
         output  = f'\n\t{title1}\n'
         output += '\t'+'-'*100
         output += f'\n\t' + pad_name('Problem name', 25) + f': {name}'
@@ -268,6 +269,8 @@ class Problem(object):
 
         # <<<<<<<<<<<<<<<<<<<<<
         # PROBLEM OVERVIEW ENDS
+        output += '\n\t' + '-'*100
+        
 
         # PROBLEM DETAILS BEGINS
         # >>>>>>>>>>>>>>>>>>>>>>>
@@ -287,9 +290,9 @@ class Problem(object):
         obj_template = "\n\t{idx:>5} | {name:<10} | {scaler:<+.6e} | {value:<+.6e}"
         for i, obj_name in enumerate(obj.keys()):
             obj_value   = obj[obj_name]
-            obj_scaler  = obj_scaler[obj_name]
+            obj_s       = obj_scaler[obj_name]
             obj_name    = obj_name[:10] if (len(obj_name)>10) else obj_name
-            output     += obj_template.format(idx=i, name=obj_name, scaler=obj_scaler, value=obj_value)
+            output     += obj_template.format(idx=i, name=obj_name, scaler=obj_s, value=obj_value)
         
         # Print design variable details
         output += f'\n\n\tDesign Variables:\n'
@@ -329,10 +332,11 @@ class Problem(object):
             idx = 0
             lag = any(x in self.declared_variables for x in ['lag_grad', 'lag_hess', 'lag_hvp'])
             if lag:
-                con_template = "\n\t{idx:>5} | {name:<10} | {scaler:<+.6e} | {lower:<+.6e} | {value:<+.6e} | {upper:<+.6e} | "
-                z = self.lag_mult
-            else:
                 con_template = "\n\t{idx:>5} | {name:<10} | {scaler:<+.6e} | {lower:<+.6e} | {value:<+.6e} | {upper:<+.6e} | {lag:<+.6e}"
+                obj_s = list(obj_scaler.values())[0]
+                z = self.lag_mult.get_data() * obj_s / c_s
+            else:
+                con_template = "\n\t{idx:>5} | {name:<10} | {scaler:<+.6e} | {lower:<+.6e} | {value:<+.6e} | {upper:<+.6e} | "
 
             for con_name, con in cons.dict_.items():
                 for i, c in enumerate(con.flatten()):
@@ -340,13 +344,14 @@ class Problem(object):
                     l = -1.e99 if c_l[i] == -np.inf else c_l[i]
                     u = +1.e99 if c_u[i] == +np.inf else c_u[i]
                     if lag:
-                        output += con_template.format(idx=idx, name=con_name+f'[{i}]', scaler=c_s[idx], lower=l, value=c, upper=u)
-                    else:
                         output += con_template.format(idx=idx, name=con_name+f'[{i}]', scaler=c_s[idx], lower=l, value=c, upper=u, lag=z[idx])
+                    else:
+                        output += con_template.format(idx=idx, name=con_name+f'[{i}]', scaler=c_s[idx], lower=l, value=c, upper=u)
                     idx += 1
 
         # # <<<<<<<<<<<<<<<<<<<<<
         # # PROBLEM DETAILS ENDS
+        output += '\n\t' + '-'*100 + '\n'
             
         return output
 
@@ -430,7 +435,8 @@ class Problem(object):
             self.con.allocate(setup_views=True)
 
             self.lag_mult = Vector(self.constraints_dict)
-            self.lag_mult.allocate(setup_views=True)
+            self.lag_mult.allocate(data=np.zeros((self.nc, )),
+                                   setup_views=True)
 
             self.jvp = Vector(self.constraints_dict)
             self.jvp.allocate(data=np.zeros((self.nc, )),
