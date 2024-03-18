@@ -341,24 +341,25 @@ class Problem(object):
 
     def initialize(self):
         '''
-        Set problem name and any problem-specific options.
         User-defined method.
+        Set problem name and any problem-specific options.
         '''
         pass
 
     def setup(self):
         '''
-        Call add_design_variables(), add_objective(), and add_constraints() inside.
         User-defined method.
+        Call add_design_variables(), add_objective(), and add_constraints() inside.
         '''
         pass
 
     def setup_derivatives(self, ):
         '''
-        Call declare_objective_gradient(), declare_objective_hessian(), 
-        declare_constraint_jacobian(), declare_constraint_jvp(), declare_lagrangian_gradient()
-        declare_lagrangian_hessian(), and declare_lagrangian_hvp() inside.
         User-defined method.
+        Call declare_objective_gradient(), declare_objective_hessian(), declare_objective_hvp(),
+        declare_constraint_jacobian(), declare_constraint_jvp(), declare_constraint_vjp(), 
+        declare_lagrangian_gradient(), declare_lagrangian_hessian(), and declare_lagrangian_hvp() 
+        inside.
         '''
         pass
 
