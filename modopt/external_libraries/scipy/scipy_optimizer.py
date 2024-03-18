@@ -387,7 +387,7 @@ class ScipyOptimizer(Optimizer):
 
         if self.optimal_variables:
             print("\t" * 1, "Optimal variables",
-                  " " * (total_length - 10), ':',
+                  " " * (total_length - 17), ':',
                   self.scipy_output['x'])
 
         bottom_line_length = total_length + 25

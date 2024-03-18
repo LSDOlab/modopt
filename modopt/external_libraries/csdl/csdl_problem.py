@@ -64,6 +64,8 @@ class CSDLProblem(OptProblem):
         if self.nc > 0:
             self.constrained = True
 
+    def raise_issues_with_user_setup(self, ):
+        pass
 
     def check_if_smaller_tol(self, tol_dict):   # only for SURF    
         if not(self.warm_tol_dict):

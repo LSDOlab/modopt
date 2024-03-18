@@ -83,6 +83,8 @@ class OpenMDAOProblem(Problem):
 #             if tol_dict[state_name] < warm_tol:
 #                 return True
 #         return False
+    def raise_issues_with_user_setup(self, ):
+        pass
     
     def check_if_warm_and_run_model(self, x, guess_dict=None, tol_dict=None, 
                                     force_rerun=False, check_failure=False):
