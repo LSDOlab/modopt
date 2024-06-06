@@ -10,15 +10,17 @@ from modopt.core.merit_function import MeritFunction
 from modopt.core.trust_region import TrustRegion
 
 # import modeling library interfaces
-from modopt.external_libraries.csdl import (CSDLProblem, )
+from modopt.external_libraries.csdl import (CSDLProblem, CSDLAlphaProblem)
 from modopt.external_libraries.openmdao import (OpenMDAOProblem, )
 
 # import test-suite interfaces
-# from modopt.external_libraries.pycutest import (, )
+# from modopt.external_libraries.pycutest import (CUTEstProblem, )
 
 # import external optimizer library interfaces
 from modopt.external_libraries.scipy import (SLSQP, COBYLA, BFGS)
 from modopt.external_libraries.snopt import SNOPTc as SNOPT
+# from modopt.external_libraries.qpsolvers import QPSolver
+# from modopt.external_libraries.cvxopt import CVXOPT
 
 # import built-in optimizers
 # unconstrained
