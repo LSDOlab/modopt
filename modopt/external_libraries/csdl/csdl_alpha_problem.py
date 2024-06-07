@@ -24,11 +24,12 @@ class CSDLAlphaProblem(OptProblem):
 
         (dScaler, dLower, dUpper, dInitial), (cScaler, cLower, cUpper), oScaler = sim.get_optimization_metadata()
 
-        self.x0 = dInitial.flatten() * 1.0
-        self.nx = len(self.x0)
+        self.nx = len(dInitial.flatten())
 
         if not (dScaler.shape == dLower.shape == dUpper.shape == dInitial.shape == (self.nx,)):
-            raise ValueError(f'Design variable metadata dimensions are not consistent. shape(dScaler, dLower, dUpper, dInitial) = ({dScaler.shape}, {dLower.shape}, {dUpper.shape}, {dInitial.shape})')
+            raise ValueError(f'Design variable metadata dimensions are not consistent. shape(dvScaler, dvLower, dvUpper, dvInitial) = ({dScaler.shape}, {dLower.shape}, {dUpper.shape}, {dInitial.shape})')
+        # Note that x0, x_lower, x_upper are all in scaled form
+        self.x0 = dInitial * dScaler
         self.x_lower  = dLower * dScaler
         self.x_upper  = dUpper * dScaler
         self.x_scaler = dScaler * 1.0
@@ -38,9 +39,10 @@ class CSDLAlphaProblem(OptProblem):
             if (cScaler is not None) or (cLower is not None) or (cUpper is not None):
                 raise ValueError(f'Constraint metadata is inconsistent. (cScaler, cLower, cUpper) = ({cScaler}, {cLower}, {cUpper})')
         else:
-            self.nc = len(cScaler)
+            self.nc = len(cScaler.flatten())
             if not (cScaler.shape == cLower.shape == cUpper.shape == (self.nc,)):
                 raise ValueError(f'Constraint metadata dimensions are not consistent. shape(cScaler, cLower, cUpper) = ({cScaler.shape}, {cLower.shape}, {cUpper.shape})')
+            # Note that c_lower, c_upper are both in scaled form
             self.c_lower  = cLower * cScaler
             self.c_upper  = cUpper * cScaler
             self.c_scaler = cScaler * 1.0
@@ -50,16 +52,78 @@ class CSDLAlphaProblem(OptProblem):
                 raise ValueError(f'Objective scaler dimensions must be (1,) for single objective optimization. shape(oScaler) = {oScaler.shape}')
         self.f_scaler = oScaler * 1.0 if oScaler is not None else 1.0
         
-        self.model_evals = 0                      # number of model evaluations
-        self.deriv_evals = 0                      # number of derivative evaluations
+        self.model_evals = 0                    # number of model evaluations
+        self.deriv_evals = 0                    # number of derivative evaluations
         self.fail1 = False                      # failure of functions
         self.fail2 = False                      # failure of functions or derivatives
-        self.warm_x         = self.x0 - 1.      # (x0 - 1.) to keep it different from initial dv values
-        self.warm_x_deriv   = self.x0 - 2.      # (x0 - 2.)to keep it different from initial dv and warm_x values
+        self.warm_x       = self.x0 - 1.      # (x0 - 1.) to keep it different from initial dv values
+        self.warm_x_deriv = self.x0 - 2.      # (x0 - 2.) to keep it different from initial dv and warm_x values
         if self.nc > 0:
             self.constrained = True
 
         self.SURF_mode = False # True if using SURF, False if using RS/FS
+        
+        # Run checks for the first model evaluation
+        sim.update_design_variables(self.x0/self.x_scaler)
+        f_us, c_us = sim.run_forward()
+        
+        if f_us is not None:
+            if self.f_scaler is None:
+                raise ValueError('Objective scaler is None but objective function returned a value. Please provide a valid scaler.')     
+            if f_us.shape != (1,):
+                raise ValueError(f'Only single objective optimization is supported but returned multiple objectives. shape(objective) = {f_us.shape}')
+            if np.isnan(np.sum(f_us)) or np.isinf(np.sum(f_us)):
+                raise Exception('Objective returned NAN/INF for the first run. Please check the model setup.')
+            self.f_s = f_us * self.f_scaler
+        else:
+            if self.f_scaler is not None:
+                raise ValueError('Objective scaler is not None, but objective function returned None. Please check the model setup.')
+            
+        if c_us is not None:
+            if self.c_scaler is None:
+                raise ValueError('Constraint scaler is None but constraint function returned a value. Please provide a valid scaler.')
+            if c_us.shape != (self.nc,):
+                raise ValueError(f'Constraint function returned shape ({c_us.shape},) but ({self.nc},) was expected corresponding to provided cScaler, cLower, and cUpper.')
+            if np.isnan(np.sum(c_us)) or np.isinf(np.sum(c_us)):
+                raise Exception('Constraints contain NAN/INF for the first run. Please check the model setup.')
+            self.c_s = c_us * self.c_scaler
+        else:
+            if self.c_scaler is not None:
+                raise ValueError('Constraint scaler is not None, but constraint function returned None. Please check the model setup.')
+            
+        self.model_evals += 1
+        self.warm_x[:] = self.x0
+            
+        # Run checks for the first derivative evaluation
+        sim.compute_optimization_derivatives()
+        g_us, j_us = sim.compute_optimization_derivatives()
+
+        if g_us is not None:
+            if self.f_scaler is None:
+                raise ValueError('Objective scaler is None but objective gradient returned a value. Please provide a valid scaler.')
+            if g_us.shape != (1, self.nx):
+                raise ValueError(f'Objective gradient must be a row vector of shape (1, {self.nx}) but computed gradient has shape {g_us.shape}.')
+            if np.isnan(np.sum(g_us)) or np.isinf(np.sum(g_us)):
+                raise Exception('Objective gradient contains NAN/INF for the first run. Please check the model setup.')
+            self.g_s = g_us[0] * self.f_scaler / self.x_scaler
+        else:
+            if self.f_scaler is not None:
+                raise ValueError('Objective scaler is not None, but objective gradient returned None. Please check the model setup.')
+            
+        if j_us is not None:
+            if self.c_scaler is None:
+                raise ValueError('Constraint scaler is None but constraint Jacobian returned a value. Please provide a valid scaler.')
+            if j_us.shape != (self.nc, self.nx):
+                raise ValueError(f'Constraint Jacobian must be a matrix of shape ({self.nc}, {self.nx}) but computed Jacobian has shape {j_us.shape}.')
+            if np.isnan(np.sum(j_us)) or np.isinf(np.sum(j_us)):
+                raise Exception('Constraint Jacobian contains NAN/INF for the first run. Please check the model setup.')
+            self.j_s = j_us * np.outer(self.c_scaler, 1./self.x_scaler)
+        else:
+            if self.c_scaler is not None:
+                raise ValueError('Constraint scaler is not None, but constraint Jacobian returned None. Please check the model setup.')
+
+        self.deriv_evals += 1
+        self.warm_x_deriv[:] = self.x0
 
     def raise_issues_with_user_setup(self, ):
         pass
@@ -72,35 +136,31 @@ class CSDLAlphaProblem(OptProblem):
     def check_if_warm_and_run_model(self, x, guess_dict=None, tol_dict=None, 
                                     force_rerun=False, check_failure=False):
         '''
-        Input x is the unscaled design variable vector.
+        Input x is the scaled design variable vector.
         '''
 
         sim = self.options['simulator']
         if not self.SURF_mode:      # for pure RS/FS 
             if (not np.array_equal(self.warm_x, x)) or force_rerun:
-                sim.update_design_variables(x)
+                sim.update_design_variables(x/self.x_scaler)
                 try:
                     f_us, c_us = sim.run_forward()
                     self.fail1 = False
                     if f_us is not None:
-                        if np.isnan(np.sum(f_us)) or np.isinf(np.sum(f_us)):
-                            self.fail1 = True
-                            if self.model_evals == 0:
-                                raise Exception('Objective returned NAN/INF for the first run. Please check the model setup.')
                         self.f_s = f_us * self.f_scaler
+                        if np.isnan(np.sum(f_us)) or np.isinf(np.sum(f_us)):
+                            raise Exception('Objective returned NAN/INF. Please check the model.')
                             
                     if c_us is not None:
-                        if np.isnan(np.sum(c_us)) or np.isinf(np.sum(c_us)):
-                            self.fail1 = True
-                            if self.model_evals == 0:
-                                raise Exception('Constraints contain NAN/INF for the first run. Please check the model setup.')
                         self.c_s = c_us * self.c_scaler
+                        if np.isnan(np.sum(c_us)) or np.isinf(np.sum(c_us)):
+                            raise Exception('Constraints contain NAN/INF. Please check the model.')
 
                 except:
                     self.fail1 = True
-                    if self.model_evals == 0:
-                        raise Exception('Model evaluation failed for the first run. Please check the model setup.')
-                
+                    if not check_failure:
+                        raise Exception('Model evaluation failed. Please check the model.')
+                    
                 self.model_evals += 1
                 self.warm_x[:] = x
 
@@ -117,28 +177,25 @@ class CSDLAlphaProblem(OptProblem):
                         g_us, j_us = sim.compute_optimization_derivatives()
                         self.fail2 = False
                         if g_us is not None:
+                            self.g_s = g_us[0] * self.f_scaler / self.x_scaler # g_us is a 2d matrix of gradients for each objective
                             if np.isnan(np.sum(g_us)) or np.isinf(np.sum(g_us)):
-                                self.fail2 = True
-                                if self.deriv_evals == 0:
-                                    raise Exception('Objective gradient contains NAN/INF for the first run. Please check the model setup.')
-                            self.g_s = g_us[0] * self.f_scaler / self.x_scaler # g_us is 2d matrix of gradients for each objective
+                                raise Exception('Objective gradient contains NAN/INF. Please check the model.')
                         
                         if j_us is not None:
-                            if np.isnan(np.sum(j_us)) or np.isinf(np.sum(j_us)):
-                                self.fail2 = True
-                                if self.deriv_evals == 0:
-                                    raise Exception('Constraint Jacobian contains NAN/INF for the first run. Please check the model setup.')
                             self.j_s = j_us * np.outer(self.c_scaler, 1./self.x_scaler)
+                            if np.isnan(np.sum(j_us)) or np.isinf(np.sum(j_us)):
+                                raise Exception('Constraint Jacobian contains NAN/INF. Please check the model.')
                             
                     except:
                         self.fail2 = True
-                        if self.deriv_evals == 0:
-                            raise Exception('Derivative evaluation failed for the first run. Please check the model setup.')
+                        if not check_failure:
+                            raise Exception('Derivative evaluation failed. Please check the model.')
                 else:
                     self.fail2 = True
                         
                 self.deriv_evals += 1
                 self.warm_x_deriv[:] = x
+                
             return
 
     def _setup_bounds(self): # x and c bounds don't include states y and residuals R for SURF
@@ -162,7 +219,7 @@ class CSDLAlphaProblem(OptProblem):
     def _compute_objective(self, x, guess_dict=None, tol_dict=None, 
                            force_rerun=False, check_failure=False):
         print('Computing objective >>>>>>>>>>')
-        self.check_if_warm_and_run_model(x/self.x_scaler, guess_dict, tol_dict, 
+        self.check_if_warm_and_run_model(x, guess_dict, tol_dict, 
                                          force_rerun, check_failure)
         print('---------Computed objective---------')
         return self._get_objective()
@@ -171,7 +228,7 @@ class CSDLAlphaProblem(OptProblem):
     def _compute_objective_gradient(self, x, guess_dict=None, tol_dict=None, 
                                     force_rerun=False, check_failure=False):
         print('Computing gradient >>>>>>>>>>')
-        self.check_if_warm_and_compute_derivatives(x/self.x_scaler, guess_dict, tol_dict, 
+        self.check_if_warm_and_compute_derivatives(x, guess_dict, tol_dict, 
                                                    force_rerun, check_failure)
         print('---------Computed gradient---------')
         return self._get_objective_gradient()
@@ -179,7 +236,7 @@ class CSDLAlphaProblem(OptProblem):
     def _compute_constraints(self, x, guess_dict=None, tol_dict=None, 
                              force_rerun=False, check_failure=False):
         print('Computing constraints >>>>>>>>>>')
-        self.check_if_warm_and_run_model(x/self.x_scaler, guess_dict, tol_dict, 
+        self.check_if_warm_and_run_model(x, guess_dict, tol_dict, 
                                          force_rerun, check_failure)
         print('---------Computed constraints---------')
         return self._get_constraints()
@@ -187,15 +244,15 @@ class CSDLAlphaProblem(OptProblem):
     def _compute_constraint_jacobian(self, x, guess_dict=None, tol_dict=None, 
                                      force_rerun=False, check_failure=False):
         print('Computing Jacobian >>>>>>>>>>')
-        self.check_if_warm_and_compute_derivatives(x/self.x_scaler, guess_dict, tol_dict, 
+        self.check_if_warm_and_compute_derivatives(x, guess_dict, tol_dict, 
                                                    force_rerun, check_failure)
         print('---------Computed Jacobian---------')
         return self._get_constraint_jacobian()
 
     def _compute_all(self, x, force_rerun=False, check_failure=False):                              # only for SNOPTC, (NOT meant for SURF)
         print('Computing all at once >>>>>>>>>>')
-        # self.check_if_warm_and_run_model(x/self.x_scaler, force_rerun=force_rerun, check_failure=check_failure)                 # This is rqd, o/w warm derivs skip model evals --> not sure since the warm_x and warm_x_deriv are always equal for compute_all
-        self.check_if_warm_and_compute_derivatives(x/self.x_scaler, force_rerun=force_rerun, check_failure=check_failure)
+        # self.check_if_warm_and_run_model(x, force_rerun=force_rerun, check_failure=check_failure)                 # This is rqd, o/w warm derivs skip model evals --> not sure since the warm_x and warm_x_deriv are always equal for compute_all
+        self.check_if_warm_and_compute_derivatives(x, force_rerun=force_rerun, check_failure=check_failure)
         print('---------Computed all at once---------')
         return self.fail2, self.f_s, self.c_s, self.g_s, self.j_s
     

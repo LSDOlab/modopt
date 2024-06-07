@@ -15,6 +15,7 @@ _temp/examples/ex_2quartic_opt_constrained
 _temp/examples/ex_2.1quartic_opt_scaled
 _temp/examples/ex_3quartic_opt_separate_constraints
 _temp/examples/ex_4quartic_opt_csdl
+_temp/examples/ex_4quartic_opt_csdl_alpha
 _temp/examples/ex_6quartic_opt_jax
 _temp/examples/ex_5quartic_opt_openmdao
 _temp/examples/ex_7modularity_NewtonLagrange
