@@ -281,13 +281,12 @@ class Optimizer(object):
         grad_abs_error = np.absolute(grad_fd - grad_exact)
 
         # FD is assumed to give the actual gradient
-        grad_rel_error = grad_abs_error / (np.absolute(grad_fd) +
-                                           EPSILON)
+        grad_rel_error = grad_abs_error / (np.linalg.norm(grad_fd, 2) + EPSILON)
+        # grad_rel_error = grad_abs_error / (np.absolute(grad_fd) + EPSILON)
 
         if constrained:
             jac_abs_error = np.absolute(jac_fd - jac_exact)
-            jac_rel_error = jac_abs_error / np.linalg.norm(
-                jac_fd, 'fro')
+            jac_rel_error = jac_abs_error / (np.linalg.norm(jac_fd, 'fro') + EPSILON)
 
             # jac_rel_error = jac_abs_error / (np.absolute(jac_fd) + EPSILON)
             # jac_rel_error = jac_abs_error / (np.absolute(jac_exact.toarray()) + EPSILON)
