@@ -20,7 +20,7 @@ class PSO(Optimizer):
         self.options.declare('cognitive_coeff', default=0.1, types=float)
         self.options.declare('social_coeff', default=0.1, types=float)
 
-        self.default_outputs_format = {
+        self.available_outputs = {
             'itr': int,
             'obj': float,
             # for arrays from each iteration, sizes need to be declared

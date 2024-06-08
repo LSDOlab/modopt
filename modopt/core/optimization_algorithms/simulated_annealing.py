@@ -17,7 +17,7 @@ class SimulatedAnnealing(Optimizer):
         self.options.declare('T0', default=1., types=float)
         self.options.declare('tol', default=1., types=float)
 
-        self.default_outputs_format = {
+        self.available_outputs = {
             'itr': int,
             'obj': float,
             'temp': float,

@@ -22,12 +22,12 @@ class SLSQP(ScipyOptimizer):
         self.options.declare('ftol', default=1e-6, types=float)
 
     def declare_outputs(self, ):
-        self.default_outputs_format = {
+        self.available_outputs = {
             # for arrays from each iteration, shapes need to be declared
             'x': (float, (self.problem.nx, )),
         }
 
-        self.options.declare('outputs', types=list, default=['x'])
+        self.options.declare('outputs', values=([],['x']), default=[])
 
     def setup(self):
         # Adapt bounds as scipy Bounds() object

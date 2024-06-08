@@ -45,7 +45,7 @@ class SQP_SURF(Optimizer):
                              default=lambda: None,
                              types=type(lambda x: None))
 
-        self.default_outputs_format = {
+        self.available_outputs = {
             'major': int,
             'obj': float,
             # for arrays from each iteration, shapes need to be declared
@@ -121,15 +121,15 @@ class SQP_SURF(Optimizer):
         # Total num. of constraints including residuals
         m = self.m = nc + 2 * nr
 
-        self.default_outputs_format['lag_mult'] = (float, (m, ))
-        # self.default_outputs_format['lam'] = (float, (nc, ))
-        # self.default_outputs_format['psi'] = (float, (nr, ))
+        self.available_outputs['lag_mult'] = (float, (m, ))
+        # self.available_outputs['lam'] = (float, (nc, ))
+        # self.available_outputs['psi'] = (float, (nr, ))
 
-        self.default_outputs_format['rho'] = (float, (m, ))
-        self.default_outputs_format['slacks'] = (float, (m, ))
-        self.default_outputs_format['constraints'] = (float, (m, ))
-        # self.default_outputs_format['constraints'] = (float, (nc, ))
-        # self.default_outputs_format['residuals'] = (float, (nr, ))
+        self.available_outputs['rho'] = (float, (m, ))
+        self.available_outputs['slacks'] = (float, (m, ))
+        self.available_outputs['constraints'] = (float, (m, ))
+        # self.available_outputs['constraints'] = (float, (nc, ))
+        # self.available_outputs['residuals'] = (float, (nr, ))
         # Damping parameters
         self.delta_rho = 1.
         self.num_rho_changes = 0

@@ -17,7 +17,7 @@ class QuasiNewton(Optimizer):
         self.options.declare('max_itr', default=1000, types=int)
         self.options.declare('opt_tol', types=float)
 
-        self.default_outputs_format = {
+        self.available_outputs = {
             'itr': int,
             'obj': float,
             # for arrays from each iteration, sizes need to be declared

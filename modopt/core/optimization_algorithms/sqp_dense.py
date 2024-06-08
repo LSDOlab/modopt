@@ -35,7 +35,7 @@ class SQP(Optimizer):
         self.options.declare('opt_tol', default=1e-7, types=float)
         self.options.declare('feas_tol', default=1e-7, types=float)
 
-        self.default_outputs_format = {
+        self.available_outputs = {
             'major': int,
             'obj': float,
             # for arrays from each iteration, shapes need to be declared
@@ -69,10 +69,10 @@ class SQP(Optimizer):
         self.setup_constraints()
         nx = self.nx
         nc = self.nc
-        self.default_outputs_format['lag_mult'] = (float, (nc, ))
-        self.default_outputs_format['rho'] = (float, (nc, ))
-        self.default_outputs_format['slacks'] = (float, (nc, ))
-        self.default_outputs_format['constraints'] = (float, (nc, ))
+        self.available_outputs['lag_mult'] = (float, (nc, ))
+        self.available_outputs['rho'] = (float, (nc, ))
+        self.available_outputs['slacks'] = (float, (nc, ))
+        self.available_outputs['constraints'] = (float, (nc, ))
         # Damping parameters
         self.delta_rho = 1.
         self.num_rho_changes = 0

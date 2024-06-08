@@ -47,7 +47,7 @@ class SQP(Optimizer):
                              default=lambda: None,
                              types=(MethodType, FunctionType))
 
-        self.default_outputs_format = {
+        self.available_outputs = {
             'major': int,
             'obj': float,
             # for arrays from each iteration, shapes need to be declared
@@ -84,10 +84,10 @@ class SQP(Optimizer):
         nx = self.nx
         nc = self.nc
 
-        self.default_outputs_format['lag_mult'] = (float, (self.nc, ))
-        self.default_outputs_format['rho'] = (float, (self.nc, ))
-        self.default_outputs_format['slacks'] = (float, (self.nc, ))
-        self.default_outputs_format['constraints'] = (float,
+        self.available_outputs['lag_mult'] = (float, (self.nc, ))
+        self.available_outputs['rho'] = (float, (self.nc, ))
+        self.available_outputs['slacks'] = (float, (self.nc, ))
+        self.available_outputs['constraints'] = (float,
                                                       (self.nc, ))
         # Damping parameters
         self.delta_rho = 1.

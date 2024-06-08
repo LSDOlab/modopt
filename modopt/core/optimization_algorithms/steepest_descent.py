@@ -15,7 +15,7 @@ class SteepestDescent(Optimizer):
         self.options.declare('max_itr', default=1000, types=int)
         self.options.declare('opt_tol', default=1e-5, types=float)
 
-        self.default_outputs_format = {
+        self.available_outputs = {
             'itr': int,
             'obj': float,
             # for arrays from each iteration, shapes need to be declared
@@ -30,7 +30,7 @@ class SteepestDescent(Optimizer):
         self.options.declare(
             'outputs',
             types=list,
-            default=list(self.default_outputs_format.keys()))
+            default=list(self.available_outputs.keys()))
 
     def setup(self):
         self.LS = ScipyLS(f=self.obj, g=self.grad, max_step=50.)

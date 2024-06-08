@@ -30,39 +30,41 @@ class Optimizer(object):
 
         name = self.problem_name
         self.outputs = {}
-        fmt = self.default_outputs_format
+        fmt = self.available_outputs
         dirName = name + '_outputs'
+        
+        # To print different outputs in different formats to different files
+        if len (self.options['outputs']) > 0:
+            # Create new directory for all the outputs of optimization
+            try:
+                os.mkdir(dirName)
+            except FileExistsError:
+                print("Directory ", dirName, " already exists")
 
-        # Create new directory for all the outputs of optimization
-        try:
-            os.mkdir(dirName)
-        except FileExistsError:
-            print("Directory ", dirName, " already exists")
+            # Only user-specified outputs will be stored
+            for key in self.options['outputs']:
+                # TODO: Add a test for this
+                if key not in fmt:
+                    raise ValueError(
+                        'Declared unavailable output "{}"'.format(key))
 
-        # Only user-specified outputs will be stored
-        for key in self.options['outputs']:
-            # TODO: Add a test for this
-            if key not in fmt:
-                raise ValueError(
-                    'Declared unavailable output "{}"'.format(key))
+                # Create new dictionaries for all user-specified outputs
+                if isinstance(fmt[key], tuple):
+                    self.outputs[key] = np.empty((1, ) + fmt[key][1],
+                                                dtype=fmt[key][0])
 
-            # Create new dictionaries for all user-specified outputs
-            if isinstance(fmt[key], tuple):
-                self.outputs[key] = np.empty((1, ) + fmt[key][1],
-                                             dtype=fmt[key][0])
-
-                with open(dirName + '/' + key + '.out', 'w') as f:
-                    pass
-            else:
-                self.outputs[key] = np.array([], dtype=fmt[key])
-                with open(dirName + '/' + key + '.out', 'w') as f:
-                    pass
+                    with open(dirName + '/' + key + '.out', 'w') as f:
+                        pass
+                else:
+                    self.outputs[key] = np.array([], dtype=fmt[key])
+                    with open(dirName + '/' + key + '.out', 'w') as f:
+                        pass
 
     def setup(self, ):
         pass
 
     def print_available_outputs(self, ):
-        print(self.default_outputs_format)
+        print(self.available_outputs)
 
     def run_post_processing(self):
         # Removes the first entry of the array when it was initialized as empty
@@ -118,7 +120,7 @@ class Optimizer(object):
 
             # Raise error if user tries to update ouptput not available in default outputs
             # for an optimizer
-            elif key not in self.default_outputs_format:
+            elif key not in self.available_outputs:
                 raise ValueError(
                     'Unavailable output "{}" is passed in to be updated'
                     .format(key))

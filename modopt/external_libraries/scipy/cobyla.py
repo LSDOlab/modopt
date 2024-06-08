@@ -21,7 +21,7 @@ class COBYLA(ScipyOptimizer):
         self.options.declare('catol', default=0.0002, types=float)
 
     def declare_outputs(self, ):
-        self.default_outputs_format = {}
+        self.available_outputs = {}
 
         self.options.declare('outputs', types=list, default=[])
 

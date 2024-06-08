@@ -13,7 +13,7 @@ class SNOPTa(SNOPTOptimizer):
         # self.options.declare('maxiter', default=100, types=int)
 
     def declare_outputs(self, ):
-        self.default_outputs_format = {
+        self.available_outputs = {
             # for arrays from each iteration, shapes need to be declared
             'x': (float, (self.problem.nx, )),
         }

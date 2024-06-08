@@ -304,15 +304,16 @@ class ScipyOptimizer(Optimizer):
     # trust-constr can call with more information
     # Overrides base class update_outputs()
     def update_outputs(self, xk, optimize_result=None):
-        name = self.problem_name
-        with open(name + '_x.out', 'a') as f:
-            np.savetxt(f, xk.reshape(1, xk.size))
+        if len(self.options['outputs']) > 0:
+            name = self.problem_name
+            with open(name + '_x.out', 'a') as f:
+                np.savetxt(f, xk.reshape(1, xk.size))
 
-        self.outputs['x'] = np.append(
-            self.outputs['x'],
-            #   xk.reshape((1, ) + (xk.size,)),
-            xk.reshape((1, ) + xk.shape),
-            axis=0)
+            self.outputs['x'] = np.append(
+                self.outputs['x'],
+                #   xk.reshape((1, ) + (xk.size,)),
+                xk.reshape((1, ) + xk.shape),
+                axis=0)
 
         # For 'trust-constr', OptimizeResult() object state is available after each iteration
         if (optimize_result is not None) and (optimize_result != True):

@@ -22,7 +22,7 @@ class NewtonLagrange(Optimizer):
         self.options.declare('opt_tol', default=1e-8, types=float)
         self.options.declare('feas_tol', default=1e-8, types=float)
 
-        self.default_outputs_format = {
+        self.available_outputs = {
             'itr': int,
             'obj': float,
             # for arrays from each iteration, sizes need to be declared

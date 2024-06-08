@@ -17,7 +17,7 @@ class NelderMead(Optimizer):
         self.options.declare('initial_length', default=1., types=float)
         self.options.declare('tol', default=1e-4, types=float)
 
-        self.default_outputs_format = {
+        self.available_outputs = {
             'itr': int,
             'obj': float,
             # for arrays from each iteration, sizes need to be declared
