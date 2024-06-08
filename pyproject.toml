@@ -1,0 +1,78 @@
+[build-system]
+requires = ['setuptools']
+build-backend = 'setuptools.build_meta'
+
+[project]
+name = 'modopt'
+description = 'A modular development environment and library for optimization algorithms.'
+readme = 'README.md'
+requires-python = '>=3.7'
+# license = {file = 'LICENSE.txt'}
+license = {text = 'LGPLv3+'}
+authors = [
+  {name = 'Anugrah Jo Joshy', email = 'ajoshy.ucsd@gmail.com'},
+]
+maintainers = [
+  {name = 'Anugrah Jo Joshy', email = 'ajoshy.ucsd@gmail.com'},
+]
+keywords=[  
+    'design optimization', 'optimization algorithm', 'optimizer library', 
+    'optimization', 'optimizer', 'nonlinear programming', 'numerical optimization'
+    ]
+dynamic = ["version"]
+dependencies = [
+    'numpy',
+    'scipy',
+    'array_manager @ git+https://github.com/anugrahjo/array_manager.git@modopt',
+]
+classifiers=[
+    'Development Status :: 4 - Beta',
+    # 'Development Status :: 5 - Production/Stable',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)',
+    'Operating System :: OS Independent',
+    'Intended Audience :: Developers',
+    'Intended Audience :: Science/Research',
+    'Intended Audience :: Education',
+    'Natural Language :: English',
+    'Topic :: Education',
+    'Topic :: Education :: Computer Aided Instruction (CAI)',
+    'Topic :: Scientific/Engineering',
+    'Topic :: Scientific/Engineering :: Mathematics',
+    'Topic :: Software Development',
+    'Topic :: Software Development :: Libraries',
+]
+
+[project.urls]
+"Homepage/Repository" = "https://github.com/LSDOlab/modopt"
+Documentation = 'https://modopt.readthedocs.io/en/latest/'
+"Bug Tracker" = "https://github.com/LSDOlab/modopt/issues"
+Changelog = "https://modopt.readthedocs.io/en/latest/src/changelog.html"
+# Download = "https://pypi.org/project/modopt-lib/#files"
+
+[tool.setuptools.dynamic]
+version = {attr = "modopt.__version__"}
+
+[tool.setuptools]
+package-dir = {"" = "."}
+
+# [tool.pytest.ini_options]
+# markers = [
+#     "visualize: marks tests as visualize (deselect with '-m \"not visualize\"')",
+# ]
+
+# [tool.coverage.run]
+# omit = [
+#     # omit anything in a tests directory anywhere
+#     "*/tests/*",
+#     # omit everything in the docs directory
+#     "/docs/*",
+#     # omit this single file since visualization is not tested by default
+#     "modopt/visualize.py",
+#     ]
