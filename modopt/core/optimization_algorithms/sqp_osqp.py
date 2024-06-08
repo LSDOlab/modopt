@@ -4,7 +4,7 @@ import scipy.sparse as sp
 import scipy.optimize as scipy_opt
 
 import time
-import pandas
+# import pandas
 
 import sys
 
@@ -530,19 +530,19 @@ class SQP_OSQP(Optimizer):
 
             iter_array = np.arange(itr_counter + 1)
 
-            pandas.set_option('display.float_format', '{:.2E}'.format)
+            # pandas.set_option('display.float_format', '{:.2E}'.format)
 
-            table = pandas.DataFrame({
-                "Major": iter_array,
-                "fg evals": fg_array,
-                "Obj": func_array,
-                "Opt": opt_array,
-                "Feas": feas_array,
-                "Penalty": rho_array,
-                "Step": step_array,
-                "Merit": merit_array,
-                "Time": time_array
-            })
+            # table = pandas.DataFrame({
+            #     "Major": iter_array,
+            #     "fg evals": fg_array,
+            #     "Obj": func_array,
+            #     "Opt": opt_array,
+            #     "Feas": feas_array,
+            #     "Penalty": rho_array,
+            #     "Step": step_array,
+            #     "Merit": merit_array,
+            #     "Time": time_array
+            # })
 
             name = self.problem_name
             with open(name + '_print.out', 'w') as f:

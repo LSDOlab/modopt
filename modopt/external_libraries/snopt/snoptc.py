@@ -21,12 +21,9 @@ class SNOPTc(SNOPTOptimizer):
         # self.options.declare('maxiter', default=100, types=int)
 
     def declare_outputs(self, ):
-        self.available_outputs = {
-            # for arrays from each iteration, shapes need to be declared
-            'x': (float, (self.problem.nx, )),
-        }
-
-        self.options.declare('outputs', types=list, default=['x'])
+        # No outputs can be declared for SNOPTc
+        self.available_outputs = {}
+        self.options.declare('outputs', values=([],), default=[])
 
     def setup(self):
         self.update_SNOPT_options_object()

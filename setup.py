@@ -38,7 +38,6 @@ setup(
     install_requires=[
         'numpy',
         'scipy',
-        'pandas',
         'array_manager @ git+https://github.com/anugrahjo/array_manager.git@modopt',
     ],
     classifiers=[

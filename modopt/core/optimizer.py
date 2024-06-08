@@ -1,6 +1,5 @@
 import numpy as np
 import scipy as sp
-import pandas
 import os
 
 from modopt.utils.options_dictionary import OptionsDictionary
@@ -30,7 +29,7 @@ class Optimizer(object):
 
         name = self.problem_name
         self.outputs = {}
-        fmt = self.available_outputs
+        outs = self.available_outputs
         dirName = name + '_outputs'
         
         # To print different outputs in different formats to different files
@@ -44,21 +43,35 @@ class Optimizer(object):
             # Only user-specified outputs will be stored
             for key in self.options['outputs']:
                 # TODO: Add a test for this
-                if key not in fmt:
+                if key not in outs:
                     raise ValueError(
                         'Declared unavailable output "{}"'.format(key))
 
                 # Create new dictionaries for all user-specified outputs
-                if isinstance(fmt[key], tuple):
-                    self.outputs[key] = np.empty((1, ) + fmt[key][1],
-                                                dtype=fmt[key][0])
+                if isinstance(outs[key], tuple):
+                    self.outputs[key] = np.empty((1, ) + outs[key][1],
+                                                dtype=outs[key][0])
 
                     with open(dirName + '/' + key + '.out', 'w') as f:
                         pass
                 else:
-                    self.outputs[key] = np.array([], dtype=fmt[key])
+                    self.outputs[key] = np.array([], dtype=outs[key])
                     with open(dirName + '/' + key + '.out', 'w') as f:
                         pass
+        
+            # Write the header of the summary_table file
+            self.scalar_keys = [out for out in outs.keys() if not isinstance(outs[out], tuple)]
+            header =''
+            for key in self.scalar_keys:
+                if outs[key] in (int, np.int_, np.int32, np.int64):
+                    header += "%16s " % key
+                elif outs[key] in (float, np.float_, np.float32, np.float64):
+                    header += "%16s " % key
+            header += '\n'
+            self.out_dict = {key: 0 for key in outs.keys()}
+
+            with open(dirName + '/' + 'summary.out', 'w') as f:
+                f.write(header)
 
     def setup(self, ):
         pass
@@ -77,8 +90,6 @@ class Optimizer(object):
     def update_outputs(self, **kwargs):
         name = self.problem_name
         dirName = name + '_outputs'
-        pandas.set_option('display.float_format', '{:.2E}'.format)
-        table = pandas.DataFrame({})
 
         for key, value in kwargs.items():
             # Only user-specified outputs will be stored
@@ -111,12 +122,9 @@ class Optimizer(object):
                     self.outputs[key] = np.append(self.outputs[key],
                                                   value)
 
-                    # Create new summary_table from updated outputs dict
-                    table[key] = self.outputs[key]
-
-                # Print updated summary_table file
-                with open(dirName + '/' + 'print.out', 'w') as f:
-                    f.writelines(table.to_string(index=False))
+                # Update outputs dict
+                self.out_dict[key] = value
+     
 
             # Raise error if user tries to update ouptput not available in default outputs
             # for an optimizer
@@ -124,6 +132,20 @@ class Optimizer(object):
                 raise ValueError(
                     'Unavailable output "{}" is passed in to be updated'
                     .format(key))
+        
+        # Print new summary_table row
+        new_row =''
+        outs = self.available_outputs
+        for key in self.scalar_keys:
+            if outs[key] in (int, np.int_, np.int32, np.int64):
+                new_row += "%16i " % self.out_dict[key]
+            elif outs[key] in (float, np.float_, np.float32, np.float64):
+                new_row += "%16.6E " % self.out_dict[key]
+        new_row += '\n'
+        self.out_dict = {key: 0 for key in self.scalar_keys}
+
+        with open(dirName + '/' + 'summary.out', 'a') as f:
+            f.write(new_row)
 
     def print_results(self, **kwargs):
         self._print_results(**kwargs)
@@ -174,7 +196,7 @@ class Optimizer(object):
 
             dirName = self.problem_name + '_outputs'
 
-            with open(dirName + '/print.out', 'r') as f:
+            with open(dirName + '/summary.out', 'r') as f:
                 # lines = f.readlines()
                 lines = f.read().splitlines()
 
