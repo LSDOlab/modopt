@@ -49,7 +49,7 @@ class Quartic(Problem):
 
 if __name__ == "__main__":
 
-    from modopt import SLSQP, SQP, SNOPT
+    from modopt import SLSQP, SQP, SNOPT, PySLSQP
 
     tol = 1E-8
     max_itr = 500
@@ -57,7 +57,8 @@ if __name__ == "__main__":
     prob = Quartic(jac_format='dense')
 
     # Set up your optimizer with the problem
-    optimizer = SLSQP(prob, maxiter=20, outputs=['x'])
+    # optimizer = SLSQP(prob, maxiter=20, outputs=['x'])
+    optimizer = PySLSQP(prob, solver_options={'maxiter': 20, 'acc': 1e-6})
     # optimizer = SQP(prob, max_itr=20)
     # optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3)
 
@@ -75,7 +76,9 @@ if __name__ == "__main__":
 
     print('\n')
     print('2. Optimizer() object provides the following scaled result:')
-    # The following print might not work for interfaced optimizers like SLSQP, COBYLA, SNOPT, ...
-    print('optimized_dvs:', optimizer.outputs['x'][-1])
+    # The following print might not work for interfaced optimizers like SLSQP, COBYLA, SNOPT, PySLSQP ...
+    # print('optimized_dvs:', optimizer.outputs['x'][-1])
+    # print('optimize_time:', optimizer.total_time)
+    print('optimized_dvs:', optimizer.results['x'])
     # print('optimized_obj:', optimizer.outputs['obj'][-1])
     # print('optimized_cons:', optimizer.outputs['constraints'][-1])
