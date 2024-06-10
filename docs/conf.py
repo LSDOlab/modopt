@@ -135,7 +135,7 @@ def py2md(config):
             elif double_start < single_start:
                 title, desc = split_first_string_between_quotes(no_line_breaks, '"')
             else:
-                raise SyntaxError('Docstring for title and description is not declared correctly')
+                raise SyntaxError(f'Docstring for title and description is not declared correctly in example {ex}.')
 
         with open(ex[:-3]+'.md', 'w') as g:
             g.write('# ' + title + '\n')

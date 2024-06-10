@@ -13,37 +13,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v1
         with:
           node-version: '12.x'
       - uses: webfactory/ssh-agent@v0.5.0
         with:
           ssh-private-key: ${{ secrets.GH_PAGES_DEPLOY }}
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          update-environment: true
       - name: Run entire workflow
         env:
           USE_SSH: true
           GIT_USER: anugrahjo
         run: |
-          # install required packages -- not sure if all are required
-          sudo apt-get update
-          sudo apt-get -y install python3-pip git
-          pip3 install yapf
-          ls
-          # install modopt
-          pip3 install -e .
-          # install array_manager
-          git clone --depth=1 https://github.com/anugrahjo/array_manager.git
-          pip3 install -e array_manager/
+          python3 -m pip install --upgrade pip
+          python3 -m pip install yapf
+          python3 -m pip install -e .
           
-          # # generate markdown files containing worked examples
-          # here=`pwd`
-          # mkdir -p ${here}/docs/docs/worked_examples
-          # python3 ${here}/csdl/utils/generate_worked_examples_mdx.py ${here}
-          # echo "Worked Examples:"
-          # ls ${here}/docs/docs/worked_examples
-          # echo "Worked Examples:"
-          # ls ${here}/docs/docs/worked_examples
           cd old_docs
           pwd
           ls

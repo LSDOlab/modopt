@@ -1,8 +1,8 @@
 
 # Documentation
 
-Before building the docs by running `make html` from the `/docs` directory, make sure you have 
-all the dependencies mentioned in the `docs/requirements-docs.txt` file installed into your current environment.
+Before you build the docs by running the `make html` command in the `/docs` directory, 
+ensure that you have installed modOpt with the `pip install -e .[docs]` command.
 
 ## Writing
 Start by modifying the documentation pages by editing `.md` files in the `/src` directory.

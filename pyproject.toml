@@ -21,8 +21,8 @@ keywords=[
     ]
 dynamic = ["version"]
 dependencies = [
-    'numpy',
-    'scipy',
+    'numpy>=1.24,<2',
+    'scipy>=1.10,<2',
     'array_manager @ git+https://github.com/anugrahjo/array_manager.git@modopt',
 ]
 classifiers=[
@@ -61,6 +61,68 @@ version = {attr = "modopt.__version__"}
 
 [tool.setuptools]
 package-dir = {"" = "."}
+
+[project.optional-dependencies]
+all = [
+    "modopt[docs, test, interfaces, visualization]",
+]
+dev = [
+    "modopt[docs, test]",
+]
+deploy = [
+    "numpy==1.26.4",   # Fixed to the latest version that was compatible at the time of writing
+    "scipy==1.13.1",   # Fixed to the latest version that was compatible at the time of writing
+    'array_manager @ git+https://github.com/anugrahjo/array_manager.git@modopt',
+]
+# Includes the list of all dependencies required to build the docs
+docs = [
+    "sphinx==5.3.0",
+    "myst-nb==0.17.2",
+    "sphinx_rtd_theme==1.1.1",
+    "sphinx-copybutton==0.5.2",
+    "sphinx-autoapi==2.1.0",   # Defining exact versions to ensure packages don't break
+    "astroid==2.15.5",
+    "numpydoc==1.5.0",
+    "sphinxcontrib-collections @ git+https://github.com/anugrahjo/sphinx-collections.git",
+    "sphinxcontrib-bibtex==2.5.0"
+]
+test = [
+    "pytest",
+    "pytest-cov",
+]
+jax = [
+    "jax[cpu]",
+]
+openmdao = [
+    "openmdao",
+]
+csdl = [
+    "csdl @ git+https://github.com/LSDOlab/csdl.git",
+]
+csdl_alpha = [
+    "csdl_alpha @ git+https://github.com/LSDOlab/csdl_alpha.git",
+]
+qpsolvers = [
+    "qpsolvers[open_source_solvers]", # Installs the library with open source QP solvers
+]
+cvxopt = [
+    "cvxopt",
+]
+pycutest = [
+    "pycutest", # Needs manual installation of the CUTEst library with the test problems
+]
+interfaces = [
+    "csdl @ git+https://github.com/LSDOlab/csdl.git",
+    "csdl_alpha @ git+https://github.com/LSDOlab/csdl_alpha.git",
+    "jax[cpu]",
+    "openmdao",
+    "qpsolvers[open_source_solvers]", # Installs the library with open source QP solvers
+    "cvxopt",
+    "pycutest", # Needs manual installation of the CUTEst library with the test problems
+]
+visualization = [
+    "matplotlib",
+]
 
 # [tool.pytest.ini_options]
 # markers = [

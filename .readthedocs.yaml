@@ -32,9 +32,11 @@ formats:
 # Optionally declare the Python requirements required to build your docs
 python:
    install:
-   - requirements: docs/requirements-docs.txt
+   # - requirements: docs/requirements-docs.txt
    - method: pip
      path: .
+     extra_requirements:
+       - docs
 
 # If using a conda environment, 
 # add the path to the Conda environment file, relative to the root of the project.

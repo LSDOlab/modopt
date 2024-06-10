@@ -1,9 +1,37 @@
-# Includes the list of all dependencies that are absolutely required to run setup() and 
-# use modOpt in a new environment.
-# Useful for creating a conda environment, or to be used in testing workflow, 
-# or to host the documentation on Read the Docs
-# This file should contain same packages as in install_requires in setup.py
+# List of all dependencies for various purposes - docs, tests, interfaces, visualization, etc.
+# This file is currently not used anywhere in the project, but is kept for reference
+# Fixed to the latest versions that were compatible at the time of writing
 
-numpy
-scipy
+# For the documentation
+sphinx==7.3.7
+sphinx_rtd_theme==2.0.0
+sphinx-copybutton==0.5.2
+sphinxcontrib-bibtex==2.6.2
+myst-nb==1.1.0
+numpydoc==1.7.0
+
+# TODO: Need to update the following later
+sphinx-autoapi==2.1.0
+astroid==2.15.5
+sphinxcontrib-collections @ git+https://github.com/anugrahjo/sphinx-collections.git
+
+# For the build
+setuptools
+
+# For the tests
+pytest
+pytest-cov
+
+# For the package itself
 array_manager @ git+https://github.com/anugrahjo/array_manager.git@modopt
+numpy==1.26.4
+scipy==1.13.1
+
+# For the interfaces
+csdl @ git+https://github.com/LSDOlab/csdl.git
+csdl_alpha @ git+https://github.com/LSDOlab/csdl_alpha.git
+jax[cpu]
+openmdao
+qpsolvers[open_source_solvers]
+cvxopt
+pycutest
