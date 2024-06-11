@@ -104,9 +104,9 @@ csdl_alpha = [
 qpsolvers = [
     "qpsolvers[open_source_solvers]", # Installs the library with open source QP solvers
 ]
-# cvxopt = [
-#     "cvxopt", # cvxopt needs to be installed from conda-forge
-# ]
+cvxopt = [    # cvxopt is already installed with qpsolvers[open_source_solvers]
+    "cvxopt",
+]
 pycutest = [
     "pycutest", # Needs manual installation of the CUTEst library with the test problems
 ]
@@ -116,7 +116,7 @@ interfaces = [
     "jax[cpu]",
     "openmdao",
     "qpsolvers[open_source_solvers]", # Installs the library with open source QP solvers
-    # "cvxopt", # cvxopt needs to be installed from conda-forge
+    # "cvxopt", # cvxopt is already installed with qpsolvers[open_source_solvers]
     "pycutest", # Needs manual installation of the CUTEst library with the test problems
 ]
 visualization = [
