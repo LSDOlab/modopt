@@ -111,7 +111,7 @@ pycutest = [
     "pycutest", # Needs manual installation of the CUTEst library with the test problems
 ]
 interfaces = [
-    "csdl @ git+https://github.com/LSDOlab/csdl.git",
+    # "csdl @ git+https://github.com/LSDOlab/csdl.git", # csdl is deprecated with dependencies fixed in the main package
     "csdl_alpha @ git+https://github.com/LSDOlab/csdl_alpha.git",
     "jax[cpu]",
     "openmdao",
