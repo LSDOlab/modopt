@@ -7,10 +7,11 @@
         <lastBuildDate>Tue, 28 May 2019 00:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
+        <language>en</language>
         <item>
             <title><![CDATA[modOpt Blog Post]]></title>
             <link>https://lsdolab.github.io/modopt/blog/first-blog-post</link>
-            <guid>first-blog-post</guid>
+            <guid>https://lsdolab.github.io/modopt/blog/first-blog-post</guid>
             <pubDate>Tue, 28 May 2019 00:00:00 GMT</pubDate>
         </item>
     </channel>
