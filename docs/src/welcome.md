@@ -74,12 +74,12 @@ _**Modopt as a development environment**_
 
 ```{toctree}
 :maxdepth: 1
-:hidden:
 
 src/getting_started
 src/tutorials
 src/csdl
-src/opt_algs
+src/instructional_algs
+src/performant_algs
 src/examples
 src/contributing
 src/changelog
