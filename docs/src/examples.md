@@ -9,6 +9,7 @@ However, outputs/visualization from running the script is excluded.
 ```{toctree}
 :maxdepth: 1
 
+_temp/examples/ex_1quartic_opt_lite
 _temp/examples/ex_1quartic_opt
 _temp/examples/ex_2rosenbrock2d
 _temp/examples/ex_2quartic_opt_constrained

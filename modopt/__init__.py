@@ -3,6 +3,7 @@ __version__ = '0.1.0'
 # import modopt base classes
 from modopt.core.optimizer import Optimizer
 from modopt.core.problem import Problem
+from modopt.core.problem_lite import ProblemLite
 # from modopt.core.recorder import Recorder
 from modopt.core.approximate_hessian import ApproximateHessian
 from modopt.core.line_search import LineSearch
