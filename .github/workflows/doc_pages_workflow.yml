@@ -31,7 +31,6 @@ jobs:
           GIT_USER: anugrahjo
         run: |
           python3 -m pip install --upgrade pip
-          python3 -m pip install yapf
           python3 -m pip install -e .
           
           cd old_docs
