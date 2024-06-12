@@ -19,18 +19,18 @@ class Problem(object):
     problem_name : str
         Problem name assigned by the user.
     x0 : np.ndarray
-        Initial guess for design variables.
+        Initial guess (unscaled) for design variables.
     x : array_manager.Vector
-        Current iterate for the design variables.
+        Current iterate (unscaled) for the design variables.
     nx : int
         Number of design variables or optimization variables.
     nc : int
         Number of constraints in the optimization problem.
     options : modopt.OptionsDictionary
-        Problem-specific options declared by the user in addition to
+        Problem-specific options declared by the user in addition
         to the global problem options 'jac_format' and 'hess_format'.
     obj : dict
-        Dictionary with objective names as keys and current objective
+        Dictionary with objective names as keys and current (unscaled) objective
         function values as values.
         Note that only one objective is supported by modOpt currently.
     obj_scaler : dict
@@ -47,19 +47,19 @@ class Problem(object):
         'obj_hess', 'obj_hvp','lag_grad', 'lag_hess', 'lag_hvp']
 
     x_lower : np.ndarray or NoneType
-        Vector of lower bounds for the design variables.
+        Vector of (scaled) lower bounds for the design variables.
         x_lower[k] = -np.inf if the variable at x[k] has no lower bound.
         x_lower = None if no variables have lower bounds.
     x_upper : np.ndarray or NoneType
-        Vector of upper bounds for the design variables.
+        Vector of (scaled) upper bounds for the design variables.
         x_upper[k] = np.inf if the variable at x[k] has no upper bound.
         x_upper = None if no variables have upper bounds.
     c_lower : np.ndarray or NoneType
-        Vector of lower bounds for the constraints.
+        Vector of (scaled) lower bounds for the constraints.
         c_lower[k] = -np.inf if the constraint at c[k] has no lower bound.
         c_lower = None if unconstrained or no constraints have lower bounds.
     c_upper : np.ndarray or NoneType
-        Vector of upper bounds for the constraints.
+        Vector of (scaled) upper bounds for the constraints.
         c_upper[k] = np.inf if the constraint at c[k] has no upper bound.
         c_upper = None if unconstrained or no constraints have upper bounds.
 
@@ -72,24 +72,24 @@ class Problem(object):
         c_scaler[k] = 1.0 by default.
 
     design_variables_dict : arraymanager.VectorComponentsDict
-        Dictionary containing design variable vector metadata.
+        Dictionary containing (unscaled) design variable vector metadata.
     constraints_dict : arraymanager.VectorComponentsDict
-        Dictionary containing constraint vector metadata.
+        Dictionary containing (unscaled) constraint vector metadata.
 
     pC_px_dict : arraymanager.MatrixComponentsDict
-        Dictionary containing constraint Jacobian matrix metadata.
+        Dictionary containing (unscaled) constraint Jacobian matrix metadata.
     p2F_pxx_dict : arraymanager.MatrixComponentsDict
-        Dictionary containing objective Hessian matrix metadata.
+        Dictionary containing (unscaled) objective Hessian matrix metadata.
     p2L_pxx_dict : arraymanager.MatrixComponentsDict
         Dictionary containing Lagrangian Hessian matrix metadata.
 
     pF_px : array_manager.Vector
-        Abstract vector containing objective gradients.
+        Abstract vector containing (unscaled) objective gradients.
     pL_px : array_manager.Vector
         Abstract vector containing Lagrangian gradients.
     
     con : array_manager.Vector
-        Abstract vector containing constraints.
+        Abstract vector containing (unscaled) constraints.
     jvp : array_manager.Vector
         Abstract vector containing constraint Jacobian-vector products (JVPs).
     vjp : array_manager.Vector
@@ -100,11 +100,11 @@ class Problem(object):
         Abstract vector containing Lagrangian Hessian-vector products (HVPs).
 
     pC_px : arraymanager.Matrix
-        Abstract matrix containing constraint Jacobian components.
-    p2F_pxx : arraymanager.MatrixComponentsDict
-        Abstract matrix containing objective Hessians components.
-    p2L_pxx : arraymanager.MatrixComponentsDict
-        Abstract matrix containing Lagrangian Hessians components.
+        Abstract matrix containing (unscaled) constraint Jacobian components.
+    p2F_pxx : arraymanager.Matrix
+        Abstract matrix containing (unscaled) objective Hessian components.
+    p2L_pxx : arraymanager.Matrix
+        Abstract matrix containing Lagrangian Hessian components.
 
     jac : (array_manager.DenseMatrix, array_manager.COOMatrix, array_manager.CSRMatrix, array_manager.CSCMatrix)
         Standard array_manager matrix object in the format 
@@ -114,7 +114,7 @@ class Problem(object):
     obj_hess : (array_manager.DenseMatrix, array_manager.COOMatrix, array_manager.CSRMatrix, array_manager.CSCMatrix)
         Standard array_manager matrix object in the format 
         self.options['hess_format'] provided by the user. 
-        This object provides standard numpy dense or scipy sparse matrices.
+        This object provides standard numpy dense or scipy sparse (unscaled) objective Hessian matrices.
         The output format for matrices is useful to meet the requirements for the chosen optimizer.
     lag_hess : (array_manager.DenseMatrix, array_manager.COOMatrix, array_manager.CSRMatrix, array_manager.CSCMatrix)
         Standard array_manager matrix object in the format 
@@ -311,8 +311,8 @@ class Problem(object):
         for dv_name, dv in dvs.dict_.items():
             for i, x in enumerate(dv.flatten()):
                 dv_name  = dv_name[:10] if (len(dv_name)>10) else dv_name
-                l = -1.e99 if x_l[i] == -np.inf else x_l[i]
-                u = +1.e99 if x_u[i] == +np.inf else x_u[i]
+                l = -1.e99 if x_l[idx] == -np.inf else x_l[idx]
+                u = +1.e99 if x_u[idx] == +np.inf else x_u[idx]
                 output += dv_template.format(idx=idx, name=dv_name+f'[{i}]', scaler=x_s[idx], lower=l, value=x, upper=u)
                 idx += 1
 
@@ -341,8 +341,8 @@ class Problem(object):
             for con_name, con in cons.dict_.items():
                 for i, c in enumerate(con.flatten()):
                     con_name  = con_name[:10] if (len(con_name)>10) else con_name
-                    l = -1.e99 if c_l[i] == -np.inf else c_l[i]
-                    u = +1.e99 if c_u[i] == +np.inf else c_u[i]
+                    l = -1.e99 if c_l[idx] == -np.inf else c_l[idx]
+                    u = +1.e99 if c_u[idx] == +np.inf else c_u[idx]
                     if lag:
                         output += con_template.format(idx=idx, name=con_name+f'[{i}]', scaler=c_s[idx], lower=l, value=c, upper=u, lag=z[idx])
                     else:
