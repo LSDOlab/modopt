@@ -65,7 +65,7 @@ if __name__ == "__main__":
     optimizer = QuasiNewton(prob, opt_tol=opt_tol)
 
     # Check first derivatives at the initial guess, if needed
-    optimizer.check_first_derivatives(prob.x.get_data())
+    optimizer.check_first_derivatives(prob.x0)
 
     # Solve your optimization problem
     optimizer.solve()

@@ -62,7 +62,7 @@ if __name__ == "__main__":
     # optimizer = SQP(prob, max_itr=20)
     # optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3)
 
-    optimizer.check_first_derivatives(prob.x.get_data() * prob.x_scaler)
+    optimizer.check_first_derivatives(prob.x0 * prob.x_scaler)
     optimizer.solve()
     optimizer.print_results(summary_table=True)
 

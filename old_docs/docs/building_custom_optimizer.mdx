@@ -41,7 +41,7 @@ class SteepestDescent(Optimizer):
 
     def solve(self):
         nx = self.problem.nx
-        x0 = x0 = self.problem.x.get_data()
+        x0 = self.problem.x0
         opt_tol = self.options['opt_tol']
         max_itr = self.options['max_itr']
 

@@ -142,8 +142,6 @@ class SNOPTOptimizer(Optimizer):
                 self.compute_all = self.problem._compute_all
 
         self.obj = self.problem._compute_objective
-        # Restore back after teting sqp optzr. with atomics lite
-        # self.x0 = self.problem.x.get_data()
         self.x0 = self.problem.x0
 
         # Exact gradient if provided else FD gradient

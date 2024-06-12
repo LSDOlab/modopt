@@ -12,7 +12,7 @@ class NelderMead(Optimizer):
 
         self.obj = self.problem._compute_objective
 
-        # TOlerance and inital length are empirical and problem-dependent
+        # Tolerance and initial length are empirical and problem-dependent
         self.options.declare('max_itr', default=200, types=int)
         self.options.declare('initial_length', default=1., types=float)
         self.options.declare('tol', default=1e-4, types=float)
@@ -39,7 +39,7 @@ class NelderMead(Optimizer):
     def solve(self):
         # Assign shorter names to variables and methods
         nx = self.problem.nx
-        x0 = self.problem.x.get_data()
+        x0 = self.problem.x0
         tol = self.options['tol']
         max_itr = self.options['max_itr']
         l  = self.options['initial_length']

@@ -370,7 +370,6 @@ class SQP(Optimizer):
         nx = self.nx
         nc = self.nc
 
-        # x0 = self.problem.x.get_data()
         x0 = self.problem.x0
         max_itr = self.options['max_itr']
 

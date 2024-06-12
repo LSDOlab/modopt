@@ -399,7 +399,7 @@ class SQP_SURF(Optimizer):
         nr = self.nr
         m = self.m
 
-        x0 = self.problem.x.get_data()
+        x0 = self.problem.x0
         y0 = self.problem.y.get_data()
 
         max_itr = self.options['max_itr']

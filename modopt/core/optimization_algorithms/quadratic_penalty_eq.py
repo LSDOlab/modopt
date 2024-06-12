@@ -63,7 +63,7 @@ class L2PenaltyEq(Optimizer):
         # Assign shorter names to variables and methods
         nx = self.problem.nx
         nc = self.problem.nc
-        x0 = self.problem.x.get_data()
+        x0 = self.problem.x0
         opt_tol = self.options['opt_tol']
         # feas_tol = self.options['feas_tol']
         max_itr = self.options['max_itr']

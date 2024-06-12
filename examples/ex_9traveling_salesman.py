@@ -73,4 +73,5 @@ optimizer.print_results(summary_table=True)
 
 print('Simulated Annealing results:')
 print('optimized_dvs:', prob.x.get_data())
-print('optimized_obj:', prob.obj['total_distance'])
+# print('optimized_obj:', prob.obj['total_distance'])
+print('optimized_obj:', optimizer.outputs['obj'][-1])

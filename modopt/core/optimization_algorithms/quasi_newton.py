@@ -42,7 +42,7 @@ class QuasiNewton(Optimizer):
     def solve(self):
         # Assign shorter names to variables and methods
         nx = self.problem.nx
-        x0 = self.problem.x.get_data()
+        x0 = self.problem.x0
         opt_tol = self.options['opt_tol']
         max_itr = self.options['max_itr']
 

@@ -65,7 +65,7 @@ class SteepestDescent(Optimizer):
 
     def solve(self):
         nx = self.problem.nx
-        x = self.problem.x.get_data()
+        x = self.problem.x0
         opt_tol = self.options['opt_tol']
         max_itr = self.options['max_itr']
 
@@ -142,7 +142,7 @@ optimizer = Newton(prob, opt_tol=opt_tol)
 optimizer = QuasiNewton(prob, opt_tol=opt_tol)
 
 # Check first derivatives at the initial guess, if needed
-optimizer.check_first_derivatives(prob.x.get_data())
+optimizer.check_first_derivatives(prob.x0)
 
 # Solve your optimization problem
 optimizer.solve()

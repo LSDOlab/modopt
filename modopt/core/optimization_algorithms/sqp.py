@@ -181,7 +181,7 @@ class SQP(Optimizer):
         #                                          self.x_vector_dict)
 
         # # Compute problem constraints
-        # x0 = self.problem.x.get_data()
+        # x0 = self.problem.x0
         # c_in = self.con_in(x0)
 
         # c_out = np.array([])
@@ -389,7 +389,6 @@ class SQP(Optimizer):
         # Assign shorter names to variables and methods
         nx = self.nx
         nc = self.nc
-        # x0 = self.problem.x.get_data()
         x0 = self.problem.x0
         opt_tol = self.options['opt_tol']
         feas_tol = self.options['feas_tol']

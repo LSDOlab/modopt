@@ -43,7 +43,7 @@ class SimulatedAnnealing(Optimizer):
     def solve(self):
         # Assign shorter names to variables and methods
         nx = self.problem.nx
-        x0 = self.problem.x.get_data().astype(int)
+        x0 = self.problem.x0.astype(int)
         tol = self.options['tol']
         max_itr = self.options['max_itr']
         T = self.options['T0']
