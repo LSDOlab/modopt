@@ -29,7 +29,8 @@ class PySLSQP(Optimizer):
         '''
         Setup the initial guess, and matrices and vectors.
         '''
-        self.setup_constraints()
+        if self.problem.constrained:
+            self.setup_constraints()
         self.x0 = self.problem.x0 * 1.
         self.nx = self.problem.nx * 1
 
@@ -61,6 +62,8 @@ class PySLSQP(Optimizer):
             self.nc_i += len(uci)
 
         self.nc = self.nc_e + self.nc_i
+        if self.nc == 0:
+            raise ValueError('No constraints found, but problem.constrained is set as True.')
 
     def con(self, x):
         c_in = self.con_in(x)
@@ -104,7 +107,7 @@ class PySLSQP(Optimizer):
         x0 = self.problem.x0
         obj = self.problem._compute_objective
         grad = self.problem._compute_objective_gradient
-        if self.eq_constrained or self.lower_constrained or self.upper_constrained:
+        if self.problem.constrained:
             con = self.con
             jac = self.jac
         else:
@@ -113,7 +116,7 @@ class PySLSQP(Optimizer):
 
         xl = self.problem.x_lower
         xu = self.problem.x_upper
-        meq = self.nc_e
+        meq = self.nc_e if self.problem.constrained else 0
         solver_options = self.options['solver_options']
 
         # Run the optimization
