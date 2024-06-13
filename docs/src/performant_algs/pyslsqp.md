@@ -12,7 +12,7 @@ from modopt import PySLSQP
 ```
 
 Options are available
-**[here](https://pyslsqp.readthedocs.io/en/latest/src/api_pages/optimize.html#pyslsqp.get_default_options)**.
+**[here](https://pyslsqp.readthedocs.io/en/latest/src/api_pages/optimize.html#pyslsqp.optimize)**.
 Options could be set by just passing them within a `solver_options` dictionary  when 
 instantiating the PySLSQP optimizer object.
 For example, we can set the maximum number of iterations `maxiter` 

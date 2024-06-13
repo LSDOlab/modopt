@@ -123,7 +123,7 @@ class SNOPTc(SNOPTOptimizer):
             m = 1
             locA = np.ones((n + 1, ))
             locA[0] = 0
-            result = snoptc(snoptc_objconFG,
+            results = snoptc(snoptc_objconFG,
                             nnObj=nnObj,
                             nnCon=nnCon,
                             nnJac=nnJac,
@@ -138,7 +138,7 @@ class SNOPTc(SNOPTOptimizer):
                             n=n,
                             append2file=append)
         else:
-            result = snoptc(snoptc_objconFG,
+            results = snoptc(snoptc_objconFG,
                             nnObj=nnObj,
                             nnCon=nnCon,
                             nnJac=nnJac,
@@ -154,4 +154,4 @@ class SNOPTc(SNOPTOptimizer):
         end_time = time.time()
         self.total_time = end_time - start_time
 
-        self.snopt_output = result
+        self.results = results

@@ -76,9 +76,6 @@ class Optimizer(object):
     def setup(self, ):
         pass
 
-    def print_available_outputs(self, ):
-        print(self.available_outputs)
-
     def run_post_processing(self):
         # Removes the first entry of the array when it was initialized as empty
         for key, value in self.outputs.items():

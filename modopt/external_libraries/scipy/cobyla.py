@@ -152,30 +152,30 @@ class COBYLA(ScipyOptimizer):
         start_time = time.time()
 
         # COBYLA has no return_all option
-        result = minimize(obj,
-                          x0,
-                          args=(),
-                          method=method,
-                          jac=None,
-                          hess=None,
-                          hessp=None,
-                          bounds=bounds,
-                          constraints=constraints,
-                          tol=None,
-                          callback=None,
-                          options={
-                              'maxiter': maxiter,
-                              'tol': tol,
-                              'catol': catol,
-                              'disp': disp,
-                              'rhobeg': rhobeg
-                          })
+        results = minimize(obj,
+                           x0,
+                           args=(),
+                           method=method,
+                           jac=None,
+                           hess=None,
+                           hessp=None,
+                           bounds=bounds,
+                           constraints=constraints,
+                           tol=None,
+                           callback=None,
+                           options={
+                               'maxiter': maxiter,
+                               'tol': tol,
+                               'catol': catol,
+                               'disp': disp,
+                               'rhobeg': rhobeg
+                               })
 
         # print(result)
 
         end_time = time.time()
         self.total_time = end_time - start_time
 
-        self.scipy_output = result
+        self.results = results
 
         # show_options(solver='minimize', method=None, disp=True)

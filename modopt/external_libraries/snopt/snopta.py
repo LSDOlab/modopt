@@ -72,7 +72,7 @@ class SNOPTa(SNOPTOptimizer):
 
             return status, F, G
 
-        result = snopta(
+        results = snopta(
             snopta_objconFG,
             n,
             nF,
@@ -92,6 +92,6 @@ class SNOPTa(SNOPTOptimizer):
         end_time = time.time()
         self.total_time = end_time - start_time
 
-        print(result)
+        print(results)
 
-        self.snopt_output = result
+        self.results = results

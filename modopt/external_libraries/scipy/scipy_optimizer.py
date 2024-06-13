@@ -342,7 +342,7 @@ class ScipyOptimizer(Optimizer):
         print("\t" * 1, "Scipy summary:")
         print("\t" * 1, "=" * len(title))
 
-        # longest_key = max(self.scipy_output, key=len)
+        # longest_key = max(self.results, key=len)
         # max_string_length = max(20, len(longest_key))
         # total_length = max_string_length + 5
         total_length = 20 + 5
@@ -353,29 +353,29 @@ class ScipyOptimizer(Optimizer):
               self.solver_name)
 
         print("\t" * 1, "Success", " " * (total_length - 7), ':',
-              self.scipy_output['success'])
+              self.results['success'])
         print("\t" * 1, "Message", " " * (total_length - 7), ':',
-              self.scipy_output['message'])
+              self.results['message'])
         print("\t" * 1, "Objective", " " * (total_length - 9), ':',
-              self.scipy_output['fun'])
-        if 'njev' in self.scipy_output:
+              self.results['fun'])
+        if 'njev' in self.results:
             print("\t" * 1, "Gradient norm", " " * (total_length - 13),
-                  ':', np.linalg.norm(self.scipy_output['jac']))
+                  ':', np.linalg.norm(self.results['jac']))
 
         print("\t" * 1, "Total time", " " * (total_length - 10), ':',
               self.total_time)
-        if 'nit' in self.scipy_output:
+        if 'nit' in self.results:
             print("\t" * 1, "Major iterations",
                   " " * (total_length - 16), ':',
-                  self.scipy_output['nit'])
+                  self.results['nit'])
 
-        # if self.scipy_output['nfev'] is not None:
+        # if self.results['nfev'] is not None:
         print("\t" * 1, "Total function evals",
-              " " * (total_length - 20), ':', self.scipy_output['nfev'])
-        if 'njev' in self.scipy_output:
+              " " * (total_length - 20), ':', self.results['nfev'])
+        if 'njev' in self.results:
             print("\t" * 1, "Total gradient evals",
                   " " * (total_length - 20), ':',
-                  self.scipy_output['njev'])
+                  self.results['njev'])
 
         allowed_keys = {
             'optimal_variables',
@@ -389,7 +389,7 @@ class ScipyOptimizer(Optimizer):
         if self.optimal_variables:
             print("\t" * 1, "Optimal variables",
                   " " * (total_length - 17), ':',
-                  self.scipy_output['x'])
+                  self.results['x'])
 
         bottom_line_length = total_length + 25
         print("\t", "=" * bottom_line_length)

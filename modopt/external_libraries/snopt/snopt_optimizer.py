@@ -228,5 +228,5 @@ class SNOPTOptimizer(Optimizer):
         # print("\t" * 1, "Problem", "\t" * 3, ':', self.problem_name)
         # print("\t" * 1, "Solver", "\t" * 3, ':', self.solver_name)
 
-        # print(self.snopt_output)
+        # print(self.results)
         pass
