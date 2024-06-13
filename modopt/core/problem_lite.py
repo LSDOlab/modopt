@@ -21,21 +21,22 @@ class ProblemLite(object):
         - Functions and derivatives are directly called from the user-provided functions (thin wrapper).
         - Only single objective problems are supported.
         - Only a single design varaible vector and single constraint vector function are supported.
-        - Every variable stored in this class is scaled by the user-provided scaling factors.
+        - Every STORED VARIABLE in this class is SCALED by the user-provided scaling factors.
+        - Objective and constraint functions are always called together in _funcs(x) method.
+        - Gradient and Jacobian functions are always called together in _derivs(x) method.
+        - Caches the function and first derivative values for the same input x to avoid redundant, consecutive evaluations.
+        - Keeps track of the number of function and gradient evaluations and time taken for each.
 
     Still supports:
         - Feasibility problems and unconstrained optimization problems.
         - Finite differencing by default for unavailable derivatives.
         - Matrix-vector products vjp, jvp, obj_hvp, lag_hvp.
-        - Caching of function and derivative values for the same input x.
+        - Caching of function and derivative values (although scaled) for the same input x.
         - Scaling of design variables, objectives, and constraints.
         - Bounds on design variables and constraints.
         - Lagrangian functions and derivatives for constrained problems.
         - Sparse or dense matrix formats for Jacobian and Hessian in user-provided functions, 
           if supported by the optimizer used.
-
-    Keeps track of the number of function and gradient evaluations and time taken for each.
-    Caches the function and first derivative values for the same input x to avoid redundant, consecutive evaluations.
 
     Attributes
     ----------
@@ -88,7 +89,7 @@ class ProblemLite(object):
         self.options = OptionsDictionary()
         self.ny = 0
         self.nx = nx = x0.size
-        self.fd_step = fd_step
+        self.fd_step = fd_step * 1.0
 
         self.f_scaler = f_scaler * np.ones((1,))
         self.x_scaler = x_scaler * np.ones((nx,))
@@ -170,44 +171,99 @@ class ProblemLite(object):
         self.g = None
         self.c = None
         self.j = None
-        self._funcs(x0)
-        self._derivs(x0)
 
+        # For the first call, we expand _funcs(x0) below to avoid redundant calls to con(x0) 
+        # to get the size of the constraints nc and to perform checks on sizes of functions.
+        # self.c_scaler = c_scaler * 1.
+        # self._funcs(self.x0)
+        # if self.constrained:
+        #     self.nc = nc = self.c.size
+
+        # NOTE: x0 is unscaled while self.x0 is scaled
+        ###### FIRST RUN FOR OBJECTIVE AND CONSTRAINTS ######
+        f_start = time.time()
+        f0 = self.obj(x0)
+        if not np.isscalar(f0):
+            if f0.shape != (1,):
+                raise ValueError('Objective function must return a scalar or a 1D array with shape (1,).')
+        self.f = (f0 * self.f_scaler)[0]
         if self.constrained:
-            self.nc = nc = self.c.size
+            c0 = self.con(x0)
+            self.nc = nc = c0.size
+            if c0.shape != (nc,):
+                raise ValueError(f'Constraints function must return a 1D array with shape (nc,) '
+                                 f'where nc={nc} is the number of constraints.')
+            self.c = c0 * c_scaler
+        self.warm_x[:] = self.x0
+        self.nfev += 1
+        self.fev_time += time.time() - f_start
+        #####################################################
+
+        # Once nc is known from the first call to con(x0), update the cl, cu, c_scaler sizes
+        if self.constrained:
             self.c_scaler = c_scaler * np.ones((nc,))
             self.c_lower = cl * c_scaler if cl is not None else np.full(nc, -np.inf)
             self.c_upper = cu * c_scaler if cu is not None else np.full(nc,  np.inf)
+        else:
+            self.c_lower = self.c_upper = self.c_scaler = None
 
-        self.check_for_errors(xl, xu, cl, cu, x_scaler, f_scaler, c_scaler)
+        # For the first call, we expand _derivs(x0) here to perform checks on sizes of derivatives returned.
+        # self._derivs(self.x0)
 
-    def check_for_errors(self, xl, xu, cl, cu, x_scaler, f_scaler, c_scaler):
+        ###### FIRST RUN FOR GRADIENT AND JACOBIAN ######
+        g_start = time.time()
+        g0 = self.grad(x0) 
+        if g0.shape != (nx,):
+            raise ValueError(f'Gradient function must return a 1D array with shape (nx,) '
+                             f'where nx={nx} is the number of design variables, '
+                             f'but returned shape {g0.shape}.')
+        self.g = g0 * self.f_scaler / self.x_scaler
+        if self.constrained:
+            j0 = self.jac(x0)
+            if j0.shape != (nc, nx):
+                raise ValueError(f'Jacobian function must return a 2D array with shape (nc, nx) '
+                                 f'where nc={nc} is the number of constraints and nx={nx} is the number of design variables, '
+                                 f'but returned shape {j0.shape}.')
+            self.j = j0 * np.outer(self.c_scaler, 1 / self.x_scaler)
+        self.warm_x_derivs[:] = self.x0
+        self.ngev += 1
+        self.gev_time += time.time() - g_start
+        #####################################################
+
+        self.check_for_errors(x0, xl, xu, cl, cu, x_scaler, f_scaler, c_scaler)
+
+    def check_for_errors(self, x0, xl, xu, cl, cu, x_scaler, f_scaler, c_scaler):
         '''
         Check for errors in the optimization problem setup.
         '''
-        if self.constrained:
-            if self.nc != self.c_lower.size:
-                raise ValueError('Number of constraints declared does not match the size of the lower bounds vector.')
-            if self.nc != self.c_upper.size:
-                raise ValueError('Number of constraints declared does not match the size of the upper bounds vector.')
-            if self.nc != self.c_scaler.size:
-                raise ValueError('Number of constraints declared does not match the size of the constraints scaler vector.')
-        else:
-            if cl is not None or cu is not None or c_scaler != 1.0:
-                raise ValueError('Constraints are not declared. Lower and upper bounds and scaling factors should be None.')
-            if self.jvp is not None or self.vjp is not None or self.lag_hvp is not None:
-                raise ValueError('Constraints are not declared. JVP, VJP, and lag_HVP functions should not be declared.')
-        
         if self.nx == 0:
             raise ValueError('No design variables declared.')
-        if self.nx != self.x0.size:
-            raise ValueError('Number of design variables declared does not match the size of the initial guess vector.')
-        if self.nx != self.x_lower.size:
-            raise ValueError('Number of design variables declared does not match the size of the lower bounds vector.')
-        if self.nx != self.x_upper.size:
-            raise ValueError('Number of design variables declared does not match the size of the upper bounds vector.')
-        if self.nx != self.x_scaler.size:
-            raise ValueError('Number of design variables declared does not match the size of the design variables scaler vector.')
+        if x0.shape != (self.nx,):
+            raise ValueError(f'The initial guess vector must be a 1D array but provided x0 has shape {x0.shape}.')
+        if self.x_lower.shape != (self.nx,):
+            raise ValueError(f'The lower bounds vector must be broadcastable to shape ({self.nx},) but got shape {xl.shape}.')
+        if self.x_upper.shape != (self.nx,):
+            raise ValueError(f'The upper bounds vector must be broadcastable to shape ({self.nx},) but got shape {xu.shape}.')
+        if self.x_scaler.shape != (self.nx,):
+            raise ValueError(f'The design variable scaler vector must be broadcastable to shape ({self.nx},) but got shape {x_scaler.shape}.')
+        if not np.isscalar(f_scaler):
+            if f_scaler.shape != (1,):
+                raise ValueError(f'The objective scaler must be a scalar or a 1D array with shape (1,) but got shape {f_scaler.shape}.')
+            
+        if self.constrained:
+            if self.nc == 0:
+                raise ValueError('Constraints are declared but the number of constraints is zero.')
+            if self.c_lower.shape != (self.nc,):
+                raise ValueError(f'Lower bounds vector for constraints must be broadcastable to shape ({self.nc},) but got shape {cl.shape}.')
+            if self.c_upper.shape != (self.nc,):
+                raise ValueError(f'Upper bounds vector for constraints must be broadcastable to shape ({self.nc},) but got shape {cu.shape}.')
+            if self.c_scaler.shape != (self.nc,):
+                raise ValueError(f'The constraint scaler vector must be broadcastable to shape ({self.nc},) but got shape {c_scaler.shape}.')
+        else:
+            if cl is not None or cu is not None or c_scaler != 1.0:
+                raise ValueError('If "con" function is not provided, "cl", "cu", and "c_scaler" must not be declared.')
+            if self.jvp is not None or self.vjp is not None or self.lag_hvp is not None:
+                raise ValueError('If "con" function is not provided, "jvp", "vjp", and "lag_hvp" must not be declared.')
 
     def _funcs(self, x):
         '''
@@ -362,14 +418,26 @@ class ProblemLite(object):
             lg1 = self.lag_grad(x/self.x_scaler + h, mu*self.c_scaler/self.f_scaler)
             fd_hvp = (lg1 - lg0) / self.fd_step
             return fd_hvp * self.f_scaler / self.x_scaler
+        
+    def compute_objective(self, dvs, obj):
+        pass
+    def compute_objective_gradient(self, dvs, grad):
+        pass
+    def compute_constraints(self, dvs, con):
+        pass
+    def compute_constraint_jacobian(self, dvs, jac):
+        pass
+    def compute_objective_hessian(self, dvs, obj_hess):
+        pass
+    def compute_lagrangian_hessian(self, dvs, z, obj_hess):
+        pass
 
     def __str__(self):
         """
-        Print the details of the unscaled optimization problem.
+        Print the details of the UNSCALED optimization problem.
         """
         name = self.problem_name
-        obj  = self.f / self.f_scaler 
-        obj = obj if np.isscalar(obj) else obj[0]
+        obj  = (self.f / self.f_scaler)[0] # self.f_scaler always has shape (1,)
         obj_scaler = self.f_scaler[0]
         dvs  = self.warm_x / self.x_scaler
         x_l  = self.x_lower / self.x_scaler
@@ -405,7 +473,7 @@ class ProblemLite(object):
         
         # PROBLEM DATA BEGINS
         # >>>>>>>>>>>>>>>>>>>>>>>
-        title2 = 'Problem Data :'
+        title2 = 'Problem Data (UNSCALED):'
         output += f'\n\n\t{title2}\n'
         output += '\t' + '-'*100
         

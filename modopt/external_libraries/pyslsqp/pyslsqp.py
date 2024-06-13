@@ -104,9 +104,9 @@ class PySLSQP(Optimizer):
 
     def solve(self):
         # Set up the problem
-        x0 = self.problem.x0
-        obj = self.problem._compute_objective
-        grad = self.problem._compute_objective_gradient
+        x0 = self.x0
+        obj = self.obj
+        grad = self.grad
         if self.problem.constrained:
             con = self.con
             jac = self.jac
