@@ -123,6 +123,9 @@ optimizer.check_first_derivatives(prob.x0)
 # Solve your optimization problem
 optimizer.solve()
 
+# Print the variables in the problem after optimization
+print(prob)
+
 # Print results of optimization (summary_table contains information from each iteration)
 optimizer.print_results(summary_table=True, compact_print=True)
 

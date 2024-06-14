@@ -69,7 +69,6 @@ class Quartic(Problem):
 
 
 if __name__ == "__main__":
-    # Instantiate your problem using the csdl Simulator object and name your problem
     prob = Quartic(jac_format='dense')
 
     from modopt import SLSQP, SQP, SNOPT, COBYLA

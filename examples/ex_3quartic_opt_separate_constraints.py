@@ -70,21 +70,21 @@ class Quartic(Problem):
         # jac['x-y', 'y'] = -1.
 
 
-from modopt import SLSQP
-# from modopt import SQP
-from modopt import SNOPT
+from modopt import SLSQP, SQP, SNOPT, PySLSQP
 
 tol = 1E-8
 max_itr = 500
 
 prob = Quartic(jac_format='dense')
+print(prob)
 
 # Set up your optimizer with the problem
-optimizer = SLSQP(prob, maxiter=20)
+optimizer = PySLSQP(prob, solver_options={'maxiter': 20, 'acc': 1e-6})
+# optimizer = SLSQP(prob, maxiter=20)
 # optimizer = SQP(prob, max_itr=20)
 # optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3)
 
-optimizer.check_first_derivatives(prob.x.get_data())
+optimizer.check_first_derivatives(prob.x0)
 optimizer.solve()
 optimizer.print_results(summary_table=True)
 

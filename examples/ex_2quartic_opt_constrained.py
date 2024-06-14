@@ -52,7 +52,7 @@ max_itr = 500
 
 prob = Quartic(jac_format='dense')
 
-# print(prob)
+print(prob)
 
 # Set up your optimizer with the problem
 optimizer = SLSQP(prob, maxiter=20)
@@ -63,7 +63,7 @@ optimizer.check_first_derivatives(prob.x0)
 optimizer.solve()
 optimizer.print_results(summary_table=True)
 
-# print(prob)
+print(prob)
 
 print('optimized_dvs:', prob.x.get_data())
 print('optimized_cons:', prob.con.get_data())

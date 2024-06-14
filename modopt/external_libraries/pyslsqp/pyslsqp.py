@@ -1,9 +1,10 @@
 import numpy as np
-from pyslsqp import optimize
-import time
-
 from modopt import Optimizer
 import warnings
+try:
+    from pyslsqp import optimize
+except:
+    warnings.warn("'pyslsqp' could not be imported. Install pyslsqp using 'pip install pyslsqp'.")
 
 class PySLSQP(Optimizer):
     '''
