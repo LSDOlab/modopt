@@ -490,15 +490,16 @@ class ProblemLite(object):
             output += f'\n\n\tConstraints:\n'
             header = "\t%-5s | %-10s | %-13s | %-13s | %-13s | %-13s | %-13s " % ('Index', 'Name', 'Scaler','Lower Limit', 'Value', 'Upper Limit', 'Lag. mult.') 
             output += header
-            if 1: # print lagrange multipliers
-                con_template = "\n\t{idx:>5} | {name:<10} | {scaler:<+.6e} | {lower:<+.6e} | {value:<+.6e} | {upper:<+.6e} | {lag:<+.6e}"
+            zero_lag = np.array_equal(mu, np.zeros((self.nc,)))
+            if not zero_lag: # print lagrange multipliers
+                con_template = "\n\t{idx:>5} | {name:<10} | {scaler:<+.6e} | {lower:<+.6e} | {value:<+.6e} | {upper:<+.6e} | {lag:<+.6e} "
             else:
                 con_template = "\n\t{idx:>5} | {name:<10} | {scaler:<+.6e} | {lower:<+.6e} | {value:<+.6e} | {upper:<+.6e} | "
 
             for i, c in enumerate(cons.flatten()):
                 l = -1.e99 if c_l[i] == -np.inf else c_l[i]
                 u = +1.e99 if c_u[i] == +np.inf else c_u[i]
-                if 1: # print lagrange multipliers
+                if not zero_lag: # print lagrange multipliers
                     output += con_template.format(idx=i, name='con'+f'[{i}]', scaler=c_s[i], lower=l, value=c, upper=u, lag=mu[i])
                 else:
                     output += con_template.format(idx=i, name='con'+f'[{i}]', scaler=c_s[i], lower=l, value=c, upper=u)

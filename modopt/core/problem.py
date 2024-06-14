@@ -233,24 +233,15 @@ class Problem(object):
             cons = self.con
             c_l  = self.c_lower; c_u  = self.c_upper; c_s  = self.c_scaler
 
-        # Print title : optimization problem name
-        # title   = f'Optimization problem : {name}'
-        # output  = f'\n\n{title}\n'
-        # output += '='*100
-        
-        # PROBLEM OVERVIEW BEGINS
-        # >>>>>>>>>>>>>>>>>>>>>>>
-        title1  = 'Problem Overview :'
         # output  = '\n\t'+'-'*100
-        output  = f'\n\t{title1}\n'
-        output += '\t'+'-'*100
+        output  = f'\n\tProblem Overview:\n\t' + '-'*100
         output += f'\n\t' + pad_name('Problem name', 25) + f': {name}'
         
         # Print objective name
         # if len(obj) > 1:
         #     raise (f'More than one objective defined for the optimization problem: {", ".join(obj)}.')
         # output += f'\n\tObjective: {list(obj.keys())[0]}'
-        output += f'\n\t' + pad_name('Objectives', 25) + f': {list(obj.keys())}'
+        output += f'\n\t' + pad_name('Objectives', 25) + f': '+', '.join(obj.keys())
         
         # Print design variables list with their dimensions
         dv_list = ''
@@ -267,25 +258,13 @@ class Problem(object):
             con_list = con_list[:-2]
             output += f'\n\t' + pad_name('Constraints', 25) + f': {con_list}'
 
-        # <<<<<<<<<<<<<<<<<<<<<
-        # PROBLEM OVERVIEW ENDS
         output += '\n\t' + '-'*100
         
-
-        # PROBLEM DETAILS BEGINS
-        # >>>>>>>>>>>>>>>>>>>>>>>
-        title2 = 'Problem Details (UNSCALED):'
-        output += f'\n\n\t{title2}\n'
-        output += '\t' + '-'*100
+        output += f'\n\n\tProblem Data (UNSCALED):\n\t' + '-'*100
         
-        # Print objective details
+        # Print objective data
         output += f'\n\tObjectives:\n'
-        header = "\t{0} | {1} | {2} | {3}".format(
-                                            pad_name('Index', 5),
-                                            pad_name('Name', 10),
-                                            pad_name('Scaler', 13),
-                                            pad_name('Value', 13),
-                                        )
+        header = "\t%-5s | %-10s | %-13s | %-13s " % ('Index', 'Name', 'Scaler', 'Value')
         output += header
         obj_template = "\n\t{idx:>5} | {name:<10} | {scaler:<+.6e} | {value:<+.6e}"
         for i, obj_name in enumerate(obj.keys()):
@@ -294,16 +273,9 @@ class Problem(object):
             obj_name    = obj_name[:10] if (len(obj_name)>10) else obj_name
             output     += obj_template.format(idx=i, name=obj_name, scaler=obj_s, value=obj_value)
         
-        # Print design variable details
+        # Print design variable data
         output += f'\n\n\tDesign Variables:\n'
-        header = "\t{0} | {1} | {2} | {3} | {4} | {5}".format(
-                                                        pad_name('Index', 5),
-                                                        pad_name('Name', 10),
-                                                        pad_name('Scaler', 13),
-                                                        pad_name('Lower Limit', 13),
-                                                        pad_name('Value', 13),
-                                                        pad_name('Upper Limit', 13),
-                                                        )
+        header = "\t%-5s | %-10s | %-13s | %-13s | %-13s | %-13s " % ('Index', 'Name', 'Scaler', 'Lower Limit', 'Value', 'Upper Limit')
         output += header
         dv_template = "\n\t{idx:>5} | {name:<10} | {scaler:<+.6e} | {lower:<+.6e} | {value:<+.6e} | {upper:<+.6e}"
 
@@ -316,22 +288,15 @@ class Problem(object):
                 output += dv_template.format(idx=idx, name=dv_name+f'[{i}]', scaler=x_s[idx], lower=l, value=x, upper=u)
                 idx += 1
 
-        # Print constraint details
+        # Print constraint data
         if self.constrained:
             output += f'\n\n\tConstraints:\n'
-            header = "\t{0} | {1} | {2} | {3} | {4} | {5} | {6} ".format(
-                                                            pad_name('Index', 5),
-                                                            pad_name('Name', 10),
-                                                            pad_name('Scaler', 13),
-                                                            pad_name('Lower Limit', 13),
-                                                            pad_name('Value', 13),
-                                                            pad_name('Upper Limit', 13),
-                                                            pad_name('Lag. mult.', 13),
-                                                            )
+            header = "\t%-5s | %-10s | %-13s | %-13s | %-13s | %-13s | %-13s " % ('Index', 'Name', 'Scaler','Lower Limit', 'Value', 'Upper Limit', 'Lag. mult.')
             output += header
+
             idx = 0
-            lag = any(x in self.declared_variables for x in ['lag_grad', 'lag_hess', 'lag_hvp'])
-            if lag:
+            lag_declared = any(x in self.declared_variables for x in ['lag_grad', 'lag_hess', 'lag_hvp'])
+            if lag_declared: # print lagrange multipliers
                 con_template = "\n\t{idx:>5} | {name:<10} | {scaler:<+.6e} | {lower:<+.6e} | {value:<+.6e} | {upper:<+.6e} | {lag:<+.6e}"
                 obj_s = list(obj_scaler.values())[0]
                 z = self.lag_mult.get_data() * obj_s / c_s
@@ -343,14 +308,12 @@ class Problem(object):
                     con_name  = con_name[:10] if (len(con_name)>10) else con_name
                     l = -1.e99 if c_l[idx] == -np.inf else c_l[idx]
                     u = +1.e99 if c_u[idx] == +np.inf else c_u[idx]
-                    if lag:
+                    if lag_declared: # print lagrange multipliers
                         output += con_template.format(idx=idx, name=con_name+f'[{i}]', scaler=c_s[idx], lower=l, value=c, upper=u, lag=z[idx])
                     else:
                         output += con_template.format(idx=idx, name=con_name+f'[{i}]', scaler=c_s[idx], lower=l, value=c, upper=u)
                     idx += 1
 
-        # # <<<<<<<<<<<<<<<<<<<<<
-        # # PROBLEM DETAILS ENDS
         output += '\n\t' + '-'*100 + '\n'
             
         return output
@@ -673,6 +636,45 @@ class Problem(object):
             if all(x not in self.declared_variables for x in ['jac', 'jvp', 'vjp', 'lag_grad']):
                 # Don't raise an error since gradient-free optimization is possible
                 warnings.warn("No constraint-related derivatives (jacobian, jvp, vjp, dL/dx) are declared.")
+
+        if self.compute_objective_gradient.__func__ == Problem.compute_objective_gradient:
+            if 'grad' in self.declared_variables:
+                raise Exception("Objective gradient is declared but compute_objective_gradient() is not provided."
+                                "If declared derivatives are constant, define an empty compute_objective_gradient() with 'pass'."
+                                "If declared derivatives are not available, define a compute_objective_gradient() method"
+                                "that calls self.use_finite_differencing('objective_gradient', step=1.e-6)."
+                                "If using a gradient-free optimizer, do not declare objective gradient.")
+        if self.compute_objective_hessian.__func__ == Problem.compute_objective_hessian:
+            if 'obj_hess' in self.declared_variables:
+                raise Exception("Objective Hessian is declared but compute_objective_hessian() is not provided."
+                                "If declared derivatives are constant, define an empty compute_objective_hessian() with 'pass'."
+                                "If declared derivatives are not available, define a compute_objective_hessian() method"
+                                "that calls self.use_finite_differencing('objective_hessian', step=1.e-6)."
+                                "If using a gradient-free optimizer, do not declare objective hessian.")
+            
+        if self.compute_objective_hvp.__func__ == Problem.compute_objective_hvp:
+            if 'obj_hvp' in self.declared_variables:
+                raise Exception("Objective HVP is declared but compute_objective_hvp() is not provided."
+                                "If declared derivatives are constant, define an empty compute_objective_hvp() with 'pass'."
+                                "If declared derivatives are not available, define a compute_objective_hvp() method"
+                                "that calls self.use_finite_differencing('objective_hvp', step=1.e-6)."
+                                "If using a gradient-free optimizer, do not declare objective hvp.")
+
+        if self.constrained:      
+            if self.compute_constraint_jacobian.__func__ == Problem.compute_constraint_jacobian:
+                if 'jac' in self.declared_variables:
+                    raise Exception("Constraint Jacobian is declared but compute_constraint_jacobian() is not provided."
+                                    "If declared derivatives are constant, define an empty compute_constraint_jacobian() with 'pass'."
+                                    "If declared derivatives are not available, define a compute_constraint_jacobian() method"
+                                    "that calls self.use_finite_differencing('constraint_jacobian', step=1.e-6)."
+                                    "If using a gradient-free optimizer, do not declare constraint jacobian.")
+            if self.compute_constraint_jvp.__func__ == Problem.compute_constraint_jvp:
+                if 'jvp' in self.declared_variables:
+                    raise Exception("Constraint JVP is declared but compute_constraint_jvp() is not provided."
+                                    "If declared derivatives are constant, define an empty compute_constraint_jvp() with 'pass'."
+                                    "If declared derivatives are not available, define a compute_constraint_jvp() method"
+                                    "that calls self.use_finite_differencing('constraint_jvp', step=1.e-6)."
+                                    "If using a gradient-free optimizer, do not declare constraint jvp.")
 
     def add_design_variables(self,
                              name=None,
@@ -1436,6 +1438,80 @@ class Problem(object):
     #     pass
 
 
+    # Finite Difference Approximations of Derivatives:
+    # ================================================
+    def use_finite_differencing(self, derivative, step=1e-6):
+        if derivative == 'objective_gradient':
+            x = self.x.get_data()
+            self.compute_objective(self.x, self.obj)
+            f0 = list(self.obj.values())[0]
+            g_fd = np.zeros((self.nx,))
+            for i in range(self.nx):
+                e = np.zeros((self.nx,))
+                e[i] = 1.
+                self.x.set_data(x + step*e)
+                self.compute_objective(self.x, self.obj)
+                f1 = list(self.obj.values())[0]
+                g_fd[i] = (f1 - f0)
+            g_fd /= step
+            self.pF_px.set_data(g_fd)
+            
+        elif derivative == 'objective_hessian':
+            x = self.x.get_data()
+            self.compute_objective_gradient(self.x, self.pF_px)
+            g0 = self.pF_px.get_data()
+            H_fd = np.zeros((self.nx, self.nx))
+            for i in range(self.nx):
+                e = np.zeros((self.nx,))
+                e[i] = 1.
+                self.x.set_data(x + step*e)
+                self.compute_objective_gradient(self.x, self.pF_px)
+                g1 = self.pF_px.get_data()
+                H_fd[:, i] = (g1 - g0)
+            H_fd /= step
+            self.p2F_pxx.vals.set_data(H_fd.flatten())
+
+        elif derivative == 'constraint_jacobian':
+            x = self.x.get_data()
+            self.compute_constraints(self.x, self.con)
+            c0 = self.con.get_data()
+            J_fd = np.zeros((self.nc, self.nx))
+            for i in range(self.nx):
+                e = np.zeros((self.nx,))
+                e[i] = 1.
+                self.x.set_data(x + step*e)
+                self.compute_constraints(self.x, self.con)
+                c1 = self.con.get_data()
+                J_fd[:, i] = (c1 - c0)
+            J_fd /= step
+            self.pC_px.vals.set_data(J_fd.flatten())
+
+        elif derivative == 'objective_hvp':
+            x = self.x.get_data()
+            self.compute_objective_gradient(self.x, self.pF_px)
+            g0 = self.pF_px.get_data()
+            v = self.vec_hvp.get_data()
+
+            self.x.set_data(x + step*v)
+            self.compute_objective_gradient(self.x, self.pF_px)
+            g1 = self.pF_px.get_data()
+            hvp_fd = (g1 - g0) / step
+            self.obj_hvp.set_data(hvp_fd)
+
+        elif derivative == 'constraint_jvp':
+            x = self.x.get_data()
+            self.compute_constraints(self.x, self.con)
+            c0 = self.con.get_data()
+            v = self.vec_jvp.get_data()
+
+            self.x.set_data(x + step*v)
+            self.compute_constraints(self.x, self.con)
+            c1 = self.con.get_data()
+            jvp_fd = (c1 - c0) / step
+            self.jvp.set_data(jvp_fd)
+
+        else:
+            raise NotImplementedError('Finite differencing is not implemented for the requested derivative.')
 
 
     # WRAPPER FOR USER-DEFINED COMPUTE METHODS BELOW (USED BY Optimizer() OBJECTS):
