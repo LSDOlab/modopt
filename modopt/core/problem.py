@@ -19,7 +19,7 @@ class Problem(object):
     problem_name : str
         Problem name assigned by the user.
     x0 : np.ndarray
-        Initial guess (unscaled) for design variables.
+        Initial guess (scaled) for design variables.
     x : array_manager.Vector
         Current iterate (unscaled) for the design variables.
     nx : int
@@ -192,7 +192,7 @@ class Problem(object):
         
         Calls user-specified setup_derivatives().
         Sets up matrices for Jacobian (if there are constraints),
-        objective or Lagrangian Hessian dependign on which one is
+        objective or Lagrangian Hessian depending on which one is
         declared by the user.
 
         Finally delete any unnecessary attributes allocated but
@@ -215,10 +215,10 @@ class Problem(object):
         self.delete_unnecessary_attributes_allocated()
         self.raise_issues_with_user_setup()
 
-        # When problem is not defined as CSDLProblem()
+        # When problem is not defined as CSDLProblem() [Note: self.x0 is always scaled]
         if self.x0 is None:
             # Note: array_manager puts np.zeros as the initial guess if no initial guess is provided
-            self.x0 = self.x.get_data()
+            self.x0 = self.x.get_data() * self.x_scaler
 
     def __str__(self):
         """
@@ -274,7 +274,7 @@ class Problem(object):
 
         # PROBLEM DETAILS BEGINS
         # >>>>>>>>>>>>>>>>>>>>>>>
-        title2 = 'Problem Details :'
+        title2 = 'Problem Details (UNSCALED):'
         output += f'\n\n\t{title2}\n'
         output += '\t' + '-'*100
         
@@ -609,13 +609,16 @@ class Problem(object):
             
     def delete_unnecessary_attributes_allocated(self, ):
         '''
-        After checking if 'obj_hess', 'obj_hvp', 'jvp', 'vjp', 'lag_grad', 
+        After checking if 'grad', 'jac', 'obj_hess', 'obj_hvp', 'jvp', 'vjp', 'lag_grad', 
         'lag_hess', or 'lag_hvp' are in self.declared_variables,
-        delete attributes self.jvp, self.vjp, self.obj_hess, self.obj_hvp, self.lag_grad, self.lag_hess, self.lag_hvp,
+        delete attributes self.pF_px, self.pC_px_dict, self.pC_px, self.jvp, self.vjp, self.obj_hess, self.obj_hvp, self.lag_grad, self.lag_hess, self.lag_hvp,
         and associated VectorComponentsDict() objects if not declared by the user.
         '''
-        # NOTE: This memory deallocation is not implemented for SURF        
+        # NOTE: This memory deallocation is not implemented for SURF  
 
+        if 'grad' not in self.declared_variables: # not needed for gradient-free optimization
+            print('Deleting self.pFpx ...')
+            del self.pF_px
         if 'obj_hess' not in self.declared_variables:
             del self.p2F_pxx_dict
         if 'obj_hvp' not in self.declared_variables:
@@ -624,6 +627,9 @@ class Problem(object):
             del self.vec_hvp
 
         if self.constrained:
+            if 'jac' not in self.declared_variables: # not needed for gradient-free optimization
+                del self.pC_px_dict, self.pC_px
+                print('Deleting self.pCpx, pCpx_dict ...')
             if 'jvp' not in self.declared_variables:
                 del self.jvp, self.vec_jvp
             if 'vjp' not in self.declared_variables:
@@ -648,13 +654,24 @@ class Problem(object):
         if 'dv' not in self.declared_variables:
             raise Exception("No design variables are declared.")
         if 'obj' not in self.declared_variables:
-            raise Exception("No objective is declared." + 
-                            "Add a dummy constant objective if the problem has no objective.")
+            warnings.warn("No objective is declared. Running a feasibility problem.")
+            self.add_objective('dummy_obj')
+            self.obj['dummy_obj'] = 0. # Default value 1. is reaplaced with 0. for feasibility problems
+
+            # Add back pF_px only for a gradient-based feasibility problem since 
+            # it was deleted in delete_unnecessary_attributes_allocated()
+            if 'jac' in self.declared_variables: # checking if gradients are declared for constraints
+                self.pF_px = Vector(self.design_variables_dict)
+                self.pF_px.allocate(data=np.zeros((self.nx, )), setup_views=False)
+
         if ('grad' not in self.declared_variables) and ('lag_grad' not in self.declared_variables):
+            # Don't raise an error since gradient-free optimization is possible
+            # Will raise errors if trying to access gradients later since pF_px was deleted
             warnings.warn("No objective/Lagrangian gradient is declared.")
 
         if self.constrained:
             if all(x not in self.declared_variables for x in ['jac', 'jvp', 'vjp', 'lag_grad']):
+                # Don't raise an error since gradient-free optimization is possible
                 warnings.warn("No constraint-related derivatives (jacobian, jvp, vjp, dL/dx) are declared.")
 
     def add_design_variables(self,
@@ -938,7 +955,7 @@ class Problem(object):
             Values for the constraint JVP. Useful if the "of" constraint is 
             only linearly-dependent on all of the design variables.
         '''
-        if of not in self.design_variables_dict:
+        if of not in self.constraints_dict:
             raise KeyError(f'JVP is declared for undeclared constraint {of}.')
 
         if 'jvp' not in self.declared_variables:
@@ -1100,6 +1117,8 @@ class Problem(object):
             Values for the objective HVP. Useful if the HVP 
             is constant w.r.t. the declared "wrt" design variables.
         '''
+        # Note 'of' and 'wrt' are same here since the Hessian is symmetric 
+        # Technically, it should be 'of' to maintain parallelism with the JVP declaration
         if wrt not in self.design_variables_dict:
             raise KeyError(f'HVP is declared with respect to undeclared design variable {wrt}')
         
@@ -1946,48 +1965,48 @@ class Problem(object):
 
         return self.df_dr_0, pR_px
 
-    def compute_objective_gradient(self, x):
-        if self.x.get_data() != x:
-            self.x.set_data(x)
-            self.y = self.solve_residual_equations(
-                x)  # Note: assumes a single set of residual equations
+    # def compute_objective_gradient(self, x):
+    #     if self.x.get_data() != x:
+    #         self.x.set_data(x)
+    #         self.y = self.solve_residual_equations(
+    #             x)  # Note: assumes a single set of residual equations
 
-        else:
-            self.y = self.solve_residual_equations(
-                x, self.y
-            )  # uses the previous approximation of y to warm start the nonlinear solver
-            # Note: assumes a single set of residual equations
-        pF_px_0, pF_py_0 = self.evaluate_objective_gradient(
-            self, x, self.y)
+    #     else:
+    #         self.y = self.solve_residual_equations(
+    #             x, self.y
+    #         )  # uses the previous approximation of y to warm start the nonlinear solver
+    #         # Note: assumes a single set of residual equations
+    #     pF_px_0, pF_py_0 = self.evaluate_objective_gradient(
+    #         self, x, self.y)
 
-        df_dr_0, pR_px = self.compute_adjoint_vector(x, pF_py_0)
-        self.pF_px_0 = pF_px_0 + np.matmul(df_dr_0, pR_px)
+    #     df_dr_0, pR_px = self.compute_adjoint_vector(x, pF_py_0)
+    #     self.pF_px_0 = pF_px_0 + np.matmul(df_dr_0, pR_px)
 
-        return self.pF_px_0
+    #     return self.pF_px_0
 
-    def compute_constraint_jacobian(self, x):
-        if self.x.get_data() != x:
-            self.x.set_data(x)
-            self.y = self.solve_residual_equations(
-                x)  # Note: assumes a single set of residual equations
+    # def compute_constraint_jacobian(self, x):
+    #     if self.x.get_data() != x:
+    #         self.x.set_data(x)
+    #         self.y = self.solve_residual_equations(
+    #             x)  # Note: assumes a single set of residual equations
 
-        else:
-            self.y = self.solve_residual_equations(
-                x, self.y
-            )  # uses the previous approximation of y to warm start the nonlinear solver
-            # Note: assumes a single set of residual equations
-        pC_px_0, pC_py_0 = self.evaluate_constraint_jacobian(
-            self, x, self.y)
+    #     else:
+    #         self.y = self.solve_residual_equations(
+    #             x, self.y
+    #         )  # uses the previous approximation of y to warm start the nonlinear solver
+    #         # Note: assumes a single set of residual equations
+    #     pC_px_0, pC_py_0 = self.evaluate_constraint_jacobian(
+    #         self, x, self.y)
 
-        if self.nc <= self.nr:
-            dc_dr_0, pR_px = self.compute_adjoint_vector(x, pC_py_0)
-            self.pC_px_0 = pC_px_0 + np.matmul(dc_dr_0, pR_px)
+    #     if self.nc <= self.nr:
+    #         dc_dr_0, pR_px = self.compute_adjoint_vector(x, pC_py_0)
+    #         self.pC_px_0 = pC_px_0 + np.matmul(dc_dr_0, pR_px)
 
-        else:
-            dy_dx = self.compute_direct_vector(x)
-            self.pC_px_0 = pC_px_0 - np.matmul(pC_py_0, dy_dx)
+    #     else:
+    #         dy_dx = self.compute_direct_vector(x)
+    #         self.pC_px_0 = pC_px_0 - np.matmul(pC_py_0, dy_dx)
 
-        return self.pC_px_0
+    #     return self.pC_px_0
 
     def evaluate_residuals(self, x, y):
         """
