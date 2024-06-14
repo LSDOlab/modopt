@@ -37,54 +37,57 @@ class ProblemLite(object):
         - Lagrangian functions and derivatives for constrained problems.
         - Sparse or dense matrix formats for Jacobian and Hessian in user-provided functions, 
           if supported by the optimizer used.
-
-    Attributes
-    ----------
-    name : str, default='unnamed_problem'
-        Problem name assigned by the user.
-    x0 : np.ndarray
-        Initial guess for design variables.
-    obj : callable
-        Objective function.
-    con : callable
-        Constraints function.
-    grad : callable
-        Gradient of the objective function.
-    jac : callable
-        Jacobian of the constraints function.
-    obj_hess : callable
-        Hessian of the objective function.
-    lag_hess : callable
-        Hessian of the Lagrangian function.
-    fd_step : float
-        Finite difference step size for gradient and Jacobian computations.
-    xl : float or np.ndarray
-        Lower bounds on design variables.
-    xu : float or np.ndarray
-        Upper bounds on design variables.
-    cl : float or np.ndarray
-        Lower bounds on constraints.
-    cu : float or np.ndarray
-        Upper bounds on constraints.
-    x_scaler : float or np.ndarray
-        Scaling factor for design variables.
-    f_scaler : float
-        Scaling factor for the objective function.
-    c_scaler : float or np.ndarray
-        Scaling factor for constraints.
-    jvp : callable
-        Jacobian-vector product function.
-    vjp : callable
-        Vector-Jacobian product function.
-    obj_hvp : callable
-        Hessian-vector product function for the objective.
-    lag_hvp : callable
-        Hessian-vector product function for the Lagrangian.
     '''
 
     def __init__(self, x0, name='unnamed_problem', obj=None, con=None, grad=None, jac=None, obj_hess=None, lag_hess=None, 
-                 fd_step=1e-8, xl=None, xu=None, cl=None, cu=None, x_scaler=1., f_scaler=1., c_scaler=1.,
+                 fd_step=1e-6, xl=None, xu=None, cl=None, cu=None, x_scaler=1., f_scaler=1., c_scaler=1.,
                  jvp=None, vjp=None, obj_hvp=None, lag_hvp=None):
+        '''
+        Initialize the optimization problem with the given design variables, objective, constraints, and their derivatives.
+
+        Attributes
+        ----------
+        name : str, default='unnamed_problem'
+            Problem name assigned by the user.
+        x0 : np.ndarray
+            Initial guess for design variables.
+        obj : callable
+            Objective function.
+        con : callable
+            Constraints function.
+        grad : callable
+            Gradient of the objective function.
+        jac : callable
+            Jacobian of the constraints function.
+        obj_hess : callable
+            Hessian of the objective function.
+        lag_hess : callable
+            Hessian of the Lagrangian function.
+        fd_step : float, default=1e-6
+            Finite difference step size for gradient and Jacobian computations.
+        xl : float or np.ndarray
+            Lower bounds on design variables.
+        xu : float or np.ndarray
+            Upper bounds on design variables.
+        cl : float or np.ndarray
+            Lower bounds on constraints.
+        cu : float or np.ndarray
+            Upper bounds on constraints.
+        x_scaler : float or np.ndarray
+            Scaling factor for design variables.
+        f_scaler : float
+            Scaling factor for the objective function.
+        c_scaler : float or np.ndarray
+            Scaling factor for constraints.
+        jvp : callable
+            Jacobian-vector product function.
+        vjp : callable
+            Vector-Jacobian product function.
+        obj_hvp : callable
+            Hessian-vector product function for the objective.
+        lag_hvp : callable
+            Hessian-vector product function for the Lagrangian.
+        '''
         self.problem_name = name
         self.options = OptionsDictionary()
         self.ny = 0
@@ -164,7 +167,6 @@ class ProblemLite(object):
         self.warm_x = self.x = np.random.rand(self.nx)
         self.warm_x_derivs = np.random.rand(self.nx)
         # self.warm_x_2nd_derivs = np.random.rand(self.nx) # No caching of 2nd derivatives since memory expensive
-        self.warm_mu = self.mu = np.zeros((self.nc,)) if self.constrained else None
 
         # Cached f, c, g, j are all scaled
         self.f = None
@@ -199,13 +201,15 @@ class ProblemLite(object):
         self.fev_time += time.time() - f_start
         #####################################################
 
-        # Once nc is known from the first call to con(x0), update the cl, cu, c_scaler sizes
+        # Once nc is known from the first call to con(x0), update the cl, cu, c_scaler, mu sizes
         if self.constrained:
             self.c_scaler = c_scaler * np.ones((nc,))
             self.c_lower = cl * c_scaler if cl is not None else np.full(nc, -np.inf)
             self.c_upper = cu * c_scaler if cu is not None else np.full(nc,  np.inf)
+            self.warm_mu = self.mu = np.full((self.nc,), 0.) if self.constrained else None
+
         else:
-            self.c_lower = self.c_upper = self.c_scaler = None
+            self.c_lower = self.c_upper = self.c_scaler = self.warm_mu = None
 
         # For the first call, we expand _derivs(x0) here to perform checks on sizes of derivatives returned.
         # self._derivs(self.x0)
@@ -449,56 +453,30 @@ class ProblemLite(object):
             c_u  = self.c_upper / self.c_scaler
             c_s  = self.c_scaler
             mu = self.warm_mu
-
-        # Print title : optimization problem name
-        # title   = f'Optimization problem : {name}'
-        # output  = f'\n\n{title}\n'
-        # output += '='*100
         
-        # PROBLEM OVERVIEW BEGINS
-        # >>>>>>>>>>>>>>>>>>>>>>>
-        title1  = 'Problem Overview :'
         # output  = '\n\t'+'-'*100
-        output  = f'\n\t{title1}\n'
-        output += '\t'+'-'*100
+        output  = f'\n\tProblem Overview:\n\t' + '-'*100
         output += f'\n\t' + pad_name('Problem name', 25) + f': {name}'
         output += f'\n\t' + pad_name('Objectives', 25) + f': obj'
-        output += f'\n\t' + pad_name('Design variables', 25) + f': x -> {dvs.shape}'
+        output += f'\n\t' + pad_name('Design variables', 25) + f': x   (shape: {dvs.shape})'
         if self.constrained:
-            output += f'\n\t' + pad_name('Constraints', 25) + f': con -> {cons.shape}'
+            output += f'\n\t' + pad_name('Constraints', 25) + f': con (shape: {cons.shape})'
 
-        # <<<<<<<<<<<<<<<<<<<<<
-        # PROBLEM OVERVIEW ENDS
         output += '\n\t' + '-'*100
         
-        # PROBLEM DATA BEGINS
-        # >>>>>>>>>>>>>>>>>>>>>>>
-        title2 = 'Problem Data (UNSCALED):'
-        output += f'\n\n\t{title2}\n'
+        output += f'\n\n\tProblem Data (UNSCALED):\n'
         output += '\t' + '-'*100
         
         # Print objective data
         output += f'\n\tObjectives:\n'
-        header = "\t{0} | {1} | {2} | {3}".format(
-                                            pad_name('Index', 5),
-                                            pad_name('Name', 10),
-                                            pad_name('Scaler', 13),
-                                            pad_name('Value', 13),
-                                        )
+        header = "\t%-5s | %-10s | %-13s | %-13s " % ('Index', 'Name', 'Scaler', 'Value')
         output += header
         obj_template = "\n\t{idx:>5} | {name:<10} | {scaler:<+.6e} | {value:<+.6e}"
         output     += obj_template.format(idx=0, name='obj', scaler=obj_scaler, value=obj)
         
         # Print design variable data
         output += f'\n\n\tDesign Variables:\n'
-        header = "\t{0} | {1} | {2} | {3} | {4} | {5}".format(
-                                                        pad_name('Index', 5),
-                                                        pad_name('Name', 10),
-                                                        pad_name('Scaler', 13),
-                                                        pad_name('Lower Limit', 13),
-                                                        pad_name('Value', 13),
-                                                        pad_name('Upper Limit', 13),
-                                                        )
+        header = "\t%-5s | %-10s | %-13s | %-13s | %-13s | %-13s " % ('Index', 'Name', 'Scaler', 'Lower Limit', 'Value', 'Upper Limit')
         output += header
         dv_template = "\n\t{idx:>5} | {name:<10} | {scaler:<+.6e} | {lower:<+.6e} | {value:<+.6e} | {upper:<+.6e}"
 
@@ -510,15 +488,7 @@ class ProblemLite(object):
         # Print constraint data
         if self.constrained:
             output += f'\n\n\tConstraints:\n'
-            header = "\t{0} | {1} | {2} | {3} | {4} | {5} | {6} ".format(
-                                                            pad_name('Index', 5),
-                                                            pad_name('Name', 10),
-                                                            pad_name('Scaler', 13),
-                                                            pad_name('Lower Limit', 13),
-                                                            pad_name('Value', 13),
-                                                            pad_name('Upper Limit', 13),
-                                                            pad_name('Lag. mult.', 13),
-                                                            )
+            header = "\t%-5s | %-10s | %-13s | %-13s | %-13s | %-13s | %-13s " % ('Index', 'Name', 'Scaler','Lower Limit', 'Value', 'Upper Limit', 'Lag. mult.') 
             output += header
             if 1: # print lagrange multipliers
                 con_template = "\n\t{idx:>5} | {name:<10} | {scaler:<+.6e} | {lower:<+.6e} | {value:<+.6e} | {upper:<+.6e} | {lag:<+.6e}"
@@ -533,8 +503,6 @@ class ProblemLite(object):
                 else:
                     output += con_template.format(idx=i, name='con'+f'[{i}]', scaler=c_s[i], lower=l, value=c, upper=u)
 
-        # # <<<<<<<<<<<<<<<<<<<<<
-        # # PROBLEM DATA ENDS
         output += '\n\t' + '-'*100 + '\n'
             
         return output
