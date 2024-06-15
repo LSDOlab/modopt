@@ -20,3 +20,18 @@ _temp
 
 # Sphinx documentation
 docs/_build/
+
+# Unit test / coverage reports
+*.lcov
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/

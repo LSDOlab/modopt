@@ -123,17 +123,19 @@ visualization = [
     "matplotlib",
 ]
 
-# [tool.pytest.ini_options]
-# markers = [
-#     "visualize: marks tests as visualize (deselect with '-m \"not visualize\"')",
-# ]
+[tool.pytest.ini_options]
+markers = [
+    "interfaces: marks tests as interfaces (deselect with '-m \"not interfaces\"')",
+    "csdl: marks tests as csdl (deselect with '-m \"not csdl\"')",
+    "csdl_alpha: marks tests as csdl_alpha (deselect with '-m \"not csdl_alpha\"')",
+]
 
-# [tool.coverage.run]
-# omit = [
-#     # omit anything in a tests directory anywhere
-#     "*/tests/*",
-#     # omit everything in the docs directory
-#     "/docs/*",
-#     # omit this single file since visualization is not tested by default
-#     "modopt/visualize.py",
-#     ]
+[tool.coverage.run]
+omit = [
+    # omit anything in a tests directory anywhere
+    "*/tests/*",
+    # omit everything in the docs directory
+    "/docs/*",
+    # omit this single file since snopta is deprecated and not used
+    "modopt/external_libraries/snopt/snopta.py",
+    ]

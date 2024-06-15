@@ -36,7 +36,7 @@ jobs:
     #   # Run the package tests and generate the coverage report
     # - name: Test with pytest
     #   run: |
-    #     pytest tests/ --cov=pyslsqp --cov-report lcov
+    #     pytest tests/ --cov=modopt --cov-report lcov
 
     #   # Upload the coverage report to coveralls
     # - name: Coveralls GitHub Action
