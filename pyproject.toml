@@ -128,6 +128,8 @@ markers = [
     "interfaces: marks tests as interfaces (deselect with '-m \"not interfaces\"')",
     "csdl: marks tests as csdl (deselect with '-m \"not csdl\"')",
     "csdl_alpha: marks tests as csdl_alpha (deselect with '-m \"not csdl_alpha\"')",
+    "openmdao: marks tests as openmdao (deselect with '-m \"not openmdao\"')",
+    "jax: marks tests as jax (deselect with '-m \"not jax\"')",
 ]
 
 [tool.coverage.run]

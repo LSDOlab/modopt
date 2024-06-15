@@ -206,6 +206,12 @@ class Problem(object):
         # CSDLProblem() overrides this method in Problem()
         self._setup_bounds()
         self._setup_vectors()
+
+        # When problem is not defined as CSDLProblem() [Note: self.x0 is always scaled]
+        if self.x0 is None:
+            # Note: array_manager puts np.zeros as the initial guess if no initial guess is provided
+            self.x0 = self.x.get_data() * self.x_scaler
+    
         self._setup_jacobian_dict()
         self._setup_hessian_dict()
 
@@ -214,11 +220,6 @@ class Problem(object):
 
         self.delete_unnecessary_attributes_allocated()
         self.raise_issues_with_user_setup()
-
-        # When problem is not defined as CSDLProblem() [Note: self.x0 is always scaled]
-        if self.x0 is None:
-            # Note: array_manager puts np.zeros as the initial guess if no initial guess is provided
-            self.x0 = self.x.get_data() * self.x_scaler
 
     def __str__(self):
         """

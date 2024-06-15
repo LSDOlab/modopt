@@ -54,7 +54,7 @@ def test_csdl():
     assert_array_equal(prob.c_upper, [20., np.inf])
 
     from modopt import SQP, SLSQP, SNOPT, PySLSQP
-    optimizer = SLSQP(prob, ftol=1e-6, maxiter=20)
+    optimizer = SLSQP(prob, ftol=1e-6, maxiter=20, disp=True)
     # optimizer = PySLSQP(prob, solver_options={'acc':1e-6, 'maxiter':20})
     # optimizer = SQP(prob, max_itr=20)
     # optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3, Verbose=True)
@@ -74,9 +74,9 @@ def test_csdl():
 @pytest.mark.csdl_alpha
 def test_csdl_alpha():
     import numpy as np
+    from numpy.testing import assert_array_equal, assert_array_almost_equal, assert_almost_equal
     from modopt import CSDLAlphaProblem
     import csdl_alpha as csdl
-    from numpy.testing import assert_array_equal, assert_array_almost_equal, assert_almost_equal
 
     # minimize x^4 + y^4 subject to x>=0, x+y=1, x-y>=1.
     rec = csdl.Recorder()
