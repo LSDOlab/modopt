@@ -141,6 +141,15 @@ class PSO(Optimizer):
             
         # Run post-processing for the Optimizer() base class
         self.run_post_processing()
+        self.total_time = time.time() - start_time
+        converged = f_sd <= tol
 
-        end_time = time.time()
-        self.total_time = end_time - start_time
+        self.results = {
+            'x': x_best_g, 
+            'f': f_best_g, 
+            'f_sd': f_sd, 
+            'nfev': num_f_evals, 
+            'niter': itr-1, 
+            'time': self.total_time,
+            'converged': converged,
+            }

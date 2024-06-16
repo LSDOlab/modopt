@@ -169,6 +169,15 @@ class NelderMead(Optimizer):
 
         # Run post-processing for the Optimizer() base class
         self.run_post_processing()
+        self.total_time = time.time() - start_time
+        converged = f_sd <= tol
 
-        end_time = time.time()
-        self.total_time = end_time - start_time
+        self.results = {
+            'x': x_k[np.argmin(f_k)], 
+            'f': np.min(f_k), 
+            'f_sd': f_sd, 
+            'nfev': num_f_evals,
+            'niter': itr,
+            'time': self.total_time,
+            'converged': converged,
+        }

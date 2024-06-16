@@ -30,7 +30,7 @@ class BeanFunction(Problem):
         x2 = dvs['x'][1]
         dfdx1 = 2 * (1-x1) - 2*x1 * (2*x2 - x1**2)
         dfdx2 = 2 * (1-x2) + 2 * (2*x2 - x1**2)
-        grad['f'] = np.array([dfdx1, dfdx2])
+        grad['x'] = np.array([dfdx1, dfdx2])
 
 from modopt import PSO, NelderMead
 
@@ -42,8 +42,8 @@ tol = 1e-4
 max_itr = 500
 population = 20
 w = 0.5
-c_g = 0.3
 c_p = 0.4
+c_g = 0.3
 
 # Set up your PSO optimizer with the problem
 optimizer = PSO(prob, 
@@ -63,8 +63,14 @@ optimizer.print_results(summary_table=True)
 # plt.show()
 
 print('PSO results:')
-print('optimized_dvs:', prob.x.get_data())
-print('optimized_obj:', prob.obj['f'])
+
+print('optimized_dvs:', optimizer.results['x'])
+print('optimized_obj:', optimizer.results['f'])
+print('final population obj std dev:', optimizer.results['f_sd'])
+print('total number of function evaluations:', optimizer.results['nfev'])
+print('total number of iterations:', optimizer.results['niter'])
+print('total time taken:', optimizer.results['time'])
+print('converged:', optimizer.results['converged'])
 
 
 # Set up your Nelder-Mead optimizer with the problem
@@ -83,5 +89,11 @@ optimizer.print_results(summary_table=True)
 # plt.show()
 
 print('Nelder-Mead results:')
-print('optimized_dvs:', prob.x.get_data())
-print('optimized_obj:', prob.obj['f'])
+
+print('optimized_dvs:', optimizer.results['x'])
+print('optimized_obj:', optimizer.results['f'])
+print('final population obj std dev:', optimizer.results['f_sd'])
+print('total number of function evaluations:', optimizer.results['nfev'])
+print('total number of iterations:', optimizer.results['niter'])
+print('total time taken:', optimizer.results['time'])
+print('converged:', optimizer.results['converged'])
