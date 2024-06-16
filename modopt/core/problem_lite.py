@@ -41,7 +41,7 @@ class ProblemLite(object):
 
     def __init__(self, x0, name='unnamed_problem', obj=None, con=None, grad=None, jac=None, obj_hess=None, lag_hess=None, 
                  fd_step=1e-6, xl=None, xu=None, cl=None, cu=None, x_scaler=1., f_scaler=1., c_scaler=1.,
-                 jvp=None, vjp=None, obj_hvp=None, lag_hvp=None):
+                 jvp=None, vjp=None, obj_hvp=None, lag_hvp=None, grad_free=False):
         '''
         Initialize the optimization problem with the given design variables, objective, constraints, and their derivatives.
 
@@ -87,6 +87,8 @@ class ProblemLite(object):
             Hessian-vector product function for the objective.
         lag_hvp : callable
             Hessian-vector product function for the Lagrangian.
+        grad_free : bool, default=False
+            If True, the optimizer will not use the gradient information.
         '''
         self.problem_name = name
         self.options = OptionsDictionary()
@@ -215,23 +217,24 @@ class ProblemLite(object):
         # self._derivs(self.x0)
 
         ###### FIRST RUN FOR GRADIENT AND JACOBIAN ######
-        g_start = time.time()
-        g0 = self.grad(x0) 
-        if g0.shape != (nx,):
-            raise ValueError(f'Gradient function must return a 1D array with shape (nx,) '
-                             f'where nx={nx} is the number of design variables, '
-                             f'but returned shape {g0.shape}.')
-        self.g = g0 * self.f_scaler / self.x_scaler
-        if self.constrained:
-            j0 = self.jac(x0)
-            if j0.shape != (nc, nx):
-                raise ValueError(f'Jacobian function must return a 2D array with shape (nc, nx) '
-                                 f'where nc={nc} is the number of constraints and nx={nx} is the number of design variables, '
-                                 f'but returned shape {j0.shape}.')
-            self.j = j0 * np.outer(self.c_scaler, 1 / self.x_scaler)
-        self.warm_x_derivs[:] = self.x0
-        self.ngev += 1
-        self.gev_time += time.time() - g_start
+        if not grad_free:
+            g_start = time.time()
+            g0 = self.grad(x0) 
+            if g0.shape != (nx,):
+                raise ValueError(f'Gradient function must return a 1D array with shape (nx,) '
+                                f'where nx={nx} is the number of design variables, '
+                                f'but returned shape {g0.shape}.')
+            self.g = g0 * self.f_scaler / self.x_scaler
+            if self.constrained:
+                j0 = self.jac(x0)
+                if j0.shape != (nc, nx):
+                    raise ValueError(f'Jacobian function must return a 2D array with shape (nc, nx) '
+                                    f'where nc={nc} is the number of constraints and nx={nx} is the number of design variables, '
+                                    f'but returned shape {j0.shape}.')
+                self.j = j0 * np.outer(self.c_scaler, 1 / self.x_scaler)
+            self.warm_x_derivs[:] = self.x0
+            self.ngev += 1
+            self.gev_time += time.time() - g_start
         #####################################################
 
         self.check_for_errors(x0, xl, xu, cl, cu, x_scaler, f_scaler, c_scaler)

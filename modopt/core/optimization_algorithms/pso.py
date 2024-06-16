@@ -14,7 +14,7 @@ class PSO(Optimizer):
 
         # All the options below are empirically chosen for a problem
         self.options.declare('population', default=25, types=int)
-        self.options.declare('max_itr', default=100, types=int)
+        self.options.declare('maxiter', default=100, types=int)
         self.options.declare('tol', types=float)
         self.options.declare('inertia_weight', default=0.8, types=float)
         self.options.declare('cognitive_coeff', default=0.1, types=float)
@@ -45,7 +45,7 @@ class PSO(Optimizer):
         # x0 = self.problem.x0
         tol = self.options['tol']
         population = self.options['population']
-        max_itr = self.options['max_itr']
+        maxiter = self.options['maxiter']
         w   = self.options['inertia_weight']
         c_p = self.options['cognitive_coeff']
         c_g = self.options['social_coeff']
@@ -89,7 +89,7 @@ class PSO(Optimizer):
         # with many runs of the same problem from random initializations
         np.random.seed(0)
 
-        while (f_sd > tol and itr < max_itr):
+        while (f_sd > tol and itr < maxiter):
             itr_start = time.time()
 
             # ALGORITHM STARTS HERE

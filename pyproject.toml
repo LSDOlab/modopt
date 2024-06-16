@@ -125,6 +125,7 @@ visualization = [
 
 [tool.pytest.ini_options]
 markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "interfaces: marks tests as interfaces (deselect with '-m \"not interfaces\"')",
     "csdl: marks tests as csdl (deselect with '-m \"not csdl\"')",
     "csdl_alpha: marks tests as csdl_alpha (deselect with '-m \"not csdl_alpha\"')",
@@ -140,4 +141,12 @@ omit = [
     "/docs/*",
     # omit this single file since snopta is deprecated and not used
     "modopt/external_libraries/snopt/snopta.py",
+    "modopt/utils/options_dictionary.py",
+
+    # Only for local testing
+    # "modopt/core/optimization_algorithms/interiror_point.py",
+    # "modopt/core/optimization_algorithms/ip_simple.py",
+    # "modopt/core/optimization_algorithms/lp_simple.py",
+    # "modopt/core/optimization_algorithms/qp_simple.py",
+    # "modopt/core/optimization_algorithms/sqp_simple.py",
     ]

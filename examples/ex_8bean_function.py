@@ -39,7 +39,7 @@ prob = BeanFunction()
 # Empirically arrived best hyperparameter values for BeanFunction for tol=1e-4:
 # population=20, w = 0.5, c_g = 0.3, c_p = 0.4
 tol = 1e-4
-max_itr = 500
+maxiter = 500
 population = 20
 w = 0.5
 c_p = 0.4
@@ -47,7 +47,7 @@ c_g = 0.3
 
 # Set up your PSO optimizer with the problem
 optimizer = PSO(prob, 
-                max_itr=max_itr, 
+                maxiter=maxiter, 
                 tol=tol, 
                 population=population,
                 inertia_weight=w,
@@ -76,9 +76,9 @@ print('converged:', optimizer.results['converged'])
 # Set up your Nelder-Mead optimizer with the problem
 prob = BeanFunction()
 tol = 1e-6
-max_itr = 200
+maxiter = 200
 l = 1.0
-optimizer = NelderMead(prob, max_itr=max_itr, tol=tol, initial_length=l)
+optimizer = NelderMead(prob, maxiter=maxiter, tol=tol, initial_length=l)
 
 optimizer.solve()
 optimizer.print_results(summary_table=True)
@@ -92,7 +92,7 @@ print('Nelder-Mead results:')
 
 print('optimized_dvs:', optimizer.results['x'])
 print('optimized_obj:', optimizer.results['f'])
-print('final population obj std dev:', optimizer.results['f_sd'])
+print('final simplex obj std dev:', optimizer.results['f_sd'])
 print('total number of function evaluations:', optimizer.results['nfev'])
 print('total number of iterations:', optimizer.results['niter'])
 print('total time taken:', optimizer.results['time'])

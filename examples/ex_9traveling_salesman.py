@@ -18,6 +18,8 @@ class TravelingSalesman(Problem):
         # self.locations = self.options['locations']
         self.add_objective('total_distance')
 
+        # get_neighbor attribute of the problem is a function that generates a random neighbor
+        self.get_neighbor = lambda x: self.generate_random_neighbor(x)
 
     def setup_derivatives(self):
         pass
@@ -30,29 +32,25 @@ class TravelingSalesman(Problem):
 
         obj['total_distance'] = np.sum(np.linalg.norm(coordinate_differences, axis=1))
 
-    def generate_random_neighbor(self, dvs):
+    def generate_random_neighbor(self, x):
         random_segment = np.random.choice(100, 2, replace=False) # returns float array
         # print(random_segment)
         i = np.min(random_segment)
         j = np.max(random_segment)
 
-        neighbor = dvs * 1
-        # reversed_segment = np.flip(dvs[i:j])
-        neighbor[i:j] = np.flip(dvs[i:j])
+        neighbor = x * 1
+        # reversed_segment = np.flip(x[i:j])
+        neighbor[i:j] = np.flip(x[i:j])
 
         # print(neighbor)
-
-        # breakpoint()
-
         return neighbor
-
-
 
 
 from modopt import SimulatedAnnealing
 
-tol = 1.
-max_itr = 10000
+std_dev_tol = 1. # 1 unit of distance standard deviation for the last 1000 iterations
+std_dev_sample_size = 1000
+maxiter = 15000
 T0 = 50.
 settling_time = 100
 
@@ -61,10 +59,16 @@ settling_time = 100
 prob = TravelingSalesman()
 
 # Set up your optimizer with the problem
-optimizer = SimulatedAnnealing(prob, max_itr=max_itr, tol=tol, T0=T0, settling_time=settling_time)
+optimizer = SimulatedAnnealing(prob, 
+                               maxiter=maxiter, 
+                               std_dev_tol=std_dev_tol,
+                               std_dev_sample_size=std_dev_sample_size,
+                               T0=T0, 
+                               settling_time=settling_time
+                               )
 
 optimizer.solve()
-optimizer.print_results(summary_table=True)
+optimizer.print_results()
 
 # import matplotlib.pyplot as plt
 # y = np.loadtxt("traveling_salesman_outputs/obj.out")
@@ -72,6 +76,14 @@ optimizer.print_results(summary_table=True)
 # plt.show()
 
 print('Simulated Annealing results:')
-print('optimized_dvs:', prob.x.get_data())
-# print('optimized_obj:', prob.obj['total_distance'])
-print('optimized_obj:', optimizer.outputs['obj'][-1])
+
+print('optimized_dvs:', optimizer.results['x'])
+print('optimized_obj:', optimizer.results['f'])
+print('initial_obj:', optimizer.results['f0'])
+print('improvement from initial obj:', optimizer.results['f0'] - optimizer.results['f'], '[', optimizer.results['improvement'] * 100, '%]')
+print('obj std dev for last 1000 iterations:', optimizer.results['f_sd'])
+print('total number of moves:', optimizer.results['nmoves'])
+print('total time taken:', optimizer.results['time'])
+print('total number of iterations:', optimizer.results['niter'])
+print('total number of function evaluations:', optimizer.results['nfev'])
+print('converged:', optimizer.results['converged'])

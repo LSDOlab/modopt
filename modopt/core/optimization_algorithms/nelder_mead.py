@@ -13,7 +13,7 @@ class NelderMead(Optimizer):
         self.obj = self.problem._compute_objective
 
         # Tolerance and initial length are empirical and problem-dependent
-        self.options.declare('max_itr', default=200, types=int)
+        self.options.declare('maxiter', default=200, types=int)
         self.options.declare('initial_length', default=1., types=float)
         self.options.declare('tol', default=1e-4, types=float)
 
@@ -41,7 +41,7 @@ class NelderMead(Optimizer):
         nx = self.problem.nx
         x0 = self.problem.x0
         tol = self.options['tol']
-        max_itr = self.options['max_itr']
+        maxiter = self.options['maxiter']
         l  = self.options['initial_length']
         obj = self.obj
 
@@ -72,7 +72,7 @@ class NelderMead(Optimizer):
                             time=time.time() - start_time,
                             num_f_evals=num_f_evals,)
 
-        while (f_sd > tol and itr < max_itr):
+        while (f_sd > tol and itr < maxiter):
             itr_start = time.time()
             itr += 1
 
