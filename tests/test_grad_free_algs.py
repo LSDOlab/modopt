@@ -104,3 +104,4 @@ def test_nelder_mead():
 if __name__ == '__main__':
     test_pso()
     test_nelder_mead()
+    print("All tests passed!")

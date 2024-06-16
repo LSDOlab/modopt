@@ -174,3 +174,4 @@ def test_jax_problem_lite():
 if __name__ == '__main__':
     test_jax_problem()
     test_jax_problem_lite()
+    print("All tests passed!")

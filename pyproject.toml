@@ -131,6 +131,9 @@ markers = [
     "csdl_alpha: marks tests as csdl_alpha (deselect with '-m \"not csdl_alpha\"')",
     "openmdao: marks tests as openmdao (deselect with '-m \"not openmdao\"')",
     "jax: marks tests as jax (deselect with '-m \"not jax\"')",
+    "snopt: marks tests as snopt (deselect with '-m \"not snopt\"')",
+    "slsqp: marks tests as slsqp (deselect with '-m \"not slsqp\"')",
+    "pyslsqp: marks tests as pyslsqp (deselect with '-m \"not pyslsqp\"')",
 ]
 
 [tool.coverage.run]
@@ -141,10 +144,12 @@ omit = [
     "/docs/*",
     # omit this single file since snopta is deprecated and not used
     "modopt/external_libraries/snopt/snopta.py",
+    # omit this single file since options dictionary is already tested in openmdao
     "modopt/utils/options_dictionary.py",
 
     # Only for local testing
-    # "modopt/core/optimization_algorithms/interiror_point.py",
+    # "modopt/core/optimization_algorithms/simulated_annealing.py",
+    # "modopt/core/optimization_algorithms/interior_point.py",
     # "modopt/core/optimization_algorithms/ip_simple.py",
     # "modopt/core/optimization_algorithms/lp_simple.py",
     # "modopt/core/optimization_algorithms/qp_simple.py",

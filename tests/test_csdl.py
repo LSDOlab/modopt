@@ -137,3 +137,4 @@ def test_csdl_alpha():
 if __name__ == '__main__':
     test_csdl()
     test_csdl_alpha()
+    print("All tests passed!")

@@ -123,3 +123,4 @@ def test_simulated_annealing():
 
 if __name__ == '__main__':
     test_simulated_annealing()
+    print("All tests passed!")

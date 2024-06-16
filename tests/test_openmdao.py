@@ -96,3 +96,4 @@ def test_openmdao():
 
 if __name__ == '__main__':
     test_openmdao()
+    print("All tests passed!")

@@ -14,6 +14,7 @@ from modopt import SLSQP
 from numpy.testing import assert_array_almost_equal, assert_array_equal, assert_almost_equal
 
 def test_ProblemClass(): # 8 problems
+    import numpy as np
     from modopt import PySLSQP, SNOPT
 
     prob = Unconstrained()
@@ -184,6 +185,7 @@ def test_ProblemClass(): # 8 problems
 
 
 def test_ProblemLiteClass(): # 8 problems
+    import numpy as np
     from modopt import PySLSQP, SNOPT
 
     prob = unconstrained_lite()
@@ -347,3 +349,4 @@ def test_ProblemLiteClass(): # 8 problems
 if __name__ == "__main__":
     test_ProblemClass()
     test_ProblemLiteClass()
+    print("All tests passed!")
