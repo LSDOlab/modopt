@@ -37,7 +37,7 @@ class SQP_SURF(Optimizer):
         self.states_in = self.problem.solve_residual_equations
         self.adj_in = self.problem.compute_adjoint_vector
 
-        self.options.declare('max_itr', default=1000, types=int)
+        self.options.declare('maxiter', default=1000, types=int)
         self.options.declare('opt_tol', default=1e-7, types=float)
         self.options.declare('feas_tol', default=1e-7, types=float)
 
@@ -453,7 +453,7 @@ class SQP_SURF(Optimizer):
 
         opt_tol = self.options['opt_tol']
         feas_tol = self.options['feas_tol']
-        max_itr = self.options['max_itr']
+        maxiter = self.options['maxiter']
         method = self.prob_options['formulation']
 
         obj = self.obj
@@ -675,7 +675,7 @@ class SQP_SURF(Optimizer):
 
         self.consecutive_ls_failures = 0
 
-        while (not (tol_satisfied) and itr < max_itr):
+        while (not (tol_satisfied) and itr < maxiter):
             itr_start = time.time()
             itr += 1
 
@@ -720,7 +720,7 @@ class SQP_SURF(Optimizer):
                 x=v_k, p=p_k, f0=mf_k, g0=mfg_k)
 
             # LSB.options['gamma_c'] = 0.1
-            # LSB.options['max_itr'] = 2
+            # LSB.options['maxiter'] = 2
             # alpha, mf_new, new_f_evals, new_g_evals, converged = LSB.search(
             #     x=v_k, p=p_k, f0=mf_k, g0=mfg_k)
 
@@ -730,7 +730,7 @@ class SQP_SURF(Optimizer):
             # if not converged:  # Fallback: Backtracking LS
             #     if self.consecutive_ls_failures <= 1:
             #         LSB.options['gamma_c'] = 0.1
-            #         LSB.options['max_itr'] = 4
+            #         LSB.options['maxiter'] = 4
             #         alpha, mf_new, new_f_evals, new_g_evals, converged = LSB.search(
             #             x=v_k, p=p_k, f0=mf_k, g0=mfg_k)
 

@@ -39,7 +39,7 @@ class SQP(Optimizer):
         # self.jac defined for check partials
         self.jac = self.problem.compute_constraint_jacobian
 
-        self.options.declare('max_itr', default=1000, types=int)
+        self.options.declare('maxiter', default=1000, types=int)
         self.options.declare('opt_tol', default=1e-7, types=float)
         self.options.declare('feas_tol', default=1e-7, types=float)
 
@@ -392,7 +392,7 @@ class SQP(Optimizer):
         x0 = self.problem.x0
         opt_tol = self.options['opt_tol']
         feas_tol = self.options['feas_tol']
-        max_itr = self.options['max_itr']
+        maxiter = self.options['maxiter']
 
         obj = self.obj
         grad = self.grad
@@ -574,7 +574,7 @@ class SQP(Optimizer):
 
         self.consecutive_ls_failures = 0
 
-        while (not (tol_satisfied) and itr < max_itr):
+        while (not (tol_satisfied) and itr < maxiter):
             itr_start = time.time()
             itr += 1
 
@@ -622,7 +622,7 @@ class SQP(Optimizer):
                 x=v_k, p=p_k, f0=mf_k, g0=mfg_k)
 
             # LSB.options['gamma_c'] = 0.1
-            # LSB.options['max_itr'] = 2
+            # LSB.options['maxiter'] = 2
             # alpha, mf_new, new_f_evals, new_g_evals, converged = LSB.search(
             #     x=v_k, p=p_k, f0=mf_k, g0=mfg_k)
 
@@ -632,7 +632,7 @@ class SQP(Optimizer):
             # if not converged:  # Fallback: Backtracking LS
             #     if self.consecutive_ls_failures <= 1:
             #         LSB.options['gamma_c'] = 0.1
-            #         LSB.options['max_itr'] = 4
+            #         LSB.options['maxiter'] = 4
             #         alpha, mf_new, new_f_evals, new_g_evals, converged = LSB.search(
             #             x=v_k, p=p_k, f0=mf_k, g0=mfg_k)
 

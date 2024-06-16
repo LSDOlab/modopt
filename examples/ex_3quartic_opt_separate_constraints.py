@@ -73,7 +73,7 @@ class Quartic(Problem):
 from modopt import SLSQP, SQP, SNOPT, PySLSQP
 
 tol = 1E-8
-max_itr = 500
+maxiter = 500
 
 prob = Quartic(jac_format='dense')
 print(prob)
@@ -81,7 +81,7 @@ print(prob)
 # Set up your optimizer with the problem
 optimizer = PySLSQP(prob, solver_options={'maxiter': 20, 'acc': 1e-6})
 # optimizer = SLSQP(prob, maxiter=20)
-# optimizer = SQP(prob, max_itr=20)
+# optimizer = SQP(prob, maxiter=20)
 # optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3)
 
 optimizer.check_first_derivatives(prob.x0)

@@ -76,7 +76,7 @@ if __name__ == "__main__":
     # Setup your preferred optimizer (here, SLSQP) with the Problem object 
     # Pass in the options for your chosen optimizer
     optimizer = SLSQP(prob, maxiter=20)
-    # optimizer = SQP(prob, max_itr=20)
+    # optimizer = SQP(prob, maxiter=20)
     # optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3, Verbose=True)
 
     # Check first derivatives at the initial guess, if needed

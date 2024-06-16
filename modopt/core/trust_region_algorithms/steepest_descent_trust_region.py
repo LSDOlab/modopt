@@ -9,7 +9,7 @@ class SteepestDescentTrustRegion(TrustRegion):
     def initialize(self):
 
         # Maximum number of iterations allowed before convergence
-        self.options.declare('max_itr', default=20, types=int, lower=3)
+        self.options.declare('maxiter', default=20, types=int, lower=3)
 
     def update(self, x, p, f0=None, g0=None):
         pass

@@ -42,13 +42,13 @@ from my_problem import MyProblem
 from modopt import SteepestDescent, Newton, QuasiNewton
 
 tol = 1E-8
-max_itr = 500
+maxiter = 500
 
 prob = MyProblem()
 
-optimizer = SteepestDescent(prob,opt_tol=tol,max_itr=max_itr)
-# optimizer = Newton(prob,opt_tol=tol,max_itr=max_itr)
-# optimizer = QuasiNewton(prob,opt_tol=tol,max_itr=max_itr)
+optimizer = SteepestDescent(prob,opt_tol=tol,maxiter=maxiter)
+# optimizer = Newton(prob,opt_tol=tol,maxiter=maxiter)
+# optimizer = QuasiNewton(prob,opt_tol=tol,maxiter=maxiter)
 
 optimizer.check_first_derivatives(prob.x0)
 optimizer.solve()

@@ -52,14 +52,14 @@ if __name__ == "__main__":
     # Set your optimality tolerance
     opt_tol = 1E-8
     # Set maximum optimizer iteration limit
-    max_itr = 100
+    maxiter = 100
 
     prob = Rosenbrock2D()
 
     # Set up your optimizer with your problem and pass in optimizer parameters
     # optimizer = SteepestDescent(prob,
     #                             opt_tol=opt_tol,
-    #                             max_itr=max_itr,
+    #                             maxiter=maxiter,
     #                             outputs=['itr', 'obj', 'x', 'opt', 'time'])
     # optimizer = Newton(prob, opt_tol=opt_tol)
     optimizer = QuasiNewton(prob, opt_tol=opt_tol)

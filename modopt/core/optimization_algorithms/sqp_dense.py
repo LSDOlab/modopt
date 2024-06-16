@@ -31,7 +31,7 @@ class SQP(Optimizer):
         self.con_in = self.problem._compute_constraints
         self.jac_in = self.problem._compute_constraint_jacobian
 
-        self.options.declare('max_itr', default=1000, types=int)
+        self.options.declare('maxiter', default=1000, types=int)
         self.options.declare('opt_tol', default=1e-7, types=float)
         self.options.declare('feas_tol', default=1e-7, types=float)
 
@@ -371,7 +371,7 @@ class SQP(Optimizer):
         nc = self.nc
 
         x0 = self.problem.x0
-        max_itr = self.options['max_itr']
+        maxiter = self.options['maxiter']
 
         obj = self.obj
         grad = self.grad
@@ -522,7 +522,7 @@ class SQP(Optimizer):
             raise TypeError(
                 'A_k must be a numpy matrix or scipy csc_matrix')
 
-        while (not (tol_satisfied) and itr < max_itr):
+        while (not (tol_satisfied) and itr < maxiter):
             itr_start = time.time()
             itr += 1
 

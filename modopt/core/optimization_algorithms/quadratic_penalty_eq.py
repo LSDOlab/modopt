@@ -18,7 +18,7 @@ class L2PenaltyEq(Optimizer):
         self.con = self.problem._compute_constraints
         self.jac = self.problem._compute_constraint_jacobian
 
-        self.options.declare('max_itr', default=1000, types=int)
+        self.options.declare('maxiter', default=1000, types=int)
         self.options.declare('opt_tol', types=float)
         self.options.declare('feas_tol', types=float)
 
@@ -66,7 +66,7 @@ class L2PenaltyEq(Optimizer):
         x0 = self.problem.x0
         opt_tol = self.options['opt_tol']
         # feas_tol = self.options['feas_tol']
-        max_itr = self.options['max_itr']
+        maxiter = self.options['maxiter']
         rho = 1000000.
 
         obj = self.obj
@@ -113,7 +113,7 @@ class L2PenaltyEq(Optimizer):
                             merit=of_k)
 
         # B_k = np.identity(nx)
-        while (opt > opt_tol and itr < max_itr):
+        while (opt > opt_tol and itr < maxiter):
             itr_start = time.time()
             itr += 1
 

@@ -49,7 +49,7 @@ class Minpack2LS(LineSearch):
                 'eta_a should be less than eta_w for existence of positive steps that satisfy strong Wolfe conditions'
             )
 
-        # max_itr = self.options['max_itr']
+        # maxiter = self.options['maxiter']
         max_step = self.options['max_step']
         min_step = self.options['min_step']
         alpha_tol = self.options['alpha_tol']

@@ -33,7 +33,7 @@ class SQP_SURF(Optimizer):
         self.state = self.problem.solve_residual_equations
         self.adj_in = self.problem.compute_residual_adjoint
 
-        self.options.declare('max_itr', default=1000, types=int)
+        self.options.declare('maxiter', default=1000, types=int)
         self.options.declare('opt_tol', default=1e-7, types=float)
         self.options.declare('feas_tol', default=1e-7, types=float)
 
@@ -402,7 +402,7 @@ class SQP_SURF(Optimizer):
         x0 = self.problem.x0
         y0 = self.problem.y.get_data()
 
-        max_itr = self.options['max_itr']
+        maxiter = self.options['maxiter']
 
         obj = self.obj
         grad = self.grad
@@ -542,7 +542,7 @@ class SQP_SURF(Optimizer):
             raise TypeError(
                 'A_k must be a numpy matrix or scipy csc_matrix')
 
-        while (not (tol_satisfied) and itr < max_itr):
+        while (not (tol_satisfied) and itr < maxiter):
             itr_start = time.time()
             itr += 1
 

@@ -127,14 +127,14 @@ Import the SQP optimizer as shown below:
 ```py
 from modopt import SQP
 ```
-Options available are: `max_iter`, `opt_tol`, and `feas_tol`.
+Options available are: `maxiter`, `opt_tol`, and `feas_tol`.
 Options could be set by just passing them as kwargs when 
 instantiating the SQP optimizer object.
-For example, we can set the maximum number of iterations `max_itr` 
+For example, we can set the maximum number of iterations `maxiter` 
 and the optimality tolerance `opt_tol` shown below.
 
 ```py
-optimizer = SQP(prob, max_itr=20, opt_tol=1e-8)
+optimizer = SQP(prob, maxiter=20, opt_tol=1e-8)
 ```
 
 

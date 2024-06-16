@@ -22,7 +22,7 @@ class SteepestDescent(Optimizer):
         self.obj = self.problem._compute_objective
         self.grad = self.problem._compute_objective_gradient
 
-        self.options.declare('max_itr', default=1000, types=int)
+        self.options.declare('maxiter', default=1000, types=int)
         self.options.declare('opt_tol', types=float)
 
         # Specify format of outputs available from your optimizer after each iteration
@@ -45,7 +45,7 @@ class SteepestDescent(Optimizer):
         nx = self.problem.nx
         x = self.problem.x0
         opt_tol = self.options['opt_tol']
-        max_itr = self.options['max_itr']
+        maxiter = self.options['maxiter']
 
         obj = self.obj
         grad = self.grad
@@ -70,7 +70,7 @@ class SteepestDescent(Optimizer):
                             opt=opt,
                             time=time.time() - start_time)
 
-        while (opt > opt_tol and itr < max_itr):
+        while (opt > opt_tol and itr < maxiter):
             itr_start = time.time()
             itr += 1
 
@@ -105,14 +105,14 @@ class SteepestDescent(Optimizer):
 # Set your optimality tolerance
 opt_tol = 1E-8
 # Set maximum optimizer iteration limit
-max_itr = 100
+maxiter = 100
 
 from modopt import Newton, QuasiNewton, SQP
 
 # Set up your optimizer with your problem and pass in optimizer parameters
 optimizer = SteepestDescent(prob,
                             opt_tol=opt_tol,
-                            max_itr=max_itr,
+                            maxiter=maxiter,
                             outputs=['itr', 'obj', 'x', 'opt', 'time'])
 optimizer = Newton(prob, opt_tol=opt_tol)
 optimizer = QuasiNewton(prob, opt_tol=opt_tol)

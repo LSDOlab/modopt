@@ -12,7 +12,7 @@ class SteepestDescent(Optimizer):
         self.obj = self.problem._compute_objective
         self.grad = self.problem._compute_objective_gradient
 
-        self.options.declare('max_itr', default=1000, types=int)
+        self.options.declare('maxiter', default=1000, types=int)
         self.options.declare('opt_tol', default=1e-5, types=float)
 
         self.available_outputs = {
@@ -41,7 +41,7 @@ class SteepestDescent(Optimizer):
         nx = self.problem.nx
         x0 = self.problem.x0
         opt_tol = self.options['opt_tol']
-        max_itr = self.options['max_itr']
+        maxiter = self.options['maxiter']
 
         obj = self.obj
         grad = self.grad
@@ -72,7 +72,7 @@ class SteepestDescent(Optimizer):
                             num_g_evals=num_g_evals,
                             step=0.)
 
-        while (opt > opt_tol and itr < max_itr):
+        while (opt > opt_tol and itr < maxiter):
             itr_start = time.time()
             itr += 1
 

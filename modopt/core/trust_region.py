@@ -58,7 +58,7 @@ class TrustRegion(object):
         eta_a = self.options['eta_a']
         eta_ref = self.options['eta_ref']
 
-        max_itr = self.options['max_itr']
+        maxiter = self.options['maxiter']
 
         gamma_c = self.options['gamma_c']
         gamma_e = self.options['gamma_e']
@@ -87,7 +87,7 @@ class TrustRegion(object):
         rho = (f1 - f2) / slope
 
         # If there is no sufficient reduction, x remains unchanged, decrease trust region radius, and solve the subproblem with the reduced radius
-        while (rho <= eta_a) and (self.itr <= max_itr):
+        while (rho <= eta_a) and (self.itr <= maxiter):
             self.itr += 1
 
             delta = gamma_c * norm_d

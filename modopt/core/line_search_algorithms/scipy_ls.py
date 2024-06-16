@@ -26,7 +26,7 @@ class ScipyLS(LineSearch):
                              lower=eps)
 
         # Maximum number of iterations allowed before convergence
-        self.options.declare('max_itr',
+        self.options.declare('maxiter',
                              default=8,
                              types=int,
                              lower=2,
@@ -42,7 +42,7 @@ class ScipyLS(LineSearch):
                 'eta_a should be less than eta_w for existence of positive steps that satisfy strong Wolfe conditions'
             )
 
-        max_itr = self.options['max_itr']
+        maxiter = self.options['maxiter']
         max_step = self.options['max_step']
 
         f = self.options['f']
@@ -76,7 +76,7 @@ class ScipyLS(LineSearch):
             c2=eta_w,
             amax=max_step,
             extra_condition=None,
-            maxiter=max_itr)
+            maxiter=maxiter)
 
         g2 = "Unavailable"
 

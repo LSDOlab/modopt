@@ -3,9 +3,9 @@
 import numpy as np
 from modopt import Problem
 
-class Quartic(Problem):
+class Quadratic(Problem):
     def initialize(self, ):
-        self.problem_name = 'quartic'
+        self.problem_name = 'quadratic'
 
     def setup(self):
         self.add_design_variables('x',
@@ -24,16 +24,24 @@ class Quartic(Problem):
 
     def setup_derivatives(self):
         self.declare_objective_gradient(wrt='x', vals=None)
+        self.declare_objective_hessian(of='x', wrt='x', vals=None)
+        self.declare_lagrangian_hessian(of='x', wrt='x', vals=None)
         self.declare_constraint_jacobian(of='c',
                                          wrt='x',
-                                        vals=np.array([[1.,1.],[1.,-1]]))
+                                         vals=np.array([[1.,1.],[1.,-1]]))
 
     def compute_objective(self, dvs, obj):
         x = dvs['x']
-        obj['f'] = np.sum(x**4)
+        obj['f'] = np.sum(x**2)
 
     def compute_objective_gradient(self, dvs, grad):
-        grad['x'] = 4 * dvs['x'] ** 3
+        grad['x'] = 2 * dvs['x']
+
+    def compute_objective_hessian(self, dvs, hess):
+        hess['x','x'] = 2 * np.eye(2)
+
+    def compute_lagrangian_hessian(self, dvs, hess):
+        hess['x','x'] = 2 * np.eye(2)
 
     def compute_constraints(self, dvs, cons):
         x   = dvs['x']
@@ -45,26 +53,39 @@ class Quartic(Problem):
         pass
         # jac['c', 'x'] = vals=np.array([[1.,1.],[1.,-1]])
 
-from modopt import SLSQP, SQP, SNOPT
+from modopt import SLSQP, SQP, SNOPT #, QPSolver, CVXOPT
 
 tol = 1E-8
 maxiter = 500
 
-prob = Quartic(jac_format='dense')
+prob = Quadratic(jac_format='dense')
 
 print(prob)
 
 # Set up your optimizer with the problem
+qp_solver_options={}
+# optimizer = QPSolver(prob, verbose=True, solver='quadprog', solver_options=qp_solver_options)
+
+
 optimizer = SLSQP(prob, maxiter=20)
 # optimizer = SQP(prob, maxiter=20)
 # optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3)
+# optimizer = CVXOPT(prob,)
 
 optimizer.check_first_derivatives(prob.x0)
 optimizer.solve()
-optimizer.print_results(summary_table=True)
+optimizer.print_results(summary_table=True, 
+                        optimal_variables=True,
+                        optimal_dual_variables_eq=True,
+                        optimal_dual_variables_ineq=True,
+                        extras=True)
+# optimizer.print_results(summary_table=True, 
+#                         optimal_variables=True,
+#                         optimal_dual_variables=True,
+#                         optimal_slack_variables=True,)
+
+# print('optimized_dvs:', prob.x.get_data())
+# print('optimized_cons:', prob.con.get_data())
+# print('optimized_obj:', prob.obj['f'])
 
 print(prob)
-
-print('optimized_dvs:', prob.x.get_data())
-print('optimized_cons:', prob.con.get_data())
-print('optimized_obj:', prob.obj['f'])
