@@ -89,7 +89,7 @@ def test_jax_problem():
     from modopt import SQP, SLSQP, SNOPT, PySLSQP
     optimizer = SLSQP(prob, ftol=1e-6, maxiter=20, disp=True)
     # optimizer = PySLSQP(prob, solver_options={'acc':1e-6, 'maxiter':20})
-    # optimizer = SQP(prob, max_itr=20)
+    # optimizer = SQP(prob, maxiter=20)
     # optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3, Verbose=True)
 
     optimizer.check_first_derivatives(prob.x0)
@@ -158,7 +158,7 @@ def test_jax_problem_lite():
     from modopt import SQP, SLSQP, SNOPT, PySLSQP
     optimizer = SLSQP(prob, ftol=1e-6, maxiter=20, disp=True)
     # optimizer = PySLSQP(prob, solver_options={'acc':1e-6, 'maxiter':20})
-    # optimizer = SQP(prob, max_itr=20)
+    # optimizer = SQP(prob, maxiter=20)
     # optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3, Verbose=True)
 
     optimizer.check_first_derivatives(prob.x0)
