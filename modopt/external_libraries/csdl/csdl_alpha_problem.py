@@ -4,14 +4,17 @@ import warnings
 from modopt import Problem as OptProblem
 
 try:
-    from csdl_alpha.experimental import PySimulator
+    # from csdl_alpha.experimental import PySimulator
+    from csdl_alpha.backends.simulator import SimulatorBase
 except:
-    warnings.warn("PySimulator() from 'csdl_alpha' could not be imported")
+    warnings.warn("SimulatorBase() from 'csdl_alpha' could not be imported")
+    # warnings.warn("PySimulator() from 'csdl_alpha' could not be imported")
 
 class CSDLAlphaProblem(OptProblem):
     def initialize(self, ):
         self.options.declare('problem_name', default='unnamed_problem', types=str)
-        self.options.declare('simulator', types=PySimulator)
+        self.options.declare('simulator', types=SimulatorBase)
+        # self.options.declare('simulator', types=PySimulator)
 
     def setup(self, ):
 
