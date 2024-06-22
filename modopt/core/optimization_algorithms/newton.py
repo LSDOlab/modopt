@@ -112,11 +112,14 @@ class Newton(Optimizer):
                 x_k += p_k * alpha
                 f_k = obj(x_k)
                 g_k = grad(x_k)
+                num_f_evals += 1
+                num_g_evals += 1
 
             else:
                 x_k += alpha * p_k
                 if g_k == 'Unavailable':
                     g_k = grad(x_k)
+                    num_g_evals += 1
 
             H_k = hess(x_k)
 

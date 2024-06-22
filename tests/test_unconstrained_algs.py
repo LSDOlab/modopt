@@ -140,7 +140,7 @@ def test_newton():
     assert_almost_equal(optimizer.results['optimality'], 0., decimal=11)
     assert optimizer.results['niter'] < solver_options['maxiter']
     assert optimizer.results['nfev'] == 42
-    assert optimizer.results['ngev'] == 42
+    assert optimizer.results['ngev'] == 83
     
 
     prob = ord2_unconstrained_lite()
@@ -158,7 +158,7 @@ def test_newton():
     assert_almost_equal(optimizer.results['optimality'], 0., decimal=11)
     assert optimizer.results['niter'] < solver_options['maxiter']
     assert optimizer.results['nfev'] == 42
-    assert optimizer.results['ngev'] == 42
+    assert optimizer.results['ngev'] == 83
 
 
 if __name__ == '__main__':

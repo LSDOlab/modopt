@@ -150,7 +150,7 @@ class NewtonLagrange(Optimizer):
 
             # Compute the search direction toward the next iterate
             p_k = np.linalg.solve(A, b)
-            print((v_k + p_k)[-1])
+            # print((v_k + p_k)[-1])
 
             # Compute the step length along the search direction via a line search
             # alpha, mf_k, mfg_new, mf_slope_new, new_f_evals, new_g_evals, converged = LS.search(
@@ -179,6 +179,9 @@ class NewtonLagrange(Optimizer):
             g_k = grad(x_k)
             c_k = con(x_k)
             J_k = jac(x_k)
+
+            num_f_evals += 1
+            num_g_evals += 1
 
             # L_k = OF.evaluate_function(x_k, pi_k, f_k, c_k)
             gL_k_new = OF.evaluate_gradient(x_k, pi_k, f_k, c_k, g_k,
@@ -220,6 +223,19 @@ class NewtonLagrange(Optimizer):
 
         # Run post-processing for the Optimizer() base class
         self.run_post_processing()
+        self.total_time = time.time() - start_time
+        converged = (opt <= opt_tol and feas <= feas_tol)
 
-        end_time = time.time()
-        self.total_time = end_time - start_time
+        self.results = {
+            'x': x_k, 
+            'f': f_k,
+            'c': c_k,
+            'pi': pi_k,
+            'optimality': opt,
+            'feasibility': feas,
+            'nfev': num_f_evals, 
+            'ngev': num_g_evals,
+            'niter': itr, 
+            'time': self.total_time,
+            'converged': converged,
+            }

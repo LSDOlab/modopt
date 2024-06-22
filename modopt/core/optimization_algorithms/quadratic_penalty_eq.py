@@ -21,6 +21,7 @@ class L2PenaltyEq(Optimizer):
         self.options.declare('maxiter', default=1000, types=int)
         self.options.declare('opt_tol', types=float)
         self.options.declare('feas_tol', types=float)
+        self.options.declare('rho', types=float, default=1000000.)
 
         self.available_outputs = {
             'itr': int,
@@ -65,9 +66,9 @@ class L2PenaltyEq(Optimizer):
         nc = self.problem.nc
         x0 = self.problem.x0
         opt_tol = self.options['opt_tol']
-        # feas_tol = self.options['feas_tol']
+        feas_tol = self.options['feas_tol']
         maxiter = self.options['maxiter']
-        rho = 1000000.
+        rho = self.options['rho']
 
         obj = self.obj
         grad = self.grad
@@ -113,7 +114,7 @@ class L2PenaltyEq(Optimizer):
                             merit=of_k)
 
         # B_k = np.identity(nx)
-        while (opt > opt_tol and itr < maxiter):
+        while ((opt > opt_tol or feas > feas_tol) and itr < maxiter):
             itr_start = time.time()
             itr += 1
 
@@ -127,7 +128,7 @@ class L2PenaltyEq(Optimizer):
 
             # Compute the search direction toward the next iterate
             p_k = np.linalg.solve(B_k, -ofg_k)
-            print((x_k + p_k))
+            # print((x_k + p_k))
 
             # Compute the step length along the search direction via a line search
             # alpha, of_k, ofg_new, of_slope_new, new_f_evals, new_g_evals, converged = LS.search(
@@ -169,6 +170,9 @@ class L2PenaltyEq(Optimizer):
                 w_k = (ofg_new - ofg_k)
                 ofg_k = ofg_new
 
+            num_f_evals += 1
+            num_g_evals += 1
+
             opt = np.linalg.norm(ofg_k)
             feas = np.linalg.norm(c_k)
             # print(pi_k)
@@ -197,6 +201,19 @@ class L2PenaltyEq(Optimizer):
 
         # Run post-processing for the Optimizer() base class
         self.run_post_processing()
+        self.total_time = time.time() - start_time
+        converged = (opt <= opt_tol and feas <= feas_tol)
 
-        end_time = time.time()
-        self.total_time = end_time - start_time
+        self.results = {
+            'x': x_k, 
+            'f': f_k,
+            'c': c_k,
+            'rho': rho,
+            'optimality': opt,
+            'feasibility': feas,
+            'nfev': num_f_evals, 
+            'ngev': num_g_evals,
+            'niter': itr, 
+            'time': self.total_time,
+            'converged': converged,
+            }
