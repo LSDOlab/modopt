@@ -108,8 +108,14 @@ qpsolvers = [
 cvxopt = [    # cvxopt is already installed with qpsolvers[open_source_solvers]
     "cvxopt",
 ]
+sqp = [
+    "osqp", # osqp is already installed with qpsolvers[open_source_solvers]
+]
 pycutest = [
     "pycutest", # Needs manual installation of the CUTEst library with the test problems
+]
+pyslsqp = [
+    "pyslsqp",
 ]
 ipopt = [
     "casadi", # Modopt uses the IPOPT solvefr from CasADi
@@ -124,6 +130,8 @@ interfaces = [
     # "cvxopt", # cvxopt is already installed with qpsolvers[open_source_solvers]
     "pycutest", # Needs manual installation of the CUTEst library with the test problems
     "casadi", # Needed for the IPOPT interface
+    "pyslsqp",
+    # "osqp", # osqp is already installed with qpsolvers[open_source_solvers]
 ]
 visualization = [
     "matplotlib",
@@ -140,6 +148,7 @@ markers = [
     "snopt: marks tests as snopt (deselect with '-m \"not snopt\"')",
     "slsqp: marks tests as slsqp (deselect with '-m \"not slsqp\"')",
     "pyslsqp: marks tests as pyslsqp (deselect with '-m \"not pyslsqp\"')",
+    "ipopt: marks tests as ipopt (deselect with '-m \"not ipopt\"')",
 ]
 
 [tool.coverage.run]
@@ -168,8 +177,4 @@ omit = [
     # Only for local testing
     # "modopt/core/optimization_algorithms/simulated_annealing.py",
     # "modopt/core/optimization_algorithms/interior_point.py",
-    # "modopt/core/optimization_algorithms/ip_simple.py",
-    # "modopt/core/optimization_algorithms/lp_simple.py",
-    # "modopt/core/optimization_algorithms/qp_simple.py",
-    # "modopt/core/optimization_algorithms/sqp_simple.py",
     ]
