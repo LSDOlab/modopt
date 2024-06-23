@@ -38,12 +38,12 @@ jobs:
       run: |
         pytest -m "not snopt" tests/ --cov=modopt --cov-report lcov
 
-    #   # Upload the coverage report to coveralls
-    # - name: Coveralls GitHub Action
-    #   uses: coverallsapp/github-action@v2.3.0
-    #   with:
-    #     github-token: ${{ secrets.COVERALLS_REPO_TOKEN}}
-    #     file: ./coverage.lcov
+      # Upload the coverage report to coveralls
+    - name: Coveralls GitHub Action
+      uses: coverallsapp/github-action@v2.3.0
+      with:
+        github-token: ${{ secrets.COVERALLS_REPO_TOKEN}}
+        file: ./coverage.lcov
 
   install-test:
     runs-on: ${{ matrix.os }}
