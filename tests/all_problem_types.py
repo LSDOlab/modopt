@@ -1,13 +1,15 @@
 
 # This file contains the following problem types for both `Problem` and `ProblemLite` classes:
-# 1. Unconstrained
-# 2. Feasibility
-# 3. BoundConstrained
-# 4. EqConstrained
-# 5. IneqConstrained
-# 6. Constrained (both nonlinear and linear eq/ineq constraints with bounds on design variables)
-# 7. Scaling (Constrained problem with scaling on design variables, objective, and constraints)
-# 8. FiniteDiff (Constrained problem with scaling taht uses finite differencing for grad, hess, hvp, jac, and jvp)
+#  1. Unconstrained
+#  2. Feasibility
+#  3. BoundConstrained
+#  4. EqConstrained
+#  5. IneqConstrained
+#  6. Constrained (both nonlinear and linear eq/ineq constraints with bounds on design variables)
+#  7. Scaling (Constrained problem with scaling on design variables, objective, and constraints)
+#  8. FiniteDiff (Constrained problem with scaling taht uses finite differencing for grad, hess, hvp, jac, and jvp)
+#  9. SecondOrderUnconstrained (Unconstrained problem with scaling that uses analytical objective hessian, for ipopt)
+# 10. SecondOrderScaling (Constrained problem with scaling that uses analytical lagrangian hessian, for ipopt)
 
 
 from modopt import Problem, ProblemLite
@@ -416,3 +418,126 @@ def finite_diff_lite():
     return ProblemLite(x0, obj=obj, con=con, cl=cl, cu=cu, xl=xl, xu=xu,
                        x_scaler=x_sc, f_scaler=f_sc, c_scaler=c_sc,
                        name='finite_diff_lite')
+
+class SecondOrderUnconstrained(Problem):
+    def initialize(self):
+        self.problem_name = 'second_order_unconstrained'
+
+    def setup(self):
+        self.add_design_variables('x',
+                                  shape=(2, ),
+                                  lower=np.array([0., -np.inf]),
+                                  upper=np.array([np.inf, np.inf]),
+                                  scaler=np.array([2., 0.2]),
+                                  vals=np.array([50., 5.]))
+                                #   vals=np.array([500., 5.])) # slsqp diverges when starting from these initial values
+        
+        self.add_objective('f', scaler=20.)
+
+    def setup_derivatives(self):
+        self.declare_objective_gradient(wrt='x')
+        self.declare_objective_hessian(of='x', wrt='x')
+
+    def compute_objective(self, dvs, obj):
+        x = dvs['x']
+        obj['f'] = np.sum(x**4)
+
+    def compute_objective_gradient(self, dvs, grad):
+        grad['x'] = 4 * dvs['x'] ** 3
+
+    def compute_objective_hessian(self, dvs, obj_hess):
+        x = dvs['x']
+        obj_hess['x', 'x'] = np.array([[12*x[0]**2, 0], [0, 12*x[1]**2]])
+
+def second_order_unconstrained_lite():
+    # x0 = np.array([500., 5.]) # slsqp diverges when starting from these initial values
+    x0 = np.array([50., 5.])
+    xl = np.array([0., -np.inf])
+    xu = np.array([np.inf, np.inf])
+    x_sc = np.array([2., 0.2])
+    f_sc = 20
+    def obj(x):
+        return np.sum(x**4)
+    def grad(x):    
+        return 4 * x ** 3
+    def obj_hess(x):
+        return np.array([[12*x[0]**2, 0], [0, 12*x[1]**2]])
+    
+    return ProblemLite(x0, obj=obj, grad=grad,
+                       xl=xl, xu=xu, 
+                       x_scaler=x_sc, f_scaler=f_sc,
+                       obj_hess=obj_hess, name='second_order_unconstrained_lite')
+
+class SecondOrderScaling(Problem):
+    def initialize(self):
+        self.problem_name = 'second_order_scaling'
+
+    def setup(self):
+        self.add_design_variables('x',
+                                  shape=(2, ),
+                                  lower=np.array([0., -np.inf]),
+                                  upper=np.array([np.inf, np.inf]),
+                                  scaler=np.array([2., 0.2]),
+                                  vals=np.array([50., 5.]))
+                                #   vals=np.array([500., 5.])) # slsqp diverges when starting from these initial values
+        
+        self.add_objective('f', scaler=20.)
+        self.add_constraints('c',
+                             shape=(2, ),
+                             lower=np.array([1., 1.]),
+                             upper=np.array([1., np.inf]),
+                             scaler=np.array([5., 0.5]),)
+
+    def setup_derivatives(self):
+        self.declare_objective_gradient(wrt='x')
+        self.declare_constraint_jacobian(of='c',
+                                         wrt='x',)
+        self.declare_lagrangian_hessian(of='x', wrt='x')
+
+    def compute_objective(self, dvs, obj):
+        x = dvs['x']
+        obj['f'] = np.sum(x**4)
+
+    def compute_objective_gradient(self, dvs, grad):
+        grad['x'] = 4 * dvs['x'] ** 3
+
+    def compute_constraints(self, dvs, cons):
+        x = dvs['x']
+        con = cons['c']
+        con[0] = x[0] + x[1]
+        con[1] = x[0]**2 - x[1]
+
+    def compute_constraint_jacobian(self, dvs, jac):
+        x0 = dvs['x'][0]
+        jac['c', 'x'] = vals = np.array([[1., 1.], [2*x0, -1]])
+
+    def compute_lagrangian_hessian(self, dvs, lag_mult, lag_hess):
+        x = dvs['x']
+        l = lag_mult['c']
+        lag_hess['x', 'x'] = np.array([[12*x[0]**2, 0], [0, 12*x[1]**2]]) + l[0] * np.array([[0, 0], [0, 0]]) + l[1] * np.array([[2, 0], [0, 0]])
+
+def second_order_scaling_lite():
+    # x0 = np.array([500., 5.]) # slsqp diverges when starting from these initial values
+    x0 = np.array([50., 5.])
+    xl = np.array([0., -np.inf])
+    xu = np.array([np.inf, np.inf])
+    cl = np.array([1., 1.])
+    cu = np.array([1., np.inf])
+    x_sc = np.array([2., 0.2])
+    f_sc = 20
+    c_sc = np.array([5., 0.5])
+    def obj(x):
+        return np.sum(x**4)
+    def grad(x):    
+        return 4 * x ** 3
+    def con(x):
+        return np.array([x[0] + x[1], x[0]**2 - x[1]])
+    def jac(x):
+        return np.array([[1., 1.], [2*x[0], -1]])
+    def lag_hess(x, l):
+        return np.array([[12*x[0]**2, 0], [0, 12*x[1]**2]]) + l[0] * np.array([[0, 0], [0, 0]]) + l[1] * np.array([[2, 0], [0, 0]])
+    
+    return ProblemLite(x0, obj=obj, grad=grad, con=con, jac=jac, 
+                       cl=cl, cu=cu, xl=xl, xu=xu, 
+                       x_scaler=x_sc, f_scaler=f_sc, c_scaler=c_sc, 
+                       lag_hess=lag_hess, name='second_order_scaling_lite')
