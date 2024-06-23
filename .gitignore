@@ -11,6 +11,11 @@ __pycache__
 *_junk*
 *_dev*
 
+# default output file for ipopt
+ipopt_output.txt
+# OpenMDAO generated reports
+reports/
+
 # File systems
 *.DS_Store
 # **/*.DS_Store

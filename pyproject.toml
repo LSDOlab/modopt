@@ -97,6 +97,7 @@ openmdao = [
 ]
 csdl = [
     "csdl @ git+https://github.com/LSDOlab/csdl.git",
+    "python_csdl_backend @ git+https://github.com/LSDOlab/python_csdl_backend.git",
 ]
 csdl_alpha = [
     "csdl_alpha @ git+https://github.com/LSDOlab/csdl_alpha.git",
@@ -110,14 +111,19 @@ cvxopt = [    # cvxopt is already installed with qpsolvers[open_source_solvers]
 pycutest = [
     "pycutest", # Needs manual installation of the CUTEst library with the test problems
 ]
+ipopt = [
+    "casadi", # Modopt uses the IPOPT solvefr from CasADi
+]
 interfaces = [
     "csdl @ git+https://github.com/LSDOlab/csdl.git", # csdl is deprecated with dependencies fixed in the main package
+    "python_csdl_backend @ git+https://github.com/LSDOlab/python_csdl_backend.git",
     "csdl_alpha @ git+https://github.com/LSDOlab/csdl_alpha.git",
     "jax[cpu]",
     "openmdao",
     "qpsolvers[open_source_solvers]", # Installs the library with open source QP solvers
     # "cvxopt", # cvxopt is already installed with qpsolvers[open_source_solvers]
     "pycutest", # Needs manual installation of the CUTEst library with the test problems
+    "casadi", # Needed for the IPOPT interface
 ]
 visualization = [
     "matplotlib",
@@ -144,6 +150,8 @@ omit = [
     "/docs/*",
     # omit this single file since snopta is deprecated and not used
     "modopt/external_libraries/snopt/snopta.py",
+    # omit any development files
+    "*/*_dev.py",
     # omit this single file since options dictionary is already tested in openmdao
     "modopt/utils/options_dictionary.py",
     # omit deprecated sqp algorithms
@@ -154,6 +162,8 @@ omit = [
     # omit surf sqp algorithms
     "modopt/core/optimization_algorithms/sqp_surf.py",
     "modopt/core/optimization_algorithms/sqp_surf_dense.py",
+    # omit snopt interface as it's licensed and cannot be put on cloud
+    "modopt/external_libraries/snopt/*",
 
     # Only for local testing
     # "modopt/core/optimization_algorithms/simulated_annealing.py",
