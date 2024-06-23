@@ -721,8 +721,21 @@ class SQP(Optimizer):
 
         # Run post-processing for the Optimizer() base class
         self.run_post_processing()
+        self.total_time = time.time() - start_time
+        converged = tol_satisfied
 
-        end_time = time.time()
-        self.total_time = end_time - start_time
+        self.results = {
+            'x': x_k,
+            'f': f_k,
+            'c': c_k,
+            'pi': pi_k,
+            'optimality': opt,
+            'feasibility': feas,
+            'nfev': num_f_evals,
+            'ngev': num_g_evals,
+            'niter': itr,
+            'time': self.total_time,
+            'converged': converged
+        }
 
-        # print(self.outputs)
+

@@ -146,6 +146,14 @@ omit = [
     "modopt/external_libraries/snopt/snopta.py",
     # omit this single file since options dictionary is already tested in openmdao
     "modopt/utils/options_dictionary.py",
+    # omit deprecated sqp algorithms
+    "modopt/core/optimization_algorithms/sqp.py",
+    "modopt/core/optimization_algorithms/sqp_osqp.py",
+    # omit deprecated qp solver
+    "modopt/core/qp_solver.py",
+    # omit surf sqp algorithms
+    "modopt/core/optimization_algorithms/sqp_surf.py",
+    "modopt/core/optimization_algorithms/sqp_surf_dense.py",
 
     # Only for local testing
     # "modopt/core/optimization_algorithms/simulated_annealing.py",
