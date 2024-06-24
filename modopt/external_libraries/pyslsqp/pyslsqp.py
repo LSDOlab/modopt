@@ -1,6 +1,7 @@
 import numpy as np
 from modopt import Optimizer
 import warnings
+import time
 try:
     from pyslsqp import optimize
 except:
@@ -120,9 +121,12 @@ class PySLSQP(Optimizer):
         meq = self.nc_e if self.problem.constrained else 0
         solver_options = self.options['solver_options']
 
+        start_time = time.time()
+
         # Run the optimization
         res = optimize(x0, obj=obj, con=con, grad=grad, jac=jac, xl=xl, xu=xu, meq=meq, **solver_options)
-
+        
+        self.total_time = time.time() - start_time
         # Store and return the results dictionary
         self.results = res
         

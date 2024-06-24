@@ -237,9 +237,12 @@ class Optimizer(object):
 
             print("=" * line_length)
 
-    def check_first_derivatives(self, x, formulation='rs'):
+    def check_first_derivatives(self, x=None, step=1e-6, formulation='rs'):
         obj = self.obj
         grad = self.grad
+
+        if x is None:
+            x = self.problem.x0
 
         if self.problem.ny == 0:
             nx = self.problem.nx
@@ -275,7 +278,7 @@ class Optimizer(object):
         if constrained:
             jac_exact = jac(x)
 
-        h = 1e-6
+        h = step
 
         grad_fd = np.full((nx, ), -obj(x), dtype=float)
         if constrained:

@@ -1,4 +1,5 @@
-# Test SLSQP, PySLSQP, SNOPT, COBYLA, and BFGS
+# Test SLSQP, PySLSQP, SNOPT, IPOPT, COBYLA, and BFGS
+# The same tests are used for the sime optimize() function
 
 from all_problem_types import Scaling, scaling_lite, Unconstrained, unconstrained_lite
 from numpy.testing import assert_array_almost_equal, assert_array_equal, assert_almost_equal

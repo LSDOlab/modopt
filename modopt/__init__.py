@@ -53,3 +53,6 @@ from modopt.core.optimization_algorithms.pso import PSO
 
 # discrete gradient-free
 from modopt.core.optimization_algorithms.simulated_annealing import SimulatedAnnealing
+
+# import user-facing functions - need to be imported at the end to avoid circular imports
+from modopt.core.optimize import optimize

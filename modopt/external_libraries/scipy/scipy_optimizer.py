@@ -4,7 +4,6 @@ from scipy.optimize import BFGS, SR1
 from array_manager.api import DenseMatrix
 
 from modopt import Optimizer, Problem
-from modopt import CSDLProblem
 
 import warnings
 

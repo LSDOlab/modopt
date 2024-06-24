@@ -1,6 +1,7 @@
 import numpy as np
 from modopt import Optimizer
 import warnings
+import time
 try:
     from casadi import *
 except:
@@ -87,6 +88,8 @@ class IPOPT(Optimizer):
             # Create an NLP solver
             solver = nlpsol('solver', 'ipopt', nlp, options)
 
+            start_time = time.time()
+
             # Solve the problem
             results = solver(x0=x0, lbg=lbg, ubg=ubg, lbx=lbx, ubx=ubx)
 
@@ -97,8 +100,12 @@ class IPOPT(Optimizer):
             # Create an NLP solver
             solver = nlpsol('solver', 'ipopt', nlp, options)
 
+            start_time = time.time()
+
             # Solve the problem
             results = solver(x0=x0, lbx=lbx, ubx=ubx)
+
+        self.total_time = time.time() - start_time
         
         self.results = {
             'x': np.array(results['x']).reshape((self.nx,)),
@@ -107,6 +114,7 @@ class IPOPT(Optimizer):
             'lam_c': np.array(results['lam_g']).reshape((self.nc,)),
             'lam_x': np.array(results['lam_x']).reshape((self.nx,)),
             'lam_p': np.array(results['lam_p']),
+            'time' : self.total_time,
             }
 
         return self.results

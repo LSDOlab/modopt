@@ -160,6 +160,7 @@ class SLSQP(ScipyOptimizer):
         # Call SLSQP algorithm from scipy (options are specific to SLSQP)
         # Note: f_tol is the precision tolerance for the objective(not the same as opt_tol)
 
+        # Run the optimization
         results = minimize(
             obj,
             x0,
@@ -181,7 +182,9 @@ class SLSQP(ScipyOptimizer):
                 'eps': eps,
             })
 
-        end_time = time.time()
-        self.total_time = end_time - start_time
-
+        self.total_time = time.time() - start_time
+        
+        # Store and return the results dictionary
         self.results = results
+        
+        return self.results

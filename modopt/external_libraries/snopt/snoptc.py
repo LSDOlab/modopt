@@ -155,3 +155,5 @@ class SNOPTc(SNOPTOptimizer):
         self.total_time = end_time - start_time
 
         self.results = results
+
+        return self.results
