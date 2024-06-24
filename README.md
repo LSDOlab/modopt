@@ -12,7 +12,7 @@
 <!-- [![Forks](https://img.shields.io/github/forks/LSDOlab/modopt.svg)](https://github.com/LSDOlab/modopt/network)
 [![Issues](https://img.shields.io/github/issues/LSDOlab/modopt.svg)](https://github.com/LSDOlab/modopt/issues) -->
 <!-- [![Pypi version](https://img.shields.io/pypi/v/modopt)](https://pypi.org/project/modopt/) -->
-[![GitHub Actions Test Badge](https://github.com/LSDOlab/modopt/actions/workflows/build_install_test.yml/badge.svg)](https://github.com/LSDOlab/modopt/actions)
+[![GitHub Actions Test Badge](https://github.com/LSDOlab/modopt/actions/workflows/install_test.yml/badge.svg)](https://github.com/LSDOlab/modopt/actions)
 [![Coverage Status](https://coveralls.io/repos/github/LSDOlab/modopt/badge.svg?branch=main)](https://coveralls.io/github/LSDOlab/modopt?branch=main)
 [![Documentation Status](https://readthedocs.org/projects/modopt/badge/?version=latest)](https://modopt.readthedocs.io/en/latest/?badge=main)
 [![License](https://img.shields.io/badge/License-GNU%20GPL-blue.svg)](https://github.com/LSDOlab/modopt/blob/main/LICENSE.txt)
