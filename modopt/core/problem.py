@@ -229,10 +229,10 @@ class Problem(object):
         obj  = self.obj
         obj_scaler = self.obj_scaler
         dvs  = self.x
-        x_l  = self.x_lower; x_u  = self.x_upper; x_s  = self.x_scaler
+        x_s  = self.x_scaler; x_l  = self.x_lower/x_s; x_u  = self.x_upper/x_s 
         if self.constrained:
             cons = self.con
-            c_l  = self.c_lower; c_u  = self.c_upper; c_s  = self.c_scaler
+            c_s  = self.c_scaler; c_l  = self.c_lower/c_s; c_u  = self.c_upper/c_s
 
         # output  = '\n\t'+'-'*100
         output  = f'\n\tProblem Overview:\n\t' + '-'*100
@@ -617,16 +617,65 @@ class Problem(object):
         '''
         if 'dv' not in self.declared_variables:
             raise Exception("No design variables are declared.")
-        if 'obj' not in self.declared_variables:
+        if 'obj' in self.declared_variables:
+            if self.compute_objective.__func__ == Problem.compute_objective:
+                raise Exception("Objective is declared but compute_objective() method is not implemented.")
+        else:
+            if 'con' not in self.declared_variables:
+                raise Exception("No objective or constraints are declared.")
             warnings.warn("No objective is declared. Running a feasibility problem.")
             self.add_objective('dummy_obj')
-            self.obj['dummy_obj'] = 0. # Default value 1. is reaplaced with 0. for feasibility problems
+            self.obj['dummy_obj'] = 0. # Default value 1. is replaced with 0. for feasibility problems
 
             # Add back pF_px only for a gradient-based feasibility problem since 
             # it was deleted in delete_unnecessary_attributes_allocated()
             if 'jac' in self.declared_variables: # checking if gradients are declared for constraints
                 self.pF_px = Vector(self.design_variables_dict)
                 self.pF_px.allocate(data=np.zeros((self.nx, )), setup_views=False)
+        if 'con' in self.declared_variables:
+            if self.compute_constraints.__func__ == Problem.compute_constraints:
+                raise Exception("Constraints are declared but compute_constraints() method is not implemented.")
+        if 'grad' in self.declared_variables:
+            if self.compute_objective_gradient.__func__ == Problem.compute_objective_gradient:
+                raise Exception("Objective gradient is declared but compute_objective_gradient() method is not implemented."
+                                "If declared derivatives are constant, define an empty compute_objective_gradient() with 'pass'."
+                                "If declared derivatives are not available, define a compute_objective_gradient() method"
+                                "that calls self.use_finite_differencing('objective_gradient', step=1.e-6)."
+                                "If using a gradient-free optimizer, do not declare objective gradient.")
+        if 'obj_hess' in self.declared_variables:
+            if self.compute_objective_hessian.__func__ == Problem.compute_objective_hessian:
+                raise Exception("Objective Hessian is declared but compute_objective_hessian() method is not implemented."
+                                "If declared derivatives are constant, define an empty compute_objective_hessian() with 'pass'."
+                                "If declared derivatives are not available, define a compute_objective_hessian() method"
+                                "that calls self.use_finite_differencing('objective_hessian', step=1.e-6)."
+                                "If using a gradient-free optimizer, do not declare objective Hessian.")
+        if 'obj_hvp' in self.declared_variables:
+            if self.compute_objective_hvp.__func__ == Problem.compute_objective_hvp:
+                raise Exception("Objective HVP is declared but compute_objective_hvp() method is not implemented.")
+            
+        if self.constrained:
+            if 'jac' in self.declared_variables:
+                if self.compute_constraint_jacobian.__func__ == Problem.compute_constraint_jacobian:
+                    raise Exception("Constraint Jacobian is declared but compute_constraint_jacobian() method is not implemented."
+                                    "If declared derivatives are constant, define an empty compute_constraint_jacobian() with 'pass'."
+                                    "If declared derivatives are not available, define a compute_constraint_jacobian() method"
+                                    "that calls self.use_finite_differencing('constraint_jacobian', step=1.e-6)."
+                                    "If using a gradient-free optimizer, do not declare constraint Jacobian.")
+            if 'jvp' in self.declared_variables:
+                if self.compute_constraint_jvp.__func__ == Problem.compute_constraint_jvp:
+                    raise Exception("Constraint JVP is declared but compute_constraint_jvp() method is not implemented.")
+            if 'vjp' in self.declared_variables:
+                if self.compute_constraint_vjp.__func__ == Problem.compute_constraint_vjp:
+                    raise Exception("Constraint VJP is declared but compute_constraint_vjp() method is not implemented.")
+            if 'lag_grad' in self.declared_variables:
+                if self.compute_lagrangian_gradient.__func__ == Problem.compute_lagrangian_gradient:
+                    raise Exception("Lagrangian gradient is declared but compute_lagrangian_gradient() method is not implemented.")
+            if 'lag_hess' in self.declared_variables:
+                if self.compute_lagrangian_hessian.__func__ == Problem.compute_lagrangian_hessian:
+                    raise Exception("Lagrangian Hessian is declared but compute_lagrangian_hessian() method is not implemented.")
+            if 'lag_hvp' in self.declared_variables:
+                if self.compute_lagrangian_hvp.__func__ == Problem.compute_lagrangian_hvp:
+                    raise Exception("Lagrangian HVP is declared but compute_lagrangian_hvp() method is not implemented.")
 
         if ('grad' not in self.declared_variables) and ('lag_grad' not in self.declared_variables):
             # Don't raise an error since gradient-free optimization is possible
@@ -637,45 +686,6 @@ class Problem(object):
             if all(x not in self.declared_variables for x in ['jac', 'jvp', 'vjp', 'lag_grad']):
                 # Don't raise an error since gradient-free optimization is possible
                 warnings.warn("No constraint-related derivatives (jacobian, jvp, vjp, dL/dx) are declared.")
-
-        if self.compute_objective_gradient.__func__ == Problem.compute_objective_gradient:
-            if 'grad' in self.declared_variables:
-                raise Exception("Objective gradient is declared but compute_objective_gradient() is not provided."
-                                "If declared derivatives are constant, define an empty compute_objective_gradient() with 'pass'."
-                                "If declared derivatives are not available, define a compute_objective_gradient() method"
-                                "that calls self.use_finite_differencing('objective_gradient', step=1.e-6)."
-                                "If using a gradient-free optimizer, do not declare objective gradient.")
-        if self.compute_objective_hessian.__func__ == Problem.compute_objective_hessian:
-            if 'obj_hess' in self.declared_variables:
-                raise Exception("Objective Hessian is declared but compute_objective_hessian() is not provided."
-                                "If declared derivatives are constant, define an empty compute_objective_hessian() with 'pass'."
-                                "If declared derivatives are not available, define a compute_objective_hessian() method"
-                                "that calls self.use_finite_differencing('objective_hessian', step=1.e-6)."
-                                "If using a gradient-free optimizer, do not declare objective hessian.")
-            
-        if self.compute_objective_hvp.__func__ == Problem.compute_objective_hvp:
-            if 'obj_hvp' in self.declared_variables:
-                raise Exception("Objective HVP is declared but compute_objective_hvp() is not provided."
-                                "If declared derivatives are constant, define an empty compute_objective_hvp() with 'pass'."
-                                "If declared derivatives are not available, define a compute_objective_hvp() method"
-                                "that calls self.use_finite_differencing('objective_hvp', step=1.e-6)."
-                                "If using a gradient-free optimizer, do not declare objective hvp.")
-
-        if self.constrained:      
-            if self.compute_constraint_jacobian.__func__ == Problem.compute_constraint_jacobian:
-                if 'jac' in self.declared_variables:
-                    raise Exception("Constraint Jacobian is declared but compute_constraint_jacobian() is not provided."
-                                    "If declared derivatives are constant, define an empty compute_constraint_jacobian() with 'pass'."
-                                    "If declared derivatives are not available, define a compute_constraint_jacobian() method"
-                                    "that calls self.use_finite_differencing('constraint_jacobian', step=1.e-6)."
-                                    "If using a gradient-free optimizer, do not declare constraint jacobian.")
-            if self.compute_constraint_jvp.__func__ == Problem.compute_constraint_jvp:
-                if 'jvp' in self.declared_variables:
-                    raise Exception("Constraint JVP is declared but compute_constraint_jvp() is not provided."
-                                    "If declared derivatives are constant, define an empty compute_constraint_jvp() with 'pass'."
-                                    "If declared derivatives are not available, define a compute_constraint_jvp() method"
-                                    "that calls self.use_finite_differencing('constraint_jvp', step=1.e-6)."
-                                    "If using a gradient-free optimizer, do not declare constraint jvp.")
 
     def add_design_variables(self,
                              name=None,
@@ -1442,6 +1452,23 @@ class Problem(object):
     # Finite Difference Approximations of Derivatives:
     # ================================================
     def use_finite_differencing(self, derivative, step=1e-6):
+        '''
+        User calls this method within compute methods to approximate derivatives.
+
+        Parameters
+        ----------
+        derivative : str
+            Derivative to approximate.
+            Valid options: 'objective_gradient', 'objective_hessian', 'constraint_jacobian',
+            'objective_hvp', 'constraint_jvp'.
+        step : float or np.ndarray, default=1e-6
+            Finite difference step size.
+        '''
+        if np.isscalar(step):
+            if not np.isreal(step):
+                raise ValueError('Step size "step" must be a real number.')
+        elif step.shape != (self.nx,):
+            raise ValueError('Step size "step" must be a scalar or an array of size (nx,) where nx is the number of design variables.')
         if derivative == 'objective_gradient':
             x = self.x.get_data()
             self.compute_objective(self.x, self.obj)
@@ -1469,7 +1496,7 @@ class Problem(object):
                 self.compute_objective_gradient(self.x, self.pF_px)
                 g1 = self.pF_px.get_data()
                 H_fd[:, i] = (g1 - g0)
-            H_fd /= step
+            H_fd /= step # rowwise division if step is a 1d array
             self.p2F_pxx.vals.set_data(H_fd.flatten())
 
         elif derivative == 'constraint_jacobian':
@@ -1484,8 +1511,11 @@ class Problem(object):
                 self.compute_constraints(self.x, self.con)
                 c1 = self.con.get_data()
                 J_fd[:, i] = (c1 - c0)
-            J_fd /= step
+            J_fd /= step # rowwise division if step is a 1d array
             self.pC_px.vals.set_data(J_fd.flatten())
+        
+        elif not np.isscalar(step):
+            raise ValueError('Step size "step" must be a scalar for JVP or HVP derivative.')
 
         elif derivative == 'objective_hvp':
             x = self.x.get_data()

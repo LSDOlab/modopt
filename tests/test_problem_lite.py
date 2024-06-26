@@ -182,8 +182,6 @@ def test_str():
     lag_hvp = prob._compute_lagrangian_hvp(prob.x0, mu, v)
     assert_array_almost_equal(lag_hvp, np.array([8., 6.]), decimal=3)
 
-    print(prob)
-
     assert str(prob) == \
     "\n"\
     "\tProblem Overview:\n"\
