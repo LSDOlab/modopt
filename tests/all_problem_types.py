@@ -326,7 +326,7 @@ def scaling_lite():
     cl = np.array([1., 1.])
     cu = np.array([1., np.inf])
     x_sc = np.array([2., 0.2])
-    f_sc = 20
+    o_sc = 20
     c_sc = np.array([5., 0.5])
     def obj(x):
         return np.sum(x**4)
@@ -339,7 +339,7 @@ def scaling_lite():
     
     return ProblemLite(x0, obj=obj, grad=grad, con=con, jac=jac, 
                        cl=cl, cu=cu, xl=xl, xu=xu, 
-                       x_scaler=x_sc, f_scaler=f_sc, c_scaler=c_sc, 
+                       x_scaler=x_sc, o_scaler=o_sc, c_scaler=c_sc, 
                        name='scaling_lite')
 
 class FiniteDiff(Problem):
@@ -407,7 +407,7 @@ def finite_diff_lite():
     cl = np.array([1., 1.])
     cu = np.array([1., np.inf])
     x_sc = np.array([2., 0.2])
-    f_sc = 20
+    o_sc = 20
     c_sc = np.array([5., 0.5])
 
     def obj(x):
@@ -416,7 +416,7 @@ def finite_diff_lite():
         return np.array([x[0] + x[1], x[0]**2 - x[1]])
     
     return ProblemLite(x0, obj=obj, con=con, cl=cl, cu=cu, xl=xl, xu=xu,
-                       x_scaler=x_sc, f_scaler=f_sc, c_scaler=c_sc,
+                       x_scaler=x_sc, o_scaler=o_sc, c_scaler=c_sc,
                        name='finite_diff_lite')
 
 class SecondOrderUnconstrained(Problem):
@@ -455,7 +455,7 @@ def second_order_unconstrained_lite():
     xl = np.array([0., -np.inf])
     xu = np.array([np.inf, np.inf])
     x_sc = np.array([2., 0.2])
-    f_sc = 20
+    o_sc = 20
     def obj(x):
         return np.sum(x**4)
     def grad(x):    
@@ -465,7 +465,7 @@ def second_order_unconstrained_lite():
     
     return ProblemLite(x0, obj=obj, grad=grad,
                        xl=xl, xu=xu, 
-                       x_scaler=x_sc, f_scaler=f_sc,
+                       x_scaler=x_sc, o_scaler=o_sc,
                        obj_hess=obj_hess, name='second_order_unconstrained_lite')
 
 class SecondOrderScaling(Problem):
@@ -524,7 +524,7 @@ def second_order_scaling_lite():
     cl = np.array([1., 1.])
     cu = np.array([1., np.inf])
     x_sc = np.array([2., 0.2])
-    f_sc = 20
+    o_sc = 20
     c_sc = np.array([5., 0.5])
     def obj(x):
         return np.sum(x**4)
@@ -539,5 +539,5 @@ def second_order_scaling_lite():
     
     return ProblemLite(x0, obj=obj, grad=grad, con=con, jac=jac, 
                        cl=cl, cu=cu, xl=xl, xu=xu, 
-                       x_scaler=x_sc, f_scaler=f_sc, c_scaler=c_sc, 
+                       x_scaler=x_sc, o_scaler=o_sc, c_scaler=c_sc, 
                        lag_hess=lag_hess, name='second_order_scaling_lite')

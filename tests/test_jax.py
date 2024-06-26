@@ -139,14 +139,14 @@ def test_jax_problem_lite():
     cl = np.array([1., 1.])
     cu = np.array([1., np.inf])
     x_sc = np.array([100., 0.2])
-    f_sc = 3.
+    o_sc = 3.
     c_sc = np.array([20., 5.])
     prob = ProblemLite(x0, name='quartic', obj=obj, grad=grad, con=con, jac=jac,
-                       xl=xl, xu=xu, cl=cl, cu=cu, x_scaler=x_sc, f_scaler=f_sc, c_scaler=c_sc)
+                       xl=xl, xu=xu, cl=cl, cu=cu, x_scaler=x_sc, o_scaler=o_sc, c_scaler=c_sc)
 
     assert prob.problem_name == 'quartic'
     assert prob.constrained == True
-    assert_array_equal(prob.f_scaler, 3.)
+    assert_array_equal(prob.o_scaler, 3.)
     assert_array_equal(prob.x_scaler, [100., 0.2])
     assert_array_equal(prob.c_scaler, [20., 5.])
     assert_array_equal(prob.x0, np.array([100., 0.4]))

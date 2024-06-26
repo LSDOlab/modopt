@@ -293,7 +293,7 @@ def test_ProblemLiteClass(): # 8 problems
     prob = scaling_lite()
     assert prob.problem_name == 'scaling_lite'
     assert prob.constrained == True
-    assert_array_equal(prob.f_scaler,  [20.])
+    assert_array_equal(prob.o_scaler,  [20.])
     assert_array_equal(prob.x_scaler, [2., 0.2])
     assert_array_equal(prob.c_scaler, [5., 0.5])
     assert_array_equal(prob.x0, np.array([100., 1.]))
@@ -315,7 +315,7 @@ def test_ProblemLiteClass(): # 8 problems
     prob = finite_diff_lite()
     assert prob.problem_name == 'finite_diff_lite'
     assert prob.constrained == True
-    assert_array_equal(prob.f_scaler, [20.])
+    assert_array_equal(prob.o_scaler, [20.])
     assert_array_equal(prob.x_scaler, [2., 0.2])
     assert_array_equal(prob.c_scaler, [5., 0.5])
     assert_array_equal(prob.x0, np.array([50., 1.]))

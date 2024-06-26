@@ -40,7 +40,7 @@ class ProblemLite(object):
     '''
 
     def __init__(self, x0, name='unnamed_problem', obj=None, con=None, grad=None, jac=None, obj_hess=None, lag_hess=None, 
-                 fd_step=1e-6, vp_fd_step=1e-6, xl=None, xu=None, cl=None, cu=None, x_scaler=1., f_scaler=1., c_scaler=1.,
+                 fd_step=1e-6, vp_fd_step=1e-6, xl=None, xu=None, cl=None, cu=None, x_scaler=1., o_scaler=1., c_scaler=1.,
                  jvp=None, vjp=None, obj_hvp=None, lag_hvp=None, grad_free=False):
         '''
         Initialize the optimization problem with the given design variables, objective, constraints, and their derivatives.
@@ -84,7 +84,7 @@ class ProblemLite(object):
             Upper bounds on constraints.
         x_scaler : float or np.ndarray
             Scaling factor for design variables.
-        f_scaler : float
+        o_scaler : float
             Scaling factor for the objective function.
         c_scaler : float or np.ndarray
             Scaling factor for constraints.
@@ -103,7 +103,7 @@ class ProblemLite(object):
         grad_free : bool, default=False
             If True, the optimizer will not use the gradient information.
         '''
-        self.check_types(x0, name, obj, con, grad, jac, obj_hess, lag_hess, fd_step, vp_fd_step, xl, xu, cl, cu, x_scaler, f_scaler, c_scaler, grad_free)
+        self.check_types(x0, name, obj, con, grad, jac, obj_hess, lag_hess, fd_step, vp_fd_step, xl, xu, cl, cu, x_scaler, o_scaler, c_scaler, grad_free)
         self.problem_name = name
         self.options = OptionsDictionary()
         self.ny = 0
@@ -112,7 +112,7 @@ class ProblemLite(object):
         fd_step = self.fd_step
         self.vp_fd_step = vp_fd_step * 1.
 
-        self.f_scaler = f_scaler * np.ones((1,))
+        self.o_scaler = o_scaler * np.ones((1,))
         self.x_scaler = x_scaler * np.ones((nx,))
 
         self.x0 = np.asfarray(x0) * x_scaler
@@ -208,7 +208,7 @@ class ProblemLite(object):
                 raise ValueError('Objective function "obj" must return a scalar or a 1D array with shape (1,).')
         elif not np.isreal(f0):
             raise ValueError('Objective function "obj" must return a real-valued scalar.')
-        self.f = (f0 * self.f_scaler)[0]
+        self.f = (f0 * self.o_scaler)[0]
         if self.constrained:
             c0 = self.con(x0)
             self.nc = nc = c0.size
@@ -246,7 +246,7 @@ class ProblemLite(object):
             if wrong_grad:
                 raise ValueError(f'Gradient function "grad" must return a 1D array with shape (nx,), '
                                  f'where nx={nx} is the number of design variables.')
-            self.g = g0 * self.f_scaler / self.x_scaler
+            self.g = g0 * self.o_scaler / self.x_scaler
             if self.constrained:
                 j0 = self.jac(x0)
                 wrong_jac = False
@@ -263,9 +263,9 @@ class ProblemLite(object):
             self.gev_time += time.time() - g_start
         #####################################################
 
-        self.check_shapes(x0, xl, xu, cl, cu, x_scaler, f_scaler, c_scaler)
+        self.check_shapes(x0, xl, xu, cl, cu, x_scaler, o_scaler, c_scaler)
 
-    def check_types(self, x0, name, obj, con, grad, jac, obj_hess, lag_hess, fd_step, vp_fd_step, xl, xu, cl, cu, x_scaler, f_scaler, c_scaler, grad_free):
+    def check_types(self, x0, name, obj, con, grad, jac, obj_hess, lag_hess, fd_step, vp_fd_step, xl, xu, cl, cu, x_scaler, o_scaler, c_scaler, grad_free):
         if not isinstance(x0, np.ndarray):
             raise TypeError('Initial guess x0 must be a numpy array.')
         if not isinstance(name, str):
@@ -283,8 +283,8 @@ class ProblemLite(object):
             for val, name in zip(val_list, name_list):
                 if not np.isscalar(val) or not np.isreal(val):
                     raise TypeError(f'{name} must be a real-valued scalar.')
-        check_real_scalar([vp_fd_step, f_scaler], ['Vector product finite difference step "vp_fd_step"',
-                                                   'Objective scaler "f_scaler"', ])
+        check_real_scalar([vp_fd_step, o_scaler], ['Vector product finite difference step "vp_fd_step"',
+                                                   'Objective scaler "o_scaler"', ])
         def check_scalar_or_array(val_list, name_list):
             for val, name in zip(val_list, name_list):
                 if (not np.isscalar(val) or not np.isreal(val)) and not isinstance(val, np.ndarray) and val is not None:
@@ -294,7 +294,7 @@ class ProblemLite(object):
                                'Constraint lower bounds "cl"', 'Constraint upper bounds "cu"', 'Design variable scaler "x_scaler"', 
                                'Constraint scaler "c_scaler"'])
 
-    def check_shapes(self, x0, xl, xu, cl, cu, x_scaler, f_scaler, c_scaler):
+    def check_shapes(self, x0, xl, xu, cl, cu, x_scaler, o_scaler, c_scaler):
         '''
         Check for errors in the optimization problem setup.
         '''
@@ -308,9 +308,9 @@ class ProblemLite(object):
             raise ValueError(f'The upper bounds vector must be a real number or of shape ({self.nx},) but got shape {xu.shape}.')
         if self.x_scaler.shape != (self.nx,):
             raise ValueError(f'The design variable scaler vector must be a real number or of shape ({self.nx},) but got shape {x_scaler.shape}.')
-        if not np.isscalar(f_scaler):
-            if f_scaler.shape != (1,):
-                raise ValueError(f'The objective scaler must be a scalar or a 1D array with shape (1,) but got shape {f_scaler.shape}.')
+        if not np.isscalar(o_scaler):
+            if o_scaler.shape != (1,):
+                raise ValueError(f'The objective scaler must be a scalar or a 1D array with shape (1,) but got shape {o_scaler.shape}.')
             
         if self.constrained:
             if self.nc == 0:
@@ -333,7 +333,7 @@ class ProblemLite(object):
         '''
         if not np.array_equal(x, self.warm_x):
             f_start = time.time()
-            self.f = (self.obj(x/self.x_scaler) * self.f_scaler)[0]
+            self.f = (self.obj(x/self.x_scaler) * self.o_scaler)[0]
             if self.constrained:
                 self.c = self.con(x/self.x_scaler) * self.c_scaler
             self.warm_x[:] = x
@@ -346,7 +346,7 @@ class ProblemLite(object):
         '''
         if not np.array_equal(x, self.warm_x_derivs):
             g_start = time.time()
-            self.g = self.grad(x/self.x_scaler) * self.f_scaler / self.x_scaler
+            self.g = self.grad(x/self.x_scaler) * self.o_scaler / self.x_scaler
             if self.constrained:
                 self.j = self.jac(x/self.x_scaler) * np.outer(self.c_scaler, 1 / self.x_scaler)
             self.warm_x_derivs[:] = x
@@ -385,14 +385,14 @@ class ProblemLite(object):
         '''
         Compute the (scaled) Hessian of the objective at the given x.
         '''
-        return self.obj_hess(x/self.x_scaler) * self.f_scaler * np.outer(1 / self.x_scaler, 1 / self.x_scaler)
+        return self.obj_hess(x/self.x_scaler) * self.o_scaler * np.outer(1 / self.x_scaler, 1 / self.x_scaler)
     
     def _compute_lagrangian_hessian(self, x, mu):
         '''
         Compute the (scaled) Hessian of the Lagrangian at the given x and mu.
         '''
         self.warm_mu[:] = mu
-        return self.lag_hess(x/self.x_scaler, mu*self.c_scaler/self.f_scaler) * self.f_scaler * np.outer(1 / self.x_scaler, 1 / self.x_scaler)
+        return self.lag_hess(x/self.x_scaler, mu*self.c_scaler/self.o_scaler) * self.o_scaler * np.outer(1 / self.x_scaler, 1 / self.x_scaler)
     
     def _compute_lagrangian(self, x, mu):
         '''
@@ -448,10 +448,10 @@ class ProblemLite(object):
         Compute the (scaled) objective Hessian-vector product at the given x and v.
         '''
         if self.obj_hvp is not None:
-            return self.obj_hvp(x/self.x_scaler, v/self.x_scaler) * self.f_scaler / self.x_scaler
+            return self.obj_hvp(x/self.x_scaler, v/self.x_scaler) * self.o_scaler / self.x_scaler
         else:
             # warnings.warn("No objective HVP function is declared. Computing full objective Hessian to get obj_HVP.")
-            # oh = self.obj_hess(x/self.x_scaler) * f_scaler * np.outer(1 / self.x_scaler, 1 / self.x_scaler)
+            # oh = self.obj_hess(x/self.x_scaler) * o_scaler * np.outer(1 / self.x_scaler, 1 / self.x_scaler)
             # return oh @ v
 
             warnings.warn("No objective HVP function is declared. Using finite differences.")
@@ -459,7 +459,7 @@ class ProblemLite(object):
             h = self.vp_fd_step * v / self.x_scaler
             g1 = self.grad(x/self.x_scaler + h)
             fd_hvp = (g1 - g0) / self.vp_fd_step
-            return fd_hvp * self.f_scaler / self.x_scaler
+            return fd_hvp * self.o_scaler / self.x_scaler
         
     def _compute_lagrangian_hvp(self, x, mu, v):
         '''
@@ -468,18 +468,18 @@ class ProblemLite(object):
         self.warm_mu[:] = mu
 
         if self.lag_hvp is not None:
-            return self.lag_hvp(x/self.x_scaler, mu*self.c_scaler/self.f_scaler, v/self.x_scaler) * self.f_scaler / self.x_scaler
+            return self.lag_hvp(x/self.x_scaler, mu*self.c_scaler/self.o_scaler, v/self.x_scaler) * self.o_scaler / self.x_scaler
         else:
             # warnings.warn("No Lagrangian HVP function is declared. Computing full lagrangian Hessian to get lag_HVP.")
-            # lh = self.lag_hess(x/self.x_scaler, mu*self.c_scaler/self.f_scaler) * self.f_scaler * np.outer(1 / self.x_scaler, 1 / self.x_scaler)
+            # lh = self.lag_hess(x/self.x_scaler, mu*self.c_scaler/self.o_scaler) * self.o_scaler * np.outer(1 / self.x_scaler, 1 / self.x_scaler)
             # return lh @ v
 
             warnings.warn("No Lagrangian HVP function is declared. Using finite differences.")
-            lg0 = self.lag_grad(x/self.x_scaler, mu*self.c_scaler/self.f_scaler)
+            lg0 = self.lag_grad(x/self.x_scaler, mu*self.c_scaler/self.o_scaler)
             h = self.vp_fd_step * v / self.x_scaler
-            lg1 = self.lag_grad(x/self.x_scaler + h, mu*self.c_scaler/self.f_scaler)
+            lg1 = self.lag_grad(x/self.x_scaler + h, mu*self.c_scaler/self.o_scaler)
             fd_hvp = (lg1 - lg0) / self.vp_fd_step
-            return fd_hvp * self.f_scaler / self.x_scaler
+            return fd_hvp * self.o_scaler / self.x_scaler
         
     def compute_objective(self, dvs, obj):
         pass
@@ -511,8 +511,8 @@ class ProblemLite(object):
         Print the details of the UNSCALED optimization problem.
         """
         name = self.problem_name
-        obj  = (self.f / self.f_scaler)[0] # self.f_scaler always has shape (1,)
-        obj_scaler = self.f_scaler[0]
+        obj  = (self.f / self.o_scaler)[0] # self.o_scaler always has shape (1,)
+        obj_scaler = self.o_scaler[0]
         dvs  = self.warm_x / self.x_scaler
         x_l  = self.x_lower / self.x_scaler
         x_u  = self.x_upper / self.x_scaler
