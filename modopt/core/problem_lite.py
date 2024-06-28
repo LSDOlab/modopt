@@ -143,7 +143,8 @@ class ProblemLite(object):
 
         if grad is not None:
             self.grad = grad
-        elif obj is not None:
+        elif (obj is not None) and (not grad_free):
+            warnings.warn('Gradient function "grad" not provided. Finite differences will be used if gradient computation is necessary.')
             # FD gradient
             def fd_grad(x):
                 f0 = self.obj(x)
@@ -151,7 +152,8 @@ class ProblemLite(object):
             self.grad = fd_grad
         
         self.jac = jac
-        if (con is not None) and (jac is None):
+        if (con is not None) and (jac is None) and (not grad_free):
+            warnings.warn('Jacobian function "jac" not provided. Finite differences will be used if Jacobian computation is necessary.')
             # FD Jacobian
             def fd_jac(x):
                 c0 = self.con(x)
@@ -164,7 +166,8 @@ class ProblemLite(object):
 
         if obj_hess is not None:
             self.obj_hess = obj_hess
-        elif obj is not None:
+        elif (obj is not None) and (not grad_free):
+            warnings.warn('Objective Hessian function "obj_hess" not provided. Finite differences will be used if objective Hessian computation is necessary.')
             # FD Hessian
             def fd_obj_hess(x):
                 g0 = self.grad(x)
@@ -174,7 +177,8 @@ class ProblemLite(object):
         if con is not None:
             if lag_hess is not None:
                 self.lag_hess = lag_hess
-            else:
+            elif not grad_free:
+                warnings.warn('Lagrangian Hessian function "lag_hess" not provided. Finite differences will be used if Lagrangian Hessian computation is necessary.')
                 # FD Lagrangian Hessian
                 def fd_lag_hess(x, mu):
                     lg0 = self.lag_grad(x, mu)

@@ -2,6 +2,7 @@ from modopt.external_libraries.scipy import SLSQP
 from modopt.external_libraries.pyslsqp import PySLSQP
 from modopt.external_libraries.snopt import SNOPTc as SNOPT
 from modopt.external_libraries.ipopt import IPOPT
+from modopt.external_libraries.qpsolvers import ConvexQPSolvers
 
 def optimize(prob, solver='SLSQP', **kwargs):
     """
@@ -18,7 +19,7 @@ def optimize(prob, solver='SLSQP', **kwargs):
     ----------
     prob : Problem or ProblemLite
         The problem to be solved.
-    solver : {'SLSQP', 'PySLSQP', 'SNOPT', 'IPOPT'}, optional
+    solver : {'SLSQP', 'PySLSQP', 'SNOPT', 'IPOPT', 'ConvexQPSolvers'}, optional
         The solver to be used. Default is 'SLSQP'.
     **kwargs
         Additional keyword arguments to be passed to the solver.
@@ -28,7 +29,7 @@ def optimize(prob, solver='SLSQP', **kwargs):
     dict
         The results of the optimization.
     """
-    valid_solvers = ['SLSQP', 'PySLSQP', 'SNOPT', 'IPOPT']
+    valid_solvers = ['SLSQP', 'PySLSQP', 'SNOPT', 'IPOPT', 'ConvexQPSolvers']
     if solver == 'SLSQP':
         optimizer = SLSQP(prob, **kwargs)
     elif solver == 'PySLSQP':
@@ -37,6 +38,8 @@ def optimize(prob, solver='SLSQP', **kwargs):
         optimizer = SNOPT(prob, **kwargs)
     elif solver == 'IPOPT':
         optimizer = IPOPT(prob, **kwargs)
+    elif solver == 'ConvexQPSolvers':
+        optimizer = ConvexQPSolvers(prob, **kwargs)
     else:
         raise ValueError(f"Invalid solver named '{solver}' is specified. Valid solvers are: {valid_solvers}.")
 

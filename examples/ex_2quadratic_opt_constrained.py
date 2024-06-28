@@ -24,7 +24,7 @@ class Quadratic(Problem):
 
     def setup_derivatives(self):
         self.declare_objective_gradient(wrt='x', vals=None)
-        self.declare_objective_hessian(of='x', wrt='x', vals=None)
+        self.declare_objective_hessian(of='x', wrt='x', vals=2*np.eye(2))
         self.declare_lagrangian_hessian(of='x', wrt='x', vals=None)
         self.declare_constraint_jacobian(of='c',
                                          wrt='x',
@@ -38,7 +38,7 @@ class Quadratic(Problem):
         grad['x'] = 2 * dvs['x']
 
     def compute_objective_hessian(self, dvs, hess):
-        hess['x','x'] = 2 * np.eye(2)
+        pass
 
     def compute_lagrangian_hessian(self, dvs, hess):
         hess['x','x'] = 2 * np.eye(2)
@@ -53,7 +53,7 @@ class Quadratic(Problem):
         pass
         # jac['c', 'x'] = vals=np.array([[1.,1.],[1.,-1]])
 
-from modopt import SLSQP, SQP, SNOPT #, QPSolver, CVXOPT
+from modopt import SLSQP, SQP, SNOPT , ConvexQPSolvers #, CVXOPT
 
 tol = 1E-8
 maxiter = 500
@@ -63,22 +63,21 @@ prob = Quadratic(jac_format='dense')
 print(prob)
 
 # Set up your optimizer with the problem
-qp_solver_options={}
-# optimizer = QPSolver(prob, verbose=True, solver='quadprog', solver_options=qp_solver_options)
+solver_options = {'solver':'quadprog'}
+optimizer = ConvexQPSolvers(prob, solver_options=solver_options)
+optimizer.check_first_derivatives(prob.x0)
+optimizer.solve()
+optimizer.print_results(optimal_variables=True,
+                        optimal_dual_variables_eq=True,
+                        optimal_dual_variables_ineq=True,
+                        optimal_dual_variables_bounds=True,
+                        extras=True)
 
-
-optimizer = SLSQP(prob, maxiter=20)
+# optimizer = SLSQP(prob, maxiter=20)
 # optimizer = SQP(prob, maxiter=20)
 # optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3)
 # optimizer = CVXOPT(prob,)
 
-optimizer.check_first_derivatives(prob.x0)
-optimizer.solve()
-optimizer.print_results(summary_table=True, 
-                        optimal_variables=True,
-                        optimal_dual_variables_eq=True,
-                        optimal_dual_variables_ineq=True,
-                        extras=True)
 # optimizer.print_results(summary_table=True, 
 #                         optimal_variables=True,
 #                         optimal_dual_variables=True,

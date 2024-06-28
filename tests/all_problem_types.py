@@ -10,6 +10,7 @@
 #  8. FiniteDiff (Constrained problem with scaling taht uses finite differencing for grad, hess, hvp, jac, and jvp)
 #  9. SecondOrderUnconstrained (Unconstrained problem with scaling that uses analytical objective hessian, for ipopt)
 # 10. SecondOrderScaling (Constrained problem with scaling that uses analytical lagrangian hessian, for ipopt)
+# 11. ConvexQP (Convex quadratic problem with bounds on design variables and linear eq/ineq constraints for ConvexQPSolvers)
 
 
 from modopt import Problem, ProblemLite
@@ -541,3 +542,68 @@ def second_order_scaling_lite():
                        cl=cl, cu=cu, xl=xl, xu=xu, 
                        x_scaler=x_sc, o_scaler=o_sc, c_scaler=c_sc, 
                        lag_hess=lag_hess, name='second_order_scaling_lite')
+
+class ConvexQP(Problem):
+    def initialize(self, ):
+        self.problem_name = 'convex_qp'
+
+    def setup(self):
+        self.add_design_variables('x',
+                                  shape=(2, ),
+                                  lower=np.array([0., -np.inf]),
+                                  upper=np.array([np.inf, np.inf]),
+                                  vals=np.array([500., 5.]))
+
+        self.add_objective('f')
+
+        self.add_constraints('c',
+                            shape=(2, ),
+                            lower=np.array([1., 1.]),
+                            upper=np.array([1., np.inf]),
+                            equals=None,)
+
+    def setup_derivatives(self):
+        self.declare_objective_gradient(wrt='x', vals=None)
+        self.declare_objective_hessian(of='x', wrt='x', vals=2*np.eye(2))
+        self.declare_constraint_jacobian(of='c',
+                                         wrt='x',
+                                         vals=np.array([[1.,1.],[1.,-1]]))
+
+    def compute_objective(self, dvs, obj):
+        x = dvs['x']
+        obj['f'] = np.sum(x**2)
+
+    def compute_objective_gradient(self, dvs, grad):
+        grad['x'] = 2 * dvs['x']
+
+    def compute_objective_hessian(self, dvs, hess):
+        pass
+
+    def compute_constraints(self, dvs, cons):
+        x   = dvs['x']
+        con = cons['c']
+        con[0] = x[0] + x[1]
+        con[1] = x[0] - x[1]
+
+    def compute_constraint_jacobian(self, dvs, jac):
+        pass
+
+def convex_qp_lite():
+    x0 = np.array([500., 5.])
+    cl = np.array([1., 1.])
+    cu = np.array([1., np.inf])
+    xl = np.array([0., -np.inf])
+    xu = np.array([np.inf, np.inf])
+    def obj(x):
+        return np.sum(x**2)
+    def grad(x):    
+        return 2 * x
+    def obj_hess(x):
+        return 2 * np.eye(2)
+    def con(x):
+        return np.array([x[0] + x[1], x[0] - x[1]])
+    def jac(x):
+        return np.array([[1., 1.], [1., -1]])
+    
+    return ProblemLite(x0, obj=obj, grad=grad, con=con, jac=jac, obj_hess=obj_hess,
+                       xl=xl, xu=xu, cl=cl, cu=cu, name='convex_qp_lite')

@@ -1,5 +1,5 @@
 # Test the optimize function interface for SLSQP, PySLSQP, SNOPT, COBYLA, and BFGS
-# The tests are exactly the same as in test_performant_algs.py
+# The tests are exactly the same as in test_performant_algs.py, test_qpsolvers.py, and test_cvxopt.py
 
 from all_problem_types import Scaling, scaling_lite, Unconstrained, unconstrained_lite
 from numpy.testing import assert_array_almost_equal, assert_array_equal, assert_almost_equal
@@ -173,13 +173,39 @@ def test_ipopt_exact_hess_lag():
     print(results)
     assert_array_almost_equal(results['x'], [0., 0.], decimal=1)
 
+@pytest.mark.interfaces
+@pytest.mark.qpsolvers
+def test_qpsolvers(): 
+    from all_problem_types import ConvexQP, convex_qp_lite
+
+    probs = [ConvexQP(), convex_qp_lite()]
+    solver_options = {'solver':'quadprog', 'verbose':True}
+
+    for prob in probs:
+        results = optimize(prob, solver='ConvexQPSolvers', solver_options=solver_options)
+        print(results)
+
+        assert results['found']
+        assert_array_almost_equal(results['x'], [1., 0.], decimal=11)
+        assert_array_almost_equal(results['z_box'], [0., 0.], decimal=11)
+        assert_almost_equal(results['objective'], 1., decimal=11)
+        assert_almost_equal(results['primal_residual'], 4.44e-16, decimal=11)
+        assert_almost_equal(results['dual_residual'], 0., decimal=11)
+        assert_almost_equal(results['duality_gap'], 4.44e-16, decimal=11)
+        assert_array_almost_equal(results['constraints'], [1., 1.], decimal=11)
+        assert_array_almost_equal(results['y'], [-1.], decimal=11)    # dual variables for the equality constraints
+        assert_array_almost_equal(results['z'], [1.], decimal=11)     # dual variables for the inequality constraints
+        assert_array_almost_equal(results['extras']['iact'], [1, 2])
+        assert_array_almost_equal(results['extras']['iterations'], [3, 0])
+
 def test_invalid_solver():
     prob = Scaling()
     with pytest.raises(Exception) as exc_info:
         optimize(prob, solver='InvalidSolver')
 
     assert exc_info.type is ValueError
-    assert str(exc_info.value) == "Invalid solver named 'InvalidSolver' is specified. Valid solvers are: ['SLSQP', 'PySLSQP', 'SNOPT', 'IPOPT']."
+    assert str(exc_info.value) == "Invalid solver named 'InvalidSolver' is specified. Valid solvers are: "\
+                                  "['SLSQP', 'PySLSQP', 'SNOPT', 'IPOPT', 'ConvexQPSolvers']."
 
 if __name__ == '__main__':
     test_slsqp()
@@ -187,5 +213,6 @@ if __name__ == '__main__':
     test_snopt()
     test_ipopt()
     test_ipopt_exact_hess_lag()
+    test_qpsolvers()
     test_invalid_solver()
     print('All tests passed!')

@@ -5,7 +5,9 @@ import os
 from modopt.utils.options_dictionary import OptionsDictionary
 from modopt.utils.general_utils import pad_name
 # from io import StringIO
-
+from modopt.core.problem import Problem
+from modopt.core.problem_lite import ProblemLite
+import warnings
 
 class Optimizer(object):
     def __init__(self, problem, **kwargs):
@@ -143,6 +145,14 @@ class Optimizer(object):
 
         with open(dirName + '/' + 'summary.out', 'a') as f:
             f.write(new_row)
+
+    def check_if_callbacks_are_declared(self, cb, cb_str, solver_str):
+        if cb not in self.problem.user_defined_callbacks:
+            if isinstance(self.problem, Problem):
+                raise ValueError(f"{cb_str} function is not declared in the Problem() subclass but is needed for {solver_str}.")
+            elif isinstance(self.problem, ProblemLite):
+                warnings.warn(f"{cb_str} function is not provided in the ProblemLite() container but is needed for {solver_str}. "\
+                              f"The optimizer will use finite differences to compute the {cb_str}.")
 
     def print_results(self, **kwargs):
         self._print_results(**kwargs)
