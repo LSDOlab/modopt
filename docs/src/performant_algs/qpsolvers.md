@@ -1,6 +1,8 @@
 # ConvexQPSolvers
 
-To use `ConvexQPSolvers`, first install the qpsolvers package with `pip install qpsolvers[wheels_only]`.
+To use `ConvexQPSolvers`, first install the `qpsolvers` package with some of the
+most stable open-source solvers by running
+ `pip install qpsolvers[wheels_only] quadprog osqp`.
 You can then follow the same process as for other optimizers
 except when importing the optimizer.
 You can import the optimizer as shown in the following code:
