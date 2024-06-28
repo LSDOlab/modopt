@@ -63,8 +63,10 @@ class OpenMDAOProblem(Problem):
         self.con_names = list(con_values_dict.keys())
         con_values = list(con_values_dict.values())
         self.nc = sum([value.size for value in con_values])
+        self.declared_variables = ['dv', 'obj', 'grad']
         if self.nc > 0:
             self.constrained = True
+            self.declared_variables += ['con', 'jac']
 
         self.model_evals = 1                    # num of model evals
         self.fail1 = False                      # NotImplemented: failure of functions

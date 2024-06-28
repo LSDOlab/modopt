@@ -61,8 +61,10 @@ class CSDLAlphaProblem(OptProblem):
         self.fail2 = False                      # failure of functions or derivatives
         self.warm_x       = self.x0 - 1.      # (x0 - 1.) to keep it different from initial dv values
         self.warm_x_deriv = self.x0 - 2.      # (x0 - 2.) to keep it different from initial dv and warm_x values
+        self.declared_variables = ['dv', 'obj', 'grad']
         if self.nc > 0:
             self.constrained = True
+            self.declared_variables += ['con', 'jac']
 
         self.SURF_mode = False # True if using SURF, False if using RS/FS
         
