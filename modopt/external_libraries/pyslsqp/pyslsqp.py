@@ -15,7 +15,7 @@ class PySLSQP(Optimizer):
     equality and inequality constraints.
     '''
     def initialize(self, ):
-        self.optimizer_name = 'pyslsqp'
+        self.solver_name = 'pyslsqp'
         self.options.declare('solver_options', default={}, types=dict)
         
         # No outputs can be declared for PySLSQP

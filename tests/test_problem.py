@@ -5,6 +5,15 @@ from numpy.testing import assert_array_almost_equal, assert_almost_equal
 import pytest
 from all_problem_types import Scaling
 
+def test_callback_list():
+    x0 = np.array([1., 1.])
+    prob = Scaling()
+
+    assert prob.nx == 2
+    assert prob.nc == 2
+    assert set(prob.declared_variables) == {'dv', 'obj', 'con', 'grad', 'jac'}
+    assert set(prob.user_defined_callbacks) == {'obj', 'con', 'grad', 'jac'}
+
 def test_errors():
     with pytest.raises(Exception) as excinfo:
         prob = Problem()

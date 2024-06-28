@@ -104,6 +104,9 @@ class ProblemLite(object):
             If True, the optimizer will not use the gradient information.
         '''
         self.check_types(x0, name, obj, con, grad, jac, obj_hess, lag_hess, fd_step, vp_fd_step, xl, xu, cl, cu, x_scaler, o_scaler, c_scaler, grad_free)
+        allowed_callbacks = ['obj', 'con', 'grad', 'jac', 'obj_hess', 'lag_hess', 'jvp', 'vjp', 'obj_hvp', 'lag_hvp']
+        local_vars = locals()
+        self.user_defined_callbacks = [key for key in allowed_callbacks if local_vars[key] is not None]
         self.problem_name = name
         self.options = OptionsDictionary()
         self.ny = 0

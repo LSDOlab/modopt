@@ -39,6 +39,16 @@ def test_type_errors():
     assert excinfo.type is TypeError
     assert str(excinfo.value) == 'Finite difference step "fd_step" must be a real-valued scalar or a numpy array.'
 
+def test_callback_list():
+    x0 = np.array([1., 1.])
+    obj = lambda x: np.sum(x**2)
+    con = lambda x: x**2 - 1.
+    prob = ProblemLite(x0, obj=obj, con=con)
+
+    assert prob.nx == 2
+    assert prob.nc == 2
+    assert set(prob.user_defined_callbacks) == {'obj', 'con'}
+
 def test_callback_errors():
     x0 = np.array([1., 1.])
     obj = lambda x: x**2

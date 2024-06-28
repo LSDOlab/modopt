@@ -14,7 +14,7 @@ class IPOPT(Optimizer):
     nonlinear programming problems with equality and inequality constraints.
     '''
     def initialize(self, ):
-        self.optimizer_name = 'ipopt'
+        self.solver_name = 'ipopt'
         self.available_options = {'print_level': 5, 'linear_solver': 'ma57', 'tol': 1e-8, 'max_iter': 1000}
         # Options to be passed to IPOPT solver in CasADi, 
         # e.g., {'print_level': 5, 'linear_solver': 'ma57', 'tol': 1e-8, 'max_iter': 1000, file_print_level: 5,

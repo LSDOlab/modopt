@@ -220,6 +220,8 @@ class Problem(object):
 
         self.delete_unnecessary_attributes_allocated()
         self.raise_issues_with_user_setup()
+        self.user_defined_callbacks = deepcopy(self.declared_variables)
+        self.user_defined_callbacks.remove('dv')
 
     def __str__(self):
         """
