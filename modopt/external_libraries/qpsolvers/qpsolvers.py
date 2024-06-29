@@ -107,7 +107,8 @@ class ConvexQPSolvers(Optimizer):
             self.solver_name += self.options['solver_options']['solver']
         else:
             raise ValueError("Please specify a 'solver' in the 'solver_options' dictionary. "\
-                             "Available solvers are: {}".format(self.available_solvers))
+                             f"Solvers available on your machine are: {self.available_solvers}"\
+                             f"Solvers supported by 'qpsolvers' are: {self.supported_solvers}")
         if 'verbose' not in self.options['solver_options']:
             self.options['solver_options']['verbose'] = True
 
@@ -243,8 +244,6 @@ class ConvexQPSolvers(Optimizer):
 
         output  = "\n\tSolution from qpsolvers:"
         output += "\n\t"+"-" * 100
-
-        from modopt.utils.general_utils import pad_name
 
         output += f"\n\t{'Problem':40}: {self.problem_name}"
         output += f"\n\t{'Solver':40}: {self.solver_name}"

@@ -46,7 +46,8 @@ def test_errors():
     for prob in probs:
         with pytest.raises(ValueError) as excinfo:
             optimizer = ConvexQPSolvers(prob, solver_options={ 'verbose':False})
-        assert "Please specify a 'solver' in the 'solver_options' dictionary. Available solvers are: " in str(excinfo.value)
+        assert "Please specify a 'solver' in the 'solver_options' dictionary. Solvers available on your machine are: " in str(excinfo.value)
+        assert "Solvers supported by 'qpsolvers' are: " in str(excinfo.value)
 
     class QPNoHess(Problem):
         def setup(self):

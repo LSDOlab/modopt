@@ -80,7 +80,7 @@ class OptionsDictionary(object):
             # if the default is an object instance, replace with the (unqualified) object type
             default_str = str(default)
             idx = default_str.find(' object at ')
-            if idx >= 0 and default_str[0] is '<':
+            if idx >= 0 and default_str[0] == '<':
                 parts = default_str[:idx].split('.')
                 default = parts[-1]
 
@@ -387,3 +387,18 @@ class OptionsDictionary(object):
                 raise RuntimeError("Option '{}' is required but has not been set.".format(name))
         except KeyError:
             raise KeyError("Option '{}' cannot be found".format(name))
+        
+    def get_pure_dict(self):
+        """
+        Generate a pure Python dictionary from the OptionsDictionary.
+
+        Returns
+        -------
+        pydict : dict
+            A dictionary containing the same data as the OptionsDictionary without any metadata.
+        """
+        pydict = {}
+        for key, val in self._dict.items():
+            pydict[key] = val['value']
+
+        return pydict

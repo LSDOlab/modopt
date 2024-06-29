@@ -50,3 +50,26 @@ class HiddenPrints:
 #     print("This will not be printed")
 
 # print("This will be printed as before")
+
+class ImmutableKeysDict(dict):
+    '''
+    Allows modifications to existing keys but will raise a KeyError 
+    if there's an attempt to add a new key.
+    '''
+    def __setitem__(self, key, value):
+        if key not in self:
+            raise KeyError(f"Cannot add new key: {key}")
+        super().__setitem__(key, value)
+
+# Usage: Initialize with default values
+# ======
+# default_solver_options = ImmutableKeysDict({
+#     'show_progress': True,
+#     'maxiters': 100,
+#     'abstol': 1E-6,
+#     'reltol': 1E-6,
+#     'feastol': 1E-6,
+#     'abstol_inacc': 1E-6,
+#     'reltol_inacc': 1E-6,
+#     'feastol_inacc': 1E-6
+# })
