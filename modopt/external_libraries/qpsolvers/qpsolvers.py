@@ -101,7 +101,7 @@ class ConvexQPSolvers(Optimizer):
         '''
         Setup the solver name, initial guess, and QP matrices and vectors.
         Check if solver is specified in the solver_options dictionary.
-        Check if the Hessian of the objective function is defined.
+        Check if the gradient/Jacobian/Hessian functions are defined.
         '''
         if 'solver' in self.options['solver_options']:
             self.solver_name += self.options['solver_options']['solver']
@@ -113,7 +113,9 @@ class ConvexQPSolvers(Optimizer):
 
         self.x0 = self.problem.x0 * 1.
 
-        # Check if Hessians are defined for the objective and raise error/warning for Problem/ProblemLite
+        # Check if gradient/Jacobian/Hessian are declared and raise error/warning for Problem/ProblemLite
+        # NOTE: Objective Hessian and gradient needs to declared even if running a QP feasibility problem
+        self.check_if_callbacks_are_declared('grad', 'Objective gradient', 'ConvexQPSolvers')
         self.check_if_callbacks_are_declared('obj_hess', 'Objective Hessian', 'ConvexQPSolvers')
         if self.problem.constrained:
             self.check_if_callbacks_are_declared('jac', 'Constraint Jacobian', 'ConvexQPSolvers')
@@ -236,9 +238,7 @@ class ConvexQPSolvers(Optimizer):
     def print_results(self,
                       optimal_variables=False,
                       optimal_constraints=False,
-                      optimal_dual_variables_eq=False,
-                      optimal_dual_variables_ineq=False,
-                      optimal_dual_variables_bounds=False,
+                      optimal_dual_variables=False,
                       extras=False):
 
         output  = "\n\tSolution from qpsolvers:"
@@ -246,27 +246,25 @@ class ConvexQPSolvers(Optimizer):
 
         from modopt.utils.general_utils import pad_name
 
-        output += f"\n\t{'Problem':30}: {self.problem_name}"
-        output += f"\n\t{'Solver':30}: {self.solver_name}"
-        output += f"\n\t{'Found':30}: {self.results['found']}"
-        output += f"\n\t{'Objective':30}: {self.results['objective']}"
-        output += f"\n\t{'Dual residual':30}: {self.results['dual_residual']}"
-        output += f"\n\t{'Primal residual':30}: {self.results['primal_residual']}"
-        output += f"\n\t{'Duality gap':30}: {self.results['duality_gap']}"
-        output += f"\n\t{'Total time':30}: {self.results['time']}"
+        output += f"\n\t{'Problem':40}: {self.problem_name}"
+        output += f"\n\t{'Solver':40}: {self.solver_name}"
+        output += f"\n\t{'Found':40}: {self.results['found']}"
+        output += f"\n\t{'Objective':40}: {self.results['objective']}"
+        output += f"\n\t{'Dual residual':40}: {self.results['dual_residual']}"
+        output += f"\n\t{'Primal residual':40}: {self.results['primal_residual']}"
+        output += f"\n\t{'Duality gap':40}: {self.results['duality_gap']}"
+        output += f"\n\t{'Total time':40}: {self.results['time']}"
 
         if optimal_variables:
-            output += f"\n\t{'Optimal variables':30}: {self.results['x']}"
+            output += f"\n\t{'Optimal variables':40}: {self.results['x']}"
         if optimal_constraints:
-            output += f"\n\t{'Optimal constraints':30}: {self.results['constraints']}"
-        if optimal_dual_variables_eq:
-            output += f"\n\t{'Optimal dual variables-eq':30}: {self.results['y']}"
-        if optimal_dual_variables_ineq:
-            output += f"\n\t{'Optimal dual variables-ineq':30}: {self.results['z']}"
-        if optimal_dual_variables_bounds:
-            output += f"\n\t{'Optimal dual variables-bounds':30}: {self.results['z_box']}"
+            output += f"\n\t{'Optimal constraints':40}: {self.results['constraints']}"
+        if optimal_dual_variables:
+            output += f"\n\t{'Optimal dual variables (bounds)':40}: {self.results['z_box']}"
+            output += f"\n\t{'Optimal dual variables (eq constraints)':40}: {self.results['y']}"
+            output += f"\n\t{'Optimal dual variables (ineq cons.)':40}: {self.results['z']}"
         if extras:
-            output += f"\n\t{'Extras':30}: {self.results['extras']}"
+            output += f"\n\t{'Extras':40}: {self.results['extras']}"
 
         output += '\n\t' + '-'*100
 

@@ -20,7 +20,7 @@ class ProblemLite(object):
         - No setup() or setup_derivatives() method is called.
         - Functions and derivatives are directly called from the user-provided functions (thin wrapper).
         - Only single objective problems are supported.
-        - Only a single design varaible vector and single constraint vector function are supported.
+        - Only a single design variable vector and single constraint vector function are supported.
         - Every STORED VARIABLE in this class is SCALED by the user-provided scaling factors.
         - Objective and constraint functions are always called together in _funcs(x) method.
         - Gradient and Jacobian functions are always called together in _derivs(x) method.

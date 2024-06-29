@@ -17,11 +17,9 @@ def test_qpsolvers():
         optimizer.check_first_derivatives(prob.x0)
         optimizer.solve()
         print(optimizer.results)
-        optimizer.print_results(optimal_dual_variables_ineq = True, 
+        optimizer.print_results(optimal_dual_variables = True, 
                                 optimal_constraints = True,  
                                 optimal_variables = True,  
-                                optimal_dual_variables_bounds = True, 
-                                optimal_dual_variables_eq = True, 
                                 extras = True)
 
         assert optimizer.results['found']

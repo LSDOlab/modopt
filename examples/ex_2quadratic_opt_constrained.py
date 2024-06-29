@@ -25,7 +25,7 @@ class Quadratic(Problem):
     def setup_derivatives(self):
         self.declare_objective_gradient(wrt='x', vals=None)
         self.declare_objective_hessian(of='x', wrt='x', vals=2*np.eye(2))
-        self.declare_lagrangian_hessian(of='x', wrt='x', vals=None)
+        self.declare_lagrangian_hessian(of='x', wrt='x', vals=2*np.eye(2))
         self.declare_constraint_jacobian(of='c',
                                          wrt='x',
                                          vals=np.array([[1.,1.],[1.,-1]]))
@@ -40,8 +40,8 @@ class Quadratic(Problem):
     def compute_objective_hessian(self, dvs, hess):
         pass
 
-    def compute_lagrangian_hessian(self, dvs, hess):
-        hess['x','x'] = 2 * np.eye(2)
+    def compute_lagrangian_hessian(self, dvs, lag_mult, hess):
+        pass
 
     def compute_constraints(self, dvs, cons):
         x   = dvs['x']
@@ -53,7 +53,7 @@ class Quadratic(Problem):
         pass
         # jac['c', 'x'] = vals=np.array([[1.,1.],[1.,-1]])
 
-from modopt import SLSQP, SQP, SNOPT , ConvexQPSolvers #, CVXOPT
+from modopt import SLSQP, SQP, SNOPT , ConvexQPSolvers, CVXOPT
 
 tol = 1E-8
 maxiter = 500
@@ -68,20 +68,18 @@ optimizer = ConvexQPSolvers(prob, solver_options=solver_options)
 optimizer.check_first_derivatives(prob.x0)
 optimizer.solve()
 optimizer.print_results(optimal_variables=True,
-                        optimal_dual_variables_eq=True,
-                        optimal_dual_variables_ineq=True,
-                        optimal_dual_variables_bounds=True,
+                        optimal_constraints=True,
+                        optimal_dual_variables=True,
                         extras=True)
 
 # optimizer = SLSQP(prob, maxiter=20)
 # optimizer = SQP(prob, maxiter=20)
 # optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3)
 # optimizer = CVXOPT(prob,)
-
-# optimizer.print_results(summary_table=True, 
-#                         optimal_variables=True,
+# optimizer.solve()
+# optimizer.print_results(optimal_variables=True,
 #                         optimal_dual_variables=True,
-#                         optimal_slack_variables=True,)
+#                         optimal_slack_variables=True)
 
 # print('optimized_dvs:', prob.x.get_data())
 # print('optimized_cons:', prob.con.get_data())
