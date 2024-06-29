@@ -152,6 +152,7 @@ markers = [
     "pyslsqp: marks tests as pyslsqp (deselect with '-m \"not pyslsqp\"')",
     "ipopt: marks tests as ipopt (deselect with '-m \"not ipopt\"')",
     "qpsolvers: marks tests as qpsolvers (deselect with '-m \"not qpsolvers\"')",
+    "cvxopt: marks tests as cvxopt (deselect with '-m \"not cvxopt\"')",
 ]
 
 [tool.coverage.run]

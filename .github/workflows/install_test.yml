@@ -30,7 +30,7 @@ jobs:
       run: | 
         python -m pip install --upgrade pip
         # if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
-        python -m pip install -e .[test,jax,openmdao,ipopt,sqp,csdl,pyslsqp,csdl_alpha,qpsolvers]
+        python -m pip install -e .[test,jax,openmdao,ipopt,sqp,csdl,pyslsqp,csdl_alpha,qpsolvers,cvxopt]
         python -m pip install coveralls
 
       # Run the package tests and generate the coverage report

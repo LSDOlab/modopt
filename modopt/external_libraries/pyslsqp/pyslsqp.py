@@ -31,39 +31,27 @@ class PySLSQP(Optimizer):
         '''
         Setup the initial guess, and matrices and vectors.
         '''
-        if self.problem.constrained:
-            self.setup_constraints()
         self.x0 = self.problem.x0 * 1.
         self.nx = self.problem.nx * 1
+        if self.problem.constrained:
+            self.setup_constraints()
 
     def setup_constraints(self, ):
         cl = self.problem.c_lower
         cu = self.problem.c_upper
 
-        self.nc_e = 0
-        self.nc_i = 0
-        self.eq_constrained = False
-        self.lower_constrained = False
-        self.upper_constrained = False
-
         eqi = self.eq_constraint_indices = np.where(cl == cu)[0]
-
-        if len(eqi) > 0:
-            self.eq_constrained = True
-            self.nc_e += len(eqi)
-
         lci = self.lower_constraint_indices = np.where((cl != -np.inf) & (cl != cu))[0]
         uci = self.upper_constraint_indices = np.where((cu !=  np.inf) & (cl != cu))[0]
 
-        if len(lci) > 0:
-            self.lower_constrained = True
-            self.nc_i += len(lci)
+        self.eq_constrained    = True if len(eqi) > 0 else False
+        self.lower_constrained = True if len(lci) > 0 else False
+        self.upper_constrained = True if len(uci) > 0 else False
 
-        if len(uci) > 0:
-            self.upper_constrained = True
-            self.nc_i += len(uci)
+        self.nc_e = len(eqi)
+        self.nc_i = len(lci) + len(uci)
+        self.nc   = self.nc_e + self.nc_i
 
-        self.nc = self.nc_e + self.nc_i
         if self.nc == 0:
             raise ValueError('No constraints found, but problem.constrained is set as True.')
 

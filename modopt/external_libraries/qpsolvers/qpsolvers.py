@@ -1,12 +1,13 @@
 import numpy as np
 import warnings
+import time
 from modopt import Optimizer, Problem, ProblemLite
 
 try:
     import qpsolvers
 except:
     warnings.warn("'qpsolvers' could not be imported."\
-                  "Install qpsolvers using 'pip install qpsolvers[wheels_only]' "\
+                  "Install 'qpsolvers' using `pip install qpsolvers[wheels_only] quadprog osqp` "\
                   "to install open-source QP solvers with pre-compiled binaries.")
 
 class ConvexQPSolvers(Optimizer):
@@ -215,8 +216,10 @@ class ConvexQPSolvers(Optimizer):
         # print("unpack", self.qp_problem.unpack())
         # exit()
 
+        start_time = time.time()
         # solution returned is an instance of qpsolvers.Solution, a subclass of dataclasses.dataclass
         solution = qpsolvers.solve_problem(problem, initvals=self.x0, **solver_options)
+        self.total_time = time.time() - start_time
         
         from dataclasses import asdict
         self.results = asdict(solution)
@@ -226,6 +229,7 @@ class ConvexQPSolvers(Optimizer):
         self.results['primal_residual'] = solution.primal_residual()
         self.results['dual_residual']   = solution.dual_residual()
         self.results['duality_gap']     = solution.duality_gap()
+        self.results['time']            = self.total_time
 
         return self.results
         
@@ -243,11 +247,13 @@ class ConvexQPSolvers(Optimizer):
         from modopt.utils.general_utils import pad_name
 
         output += f"\n\t{'Problem':30}: {self.problem_name}"
+        output += f"\n\t{'Solver':30}: {self.solver_name}"
         output += f"\n\t{'Found':30}: {self.results['found']}"
         output += f"\n\t{'Objective':30}: {self.results['objective']}"
         output += f"\n\t{'Dual residual':30}: {self.results['dual_residual']}"
         output += f"\n\t{'Primal residual':30}: {self.results['primal_residual']}"
         output += f"\n\t{'Duality gap':30}: {self.results['duality_gap']}"
+        output += f"\n\t{'Total time':30}: {self.results['time']}"
 
         if optimal_variables:
             output += f"\n\t{'Optimal variables':30}: {self.results['x']}"
