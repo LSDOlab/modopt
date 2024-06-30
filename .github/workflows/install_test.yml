@@ -33,6 +33,43 @@ jobs:
         python -m pip install -e .[test,jax,openmdao,ipopt,sqp,csdl,pyslsqp,csdl_alpha,qpsolvers,cvxopt]
         python -m pip install coveralls
 
+    - name: Install CUTEst
+      run: |
+        mkdir cutest
+        cd cutest
+        git clone https://github.com/ralna/ARCHDefs ./archdefs
+        git clone https://github.com/ralna/SIFDecode ./sifdecode
+        git clone https://github.com/ralna/CUTEst ./cutest
+        git clone https://bitbucket.org/optrove/sif ./mastsif
+        ls
+        cd ..
+        pwd
+
+
+        echo "ARCHDEFS=${{ github.workspace }}/cutest/archdefs" >> $GITHUB_ENV
+        echo "SIFDECODE=${{ github.workspace }}/cutest/sifdecode" >> $GITHUB_ENV
+        echo "MASTSIF=${{ github.workspace }}/cutest/mastsif" >> $GITHUB_ENV
+        echo "CUTEST=${{ github.workspace }}/cutest/cutest" >> $GITHUB_ENV
+        myarch="pc64.lnx.gfo"
+        echo "MYARCH=$myarch" >> $GITHUB_ENV
+
+        # env:
+        # ARCHDEFS: ${{ github.workspace }}/cutest/archdefs
+        # SIFDECODE: ${{ github.workspace }}/cutest/sifdecode
+        # MASTSIF: ${{ github.workspace }}/cutest/mastsif
+        # CUTEST: ${{ github.workspace }}/cutest/cutest
+        # MYARCH: "pc64.lnx.gfo"
+
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/jfowkes/pycutest/master/.install_cutest.sh)"
+        cd $SIFDECODE/src ; make -f $SIFDECODE/makefiles/$MYARCH test
+        cd $CUTEST/src ; make -f $CUTEST/makefiles/$MYARCH test
+        
+        pip install pycutest
+        ls
+        mkdir pycutest_cache
+        ls
+        echo "PYCUTEST_CACHE=${{ github.workspace }}/pycutest_cache" >> $GITHUB_ENV
+
       # Run the package tests and generate the coverage report
     - name: Test with pytest
       run: |
