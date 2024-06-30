@@ -63,23 +63,26 @@ prob = Quadratic(jac_format='dense')
 print(prob)
 
 # Set up your optimizer with the problem
-solver_options = {'solver':'quadprog'}
-optimizer = ConvexQPSolvers(prob, solver_options=solver_options)
-optimizer.check_first_derivatives(prob.x0)
-optimizer.solve()
-optimizer.print_results(optimal_variables=True,
-                        optimal_constraints=True,
-                        optimal_dual_variables=True,
-                        extras=True)
+# solver_options = {'solver':'quadprog'}
+# optimizer = ConvexQPSolvers(prob, solver_options=solver_options)
+# optimizer.check_first_derivatives(prob.x0)
+# optimizer.solve()
+# optimizer.print_results(optimal_variables=True,
+#                         optimal_constraints=True,
+#                         optimal_dual_variables=True,
+#                         extras=True)
 
 # optimizer = SLSQP(prob, maxiter=20)
 # optimizer = SQP(prob, maxiter=20)
 # optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3)
-# optimizer = CVXOPT(prob,)
-# optimizer.solve()
-# optimizer.print_results(optimal_variables=True,
-#                         optimal_dual_variables=True,
-#                         optimal_slack_variables=True)
+
+solver_options = {'maxiters':10, 'abstol':1e-7, 'reltol':1e-6, 'feastol':1e-7}
+optimizer = CVXOPT(prob, solver_options=solver_options)
+optimizer.solve()
+optimizer.print_results(optimal_variables=True,
+                        optimal_constraints=True,
+                        optimal_dual_variables=True,
+                        optimal_slack_variables=True)
 
 # print('optimized_dvs:', prob.x.get_data())
 # print('optimized_cons:', prob.con.get_data())

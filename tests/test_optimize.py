@@ -198,6 +198,23 @@ def test_qpsolvers():
         assert_array_almost_equal(results['extras']['iact'], [1, 2])
         assert_array_almost_equal(results['extras']['iterations'], [3, 0])
 
+@pytest.mark.interfaces
+@pytest.mark.cvxopt
+def test_cvxopt(): 
+    from test_cvxopt import ConstrainedBoundedConvex, constrained_bounded_convex_lite
+
+    probs = [ConstrainedBoundedConvex(), constrained_bounded_convex_lite()]
+    solver_options = {'maxiters':50, 'abstol':1e-12, 'reltol':1e-12, 'feastol':1e-12}
+
+    for prob in probs:
+        results = optimize(prob, solver='CVXOPT', solver_options=solver_options)
+        print(results)
+
+        assert results['status'] == 'optimal'
+        assert_array_almost_equal(results['x'], [0.5, 0.5], decimal=11)
+        assert_almost_equal(results['objective'], 0.5, decimal=11)
+        assert_array_almost_equal(results['constraints'], [1., -0.25], decimal=11)
+
 def test_invalid_solver():
     prob = Scaling()
     with pytest.raises(Exception) as exc_info:
@@ -205,7 +222,7 @@ def test_invalid_solver():
 
     assert exc_info.type is ValueError
     assert str(exc_info.value) == "Invalid solver named 'InvalidSolver' is specified. Valid solvers are: "\
-                                  "['SLSQP', 'PySLSQP', 'SNOPT', 'IPOPT', 'ConvexQPSolvers']."
+                                  "['SLSQP', 'PySLSQP', 'SNOPT', 'IPOPT', 'CVXOPT', 'ConvexQPSolvers']."
 
 if __name__ == '__main__':
     test_slsqp()
@@ -214,5 +231,6 @@ if __name__ == '__main__':
     test_ipopt()
     test_ipopt_exact_hess_lag()
     test_qpsolvers()
+    test_cvxopt()
     test_invalid_solver()
     print('All tests passed!')

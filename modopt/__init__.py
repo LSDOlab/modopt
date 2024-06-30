@@ -23,7 +23,7 @@ from modopt.external_libraries.pyslsqp import PySLSQP
 from modopt.external_libraries.snopt import SNOPTc as SNOPT
 from modopt.external_libraries.ipopt import IPOPT
 from modopt.external_libraries.qpsolvers import ConvexQPSolvers
-# from modopt.external_libraries.cvxopt import CVXOPT
+from modopt.external_libraries.cvxopt import CVXOPT
 
 # import built-in optimizers
 # unconstrained

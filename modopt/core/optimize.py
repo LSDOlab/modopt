@@ -2,12 +2,14 @@ from modopt.external_libraries.scipy import SLSQP
 from modopt.external_libraries.pyslsqp import PySLSQP
 from modopt.external_libraries.snopt import SNOPTc as SNOPT
 from modopt.external_libraries.ipopt import IPOPT
+from modopt.external_libraries.cvxopt import CVXOPT
 from modopt.external_libraries.qpsolvers import ConvexQPSolvers
 
 def optimize(prob, solver='SLSQP', **kwargs):
     """
     Optimize a given problem using a specified solver.
-    The available solvers are 'SLSQP', 'PySLSQP', 'SNOPT', and 'IPOPT'.
+    The available solvers are 'SLSQP', 'PySLSQP', 'SNOPT', 'IPOPT'
+    'CVXOPT', and 'ConvexQPSolvers'.
 
     Only performant algorithms can be used with this function
     and is made available for users who are only interested in
@@ -19,7 +21,7 @@ def optimize(prob, solver='SLSQP', **kwargs):
     ----------
     prob : Problem or ProblemLite
         The problem to be solved.
-    solver : {'SLSQP', 'PySLSQP', 'SNOPT', 'IPOPT', 'ConvexQPSolvers'}, optional
+    solver : {'SLSQP', 'PySLSQP', 'SNOPT', 'IPOPT', 'CVXOPT', 'ConvexQPSolvers'}, optional
         The solver to be used. Default is 'SLSQP'.
     **kwargs
         Additional keyword arguments to be passed to the solver.
@@ -29,7 +31,7 @@ def optimize(prob, solver='SLSQP', **kwargs):
     dict
         The results of the optimization.
     """
-    valid_solvers = ['SLSQP', 'PySLSQP', 'SNOPT', 'IPOPT', 'ConvexQPSolvers']
+    valid_solvers = ['SLSQP', 'PySLSQP', 'SNOPT', 'IPOPT', 'CVXOPT', 'ConvexQPSolvers']
     if solver == 'SLSQP':
         optimizer = SLSQP(prob, **kwargs)
     elif solver == 'PySLSQP':
@@ -38,6 +40,8 @@ def optimize(prob, solver='SLSQP', **kwargs):
         optimizer = SNOPT(prob, **kwargs)
     elif solver == 'IPOPT':
         optimizer = IPOPT(prob, **kwargs)
+    elif solver == 'CVXOPT':
+        optimizer = CVXOPT(prob, **kwargs)
     elif solver == 'ConvexQPSolvers':
         optimizer = ConvexQPSolvers(prob, **kwargs)
     else:

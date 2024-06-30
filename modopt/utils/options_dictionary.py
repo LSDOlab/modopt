@@ -355,8 +355,9 @@ class OptionsDictionary(object):
             meta = self._dict[name]
         except KeyError:
             # The key must have been declared.
-            msg = "Option '{}' cannot be set because it has not been declared."
-            raise KeyError(msg.format(name))
+            msg = "Option '{}' cannot be set because it has not been declared. "\
+                  "Declared and available options are: {}."
+            raise KeyError(msg.format(name, list(self._dict.keys())))
 
         if self._read_only:
             raise KeyError("Tried to set read-only option '{}'.".format(name))
