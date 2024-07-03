@@ -46,10 +46,10 @@ jobs:
 
     - name: Install CUTEst and pyCUTEst
       env:
-        ARCHDEFS: $GITHUB_WORKSPACE/cutest/archdefs
-        SIFDECODE: $GITHUB_WORKSPACE/cutest/sifdecode
-        MASTSIF: $GITHUB_WORKSPACE/cutest/mastsif
-        CUTEST: $GITHUB_WORKSPACE/cutest/cutest
+        ARCHDEFS: ${{github.workspace}}/cutest/archdefs
+        SIFDECODE: ${{github.workspace}}/cutest/sifdecode
+        MASTSIF: ${{github.workspace}}/cutest/mastsif
+        CUTEST: ${{github.workspace}}/cutest/cutest
         MYARCH: "pc64.lnx.gfo"
       run: |
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/jfowkes/pycutest/master/.install_cutest.sh)"
@@ -61,12 +61,12 @@ jobs:
       # Run the package tests and generate the coverage report
     - name: Test with pytest
       env:
-        ARCHDEFS: $GITHUB_WORKSPACE/cutest/archdefs
-        SIFDECODE: $GITHUB_WORKSPACE/cutest/sifdecode
-        MASTSIF: $GITHUB_WORKSPACE/cutest/mastsif
-        CUTEST: $GITHUB_WORKSPACE/cutest/cutest
+        ARCHDEFS: ${{github.workspace}}/cutest/archdefs
+        SIFDECODE: ${{github.workspace}}/cutest/sifdecode
+        MASTSIF: ${{github.workspace}}/cutest/mastsif
+        CUTEST: ${{github.workspace}}/cutest/cutest
         MYARCH: "pc64.lnx.gfo"
-        PYCUTEST_CACHE: $$GITHUB_WORKSPACE/pycutest_cache
+        PYCUTEST_CACHE: ${{github.workspace}}/pycutest_cache
       run: |
         pytest -m "not snopt" tests/ --cov=modopt --cov-report lcov
 
