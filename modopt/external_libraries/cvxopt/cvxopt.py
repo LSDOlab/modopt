@@ -29,15 +29,19 @@ class CVXOPT(Optimizer):
         self.options.declare('outputs', values=([],), default=[])
         self.options.declare('solver_options', types=dict, default={})
 
+        self.default_solver_options = {
+            'show_progress': (bool, True),
+            'maxiters': (int, 100),
+            'abstol': (float, 1e-7),
+            'reltol': (float, 1e-6),
+            'feastol': (float, 1e-7),
+            'refinement': (int, 1),
+        }
         # Used for verifying the keys and value-types of user-provided solver_options, 
         # and generating an updated pure Python dictionary to update cvxopt.solvers.options
         self.solver_options = OptionsDictionary()
-        self.solver_options.declare('show_progress', types=bool, default=True)
-        self.solver_options.declare('maxiters', types=int, default=100)
-        self.solver_options.declare('abstol', types=float, default=1e-7)
-        self.solver_options.declare('reltol', types=float, default=1e-6)
-        self.solver_options.declare('feastol', types=float, default=1e-7)
-        self.solver_options.declare('refinement', types=int, default=1)
+        for key, value in self.default_solver_options.items():
+            self.solver_options.declare(key, types=value[0], default=value[1])
 
         self.obj = self.problem._compute_objective
         self.grad = self.problem._compute_objective_gradient

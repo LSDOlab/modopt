@@ -502,7 +502,7 @@ class ProblemLite(object):
         pass
     def compute_objective_hessian(self, dvs, obj_hess):
         pass
-    def compute_lagrangian_hessian(self, dvs, z, obj_hess):
+    def compute_lagrangian_hessian(self, dvs, lag_mult, lag_hess):
         pass
     def compute_constraint_jvp(self, dvs, vec, jvp):
         pass
@@ -510,7 +510,7 @@ class ProblemLite(object):
         pass
     def compute_objective_hvp(self, dvs, vec, obj_hvp):
         pass
-    def compute_lagrangian_hvp(self, dvs, vec, z, lag_hvp):
+    def compute_lagrangian_hvp(self, dvs, lag_mult, vec, lag_hvp):
         pass
 
     def __str__(self):

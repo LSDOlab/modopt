@@ -2,6 +2,8 @@ import numpy as np
 from modopt import Optimizer
 import warnings
 import time
+from modopt.utils.options_dictionary import OptionsDictionary
+
 try:
     from pyslsqp import optimize
 except:
@@ -16,11 +18,34 @@ class PySLSQP(Optimizer):
     '''
     def initialize(self, ):
         self.solver_name = 'pyslsqp'
-        self.options.declare('solver_options', default={}, types=dict)
         
         # No outputs can be declared for PySLSQP
         self.available_outputs = {}
         self.options.declare('outputs', values=([],), default=[])
+        self.options.declare('solver_options', types=dict, default={})
+
+        self.default_solver_options = {
+            'maxiter': (int, 100),
+            'acc': (float, 1e-6),
+            'iprint': (int, 1),
+            'callback': ((type(None), callable), None),
+            'summary_filename': (str, 'slsqp_summary.out'),
+            'visualize': (bool, False),
+            'visualize_vars': (list, ['objective', 'optimality', 'feasibility']),
+            'keep_plot_open': (bool, False),
+            'save_figname': (str, 'slsqp_plot.pdf'),
+            'save_itr': ((type(None), str), None),
+            'save_vars': (list, ['x', 'objective', 'optimality', 'feasibility', 'step', 'iter', 'majiter', 'ismajor', 'mode']),
+            'save_filename': (str, 'slsqp_recorder.hdf5'),
+            'load_filename': ((type(None), str), None),
+            'warm_start': (bool, False),
+            'hot_start': (bool, False),
+        }
+        # Used for verifying the keys and value-types of user-provided solver_options, 
+        # and generating an updated pure Python dictionary to provide pyslsqp.optimize()
+        self.solver_options = OptionsDictionary()
+        for key, value in self.default_solver_options.items():
+            self.solver_options.declare(key, types=value[0], default=value[1])
 
         self.obj = self.problem._compute_objective
         self.grad = self.problem._compute_objective_gradient
@@ -31,6 +56,9 @@ class PySLSQP(Optimizer):
         '''
         Setup the initial guess, and matrices and vectors.
         '''
+        # Check if user-provided solver_options have valid keys and value-types
+        self.solver_options.update(self.options['solver_options'])
+
         self.x0 = self.problem.x0 * 1.
         self.nx = self.problem.nx * 1
         if self.problem.constrained:
@@ -107,16 +135,12 @@ class PySLSQP(Optimizer):
         xl = self.problem.x_lower
         xu = self.problem.x_upper
         meq = self.nc_e if self.problem.constrained else 0
-        solver_options = self.options['solver_options']
-
-        start_time = time.time()
+        solver_options = self.solver_options.get_pure_dict() # = self.options['solver_options']
 
         # Run the optimization
-        res = optimize(x0, obj=obj, con=con, grad=grad, jac=jac, xl=xl, xu=xu, meq=meq, **solver_options)
-        
+        start_time = time.time()
+        self.results = optimize(x0, obj=obj, con=con, grad=grad, jac=jac, xl=xl, xu=xu, meq=meq, **solver_options)
         self.total_time = time.time() - start_time
-        # Store and return the results dictionary
-        self.results = res
         
         return self.results
     
