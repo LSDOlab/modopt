@@ -33,10 +33,10 @@ class BFGS(ScipyOptimizer):
     def solve(self):
         # Assign shorter names to variables and methods
         method = 'BFGS'
-        # nx = self.prob_options['nx']
+        # nx = self.problem.options[['nx']
         # nc = self.options['nc']
 
-        x0 = self.prob_options['x0']
+        x0 = self.problem.options['x0']
         gtol = self.options['gtol']
         norm = self.options['norm']
         eps = self.options['eps']

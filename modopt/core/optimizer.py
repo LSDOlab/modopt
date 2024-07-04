@@ -14,10 +14,7 @@ class Optimizer(object):
 
         self.options = OptionsDictionary()
         self.problem = problem
-        self.prob_options = problem.options
         self.problem_name = problem.problem_name
-        # try methods required for a specific optimizer are available inside the Problem subclass (inspect package)
-
         self.solver_name = 'unnamed_solver'
         self.options.declare('formulation', default='rs', types=str)
 
@@ -30,7 +27,6 @@ class Optimizer(object):
         self.setup()
 
         name = self.problem_name
-        self.outputs = {}
         outs = self.available_outputs
         dirName = name + '_outputs'
         
@@ -51,13 +47,9 @@ class Optimizer(object):
 
                 # Create new dictionaries for all user-specified outputs
                 if isinstance(outs[key], tuple):
-                    self.outputs[key] = np.empty((1, ) + outs[key][1],
-                                                dtype=outs[key][0])
-
                     with open(dirName + '/' + key + '.out', 'w') as f:
                         pass
                 else:
-                    self.outputs[key] = np.array([], dtype=outs[key])
                     with open(dirName + '/' + key + '.out', 'w') as f:
                         pass
         
@@ -79,11 +71,7 @@ class Optimizer(object):
         pass
 
     def run_post_processing(self):
-        # Removes the first entry of the array when it was initialized as empty
-        for key, value in self.outputs.items():
-            if len(value.shape) >= 2:
-                self.outputs[key] = self.outputs[key][1:]
-
+        pass
         # TODO: Add lsdo_dashboard processing
 
     def update_outputs(self, **kwargs):
@@ -93,7 +81,7 @@ class Optimizer(object):
         for key, value in kwargs.items():
             # Only user-specified outputs will be stored
             # Multidim. arrays will be flattened (c-major/row major) before writing to a file
-            if key in self.outputs:
+            if key in self.options['outputs']:
                 # if isinstance(value, np.ndarray):
                 # try:
                 #     value.size == 1
@@ -101,11 +89,6 @@ class Optimizer(object):
                     # Update output file
                     with open(dirName + '/' + key + '.out', 'a') as f:
                         np.savetxt(f, value.reshape(1, value.size))
-                    # Update outputs dict
-                    self.outputs[key] = np.append(
-                        self.outputs[key],
-                        value.reshape((1, ) + value.shape),
-                        axis=0)
                 # else:
                 # except:
                 else:
@@ -117,9 +100,6 @@ class Optimizer(object):
                         except:
                             np.savetxt(f, [1.])
 
-                    # Update outputs dict
-                    self.outputs[key] = np.append(self.outputs[key],
-                                                  value)
 
                 # Update outputs dict
                 self.out_dict[key] = value
@@ -154,53 +134,25 @@ class Optimizer(object):
                 warnings.warn(f"{cb_str} function is not provided in the ProblemLite() container but is needed for {solver_str}. "\
                               f"The optimizer will use finite differences to compute the {cb_str}.")
 
-    def print_results(self, **kwargs):
-        self._print_results(**kwargs)
-
-    def _print_results(self,
-                       title="ModOpt final iteration summary:",
-                       **kwargs):
+    def print_results(self, summary_table=False):
 
         # TODO: Testing to verify the design variable data
         # print(
-        #     np.loadtxt(self.problem_name + '_outputs/x.out') -
-        #     self.outputs['x'])
+        #     np.loadtxt(self.problem_name + '_outputs/x.out'))
 
-        # Print modopt final iteration summary
+        output  = "\n\tSolution from modOpt:"
+        output += "\n\t"+"-" * 100
 
-        # title = "ModOpt final iteration summary:"
+        output += f"\n\t{'Problem':25}: {self.problem_name}"
+        output += f"\n\t{'Solver':25}: {self.solver_name}"
+        for key, value in self.results.items():
+            if np.isscalar(value):
+                output += f"\n\t{key:25}: {value}"
 
-        print("\n", "\t" * 1, "=" * len(title))
-        print("\t" * 1, title)
-        print("\t" * 1, "=" * len(title))
+        output += '\n\t' + '-'*100
+        print(output)
 
-        longest_key = max(self.outputs, key=len)
-        max_string_length = max(7, len(longest_key))
-        total_length = max_string_length + 5
-
-        print("\t" * 1, "Problem", " " * (total_length - 7), ':',
-              self.problem_name)
-        print("\t" * 1, "Solver", " " * (total_length - 6), ':',
-              self.solver_name)
-
-        for key, value in self.outputs.items():
-            if len(value.shape) == 1:
-                print("\t" * 1, key, " " * (total_length - len(key)),
-                      ':', value[-1])
-
-        bottom_line_length = total_length + 25
-        # bottom_line_length = len(title)
-        print("\t", "=" * bottom_line_length)
-
-        # Print optimization summary table
-
-        allowed_keys = {'summary_table', 'compact_print'}
-        self.__dict__.update((key, False) for key in allowed_keys)
-        self.__dict__.update((key, val) for key, val in kwargs.items()
-                             if key in allowed_keys)
-
-        if self.summary_table:
-
+        if summary_table:
             dirName = self.problem_name + '_outputs'
 
             with open(dirName + '/summary.out', 'r') as f:
@@ -208,44 +160,19 @@ class Optimizer(object):
                 lines = f.read().splitlines()
 
             title = "modOpt summary table:"
-            row_length = len(lines[0])
-            line_length = max(row_length, len(title))
+            line_length = max(len(lines[0]), len(title))
 
-            print("\n")
-            print("=" * line_length)
-            print(title.center(line_length))
-            print("=" * line_length)
-
-            # Number of iterations including zeroth iteration
-            # (after removing column label)
-            total_itr = len(lines) - 1
+            # Print header
+            output  = "\n" + "=" * line_length
+            output += f"\n{title.center(line_length)}"
+            output += "\n" + "=" * line_length
 
             # Print all iterations
-            if not (self.compact_print):
-                print(*lines, sep="\n")
+            output += "\n" + "\n".join(lines)
 
-            # Print only itrs_to_print above the itr_threshold
-            else:
-                itr_threshold = 20
-                itrs_to_print = 10
+            output += "\n" + "=" * line_length
+            print(output)
 
-                if total_itr <= itr_threshold:
-                    print(*lines, sep="\n")
-
-                else:
-                    idx = np.linspace(0,
-                                      total_itr - 1,
-                                      itrs_to_print,
-                                      dtype='int')
-
-                    # Account for the column label index
-                    idx = np.append(0, idx + 1)
-
-                    # Lines to print
-                    compact_lines = [lines[i] for i in idx]
-                    print(*compact_lines, sep="\n")
-
-            print("=" * line_length)
 
     def check_first_derivatives(self, x=None, step=1e-6, formulation='rs'):
         obj = self.obj

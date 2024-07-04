@@ -308,12 +308,6 @@ class ScipyOptimizer(Optimizer):
             with open(name + '_x.out', 'a') as f:
                 np.savetxt(f, xk.reshape(1, xk.size))
 
-            self.outputs['x'] = np.append(
-                self.outputs['x'],
-                #   xk.reshape((1, ) + (xk.size,)),
-                xk.reshape((1, ) + xk.shape),
-                axis=0)
-
         # For 'trust-constr', OptimizeResult() object state is available after each iteration
         if (optimize_result is not None) and (optimize_result != True):
             pass
@@ -326,71 +320,25 @@ class ScipyOptimizer(Optimizer):
         with open(name + '_x.out', 'a') as f:
             np.savetxt(f, x.reshape(1, nx))
 
-    # print_results for scipy_library overrides print_results from Optimizer()
-    # summary table and compact print does not work
-    def print_results(self, **kwargs):
+    def print_results(self, optimal_variables=False):
 
-        # self._print_results(title="ModOpt final iteration summary:", **kwargs)
+        output  = "\n\tSolution from Scipy:"
+        output += "\n\t"+"-" * 100
 
-        # Testing to verify the design variable data
-        # print(np.loadtxt(self.problem_name+'_x.out') - self.outputs['x_array'])
-
-        title = "Scipy summary:"
-
-        print("\n", "\t" * 1, "=" * len(title))
-        print("\t" * 1, "Scipy summary:")
-        print("\t" * 1, "=" * len(title))
-
-        # longest_key = max(self.results, key=len)
-        # max_string_length = max(20, len(longest_key))
-        # total_length = max_string_length + 5
-        total_length = 20 + 5
-
-        print("\t" * 1, "Problem", " " * (total_length - 7), ':',
-              self.problem_name)
-        print("\t" * 1, "Solver", " " * (total_length - 6), ':',
-              self.solver_name)
-
-        print("\t" * 1, "Success", " " * (total_length - 7), ':',
-              self.results['success'])
-        print("\t" * 1, "Message", " " * (total_length - 7), ':',
-              self.results['message'])
-        print("\t" * 1, "Objective", " " * (total_length - 9), ':',
-              self.results['fun'])
+        output += f"\n\t{'Problem':25}: {self.problem_name}"
+        output += f"\n\t{'Solver':25}: {self.solver_name}"
+        output += f"\n\t{'Success':25}: {self.results['success']}"
+        output += f"\n\t{'Message':25}: {self.results['message']}"
+        output += f"\n\t{'Total time':25}: {self.total_time}"
+        output += f"\n\t{'Objective':25}: {self.results['fun']}"
+        output += f"\n\t{'Total function evals':25}: {self.results['nfev']}"
         if 'njev' in self.results:
-            print("\t" * 1, "Gradient norm", " " * (total_length - 13),
-                  ':', np.linalg.norm(self.results['jac']))
-
-        print("\t" * 1, "Total time", " " * (total_length - 10), ':',
-              self.total_time)
+            output += f"\n\t{'Gradient norm':25}: {np.linalg.norm(self.results['jac'])}"
+            output += f"\n\t{'Total gradient evals':25}: {self.results['njev']}"
         if 'nit' in self.results:
-            print("\t" * 1, "Major iterations",
-                  " " * (total_length - 16), ':',
-                  self.results['nit'])
+            output += f"\n\t{'Major iterations':25}: {self.results['nit']}"
+        if optimal_variables:
+            output += f"\n\t{'Optimal variables':25}: {self.results['x']}"
 
-        # if self.results['nfev'] is not None:
-        print("\t" * 1, "Total function evals",
-              " " * (total_length - 20), ':', self.results['nfev'])
-        if 'njev' in self.results:
-            print("\t" * 1, "Total gradient evals",
-                  " " * (total_length - 20), ':',
-                  self.results['njev'])
-
-        allowed_keys = {
-            'optimal_variables',
-            # 'summary_table',
-            # 'compact_print'
-        }
-        self.__dict__.update((key, False) for key in allowed_keys)
-        self.__dict__.update((key, val) for key, val in kwargs.items()
-                             if key in allowed_keys)
-
-        if self.optimal_variables:
-            print("\t" * 1, "Optimal variables",
-                  " " * (total_length - 17), ':',
-                  self.results['x'])
-
-        bottom_line_length = total_length + 25
-        print("\t", "=" * bottom_line_length)
-
-        # print("\t", "===========================================")
+        output += '\n\t' + '-'*100
+        print(output)

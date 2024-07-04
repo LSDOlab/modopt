@@ -454,7 +454,7 @@ class SQP_SURF(Optimizer):
         opt_tol = self.options['opt_tol']
         feas_tol = self.options['feas_tol']
         maxiter = self.options['maxiter']
-        method = self.prob_options['formulation']
+        method = self.problem.options['formulation']
 
         obj = self.obj
         grad = self.grad
@@ -925,7 +925,4 @@ class SQP_SURF(Optimizer):
         # Run post-processing for the Optimizer() base class
         self.run_post_processing()
 
-        end_time = time.time()
-        self.total_time = end_time - start_time
-
-        # print(self.outputs)
+        self.total_time = time.time() - start_time

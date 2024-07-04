@@ -148,7 +148,7 @@ optimizer.check_first_derivatives(prob.x0)
 optimizer.solve()
 
 # Print results of optimization (summary_table contains information from each iteration)
-optimizer.print_results(summary_table=True, compact_print=True)
+optimizer.print_results(summary_table=True)
 
 # Print to see any output that was declared
 # Since the arrays are long, here we only print the last entry and
@@ -156,11 +156,11 @@ optimizer.print_results(summary_table=True, compact_print=True)
 
 print('\n')
 print('Optimizer data')
-print('num_iterations:', optimizer.outputs['itr'][-1])
-print('optimized_dvs:', optimizer.outputs['x'][-1])
-print('optimization_time:', optimizer.outputs['time'][-1])
-print('optimized_obj:', optimizer.outputs['obj'][-1])
-print('final_optimality:', optimizer.outputs['opt'][-1])
+print('num_iterations:', optimizer.results['niter'])
+print('optimized_dvs:', optimizer.results['x'])
+print('optimization_time:', optimizer.results['time'])
+print('optimized_obj:', optimizer.results['f'])
+print('final_optimality:', optimizer.results['optimality'])
 
 print('\n')
 print('Final problem data')

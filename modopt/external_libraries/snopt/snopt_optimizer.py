@@ -165,33 +165,8 @@ class SNOPTOptimizer(Optimizer):
         self.c_lower = np.where(cl == -np.inf, -inf, cl)
         self.c_upper = np.where(cu ==  np.inf,  inf, cu)
 
-    # For callback, for every method
-    # Overrides base class update_outputs()
-    # def update_outputs(self, xk):
-    #     name = self.problem_name
-    #     with open(name + '_x.out', 'a') as f:
-    #         np.savetxt(f, xk.reshape(1, xk.size))
-
-    #     self.outputs['x'] = np.append(
-    #         self.outputs['x'],
-    #         #   xk.reshape((1, ) + (xk.size,)),
-    #         xk.reshape((1, ) + xk.shape),
-    #         axis=0)
-
-    # def save_xk(self, x):
-    #     # Saving new x iterate on file
-    #     name = self.problem_name
-    #     nx = self.problem.nx
-
-    #     with open(name + '_x.out', 'a') as f:
-    #         np.savetxt(f, x.reshape(1, nx))
-
-    # print_results for scipy_library overrides print_results from Optimizer()
-    # summary table and compact print does not work
     def print_results(self, **kwargs):
         # TODO: Use pthon file snopt.py and mics.py and result() object to print in modopt format
-        # Testing to verify the design variable data
-        # print(np.loadtxt(self.problem_name+'_x.out') - self.outputs['x_array'])
         # print("\n", "\t" * 1, "==============")
         # print("\t" * 1, "SNOPT summary:")
         # print("\t" * 1, "==============", "\n")

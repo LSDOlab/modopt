@@ -63,14 +63,14 @@ if __name__ == "__main__":
         }
 
     # Set up your optimizer with the problem
-    # optimizer = SLSQP(prob, solver_options={'maxiter':20}, outputs=['x'])
-    optimizer = PySLSQP(prob, solver_options={'maxiter': 20, 'acc': 1e-6})
+    optimizer = SLSQP(prob, solver_options={'maxiter':20}, outputs=['x'])
+    # optimizer = PySLSQP(prob, solver_options={'maxiter': 20, 'acc': 1e-6})
     # optimizer = SQP(prob, maxiter=20)
     # optimizer = SNOPT(prob, solver_options=snopt_options)
 
     optimizer.check_first_derivatives(prob.x0 * prob.x_scaler)
     optimizer.solve()
-    optimizer.print_results(summary_table=True)
+    optimizer.print_results()
 
     print('\n')
     print('NOTE: Optimizer and problem Independent Scaling')
@@ -83,8 +83,7 @@ if __name__ == "__main__":
     print('\n')
     print('2. Optimizer() object provides the following scaled result:')
     # The following print might not work for interfaced optimizers like SLSQP, COBYLA, SNOPT, PySLSQP ...
-    # print('optimized_dvs:', optimizer.outputs['x'][-1])
     # print('optimize_time:', optimizer.total_time)
     print('optimized_dvs:', optimizer.results['x'])
-    # print('optimized_obj:', optimizer.outputs['obj'][-1])
-    # print('optimized_cons:', optimizer.outputs['constraints'][-1])
+    # print('optimized_obj:', optimizer.results['obj'])
+    # print('optimized_cons:', optimizer.results['constraints'])

@@ -160,8 +160,17 @@ class SteepestDescent(Optimizer):
         # Run post-processing for the Optimizer() base class
         self.run_post_processing()
 
-        end_time = time.time()
-        self.total_time = end_time - start_time
+        self.total_time = time.time() - start_time
+
+        self.results = {
+            'x': x_k,
+            'obj': f_k,
+            'opt': opt,
+            'itr': itr,
+            'time': self.total_time
+        }
+
+        return self.results
 ```
 
 The **Optimizer()** class records all the data needed using the `outputs` dictionary.
@@ -202,11 +211,11 @@ optimizer.print_results(summary_table=True)
 # verify it with the print_results() above
 
 print('\n')
-print(optimizer.outputs['itr'][-1])
-print(optimizer.outputs['x'][-1])
-print(optimizer.outputs['time'][-1])
-print(optimizer.outputs['obj'][-1])
-print(optimizer.outputs['opt'][-1])
+print(optimizer.results['itr'])
+print(optimizer.results['x'])
+print(optimizer.results['time'])
+print(optimizer.results['obj'])
+print(optimizer.results['opt'])
 
 ```
 

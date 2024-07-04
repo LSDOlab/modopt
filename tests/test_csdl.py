@@ -66,7 +66,7 @@ def test_csdl():
 
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
-    optimizer.print_results(summary_table=True)
+    optimizer.print_results()
 
     assert optimizer.results['success'] == True
     assert optimizer.results['message'] == 'Optimization terminated successfully'
@@ -135,7 +135,7 @@ def test_csdl_alpha():
 
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
-    optimizer.print_results(summary_table=True)
+    optimizer.print_results()
 
     assert optimizer.results['success'] == True
     assert optimizer.results['message'] == 'Optimization terminated successfully'
@@ -204,7 +204,7 @@ def test_csdl_alpha():
 
 #     optimizer.check_first_derivatives(prob.x0)
 #     optimizer.solve()
-#     optimizer.print_results(summary_table=True)
+#     optimizer.print_results()
 
 #     assert optimizer.results['success'] == True
 #     assert optimizer.results['message'] == 'Optimization terminated successfully'

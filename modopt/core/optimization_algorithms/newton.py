@@ -153,3 +153,5 @@ class Newton(Optimizer):
             'time': self.total_time,
             'converged': converged,
             }
+        
+        return self.results
