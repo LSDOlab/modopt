@@ -36,6 +36,7 @@ class SQP_SURF(Optimizer):
         self.options.declare('maxiter', default=1000, types=int)
         self.options.declare('opt_tol', default=1e-7, types=float)
         self.options.declare('feas_tol', default=1e-7, types=float)
+        self.options.declare('outputs', types=list, default=[])
 
         self.available_outputs = {
             'major': int,
@@ -61,17 +62,8 @@ class SQP_SURF(Optimizer):
             'merit': float,
         }
 
-        self.options.declare('outputs',
-                             types=list,
-                             default=[
-                                 'major', 'obj', 'x', 'y', 'opt',
-                                 'feas', 'lam', 'psi', 'slacks',
-                                 'constraints', 'residuals', 'time',
-                                 'num_f_evals', 'num_g_evals', 'step',
-                                 'rho', 'merit'
-                             ])
-
     def setup(self):
+        self.setup_outputs()
         self.setup_constraints()
         nx = self.nx = self.problem.nx
         ny = self.ny = self.problem.ny

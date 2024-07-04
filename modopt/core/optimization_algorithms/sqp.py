@@ -42,7 +42,7 @@ class SQP(Optimizer):
         self.options.declare('maxiter', default=1000, types=int)
         self.options.declare('opt_tol', default=1e-7, types=float)
         self.options.declare('feas_tol', default=1e-7, types=float)
-
+        self.options.declare('outputs', types=list, default=[])
         self.options.declare('callback',
                              default=lambda: None,
                              types=(MethodType, FunctionType))
@@ -52,7 +52,6 @@ class SQP(Optimizer):
             'obj': float,
             # for arrays from each iteration, shapes need to be declared
             'x': (float, (self.problem.nx, )),
-
             # Note that the number of constraints will
             # be updated after constraints are setup
             'lag_mult': (float, (self.problem.nc, )),
@@ -68,16 +67,8 @@ class SQP(Optimizer):
             'merit': float,
         }
 
-        self.options.declare('outputs',
-                             types=list,
-                             default=[
-                                 'major', 'obj', 'x', 'opt', 'feas',
-                                 'lag_mult', 'slacks', 'constraints',
-                                 'time', 'num_f_evals', 'num_g_evals',
-                                 'step', 'rho', 'merit'
-                             ])
-
     def setup(self):
+        self.setup_outputs()
         # self.setup_constraints()
         self.nc = self.problem.nc
 

@@ -1,6 +1,6 @@
 import numpy as np
 import scipy as sp
-import os
+import os, shutil, copy
 
 from modopt.utils.options_dictionary import OptionsDictionary
 from modopt.utils.general_utils import pad_name
@@ -26,46 +26,39 @@ class Optimizer(object):
         # User defined optimizer-specific setup
         self.setup()
 
-        name = self.problem_name
-        outs = self.available_outputs
-        dirName = name + '_outputs'
+    def setup_outputs(self):
+        dir = self.problem_name + '_outputs'
+        a_outs = self.available_outputs     # Available outputs dictionary
+        d_outs = self.options['outputs']    # Declared outputs list
+
+        # Write the header of the summary_table file
+        self.scalar_outputs = [out for out in a_outs.keys() if not isinstance(a_outs[out], tuple)]
+        header =''
+        for key in self.scalar_outputs:
+            if a_outs[key] in (int, np.int_, np.int32, np.int64):
+                header += "%16s " % key
+            elif a_outs[key] in (float, np.float_, np.float32, np.float64):
+                header += "%16s " % key
+                
+        with open('modOpt_summary.out', 'w') as f:
+            f.write(header)
+
+        if len(d_outs) == 0:
+            return
         
-        # To print different outputs in different formats to different files
-        if len (self.options['outputs']) > 0:
-            # Create new directory for all the outputs of optimization
-            try:
-                os.mkdir(dirName)
-            except FileExistsError:
-                print("Directory ", dirName, " already exists")
+        try:
+            shutil.rmtree(dir)
+            print("Outputs directory ", dir, " already exists. Overwriting...")
+        except FileNotFoundError:
+            pass
+        os.mkdir(dir)
 
-            # Only user-specified outputs will be stored
-            for key in self.options['outputs']:
-                # TODO: Add a test for this
-                if key not in outs:
-                    raise ValueError(
-                        'Declared unavailable output "{}"'.format(key))
-
-                # Create new dictionaries for all user-specified outputs
-                if isinstance(outs[key], tuple):
-                    with open(dirName + '/' + key + '.out', 'w') as f:
-                        pass
-                else:
-                    with open(dirName + '/' + key + '.out', 'w') as f:
-                        pass
-        
-            # Write the header of the summary_table file
-            self.scalar_keys = [out for out in outs.keys() if not isinstance(outs[out], tuple)]
-            header =''
-            for key in self.scalar_keys:
-                if outs[key] in (int, np.int_, np.int32, np.int64):
-                    header += "%16s " % key
-                elif outs[key] in (float, np.float_, np.float32, np.float64):
-                    header += "%16s " % key
-            header += '\n'
-            self.out_dict = {key: 0 for key in outs.keys()}
-
-            with open(dirName + '/' + 'summary.out', 'w') as f:
-                f.write(header)
+        for key in d_outs:
+            if key not in a_outs:
+                raise ValueError(f'Invalid output "{key}" is declared.' \
+                                 f'Available outputs are {list(a_outs.keys())}.')
+            with open(dir + '/' + key + '.out', 'w') as f:
+                pass
 
     def setup(self, ):
         pass
@@ -75,56 +68,40 @@ class Optimizer(object):
         # TODO: Add lsdo_dashboard processing
 
     def update_outputs(self, **kwargs):
-        name = self.problem_name
-        dirName = name + '_outputs'
+        dir = self.problem_name + '_outputs'
+        a_outs = self.available_outputs     # Available outputs dictionary
+        d_outs = self.options['outputs']    # Declared outputs list
 
-        for key, value in kwargs.items():
-            # Only user-specified outputs will be stored
-            # Multidim. arrays will be flattened (c-major/row major) before writing to a file
-            if key in self.options['outputs']:
-                # if isinstance(value, np.ndarray):
-                # try:
-                #     value.size == 1
-                if not isinstance(value, (int, float, list)):
-                    # Update output file
-                    with open(dirName + '/' + key + '.out', 'a') as f:
-                        np.savetxt(f, value.reshape(1, value.size))
-                # else:
-                # except:
-                else:
-                    # Update output file
-                    with open(dirName + '/' + key + '.out', 'a') as f:
-                        # Avoid appending None for a failed line search
-                        try:
-                            np.savetxt(f, [value])
-                        except:
-                            np.savetxt(f, [1.])
-
-
-                # Update outputs dict
-                self.out_dict[key] = value
-     
-
-            # Raise error if user tries to update ouptput not available in default outputs
-            # for an optimizer
-            elif key not in self.available_outputs:
-                raise ValueError(
-                    'Unavailable output "{}" is passed in to be updated'
-                    .format(key))
+        if set(kwargs.keys()) != set(a_outs):
+            raise ValueError(f'Output(s) passed in to be updated {list(kwargs.keys())}' \
+                             f'do not match the available outputs {list(a_outs.keys())}.')
         
-        # Print new summary_table row
-        new_row =''
-        outs = self.available_outputs
-        for key in self.scalar_keys:
-            if outs[key] in (int, np.int_, np.int32, np.int64):
-                new_row += "%16i " % self.out_dict[key]
-            elif outs[key] in (float, np.float_, np.float32, np.float64):
-                new_row += "%16.6E " % self.out_dict[key]
-        new_row += '\n'
-        self.out_dict = {key: 0 for key in self.scalar_keys}
+        # Print summary_table row
+        new_row ='\n'
+        for key in self.scalar_outputs:
+            if a_outs[key] in (int, np.int_, np.int32, np.int64):
+                new_row += "%16i " % kwargs[key]
+            elif a_outs[key] in (float, np.float_, np.float32, np.float64):
+                new_row += "%16.6E " % kwargs[key]
 
-        with open(dirName + '/' + 'summary.out', 'a') as f:
+        with open('modOpt_summary.out', 'a') as f:
             f.write(new_row)
+
+        self.out_dict = copy.deepcopy(kwargs)
+
+        # Write the declared outputs to the corresponding files
+        for key in d_outs:
+            value = kwargs[key]
+            if key in self.scalar_outputs:
+                if np.isscalar(value) and np.isreal(value):
+                    with open(dir + '/' + key + '.out', 'a') as f:
+                        np.savetxt(f, [value])
+                else:
+                    raise ValueError(f'Value of "{key}" is not a real-valued scalar.')        
+            else:
+                # Multidim. arrays will be flattened (c-major/row major) before writing to a file
+                with open(dir + '/' + key + '.out', 'a') as f:
+                    np.savetxt(f, value.reshape(1, value.size))
 
     def check_if_callbacks_are_declared(self, cb, cb_str, solver_str):
         if cb not in self.problem.user_defined_callbacks:
@@ -155,7 +132,7 @@ class Optimizer(object):
         if summary_table:
             dirName = self.problem_name + '_outputs'
 
-            with open(dirName + '/summary.out', 'r') as f:
+            with open('modOpt_summary.out', 'r') as f:
                 # lines = f.readlines()
                 lines = f.read().splitlines()
 

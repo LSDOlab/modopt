@@ -15,6 +15,7 @@ class Newton(Optimizer):
 
         self.options.declare('maxiter', default=1000, types=int)
         self.options.declare('opt_tol', default=1e-7, types=float)
+        self.options.declare('outputs', types=list, default=[])
 
         self.available_outputs = {
             'itr': int,
@@ -28,26 +29,9 @@ class Newton(Optimizer):
             'step': float,
         }
 
-        # self.available_outputs = {
-        #     'itr': ('Iteration number', int),
-        #     'obj': ('Objective values', float),
-        #     # for arrays from each iteration, shapes need to be declared
-        #     'x': ('Design variable values', float, (self.problem.nx, )),
-        #     'opt': ('Optimality', float),
-        #     'time': ('Time', float),
-        #     'num_f_evals': ('Number of objective evaluations', int),
-        #     'num_g_evals': ('Number of gradient evaluations', int),
-        #     'step': ('Step lengths from line search', float),
-        # }
-
-        self.options.declare('outputs',
-                             types=list,
-                             default=[
-                                 'itr', 'obj', 'x', 'opt', 'time',
-                                 'num_f_evals', 'num_g_evals', 'step'
-                             ])
 
     def setup(self):
+        self.setup_outputs()
         self.LS = ScipyLS(f=self.obj, g=self.grad)
 
     def solve(self):

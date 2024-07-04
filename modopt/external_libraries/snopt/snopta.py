@@ -12,11 +12,6 @@ class SNOPTa(SNOPTOptimizer):
         # Solver-specific options exactly as in SNOPT with defaults
         # self.options.declare('maxiter', default=100, types=int)
 
-    def declare_outputs(self, ):
-        # No outputs can be declared for SNOPTa
-        self.available_outputs = {}
-        self.options.declare('outputs', values=([],), default=[])
-
     def setup(self):
         self.update_SNOPT_options_object()
         self.setup_bounds()
@@ -30,8 +25,6 @@ class SNOPTa(SNOPTOptimizer):
         # Assign shorter names to variables and methods
         x0 = self.x0
 
-        self.update_outputs(x0)
-
         ObjRow = 1
         n = self.problem.nx
         nF = self.problem.nc + 1
@@ -44,8 +37,6 @@ class SNOPTa(SNOPTOptimizer):
             con = self.con
             jac = self.jac
             G = np.append(G.reshape(1, n), jac(x0), axis=0)
-
-        # callback = self.update_outputs
 
         start_time = time.time()
 

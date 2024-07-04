@@ -86,11 +86,6 @@ class ConvexQPSolvers(Optimizer):
                                   'qpswift', 'quadprog', 'scs', 'nppro']
         self.options.declare('solver_options', types=dict, default={})
 
-        # No outputs can be declared for QPSolver
-        self.available_outputs = {}
-        self.options.declare('outputs', values=([],), default=[])
-
-
         # Defined only for checking derivatives
         self.obj = self.problem._compute_objective
         self.grad = self.problem._compute_objective_gradient

@@ -17,6 +17,7 @@ class SimulatedAnnealing(Optimizer):
         self.options.declare('T0', default=1., types=float)
         self.options.declare('std_dev_tol', default=1., types=float)
         self.options.declare('std_dev_sample_size', default=1000, types=int)
+        self.options.declare('outputs', types=list, default=[])
 
         self.available_outputs = {
             'itr': int,
@@ -27,14 +28,9 @@ class SimulatedAnnealing(Optimizer):
             'f_sd': float,
             'time': float,
         }
-        self.options.declare('outputs',
-                             types=list,
-                             default=[
-                                 'itr', 'obj', 'x', 'f_sd', 'time', 'temp',
-                             ])
 
     def setup(self):
-        pass
+        self.setup_outputs()
         
     def cool(self, T, itr):
         return 0.9 * T

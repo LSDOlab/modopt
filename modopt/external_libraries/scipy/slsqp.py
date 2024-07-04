@@ -23,13 +23,11 @@ class SLSQP(ScipyOptimizer):
             self.solver_options.declare(key, types=value[0], default=value[1])
 
     def declare_outputs(self, ):
-        self.available_outputs = {
-            # for arrays from each iteration, shapes need to be declared
-            'x': (float, (self.problem.nx, )),
-        }
+        self.available_outputs = {'x': (float, (self.problem.nx,))}
         self.options.declare('outputs', values=([],['x']), default=[])
 
     def setup(self):
+        self.setup_outputs()
         # Check if user-provided solver_options have valid keys and value-types
         self.solver_options.update(self.options['solver_options'])
 
@@ -40,7 +38,6 @@ class SLSQP(ScipyOptimizer):
         self.setup_constraints()
 
     def setup_constraints(self, ):
-
         c_lower = self.problem.c_lower
         c_upper = self.problem.c_upper
 
@@ -140,11 +137,11 @@ class SLSQP(ScipyOptimizer):
         user_callback = solver_options.pop('callback', None)
 
         def callback(x): 
-            self.update_outputs(x)
+            self.update_outputs(x=x)
             if user_callback: user_callback(x) 
 
         x0 = self.problem.x0 * 1.
-        self.update_outputs(x0)
+        self.update_outputs(x=x0)
 
         obj = self.obj
         grad = self.grad

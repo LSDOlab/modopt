@@ -16,6 +16,7 @@ class NelderMead(Optimizer):
         self.options.declare('maxiter', default=200, types=int)
         self.options.declare('initial_length', default=1., types=float)
         self.options.declare('tol', default=1e-4, types=float)
+        self.options.declare('outputs', types=list, default=[])
 
         self.available_outputs = {
             'itr': int,
@@ -26,15 +27,9 @@ class NelderMead(Optimizer):
             'time': float,
             'num_f_evals': int,
         }
-        self.options.declare('outputs',
-                             types=list,
-                             default=[
-                                 'itr', 'obj', 'x', 'f_sd',
-                                 'time', 'num_f_evals',
-                             ])
 
     def setup(self):
-        pass
+        self.setup_outputs()
         
     def solve(self):
         # Assign shorter names to variables and methods

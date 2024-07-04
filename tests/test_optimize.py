@@ -6,6 +6,8 @@ from numpy.testing import assert_array_almost_equal, assert_array_equal, assert_
 import pytest
 from modopt import optimize
 
+@pytest.mark.slsqp
+@pytest.mark.interfaces
 def test_slsqp():
 
     prob = Scaling()

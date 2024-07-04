@@ -19,6 +19,7 @@ class PSO(Optimizer):
         self.options.declare('inertia_weight', default=0.8, types=float)
         self.options.declare('cognitive_coeff', default=0.1, types=float)
         self.options.declare('social_coeff', default=0.1, types=float)
+        self.options.declare('outputs', types=list, default=[])
 
         self.available_outputs = {
             'itr': int,
@@ -29,15 +30,9 @@ class PSO(Optimizer):
             'time': float,
             'num_f_evals': int,
         }
-        self.options.declare('outputs',
-                             types=list,
-                             default=[
-                                 'itr', 'obj', 'x', 'f_sd',
-                                 'time', 'num_f_evals',
-                             ])
 
     def setup(self):
-        pass
+        self.setup_outputs()
         
     def solve(self):
         # Assign shorter names to variables and methods

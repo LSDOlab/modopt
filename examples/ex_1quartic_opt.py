@@ -46,6 +46,9 @@ class SteepestDescent(Optimizer):
 
         self.options.declare('maxiter', default=1000, types=int)
         self.options.declare('opt_tol', types=float)
+        # Enable user to specify, as a list, which among the available outputs
+        # need to be written to output files
+        self.options.declare('outputs', types=list, default=[])
 
         # Specify format of outputs available from your optimizer after each iteration
         self.available_outputs = {
@@ -57,13 +60,8 @@ class SteepestDescent(Optimizer):
             'time': float,
         }
 
-        # Enable user to specify, as a list, which among the available outputs
-        # need to be stored in memory and written to output files
-        self.options.declare('outputs',
-                             types=list,
-                             default=['itr', 'obj', 'x', 'opt', 'time'])
-
     def solve(self):
+        self.setup_outputs()
         nx = self.problem.nx
         x = self.problem.x0
         opt_tol = self.options['opt_tol']

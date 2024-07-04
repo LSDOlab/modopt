@@ -22,6 +22,7 @@ class L2PenaltyEq(Optimizer):
         self.options.declare('opt_tol', types=float)
         self.options.declare('feas_tol', types=float)
         self.options.declare('rho', types=float, default=1000000.)
+        self.options.declare('outputs', types=list, default=[])
 
         self.available_outputs = {
             'itr': int,
@@ -37,15 +38,9 @@ class L2PenaltyEq(Optimizer):
             'step': float,
             'merit': float,
         }
-        self.options.declare('outputs',
-                             types=list,
-                             default=[
-                                 'itr', 'obj', 'x', 'opt', 'feas',
-                                 'con', 'time', 'num_f_evals',
-                                 'num_g_evals', 'step', 'merit'
-                             ])
 
     def setup(self):
+        self.setup_outputs()
         nx = self.problem.nx
         nc = self.problem.nc
         self.OF = L2Eq(nx=nx,

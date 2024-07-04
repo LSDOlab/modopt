@@ -16,6 +16,7 @@ class QuasiNewton(Optimizer):
 
         self.options.declare('maxiter', default=1000, types=int)
         self.options.declare('opt_tol', types=float)
+        self.options.declare('outputs', types=list, default=[])
 
         self.available_outputs = {
             'itr': int,
@@ -28,14 +29,9 @@ class QuasiNewton(Optimizer):
             'num_g_evals': int,
             'step': float,
         }
-        self.options.declare('outputs',
-                             types=list,
-                             default=[
-                                 'itr', 'obj', 'x', 'opt', 'time',
-                                 'num_f_evals', 'num_g_evals', 'step'
-                             ])
 
     def setup(self):
+        self.setup_outputs()
         self.LS = ScipyLS(f=self.obj, g=self.grad)
         self.QN = BFGS(nx=self.problem.nx)
 

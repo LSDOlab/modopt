@@ -22,6 +22,7 @@ class NewtonLagrange(Optimizer):
         self.options.declare('maxiter', default=1000, types=int)
         self.options.declare('opt_tol', default=1e-8, types=float)
         self.options.declare('feas_tol', default=1e-8, types=float)
+        self.options.declare('outputs', types=list, default=[])
 
         self.available_outputs = {
             'itr': int,
@@ -38,15 +39,9 @@ class NewtonLagrange(Optimizer):
             'step': float,
             'merit': float,
         }
-        self.options.declare('outputs',
-                             types=list,
-                             default=[
-                                 'itr', 'obj', 'x', 'mult', 'opt',
-                                 'feas', 'con', 'time', 'num_f_evals',
-                                 'num_g_evals', 'step', 'merit'
-                             ])
 
     def setup(self):
+        self.setup_outputs()
         nx = self.problem.nx
         nc = self.problem.nc
         self.QN = BFGS(nx=self.problem.nx)

@@ -22,17 +22,16 @@ class COBYLA(ScipyOptimizer):
 
     def declare_outputs(self, ):
         self.available_outputs = {}
-
         self.options.declare('outputs', types=list, default=[])
 
     def setup(self):
+        self.setup_outputs()
         # Adapt bounds as scipy Bounds() object
         self.setup_bounds()
         # Adapt constraints with bounds as a list of dictionaries with constraints = 0 or >= 0
         self.setup_constraints()
 
     def setup_constraints(self, ):
-
         c_lower = self.problem.c_lower
         c_upper = self.problem.c_upper
         # print(c_lower)

@@ -21,10 +21,6 @@ class IPOPT(Optimizer):
         # 'hessian_approximation': 'limited-memory'}
         self.options.declare('solver_options', default={}, types=dict)
         
-        # No outputs can be declared for PySLSQP
-        self.available_outputs = {}
-        self.options.declare('outputs', values=([],), default=[])
-
         self.obj = self.problem._compute_objective
         self.grad = self.problem._compute_objective_gradient
         self.con = self.problem._compute_constraints

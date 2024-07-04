@@ -18,12 +18,7 @@ class PySLSQP(Optimizer):
     '''
     def initialize(self, ):
         self.solver_name = 'pyslsqp'
-        
-        # No outputs can be declared for PySLSQP
-        self.available_outputs = {}
-        self.options.declare('outputs', values=([],), default=[])
         self.options.declare('solver_options', types=dict, default={})
-
         self.default_solver_options = {
             'maxiter': (int, 100),
             'acc': (float, 1e-6),

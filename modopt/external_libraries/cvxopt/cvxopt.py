@@ -23,10 +23,6 @@ class CVXOPT(Optimizer):
         Initialize the Optimizer() instance for CVXOPT.
         '''
         self.solver_name = 'cvxopt-cp'
-
-        # No outputs can be declared for CVXOPT
-        self.available_outputs = {}
-        self.options.declare('outputs', values=([],), default=[])
         self.options.declare('solver_options', types=dict, default={})
 
         self.default_solver_options = {

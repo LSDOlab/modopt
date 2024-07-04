@@ -122,7 +122,6 @@ class SNOPTOptimizer(Optimizer):
 
         # Declare method specific options (implemented in the respective algorithm)
         self.declare_options()
-        self.declare_outputs()
 
         if hasattr(self.problem, "_compute_all"):
             if callable(self.problem._compute_all):

@@ -299,18 +299,18 @@ class ScipyOptimizer(Optimizer):
                                                    c_upper,
                                                    jac=self.jac)
 
-    # For callback, for every method except trust-constr
-    # trust-constr can call with more information
-    # Overrides base class update_outputs()
-    def update_outputs(self, xk, optimize_result=None):
-        if len(self.options['outputs']) > 0:
-            name = self.problem_name
-            with open(name + '_x.out', 'a') as f:
-                np.savetxt(f, xk.reshape(1, xk.size))
+    # # For callback, for every method except trust-constr
+    # # trust-constr can call with more information
+    # # Overrides base class update_outputs()
+    # def update_outputs(self, xk, optimize_result=None):
+    #     if len(self.options['outputs']) > 0:
+    #         name = self.problem_name
+    #         with open(name + '_x.out', 'a') as f:
+    #             np.savetxt(f, xk.reshape(1, xk.size))
 
-        # For 'trust-constr', OptimizeResult() object state is available after each iteration
-        if (optimize_result is not None) and (optimize_result != True):
-            pass
+    #     # For 'trust-constr', OptimizeResult() object state is available after each iteration
+    #     if (optimize_result is not None) and (optimize_result != True):
+    #         pass
 
     def save_xk(self, x):
         # Saving new x iterate on file
