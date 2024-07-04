@@ -54,10 +54,15 @@ prob = Quartic(jac_format='dense')
 
 print(prob)
 
+snopt_options = {
+    'Infinite bound': 1.0e20, 
+    'Verify level': 3,
+    }
+
 # Set up your optimizer with the problem
-optimizer = SLSQP(prob, maxiter=20)
+optimizer = SLSQP(prob, solver_options={'maxiter':20})
 # optimizer = SQP(prob, maxiter=20)
-# optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3)
+# optimizer = SNOPT(prob, solver_options=snopt_options)
 
 optimizer.check_first_derivatives(prob.x0)
 optimizer.solve()

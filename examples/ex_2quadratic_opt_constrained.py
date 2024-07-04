@@ -62,6 +62,11 @@ prob = Quadratic(jac_format='dense')
 
 print(prob)
 
+snopt_options = {
+    'Infinite bound': 1.0e20, 
+    'Verify level': 3,
+    }
+
 # Set up your optimizer with the problem
 # solver_options = {'solver':'quadprog'}
 # optimizer = ConvexQPSolvers(prob, solver_options=solver_options)
@@ -72,9 +77,9 @@ print(prob)
 #                         optimal_dual_variables=True,
 #                         extras=True)
 
-# optimizer = SLSQP(prob, maxiter=20)
+# optimizer = SLSQP(prob, solver_options={'maxiter':20})
 # optimizer = SQP(prob, maxiter=20)
-# optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3)
+# optimizer = SNOPT(prob, solver_options=snopt_options)
 
 solver_options = {'maxiters':10, 'abstol':1e-7, 'reltol':1e-6, 'feastol':1e-7}
 optimizer = CVXOPT(prob, solver_options=solver_options)

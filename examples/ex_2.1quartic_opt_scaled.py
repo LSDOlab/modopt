@@ -55,12 +55,18 @@ if __name__ == "__main__":
     maxiter = 500
 
     prob = Quartic(jac_format='dense')
+    snopt_options = {
+        'Infinite bound': 1.0e20, 
+        'Verify level': 3,
+        'Major optimality': 1e-8,
+        'append2file': True,
+        }
 
     # Set up your optimizer with the problem
-    # optimizer = SLSQP(prob, maxiter=20, outputs=['x'])
+    # optimizer = SLSQP(prob, solver_options={'maxiter':20}, outputs=['x'])
     optimizer = PySLSQP(prob, solver_options={'maxiter': 20, 'acc': 1e-6})
     # optimizer = SQP(prob, maxiter=20)
-    # optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3)
+    # optimizer = SNOPT(prob, solver_options=snopt_options)
 
     optimizer.check_first_derivatives(prob.x0 * prob.x_scaler)
     optimizer.solve()

@@ -28,14 +28,15 @@ class SNOPTc(SNOPTOptimizer):
     def setup(self):
         self.update_SNOPT_options_object()
         self.setup_bounds()
-        self.setup_constraints()
+        if self.problem.constrained:
+            self.setup_constraints()
 
     # def setup_constraints(self, ):
     #     pass
 
     def solve(self):
-        append=self.options['append2file']
-        check_failure = self.options['continue_on_failure']
+        append = self.solver_options['append2file']
+        check_failure = self.solver_options['continue_on_failure']
         # Assign shorter names to variables and methods
         x0 = self.x0
         x0c0 = x0.copy()
@@ -81,7 +82,7 @@ class SNOPTc(SNOPTOptimizer):
         # J = np.array([[100.0, 100.0, 1.0, 0], [0.0, 100.0, 0, 1.0],
         #               [2.0, 4.0, 0, 0], [0.0, 0.0, 3.0, 5.0]])
 
-        inf = self.options['Infinite_bound']
+        inf = self.solver_options['Infinite bound']
 
         def snoptc_objconFG(mode, nnjac, x, fObj, gObj, fCon, gCon,
                             nState):
@@ -123,37 +124,34 @@ class SNOPTc(SNOPTOptimizer):
             m = 1
             locA = np.ones((n + 1, ))
             locA[0] = 0
-            results = snoptc(snoptc_objconFG,
-                            nnObj=nnObj,
-                            nnCon=nnCon,
-                            nnJac=nnJac,
-                            x0=np.append(x0, 0.),
-                            J=(np.array([0]), np.array([0]), locA),
-                            name=self.problem_name,
-                            iObj=0,
-                            bl=np.append(bl, -inf),
-                            bu=np.append(bu, inf),
-                            options=self.SNOPT_options_object,
-                            m=m,
-                            n=n,
-                            append2file=append)
+            self.results = snoptc(snoptc_objconFG,
+                                  nnObj=nnObj,
+                                  nnCon=nnCon,
+                                  nnJac=nnJac,
+                                  x0=np.append(x0, 0.),
+                                  J=(np.array([0]), np.array([0]), locA),
+                                  name=self.problem_name,
+                                  iObj=0,
+                                  bl=np.append(bl, -inf),
+                                  bu=np.append(bu, inf),
+                                  options=self.SNOPT_options_object,
+                                  m=m,
+                                  n=n,
+                                  append2file=append)
         else:
-            results = snoptc(snoptc_objconFG,
-                            nnObj=nnObj,
-                            nnCon=nnCon,
-                            nnJac=nnJac,
-                            x0=x0c0,
-                            J=J,
-                            name=self.problem_name,
-                            iObj=0,
-                            bl=bl,
-                            bu=bu,
-                            options=self.SNOPT_options_object,
-                            append2file=append)
+            self.results = snoptc(snoptc_objconFG,
+                                  nnObj=nnObj,
+                                  nnCon=nnCon,
+                                  nnJac=nnJac,
+                                  x0=x0c0,
+                                  J=J,
+                                  name=self.problem_name,
+                                  iObj=0,
+                                  bl=bl,
+                                  bu=bu,
+                                  options=self.SNOPT_options_object,
+                                  append2file=append)
 
-        end_time = time.time()
-        self.total_time = end_time - start_time
-
-        self.results = results
+        self.total_time = time.time() - start_time
 
         return self.results

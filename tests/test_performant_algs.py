@@ -12,7 +12,7 @@ def test_slsqp():
     prob = Scaling()
 
     # optimizer = PySLSQP(prob, solver_options={'acc':1e-6, 'maxiter':20, 'summary_filename':'scaling_summary.out'})
-    optimizer = SLSQP(prob, maxiter=50, disp=True)
+    optimizer = SLSQP(prob, solver_options={'maxiter':50, 'disp':True})
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
     print(optimizer.results)
@@ -26,7 +26,7 @@ def test_slsqp():
     prob = scaling_lite()
 
     # optimizer = PySLSQP(prob, solver_options={'acc':1e-6, 'maxiter':20, 'summary_filename':'scaling_lite_summary.out'})
-    optimizer = SLSQP(prob, maxiter=50, disp=True)
+    optimizer = SLSQP(prob, solver_options={'maxiter':50, 'disp':True})
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
     print(optimizer.results)
@@ -45,7 +45,7 @@ def test_pyslsqp():
     prob = Scaling()
 
     optimizer = PySLSQP(prob, solver_options={'acc':1e-6, 'maxiter':20, 'summary_filename':'scaling_summary.out'})
-    # optimizer = SLSQP(prob, maxiter=50, disp=True)
+    # optimizer = SLSQP(prob, solver_options={'maxiter':50, 'disp':True})
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
     print(optimizer.results)
@@ -59,7 +59,7 @@ def test_pyslsqp():
     prob = scaling_lite()
 
     optimizer = PySLSQP(prob, solver_options={'acc':1e-6, 'maxiter':20, 'summary_filename':'scaling_lite_summary.out'})
-    # optimizer = SLSQP(prob, maxiter=50, disp=True)
+    # optimizer = SLSQP(prob, solver_options={'maxiter':50, 'disp':True})
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
     print(optimizer.results)
@@ -77,7 +77,13 @@ def test_snopt():
 
     prob = Scaling()
 
-    optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3, Verbose=False, Major_optimality=1e-8)
+    snopt_options = {
+        'Infinite bound': 1.0e20,
+        'Verify level': 3,
+        'Verbose': False,
+        'Major optimality': 1e-8
+        }
+    optimizer = SNOPT(prob, solver_options=snopt_options)
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
     print(optimizer.results)
@@ -87,8 +93,8 @@ def test_snopt():
     
 
     prob = scaling_lite()
-
-    optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3, Verbose=True, Major_optimality=1e-8)
+    snopt_options.update({'Verbose': True})
+    optimizer = SNOPT(prob, solver_options=snopt_options)
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
     # print(optimizer.results)

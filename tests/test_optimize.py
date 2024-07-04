@@ -11,7 +11,7 @@ def test_slsqp():
     prob = Scaling()
 
     # results = optimize(prob, solver='PySLSQP', solver_options={'acc':1e-6, 'maxiter':20, 'summary_filename':'scaling_summary.out'})
-    results = optimize(prob, solver='SLSQP', maxiter=50, disp=True)
+    results = optimize(prob, solver='SLSQP', solver_options={'maxiter':50, 'disp':True})
     print(results)
     assert results['success'] == True
     assert results['message'] == 'Optimization terminated successfully'
@@ -23,7 +23,7 @@ def test_slsqp():
     prob = scaling_lite()
 
     # results = optimize(prob, solver='PySLSQP', solver_options={'acc':1e-6, 'maxiter':20, 'summary_filename':'scaling_summary.out'})
-    results = optimize(prob, solver='SLSQP', maxiter=50, disp=True)
+    results = optimize(prob, solver='SLSQP', solver_options={'maxiter':50, 'disp':True})
     print(results)
     assert results['success'] == True
     assert results['message'] == 'Optimization terminated successfully'
@@ -38,7 +38,7 @@ def test_pyslsqp():
     prob = Scaling()
 
     results = optimize(prob, solver='PySLSQP', solver_options={'acc':1e-6, 'maxiter':20, 'summary_filename':'scaling_summary.out'})
-    # results = optimize(prob, solver='SLSQP', maxiter=50, disp=True)
+    # results = optimize(prob, solver='SLSQP', solver_options={'maxiter':50, 'disp':True})
     print(results)
     print(results)
     assert results['success'] == True
@@ -51,7 +51,7 @@ def test_pyslsqp():
     prob = scaling_lite()
 
     results = optimize(prob, solver='PySLSQP', solver_options={'acc':1e-6, 'maxiter':20, 'summary_filename':'scaling_summary.out'})
-    # results = optimize(prob, solver='SLSQP', maxiter=50, disp=True)
+    # results = optimize(prob, solver='SLSQP', solver_options={'maxiter':50, 'disp':True})
     print(results)
     assert results['success'] == True
     assert results['message'] == 'Optimization terminated successfully'
@@ -65,7 +65,14 @@ def test_snopt():
 
     prob = Scaling()
 
-    results = optimize(prob, solver='SNOPT', Infinite_bound=1.0e20, Verify_level=3, Verbose=False, Major_optimality=1e-8)
+    snopt_options = {
+        'Infinite bound': 1.0e20, 
+        'Verify level': 3,
+        'Verbose': False,
+        'Major optimality': 1e-8
+    }
+
+    results = optimize(prob, solver='SNOPT', solver_options=snopt_options)
     print(results)
     assert results.info == 1
     assert_array_almost_equal(results.x[:prob.nx], [2., 0.], decimal=11)
@@ -74,7 +81,7 @@ def test_snopt():
 
     prob = scaling_lite()
 
-    results = optimize(prob, solver='SNOPT', Infinite_bound=1.0e20, Verify_level=3, Verbose=False, Major_optimality=1e-8)
+    results = optimize(prob, solver='SNOPT', solver_options=snopt_options)
     # print(results)
     assert results.info == 1
     assert_array_almost_equal(results.x[:prob.nx], [2., 0.], decimal=11)

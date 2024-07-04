@@ -28,7 +28,7 @@ def test_ProblemClass(): # 8 problems
     assert prob.c_upper == None
     
     # optimizer = PySLSQP(prob, solver_options={'acc':1e-12, 'maxiter':20})
-    optimizer = SLSQP(prob, maxiter=20, disp=True)
+    optimizer = SLSQP(prob, solver_options={'maxiter':20, 'disp':True})
     optimizer.solve()
     assert optimizer.results['success'] == True
     assert optimizer.results['message'] == 'Optimization terminated successfully'
@@ -46,7 +46,7 @@ def test_ProblemClass(): # 8 problems
     assert_array_equal(prob.c_upper, [1., 1.])
 
     # optimizer = PySLSQP(prob, solver_options={'acc':1e-12, 'maxiter':20})
-    optimizer = SLSQP(prob, maxiter=50, disp=True)
+    optimizer = SLSQP(prob, solver_options={'maxiter':50, 'disp':True})
     optimizer.solve()
     assert optimizer.results['success'] == True
     assert optimizer.results['message'] == 'Optimization terminated successfully'
@@ -66,7 +66,7 @@ def test_ProblemClass(): # 8 problems
 
     # This one's a difficult problem for SLSQP (and PySLSQP)
     # optimizer = PySLSQP(prob, solver_options={'acc':1e-6, 'maxiter':50})
-    optimizer = SLSQP(prob, maxiter=50, disp=True)
+    optimizer = SLSQP(prob, solver_options={'maxiter':50, 'disp':True})
     # optimizer = SNOPT(prob,)
     optimizer.solve()
     assert optimizer.results['success'] == True
@@ -84,7 +84,7 @@ def test_ProblemClass(): # 8 problems
     assert_array_equal(prob.c_lower, [1.])
     assert_array_equal(prob.c_upper, [1.])
 
-    optimizer = SLSQP(prob, maxiter=50, disp=True)
+    optimizer = SLSQP(prob, solver_options={'maxiter':50, 'disp':True})
     optimizer.solve()
     assert optimizer.results['success'] == True
     assert optimizer.results['message'] == 'Optimization terminated successfully'
@@ -101,7 +101,7 @@ def test_ProblemClass(): # 8 problems
     assert_array_equal(prob.c_lower, [1.])
     assert_array_equal(prob.c_upper, [np.inf])
 
-    optimizer = SLSQP(prob, maxiter=50, ftol=1e-12, disp=True)
+    optimizer = SLSQP(prob, solver_options={'maxiter':50, 'disp':True, 'ftol':1e-12})
     optimizer.solve()
     assert optimizer.results['success'] == True
     assert optimizer.results['message'] == 'Optimization terminated successfully'
@@ -119,7 +119,7 @@ def test_ProblemClass(): # 8 problems
     assert_array_equal(prob.c_upper, [1., np.inf])
 
     # optimizer = PySLSQP(prob, solver_options={'acc':1e-6, 'maxiter':20})
-    optimizer = SLSQP(prob, maxiter=50, disp=True)
+    optimizer = SLSQP(prob, solver_options={'maxiter':50, 'disp':True})
     optimizer.solve()
     assert optimizer.results['success'] == True
     assert optimizer.results['message'] == 'Optimization terminated successfully'
@@ -141,7 +141,7 @@ def test_ProblemClass(): # 8 problems
     assert_array_equal(prob.c_upper, [5., np.inf])
 
     # optimizer = PySLSQP(prob, solver_options={'acc':1e-6, 'maxiter':20, 'summary_filename':'scaling_summary.out'})
-    optimizer = SLSQP(prob, maxiter=50, disp=True)
+    optimizer = SLSQP(prob, solver_options={'maxiter':50, 'disp':True})
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
     assert optimizer.results['success'] == True
@@ -165,7 +165,7 @@ def test_ProblemClass(): # 8 problems
 
     # With FD derivs, this one's a difficult problem for SLSQP (and PySLSQP) starting from even [30., 5.]
     # optimizer = PySLSQP(prob, solver_options={'acc':1e-6, 'maxiter':50, 'summary_filename':'fd_summary.out'})
-    optimizer = SLSQP(prob, maxiter=50, disp=True)
+    optimizer = SLSQP(prob, solver_options={'maxiter':50, 'disp':True})
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
     assert optimizer.results['success'] == True
@@ -198,7 +198,7 @@ def test_ProblemLiteClass(): # 8 problems
     assert prob.c_upper == None
     
     # optimizer = PySLSQP(prob, solver_options={'acc':1e-12, 'maxiter':20})
-    optimizer = SLSQP(prob, maxiter=20, disp=True)
+    optimizer = SLSQP(prob, solver_options={'maxiter':20, 'disp':True})
     # optimizer = SNOPT(prob,)
     optimizer.solve()
     assert optimizer.results['success'] == True
@@ -216,7 +216,7 @@ def test_ProblemLiteClass(): # 8 problems
     assert_array_equal(prob.c_upper, [1., 1.])
 
     # optimizer = PySLSQP(prob, solver_options={'acc':1e-12, 'maxiter':20})
-    optimizer = SLSQP(prob, maxiter=50, disp=True)
+    optimizer = SLSQP(prob, solver_options={'maxiter':50, 'disp':True})
     optimizer.solve()
     assert optimizer.results['success'] == True
     assert optimizer.results['message'] == 'Optimization terminated successfully'
@@ -234,7 +234,7 @@ def test_ProblemLiteClass(): # 8 problems
 
     # This one's a difficult problem for SLSQP (and PySLSQP) starting from [500., 5.]
     # optimizer = PySLSQP(prob, solver_options={'acc':1e-6, 'maxiter':50})
-    optimizer = SLSQP(prob, maxiter=50, disp=True)
+    optimizer = SLSQP(prob, solver_options={'maxiter':50, 'disp':True})
     # optimizer = SNOPT(prob,)
     optimizer.solve()
     assert optimizer.results['success'] == True
@@ -251,7 +251,7 @@ def test_ProblemLiteClass(): # 8 problems
     assert_array_equal(prob.c_lower, [1.])
     assert_array_equal(prob.c_upper, [1.])
 
-    optimizer = SLSQP(prob, maxiter=50, disp=True)
+    optimizer = SLSQP(prob, solver_options={'maxiter':50, 'disp':True})
     optimizer.solve()
     assert optimizer.results['success'] == True
     assert optimizer.results['message'] == 'Optimization terminated successfully'
@@ -267,7 +267,7 @@ def test_ProblemLiteClass(): # 8 problems
     assert_array_equal(prob.c_lower, [1.])
     assert_array_equal(prob.c_upper, [np.inf])
 
-    optimizer = SLSQP(prob, maxiter=50, ftol=1e-12, disp=True)
+    optimizer = SLSQP(prob, solver_options={'maxiter':50, 'disp':True, 'ftol':1e-12})
     optimizer.solve()
     assert optimizer.results['success'] == True
     assert optimizer.results['message'] == 'Optimization terminated successfully'
@@ -283,7 +283,7 @@ def test_ProblemLiteClass(): # 8 problems
     assert_array_equal(prob.c_lower, [1., 1.])
     assert_array_equal(prob.c_upper, [1., np.inf])
 
-    optimizer = SLSQP(prob, maxiter=50, disp=True)
+    optimizer = SLSQP(prob, solver_options={'maxiter':50, 'disp':True})
     optimizer.solve()
     assert optimizer.results['success'] == True
     assert optimizer.results['message'] == 'Optimization terminated successfully'
@@ -303,7 +303,7 @@ def test_ProblemLiteClass(): # 8 problems
     assert_array_equal(prob.c_upper, [5., np.inf])
 
     # optimizer = PySLSQP(prob, solver_options={'acc':1e-6, 'maxiter':20, 'summary_filename':'scaling_lite_summary.out'})
-    optimizer = SLSQP(prob, maxiter=50, disp=True)
+    optimizer = SLSQP(prob, solver_options={'maxiter':50, 'disp':True})
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
     assert optimizer.results['success'] == True
@@ -326,7 +326,7 @@ def test_ProblemLiteClass(): # 8 problems
 
     # With FD derivs, this one's a difficult problem for SLSQP (and PySLSQP) starting from even [30., 5.]
     # optimizer = PySLSQP(prob, solver_options={'acc':1e-6, 'maxiter':20, 'summary_filename':'fd_lite_summary.out'})
-    optimizer = SLSQP(prob, maxiter=50, disp=True)
+    optimizer = SLSQP(prob, solver_options={'maxiter':50, 'disp':True})
     # optimizer = SNOPT(prob,)
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
@@ -342,8 +342,6 @@ def test_ProblemLiteClass(): # 8 problems
 
     assert_array_almost_equal(prob._compute_constraint_jacobian(np.array([2., 0.])), [[2.5, 25.], [0.5, -2.5]], decimal=6)
     assert_array_almost_equal(prob._compute_constraint_jvp(np.array([2., 0.]), np.array([1.,1.])), [27.5, -2.0], decimal=7)
-
-
 
 
 if __name__ == "__main__":

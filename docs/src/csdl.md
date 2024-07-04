@@ -81,7 +81,7 @@ from modopt import SLSQP
 
 # Setup your preferred optimizer (SLSQP) with the Problem object 
 # Pass in the options for your chosen optimizer
-optimizer = SLSQP(prob, maxiter=20)
+optimizer = SLSQP(prob, solver_options={'maxiter':20})
 
 # Check first derivatives at the initial guess, if needed
 optimizer.check_first_derivatives(prob.x0)
@@ -112,7 +112,7 @@ For example, we can set the maximum number of iterations `maxiter`
 and the precision goal `ftol` for the objective as shown below.
 
 ```py
-optimizer = SLSQP(prob, maxiter=20, ftol=1e-6)
+optimizer = SLSQP(prob, solver_options={'maxiter':20, 'ftol':1e-6})
 ```
 
 ### 2. SQP
@@ -144,8 +144,10 @@ Options could be set by just passing them as kwargs when
 instantiating the SNOPT optimizer object.
 
 ```py
-optimizer = SNOPT(  prob, 
-                    Major_iterations = 100, 
-                    Major_optimality=1e-9, 
-                    Major_feasibility=1e-8)
+snopt_options = {
+    'Major iterations': 100, 
+    'Major optimality': 1e-9, 
+    'Major feasibility': 1e-8
+    }
+optimizer = SNOPT(prob, solver_options=snopt_options)
 ```

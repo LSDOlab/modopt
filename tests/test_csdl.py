@@ -54,10 +54,15 @@ def test_csdl():
     assert_array_equal(prob.c_upper, [20., np.inf])
 
     from modopt import SQP, SLSQP, SNOPT, PySLSQP
-    optimizer = SLSQP(prob, ftol=1e-6, maxiter=20, disp=True)
+    optimizer = SLSQP(prob, solver_options={'ftol': 1e-6, 'maxiter': 20, 'disp': True})
     # optimizer = PySLSQP(prob, solver_options={'acc':1e-6, 'maxiter':20})
     # optimizer = SQP(prob, maxiter=20)
-    # optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3, Verbose=True)
+    snopt_options = {
+        'Infinite bound': 1.0e20, 
+        'Verify level': 3,
+        'Verbose': True,
+        }
+    # optimizer = SNOPT(prob, solver_options=snopt_options)
 
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
@@ -118,10 +123,15 @@ def test_csdl_alpha():
     assert_array_equal(prob.c_upper, [20., np.inf])
 
     from modopt import SQP, SLSQP, SNOPT, PySLSQP
-    optimizer = SLSQP(prob, ftol=1e-6, maxiter=20, disp=True)
+    optimizer = SLSQP(prob, solver_options={'ftol': 1e-6, 'maxiter': 20, 'disp': True})
     # optimizer = PySLSQP(prob, solver_options={'acc':1e-6, 'maxiter':20})
     # optimizer = SQP(prob, maxiter=20)
-    # optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3, Verbose=True)
+    snopt_options = {
+        'Infinite bound': 1.0e20, 
+        'Verify level': 3,
+        'Verbose': True,
+        }
+    # optimizer = SNOPT(prob, solver_options=snopt_options)
 
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
@@ -182,10 +192,15 @@ def test_csdl_alpha():
 #     assert_array_equal(prob.c_upper, [20., np.inf])
 
 #     from modopt import SQP, SLSQP, SNOPT, PySLSQP
-#     optimizer = SLSQP(prob, ftol=1e-6, maxiter=20, disp=True)
+#     optimizer = SLSQP(prob, solver_options={'ftol': 1e-6, 'maxiter': 20, 'disp': True}
 #     # optimizer = PySLSQP(prob, solver_options={'acc':1e-6, 'maxiter':20})
 #     # optimizer = SQP(prob, maxiter=20)
-#     # optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3, Verbose=True)
+#         snopt_options = {
+#                 'Infinite bound': 1.0e20, 
+#                 'Verify level': 3,
+#                 'Verbose': True,
+#                 }
+#     # optimizer = SNOPT(prob, solver_options=snopt_options)
 
 #     optimizer.check_first_derivatives(prob.x0)
 #     optimizer.solve()

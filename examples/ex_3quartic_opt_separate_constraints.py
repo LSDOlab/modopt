@@ -74,15 +74,19 @@ from modopt import SLSQP, SQP, SNOPT, PySLSQP
 
 tol = 1E-8
 maxiter = 500
+snopt_options = {
+    'Infinite bound': 1.0e20, 
+    'Verify level': 3,
+    }
 
 prob = Quartic(jac_format='dense')
 print(prob)
 
 # Set up your optimizer with the problem
 optimizer = PySLSQP(prob, solver_options={'maxiter': 20, 'acc': 1e-6})
-# optimizer = SLSQP(prob, maxiter=20)
+# optimizer = SLSQP(prob, solver_options={'maxiter':20})
 # optimizer = SQP(prob, maxiter=20)
-# optimizer = SNOPT(prob, Infinite_bound=1.0e20, Verify_level=3)
+# optimizer = SNOPT(prob, solver_options=snopt_options)
 
 optimizer.check_first_derivatives(prob.x0)
 optimizer.solve()

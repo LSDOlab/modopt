@@ -20,7 +20,8 @@ class SNOPTa(SNOPTOptimizer):
     def setup(self):
         self.update_SNOPT_options_object()
         self.setup_bounds()
-        self.setup_constraints()
+        if self.problem.constrained:
+            self.setup_constraints()
 
     # def setup_constraints(self, ):
     #     pass
@@ -53,7 +54,7 @@ class SNOPTa(SNOPTOptimizer):
         x_lower = self.x_lower
         x_upper = self.x_upper
 
-        inf = self.options['Infinite bound']
+        inf = self.solver_options['Infinite bound']
 
         f_lower = np.concatenate([
             inf,

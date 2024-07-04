@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.optimize import minimize, Bounds
 import time
+from modopt.utils.options_dictionary import OptionsDictionary
 
 from .scipy_optimizer import ScipyOptimizer
 
@@ -8,28 +9,30 @@ from .scipy_optimizer import ScipyOptimizer
 class SLSQP(ScipyOptimizer):
     def declare_options(self):
         self.solver_name += 'slsqp'
-
-        # Solver-specific options exactly as in scipy with defaults
-        self.options.declare('maxiter', default=100, types=int)
-        self.options.declare('disp', default=False, types=bool)
-        self.options.declare('eps',
-                             default=1.4901161193847656e-08,
-                             types=float)
-        self.options.declare('finite_diff_rel_step',
-                             default=None,
-                             types=(type(None), np.ndarray))
-        # Objective precision
-        self.options.declare('ftol', default=1e-6, types=float)
+        self.options.declare('solver_options', types=dict, default={})
+        self.default_solver_options = {
+            'maxiter': (int, 100),
+            'ftol': (float, 1e-6),
+            'disp': (bool, False),
+            'callback': ((type(None), callable), None),
+        }
+        # Used for verifying the keys and value-types of user-provided solver_options, 
+        # and generating an updated pure Python dictionary to provide pyslsqp.optimize()
+        self.solver_options = OptionsDictionary()
+        for key, value in self.default_solver_options.items():
+            self.solver_options.declare(key, types=value[0], default=value[1])
 
     def declare_outputs(self, ):
         self.available_outputs = {
             # for arrays from each iteration, shapes need to be declared
             'x': (float, (self.problem.nx, )),
         }
-
         self.options.declare('outputs', values=([],['x']), default=[])
 
     def setup(self):
+        # Check if user-provided solver_options have valid keys and value-types
+        self.solver_options.update(self.options['solver_options'])
+
         # Adapt bounds as scipy Bounds() object
         self.setup_bounds()
 
@@ -132,36 +135,25 @@ class SLSQP(ScipyOptimizer):
                 self.constraints.append(con_dict_ineq2)
 
     def solve(self):
-        # Assign shorter names to variables and methods
         method = 'SLSQP'
+        solver_options = self.solver_options.get_pure_dict()
+        user_callback = solver_options.pop('callback', None)
+
+        def callback(x): 
+            self.update_outputs(x)
+            if user_callback: user_callback(x) 
 
         x0 = self.problem.x0 * 1.
-
         self.update_outputs(x0)
-
-        ftol = self.options['ftol']
-
-        maxiter = self.options['maxiter']
-        eps = self.options['eps']
-        finite_diff_rel_step = self.options['finite_diff_rel_step']
 
         obj = self.obj
         grad = self.grad
-        # Note: SLSQP does not take Hessians
-
         bounds = self.bounds
         constraints = self.constraints  # (contains eq,ineq constraints and jacobian)
-        callback = self.update_outputs
-
-        disp = self.options['disp']
-
-        start_time = time.time()
 
         # Call SLSQP algorithm from scipy (options are specific to SLSQP)
-        # Note: f_tol is the precision tolerance for the objective(not the same as opt_tol)
-
-        # Run the optimization
-        results = minimize(
+        start_time = time.time()
+        self.results = minimize(
             obj,
             x0,
             args=(),
@@ -173,18 +165,8 @@ class SLSQP(ScipyOptimizer):
             constraints=constraints,
             tol=None,
             callback=callback,
-            options={
-                #   'func': obj,
-                'maxiter': maxiter,
-                'ftol': ftol,
-                'iprint': 1,
-                'disp': disp,
-                'eps': eps,
-            })
-
+            options=solver_options
+            )
         self.total_time = time.time() - start_time
-        
-        # Store and return the results dictionary
-        self.results = results
         
         return self.results

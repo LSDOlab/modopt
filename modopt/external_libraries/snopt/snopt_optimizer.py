@@ -7,27 +7,19 @@ except:
 
 from array_manager.api import DenseMatrix
 
-from modopt import Optimizer, Problem
-from modopt import CSDLProblem
+from modopt import Optimizer
+from modopt.utils.options_dictionary import OptionsDictionary
 
 
 class SNOPTOptimizer(Optimizer):
     def initialize(self):
         self.solver_name = 'snopt_'
-        self.options.declare('append2file',
-                             default=False,
-                             types=bool)
-        self.options.declare('continue_on_failure',
-                             default=False,
-                             types=bool)
-        self.options.declare('gradient',
-                             default='exact',
-                             values=['exact', 'fd'])
-        self.options.declare('jacobian',
-                             default='exact',
-                             values=['exact', 'fd'])
+        self.options.declare('solver_options', types=dict, default={})
 
-        self.SNOPT_options = {
+        self.default_solver_options = {
+            # Custom options for modopt
+            'append2file': [False, False, bool],
+            'continue_on_failure': [False, False, bool],
             # [Current value, default value, type]
             'Start type': ['Cold', 'Cold', str],  ##
             'Specs filename': [None, None, (str, type(None))],  ##
@@ -124,14 +116,9 @@ class SNOPTOptimizer(Optimizer):
             'Verbose': [True, True, bool]  ##
         }
 
-        for option in self.SNOPT_options:
-            # New option replaces spaces with underscores in option names
-            new_option = option.replace(' ', '_')
-            self.options.declare(
-                new_option,
-                default=self.SNOPT_options[option][1],
-                types=self.SNOPT_options[option][2],
-            )
+        self.solver_options = OptionsDictionary()
+        for key, value in self.default_solver_options.items():
+            self.solver_options.declare(key, types=value[2], default=value[1])
 
         # Declare method specific options (implemented in the respective algorithm)
         self.declare_options()
@@ -143,57 +130,40 @@ class SNOPTOptimizer(Optimizer):
 
         self.obj = self.problem._compute_objective
         self.x0 = self.problem.x0
-
-        # Exact gradient if provided else FD gradient
-        if not isinstance(self.problem, CSDLProblem):
-            if self.problem.compute_objective_gradient.__func__ is not Problem.compute_objective_gradient:
-                self.grad = self.problem._compute_objective_gradient
-            else:
-                self.grad = self.options['gradient']
-        else:
-            self.grad = self.problem._compute_objective_gradient
+        self.grad = self.problem._compute_objective_gradient
 
         if self.problem.nc > 0:
             # Uncomment the line below after testing our sqp_optimizer with atomics_lite
             # pC_px = DenseMatrix(self.problem.pC_px).numpy_array()
             self.con = self.problem._compute_constraints
-
-            # Exact jac if provided else FD jac
-            if not isinstance(self.problem, CSDLProblem):
-                if self.problem.compute_constraint_jacobian.__func__ is not Problem.compute_constraint_jacobian:
-                    self.jac = self.problem._compute_constraint_jacobian
-
-                # Uncomment the 2 lines below after testing our sqp_optimizer with atomics_lite
-                # elif pC_px.any() != 0:
-                #     self.jac = lambda x: pC_px
-                else:
-                    self.jac = self.options['jacobian']
-            else:
-                self.jac = self.problem._compute_constraint_jacobian
+            self.jac = self.problem._compute_constraint_jacobian
+            # Uncomment the 2 lines below after testing our sqp_optimizer with atomics_lite
+            # if pC_px.any() != 0:
+            #     self.jac = lambda x: pC_px
 
     def update_SNOPT_options_object(self):
+        # Check if user-provided solver_options have valid keys and value-types
+        self.solver_options.update(self.options['solver_options'])
+
         self.SNOPT_options_object = SNOPT_options()
-        for option in self.SNOPT_options:
-            # New option replaces spaces with underscores in option names
-            new_option = option.replace(' ', '_')
-            self.SNOPT_options_object.setOption(
-                option, self.options[new_option])
+        for key in self.solver_options:
+            if key in ['append2file', 'continue_on_failure']:
+                continue
+            self.SNOPT_options_object.setOption(key, self.solver_options[key])
 
     def setup_bounds(self):
-        inf = self.options['Infinite_bound']
-        self.x_lower = np.where(self.problem.x_lower == -np.inf, -inf,
-                                self.problem.x_lower)
-        self.x_upper = np.where(self.problem.x_upper == np.inf, inf,
-                                self.problem.x_upper)
+        inf = self.solver_options['Infinite bound']
+        xl = self.problem.x_lower
+        xu = self.problem.x_upper
+        self.x_lower = np.where(xl == -np.inf, -inf, xl)
+        self.x_upper = np.where(xu ==  np.inf,  inf, xu)
 
     def setup_constraints(self, ):
-
-        if self.problem.constrained:
-            inf = self.options['Infinite_bound']
-            self.c_lower = np.where(self.problem.c_lower == -np.inf, -inf,
-                                    self.problem.c_lower)
-            self.c_upper = np.where(self.problem.c_upper == np.inf, inf,
-                                    self.problem.c_upper)
+        inf = self.solver_options['Infinite bound']
+        cl = self.problem.c_lower
+        cu = self.problem.c_upper
+        self.c_lower = np.where(cl == -np.inf, -inf, cl)
+        self.c_upper = np.where(cu ==  np.inf,  inf, cu)
 
     # For callback, for every method
     # Overrides base class update_outputs()
