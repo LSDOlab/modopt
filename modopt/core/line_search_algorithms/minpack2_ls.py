@@ -1,9 +1,9 @@
 import numpy as np
 
-eps = np.finfo(np.float64).resolution  # 1e-15
+eps = np.finfo(np.float64).resolution  # 1.4901e-15
 
 from modopt import LineSearch
-from scipy.optimize.linesearch import line_search_wolfe1 as line_search
+from scipy.optimize._linesearch import line_search_wolfe1 as line_search
 
 # def line_search_wolfe1(f, fprime, xk, pk, gfk=None,
 #                        old_fval=None, old_old_fval=None,
