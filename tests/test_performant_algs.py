@@ -18,6 +18,7 @@ def test_slsqp():
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
     print(optimizer.results)
+    optimizer.print_results(optimal_variables=True, optimal_gradient=True)
     assert optimizer.results['success'] == True
     assert optimizer.results['message'] == 'Optimization terminated successfully'
     assert_array_almost_equal(optimizer.results['x'], [2., 0.], decimal=8)
@@ -28,16 +29,59 @@ def test_slsqp():
     prob = scaling_lite()
 
     # optimizer = PySLSQP(prob, solver_options={'acc':1e-6, 'maxiter':20, 'summary_filename':'scaling_lite_summary.out'})
-    optimizer = SLSQP(prob, solver_options={'maxiter':50, 'disp':True})
+    optimizer = SLSQP(prob, solver_options={'maxiter':50, 'disp':True}, outputs=['x'])
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
     print(optimizer.results)
+    optimizer.print_results(optimal_variables=True, optimal_gradient=True)
     assert optimizer.results['success'] == True
     assert optimizer.results['message'] == 'Optimization terminated successfully'
     assert_array_almost_equal(optimizer.results['x'], [2., 0.], decimal=8)
     assert_almost_equal(optimizer.results['fun'], 20., decimal=6)
     # assert_almost_equal(optimizer.results['objective'], 20., decimal=6)
 
+@pytest.mark.cobyla
+@pytest.mark.interfaces
+def test_cobyla():
+    import numpy as np
+    from modopt import COBYLA
+    from all_problem_types import IneqConstrained, ineq_constrained_lite
+
+    prob = IneqConstrained()
+    prob.x0 = np.array([50., 5.])
+
+    optimizer = COBYLA(prob, solver_options={'maxiter':1000, 'disp':False, 'tol':1e-6})
+    optimizer.solve()
+    print(optimizer.results)
+    optimizer.print_results(optimal_variables=True)
+    assert optimizer.results['success'] == True
+    assert optimizer.results['message'] == 'Optimization terminated successfully.'
+    assert_array_almost_equal(optimizer.results['x'], [0.5, -0.5], decimal=6)
+    assert_almost_equal(optimizer.results['fun'], 0.125, decimal=11)
+    
+
+    prob = ineq_constrained_lite()
+    prob.x0 = np.array([50., 5.])
+
+    optimizer = COBYLA(prob, solver_options={'maxiter':1000, 'disp':False, 'tol':1e-6}, outputs=['x'])
+    optimizer.solve()
+    print(optimizer.results)
+    optimizer.print_results(optimal_variables=True)
+    assert optimizer.results['success'] == True
+    assert optimizer.results['message'] == 'Optimization terminated successfully.'
+    assert_array_almost_equal(optimizer.results['x'], [0.5, -0.5], decimal=6)
+    assert_almost_equal(optimizer.results['fun'], 0.125, decimal=6)
+
+    prob = Scaling()
+
+    with pytest.raises(Exception) as exc_info:
+        optimizer = COBYLA(prob, solver_options={'maxiter':1000, 'disp':False, 'tol':1e-6})
+    
+    assert exc_info.type is RuntimeError
+    assert str(exc_info.value) == 'Detected equality constraints in the problem. '\
+                                  'COBYLA does not support equality constraints. '\
+                                  'Use a different solver (PySLSQP, IPOPT, etc.) or remove the equality constraints.'
+    
 @pytest.mark.pyslsqp
 @pytest.mark.interfaces
 def test_pyslsqp():
@@ -220,6 +264,7 @@ def test_ipopt_exact_hess_lag():
 
 if __name__ == '__main__':
     test_slsqp()
+    test_cobyla()
     test_pyslsqp()
     test_snopt()
     test_ipopt()

@@ -1,4 +1,5 @@
-# Test the optimize function interface for SLSQP, PySLSQP, SNOPT, COBYLA, and BFGS
+# Test the optimize function interface for SLSQP, PySLSQP, SNOPT, IPOPT, CVXOPT,
+# ConvexQPSolvers, COBYLA, and BFGS
 # The tests are exactly the same as in test_performant_algs.py, test_qpsolvers.py, and test_cvxopt.py
 
 from all_problem_types import Scaling, scaling_lite, Unconstrained, unconstrained_lite
@@ -32,6 +33,32 @@ def test_slsqp():
     assert_array_almost_equal(results['x'], [2., 0.], decimal=8)
     assert_almost_equal(results['fun'], 20., decimal=6)
     # assert_almost_equal(results['objective'], 20., decimal=6)
+
+@pytest.mark.cobyla
+@pytest.mark.interfaces
+def test_cobyla():
+    import numpy as np
+    from modopt import COBYLA
+    from all_problem_types import IneqConstrained, ineq_constrained_lite
+
+    prob = IneqConstrained()
+    prob.x0 = np.array([50., 5.])
+
+    results = optimize(prob, solver='COBYLA', solver_options={'maxiter':1000, 'disp':False, 'tol':1e-6})
+    assert results['success'] == True
+    assert results['message'] == 'Optimization terminated successfully.'
+    assert_array_almost_equal(results['x'], [0.5, -0.5], decimal=6)
+    assert_almost_equal(results['fun'], 0.125, decimal=11)
+    
+
+    prob = ineq_constrained_lite()
+    prob.x0 = np.array([50., 5.])
+
+    results = optimize(prob, solver='COBYLA', solver_options={'maxiter':1000, 'disp':False, 'tol':1e-6}, outputs=['x'])
+    assert results['success'] == True
+    assert results['message'] == 'Optimization terminated successfully.'
+    assert_array_almost_equal(results['x'], [0.5, -0.5], decimal=6)
+    assert_almost_equal(results['fun'], 0.125, decimal=6)
 
 @pytest.mark.pyslsqp
 @pytest.mark.interfaces
@@ -231,10 +258,11 @@ def test_invalid_solver():
 
     assert exc_info.type is ValueError
     assert str(exc_info.value) == "Invalid solver named 'InvalidSolver' is specified. Valid solvers are: "\
-                                  "['SLSQP', 'PySLSQP', 'SNOPT', 'IPOPT', 'CVXOPT', 'ConvexQPSolvers']."
+                                  "['SLSQP', 'PySLSQP', 'COBYLA', 'SNOPT', 'IPOPT', 'CVXOPT', 'ConvexQPSolvers']."
 
 if __name__ == '__main__':
     test_slsqp()
+    test_cobyla()
     test_pyslsqp()
     test_snopt()
     test_ipopt()

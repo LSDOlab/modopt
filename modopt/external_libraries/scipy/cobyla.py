@@ -1,180 +1,153 @@
 import numpy as np
-from scipy.optimize import minimize, Bounds, show_options
+from scipy.optimize import minimize, Bounds
 import time
+from modopt.utils.options_dictionary import OptionsDictionary
+from modopt import Optimizer
 
-from .scipy_optimizer import ScipyOptimizer
+class COBYLA(Optimizer):
+    '''
+    Class that interfaces modOpt with the COBYLA optimization algorithm from Scipy.
+    '''
+    def initialize(self):
+        '''
+        Initialize the optimizer.
+        Declare options, solver_options and outputs.
+        '''
+        self.solver_name = 'scipy-cobyla'
+        self.options.declare('solver_options', types=dict, default={})
+        self.default_solver_options = {
+            'maxiter': (int, 1000), # Maximum number of function evaluations
+            'rhobeg': (float, 1.0), # Reasonable initial changes to the variables
+            'tol': (float, 1e-4),   # Final accuracy in the optimization (lower bound on the size of the trust region)
+            'catol': (float, 2e-4), # Absolute constraint violation tolerance
+            'disp': (bool, False),
+            'callback': ((type(None), callable), None),
+        }
 
+        # Used for verifying the keys and value-types of user-provided solver_options
+        self.solver_options = OptionsDictionary()
+        for key, value in self.default_solver_options.items():
+            self.solver_options.declare(key, types=value[0], default=value[1])
+        
+        # Declare outputs
+        self.available_outputs = {'x': (float, (self.problem.nx,))}
+        self.options.declare('outputs', values=([],['x']), default=[])
 
-class COBYLA(ScipyOptimizer):
-    def declare_options(self):
-        self.solver_name += 'cobyla'
-
-        # Solver-specific options exactly as in scipy with defaults
-        self.options.declare('maxiter', default=1000, types=int)
-        self.options.declare('disp', default=False, types=bool)
-        self.options.declare('rhobeg', default=1.0, types=float)
-        # Objective precision
-        self.options.declare('tol',
-                             default=None,
-                             types=(float, type(None)))
-        # Constraint violation
-        self.options.declare('catol', default=0.0002, types=float)
-
-    def declare_outputs(self, ):
-        self.available_outputs = {}
-        self.options.declare('outputs', types=list, default=[])
+        self.x0   = self.problem.x0 * 1.0
+        self.obj  = self.problem._compute_objective
+        if self.problem.constrained:
+            self.con  = self.problem._compute_constraints
 
     def setup(self):
+        '''
+        Setup the optimizer.
+        Setup outputs, bounds, and constraints.
+        Check the validity of user-provided 'solver_options'.
+        '''
         self.setup_outputs()
-        # Adapt bounds as scipy Bounds() object
+        self.solver_options.update(self.options['solver_options'])
         self.setup_bounds()
-        # Adapt constraints with bounds as a list of dictionaries with constraints = 0 or >= 0
-        self.setup_constraints()
-
-    def setup_constraints(self, ):
-        c_lower = self.problem.c_lower
-        c_upper = self.problem.c_upper
-        # print(c_lower)
-        # print(c_upper)
-
-        if c_lower.size == 0:
-            # print('No constraints')
+        if self.problem.constrained:
+            self.setup_constraints()
+        else:
             self.constraints = ()
-            return None
 
-        # Adapt constraints as a list of dictionaries with constraints = 0 or >= 0 for SLSQP
-        eq_indices = np.where(c_upper == c_lower)[0]
-        ineq_indices = np.where(c_upper != c_lower)[0]
+    def setup_bounds(self):
+        '''
+        Adapt bounds as a Scipy Bounds() object.
+        Only for  Nelder-Mead, L-BFGS-B, TNC, SLSQP, Powell, trust-constr, COBYLA, and COBYQA methods.
+        '''
+        xl = self.problem.x_lower
+        xu = self.problem.x_upper
+
+        if xl.all() == -np.inf and xu.all() == np.inf:
+            self.bounds = None
+        else:
+            self.bounds = Bounds(xl, xu, keep_feasible=False)
+
+    def setup_constraints(self):
+        '''
+        Adapt constraints as a list of dictionaries with constraints >= 0.
+        Note: COBYLA only supports inequality constraints.
+        Raises
+        ------
+        RuntimeError
+            If equality constraints are detected in the problem.
+        '''
+        cl = self.problem.c_lower
+        cu = self.problem.c_upper
+
+        eqi = np.where(cl == cu)[0]
+        lci = np.where((cl != -np.inf) & (cl != cu))[0]
+        uci = np.where((cu !=  np.inf) & (cl != cu))[0]
 
         self.constraints = []
-        if len(eq_indices) > 0:
-            con_dict_eq = {}
-            con_dict_eq['type'] = 'eq'
+        if len(eqi) > 0:
+            raise RuntimeError('Detected equality constraints in the problem. '\
+                               'COBYLA does not support equality constraints. '\
+                               'Use a different solver (PySLSQP, IPOPT, etc.) or remove the equality constraints.')
 
-            def func_eq(x):
-                # print('EQ:')
-                # print(self.con(x)[eq_indices])
-                # print(c_lower[eq_indices])
+        if len(lci) > 0:
+            con_dict_ineq1 = {}
+            con_dict_ineq1['type'] = 'ineq'
+            con_dict_ineq1['fun'] = lambda x: self.con(x)[lci] - cl[lci]
+            self.constraints.append(con_dict_ineq1)
 
-                return self.con(x)[eq_indices] - c_lower[eq_indices]
-
-            con_dict_eq['fun'] = func_eq
-
-            if type(self.jac) != str:
-
-                def jac_eq(x):
-                    return self.jac(x)[eq_indices]
-
-                con_dict_eq['jac'] = jac_eq
-
-            self.constraints.append(con_dict_eq)
-
-        if len(ineq_indices) > 0:
-            # Remove constraints with -np.inf as lower bound
-            c_lower_ineq = c_lower[ineq_indices]
-            lower_ineq_indices = ineq_indices[np.where(
-                c_lower_ineq != -np.inf)[0]]
-
-            if len(lower_ineq_indices) > 0:
-                con_dict_ineq1 = {}
-                con_dict_ineq1['type'] = 'ineq'
-
-                def func_ineq1(x):
-                    # print('INEQ1:')
-                    # print(self.con(x)[lower_ineq_indices])
-                    # print(c_lower[lower_ineq_indices])
-
-                    return self.con(x)[lower_ineq_indices] - c_lower[
-                        lower_ineq_indices]
-
-                con_dict_ineq1['fun'] = func_ineq1
-
-                if type(self.jac) != str:
-
-                    def jac_ineq1(x):
-                        return self.jac(x)[lower_ineq_indices]
-
-                    con_dict_ineq1['jac'] = jac_ineq1
-
-                self.constraints.append(con_dict_ineq1)
-
-            # Remove constraints with np.inf as upper bound
-            c_upper_ineq = c_upper[ineq_indices]
-            upper_ineq_indices = ineq_indices[np.where(
-                c_upper_ineq != np.inf)[0]]
-
-            if len(upper_ineq_indices) > 0:
-                con_dict_ineq2 = {}
-                con_dict_ineq2['type'] = 'ineq'
-
-                def func_ineq2(x):
-                    # print('INEQ2:')
-                    # print(self.con(x)[upper_ineq_indices])
-                    # print(c_upper[upper_ineq_indices])
-                    return c_upper[upper_ineq_indices] - self.con(
-                        x)[upper_ineq_indices]
-
-                con_dict_ineq2['fun'] = func_ineq2
-
-                if type(self.jac) != str:
-
-                    def jac_ineq2(x):
-                        return -self.jac(x)[upper_ineq_indices]
-
-                    con_dict_ineq2['jac'] = jac_ineq2
-
-                self.constraints.append(con_dict_ineq2)
+        if len(uci) > 0:
+            con_dict_ineq2 = {}
+            con_dict_ineq2['type'] = 'ineq'
+            con_dict_ineq2['fun'] = lambda x: cu[uci] - self.con(x)[uci]
+            self.constraints.append(con_dict_ineq2)
 
     def solve(self):
-        # Assign shorter names to variables and methods
         method = 'COBYLA'
+        solver_options = self.solver_options.get_pure_dict()
+        user_callback = solver_options.pop('callback')
 
-        x0 = self.problem.x0 * 1.
+        def callback(x): 
+            self.update_outputs(x=x)
+            if user_callback: user_callback(x) 
 
-        tol = self.options['tol']
-        catol = self.options['catol']
+        self.update_outputs(x=self.x0)
 
-        maxiter = self.options['maxiter']
-        rhobeg = self.options['rhobeg']
-
-        obj = self.obj
-        grad = self.grad
-
-        bounds = self.bounds
-
-        constraints = self.constraints  # (contains eq,ineq constraints and jacobian)
-
-        # COBYLA does not support callback
-        # callback = None
-        disp = self.options['disp']
-
+        # Call the COBYLA algorithm from scipy (options are specific to COBYLA)
         start_time = time.time()
+        self.results = minimize(
+            self.obj,
+            self.x0,
+            args=(),
+            method=method,
+            jac=None,
+            hess=None,
+            hessp=None,
+            bounds=self.bounds,
+            constraints=self.constraints,
+            tol=None,
+            callback=callback,
+            options=solver_options
+            )
+        self.total_time = time.time() - start_time
 
-        # COBYLA has no return_all option
-        results = minimize(obj,
-                           x0,
-                           args=(),
-                           method=method,
-                           jac=None,
-                           hess=None,
-                           hessp=None,
-                           bounds=bounds,
-                           constraints=constraints,
-                           tol=None,
-                           callback=None,
-                           options={
-                               'maxiter': maxiter,
-                               'tol': tol,
-                               'catol': catol,
-                               'disp': disp,
-                               'rhobeg': rhobeg
-                               })
+        return self.results
+    
+    def print_results(self, optimal_variables=False):
+        '''
+        Print the results of the optimization in modOpt's format.
+        '''
+        output  = "\n\tSolution from Scipy COBYLA:"
+        output += "\n\t"+"-" * 100
 
-        # print(result)
+        output += f"\n\t{'Problem':25}: {self.problem_name}"
+        output += f"\n\t{'Solver':25}: {self.solver_name}"
+        output += f"\n\t{'Success':25}: {self.results['success']}"
+        output += f"\n\t{'Message':25}: {self.results['message']}"
+        output += f"\n\t{'Status':25}: {self.results['status']}"
+        output += f"\n\t{'Total time':25}: {self.total_time}"
+        output += f"\n\t{'Objective':25}: {self.results['fun']}"
+        output += f"\n\t{'Total function evals':25}: {self.results['nfev']}"
+        output += f"\n\t{'Max. constraint violation':25}: {self.results['maxcv']}"
+        if optimal_variables:
+            output += f"\n\t{'Optimal variables':25}: {self.results['x']}"
 
-        end_time = time.time()
-        self.total_time = end_time - start_time
-
-        self.results = results
-
-        # show_options(solver='minimize', method=None, disp=True)
+        output += '\n\t' + '-'*100
+        print(output)

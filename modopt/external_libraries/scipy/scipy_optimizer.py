@@ -11,46 +11,49 @@ import warnings
 #                         x0,
 #                         args=(),
 #
-#                         method=None,
+#                         method=None, {str or callable}, optional
 #                         # If not given, chosen to be one of BFGS, L-BFGS-B, SLSQP,
-#                         # depending if the problem has constraints or bounds.
+#                         # depending on if the problem has constraints or bounds.
 #
-#                         jac=None,
+#                         jac=None, {callable, ‘2-point’, ‘3-point’, ‘cs’, bool}, optional
 #                         # method returning gradient vector
 #                         # Only for CG, BFGS, Newton-CG, L-BFGS-B, TNC, SLSQP, dogleg,
 #                         # trust-ncg, trust-krylov, trust-exact and trust-constr.
+#                         # If jac is a Boolean and is True, fun is assumed to return
+#                         # a tuple (f, g) containing the objective function and the gradient.
 #                         # If None or False, the gradient will be estimated using 2-point
 #                         # finite difference estimation with an absolute step size.
 #                         # Alternatively, the keywords {‘2-point’, ‘3-point’, ‘cs’} can be used.
 #
-#                         hess=None,
+#                         hess=None, {callable, ‘2-point’, ‘3-point’, ‘cs’, HessianUpdateStrategy}, optional
 #                         # method returning Hessian matrix
 #                         # Only for Newton-CG, dogleg, trust-ncg, trust-krylov, trust-exact
 #                         # and trust-constr
 #
-#                         hessp=None,
+#                         hessp=None, callable, optional
 #                         # Hessian of objective function times an arbitrary vector p.
 #                         # Only for Newton-CG, trust-ncg, trust-krylov, trust-constr.
-#                         # Only one of hessp or hess needs to be given.
+#                         # Only one of hessp(x,p) or hess(x) needs to be given.
 #                         # If hess is provided, then hessp will be ignored.
 #
 #                         bounds=None,
 #                         # Bounds on variables for Nelder-Mead, L-BFGS-B, TNC, SLSQP,
-#                         # Powell, and trust-constr methods.
+#                         # Powell, trust-constr, COBYLA, and COBYQA methods.
 #                         # There are two ways to specify the bounds:
 #                         # Instance of Bounds() class.
 #                         # Sequence of (min, max) pairs for each element in x.
 #                         # None is used to specify no bound.
 #
 #                         constraints=(),
-#                         # Constraints definition (only for COBYLA, SLSQP and trust-constr).
-#                         # ‘trust-constr’: single object (LinearConstraint or NonlinearConstraint) or
+#                         # Constraints definition (only for COBYLA, COBYQA, SLSQP and trust-constr).
+#                         # ‘trust-constr’ and 'COBYQA': single object (LinearConstraint or NonlinearConstraint) or
 #                         # a list of objects specifying constraints to the optimization problem.
 #                         # 'COBYLA', 'SLSQP': Constraints are defined as a list of dictionaries.
-#                         # {type : 'eq' or 'ineq', fun : callable constraint function,
-#                         #  jac : callable Jacobian of fun (optional),
-#                         #  args : Extra arguments to be passed to fun and jac.}
-#                         # Equality constraint mans c(x) = 0
+#                         # {'type' : 'eq' or 'ineq', 
+#                         #  'fun' : callable constraint function,
+#                         #  'jac' : callable Jacobian of fun (optional),
+#                         #  'args' : Extra arguments to be passed to fun and jac.}
+#                         # Equality constraint means c(x) = 0
 #                         # whereas inequality means c(x) >= 0
 #                         # Note that COBYLA only supports inequality constraints.
 #
@@ -70,6 +73,7 @@ import warnings
 #
 #                         options=None)
 #                         # A dictionary of solver options.
+#                         # All methods except TNC accept the following generic options:
 #                         # options = {maxiter:int, disp:bool (True to print convergence messages),
 #                         # +solver_specific_options}, given by
 #                         # scipy.optimize.show_options(solver=None, method=None, disp=True)
@@ -184,120 +188,20 @@ class ScipyOptimizer(Optimizer):
 
     def setup_bounds(self):
         # Adapt bounds as scipy Bounds() object
-        # Only for Nelder-Mead, L-BFGS-B, TNC, SLSQP, Powell, and trust-constr methods
+        # Only for Nelder-Mead, L-BFGS-B, TNC, SLSQP, Powell, trust-constr, COBYLA, and COBYQA methods
+        xl = self.problem.x_lower
+        xu = self.problem.x_upper
 
-        # TODO: check for bugs for the if condition from 2 lines below
-        if self.problem.x_lower.all(
-        ) == -np.inf and self.problem.x_upper.all() == np.inf:
+        if xl.all() == -np.inf and xu.all() == np.inf:
             self.bounds = None
-            return None
-
-        x_lower = self.problem.x_lower
-        x_upper = self.problem.x_upper
-
-        self.bounds = Bounds(x_lower, x_upper, keep_feasible=False)
-
-    def setup_constraints(self, build_dict=True):
-
-        # To avoid can give as one eq and one ineq constraint
-        c_lower = self.problem.c_lower
-        c_upper = self.problem.c_upper
-
-        if c_lower.size == 0:
-            self.constraints = ()
-            return None
-
-        # Adapt constraints as a list of dictionaries with constraints = 0 or >= 0
-        # For SLSQP and COBYLA
-        # Note: COBYLA only supports inequality constraints
-
-        if build_dict:
-            eq_indices = np.where(c_upper == c_lower)[0]
-            ineq_indices = np.where(c_upper != c_lower)[0]
-
-            self.constraints = []
-            if len(eq_indices) > 0:
-                con_dict_eq = {}
-                con_dict_eq['type'] = 'eq'
-
-                def func_eq(x):
-                    return self.con(x)[
-                        eq_indices] - self.problem.c_lower[eq_indices]
-
-                con_dict_eq['fun'] = func_eq
-
-                if type(self.jac) != str:
-
-                    def jac_eq(x):
-                        return self.jac(x)[eq_indices]
-
-                    con_dict_eq['jac'] = jac_eq
-
-                self.constraints.append(con_dict_eq)
-                # print('eq')
-
-            if len(ineq_indices) > 0:
-
-                # Remove -np.inf constraints with -np.inf as lower bound
-                c_lower_ineq = c_lower[ineq_indices]
-                lower_ineq_indices = ineq_indices[np.where(
-                    c_lower_ineq != -np.inf)[0]]
-
-                if len(lower_ineq_indices) > 0:
-                    con_dict_ineq1 = {}
-                    con_dict_ineq1['type'] = 'ineq'
-
-                    def func_ineq1(x):
-                        return self.con(x)[
-                            lower_ineq_indices] - self.problem.c_lower[
-                                lower_ineq_indices]
-
-                    con_dict_ineq1['fun'] = func_ineq1
-
-                    if type(self.jac) != str:
-
-                        def jac_ineq1(x):
-                            return self.jac(x)[lower_ineq_indices]
-
-                        con_dict_ineq1['jac'] = jac_ineq1
-
-                    self.constraints.append(con_dict_ineq1)
-                    # print('ineq1')
-
-                # Remove np.inf constraints with -np.inf as lower bound
-                c_upper_ineq = c_upper[ineq_indices]
-                upper_ineq_indices = ineq_indices[np.where(
-                    c_upper_ineq != np.inf)[0]]
-
-                if len(upper_ineq_indices) > 0:
-                    con_dict_ineq2 = {}
-                    con_dict_ineq2['type'] = 'ineq'
-
-                    def func_ineq2(x):
-                        return self.problem.c_upper[
-                            upper_ineq_indices] - self.con(
-                                x)[upper_ineq_indices]
-
-                    con_dict_ineq2['fun'] = func_ineq2
-
-                    if type(self.jac) != str:
-
-                        def jac_ineq2(x):
-                            print('jac:', self.jac)
-                            return -self.jac(x)[upper_ineq_indices]
-
-                        con_dict_ineq2['jac'] = jac_ineq2
-
-                    self.constraints.append(con_dict_ineq2)
-
-                    # print('ineq2')
-
         else:
-            # Adapt constraints a single/list of scipy LinearConstraint() or NonlinearConstraint() objects
-            self.constraints = NonlinearConstraint(self.con,
-                                                   c_lower,
-                                                   c_upper,
-                                                   jac=self.jac)
+            self.bounds = Bounds(xl, xu, keep_feasible=False)
+
+    def setup_constraints(self):
+        cl = self.problem.c_lower
+        cu = self.problem.c_upper
+        # Adapt constraints a single/list of scipy LinearConstraint() or NonlinearConstraint() objects
+        self.constraints = NonlinearConstraint(self.con, cl, cu, jac=self.jac)
 
     # # For callback, for every method except trust-constr
     # # trust-constr can call with more information
@@ -311,14 +215,6 @@ class ScipyOptimizer(Optimizer):
     #     # For 'trust-constr', OptimizeResult() object state is available after each iteration
     #     if (optimize_result is not None) and (optimize_result != True):
     #         pass
-
-    def save_xk(self, x):
-        # Saving new x iterate on file
-        name = self.problem_name
-        nx = self.problem.nx
-
-        with open(name + '_x.out', 'a') as f:
-            np.savetxt(f, x.reshape(1, nx))
 
     def print_results(self, optimal_variables=False):
 

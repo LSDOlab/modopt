@@ -41,7 +41,6 @@ from modopt.core.optimization_algorithms.quadratic_penalty_eq import L2PenaltyEq
 # from modopt.core.optimization_algorithms.aug_lag import AugLag
 
 # from modopt.core.optimization_algorithms.interior_point import InteriorPoint
-# from modopt.core.optimization_algorithms.slsqp_v2.slsqp_v2 import SLSQPv2
 
 from modopt.core.optimization_algorithms.sqp import SQP as SQPSparse
 from modopt.core.optimization_algorithms.sqp_dense import SQP

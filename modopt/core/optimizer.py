@@ -31,17 +31,18 @@ class Optimizer(object):
         a_outs = self.available_outputs     # Available outputs dictionary
         d_outs = self.options['outputs']    # Declared outputs list
 
-        # Write the header of the summary_table file
         self.scalar_outputs = [out for out in a_outs.keys() if not isinstance(a_outs[out], tuple)]
-        header =''
-        for key in self.scalar_outputs:
-            if a_outs[key] in (int, np.int_, np.int32, np.int64):
-                header += "%16s " % key
-            elif a_outs[key] in (float, np.float_, np.float32, np.float64):
-                header += "%16s " % key
-                
-        with open('modOpt_summary.out', 'w') as f:
-            f.write(header)
+        # Write the header of the summary_table file
+        if len(self.scalar_outputs) > 0:
+            header =''
+            for key in self.scalar_outputs:
+                if a_outs[key] in (int, np.int_, np.int32, np.int64):
+                    header += "%16s " % key
+                elif a_outs[key] in (float, np.float_, np.float32, np.float64):
+                    header += "%16s " % key
+
+            with open('modOpt_summary.out', 'w') as f:
+                f.write(header)
 
         if len(d_outs) == 0:
             return
@@ -76,16 +77,17 @@ class Optimizer(object):
             raise ValueError(f'Output(s) passed in to be updated {list(kwargs.keys())}' \
                              f'do not match the available outputs {list(a_outs.keys())}.')
         
-        # Print summary_table row
-        new_row ='\n'
-        for key in self.scalar_outputs:
-            if a_outs[key] in (int, np.int_, np.int32, np.int64):
-                new_row += "%16i " % kwargs[key]
-            elif a_outs[key] in (float, np.float_, np.float32, np.float64):
-                new_row += "%16.6E " % kwargs[key]
+        if len(self.scalar_outputs) > 0:
+            # Print summary_table row
+            new_row ='\n'
+            for key in self.scalar_outputs:
+                if a_outs[key] in (int, np.int_, np.int32, np.int64):
+                    new_row += "%16i " % kwargs[key]
+                elif a_outs[key] in (float, np.float_, np.float32, np.float64):
+                    new_row += "%16.6E " % kwargs[key]
 
-        with open('modOpt_summary.out', 'a') as f:
-            f.write(new_row)
+            with open('modOpt_summary.out', 'a') as f:
+                f.write(new_row)
 
         self.out_dict = copy.deepcopy(kwargs)
 
@@ -130,8 +132,6 @@ class Optimizer(object):
         print(output)
 
         if summary_table:
-            dirName = self.problem_name + '_outputs'
-
             with open('modOpt_summary.out', 'r') as f:
                 # lines = f.readlines()
                 lines = f.read().splitlines()

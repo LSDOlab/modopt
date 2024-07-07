@@ -19,7 +19,7 @@ optimizer = SLSQP(prob, solver_options={'maxiter':20, 'ftol':1e-6})
 
 A limited number of options are available for the SLSQP solver in modOpt as given in the following table.
 For more information on the Scipy SLSQP algorithm, visit
-**[Scipy documentation](https://docs.scipy.org/doc/scipy/reference/optimize.minimize-slsqp.html#optimize-minimize-slsqp)**.
+**[Scipy documentation](https://docs.scipy.org/doc/scipy/reference/optimize.minimize-slsqp.html)**.
 
 ```{list-table} SLSQP solver options
 :header-rows: 1
@@ -37,7 +37,7 @@ For more information on the Scipy SLSQP algorithm, visit
 * - `disp`
   - *bool* (`False`)
   - Set to `True` to print convergence messages. \
-    If `False`, no console outputs will be printed.
+    If `False`, no console outputs will be generated.
 * - `callback`
   - *callable* (`None`)
   - Function to be called after each major iteration. \

@@ -60,10 +60,13 @@ with `optimizer.check_first_derivatives(x=x0, step=1e-6)`.
 Please visit the following pages for more information on any specific optimizer.
 
 ```{toctree}
+:caption: List of performant algorithms
 :maxdepth: 1
+:numbered: 1
 
 performant_algs/slsqp
 performant_algs/pyslsqp
+performant_algs/cobyla
 performant_algs/sqp
 performant_algs/snopt
 performant_algs/ipopt

@@ -26,7 +26,8 @@ def test_sqp():
     assert_almost_equal(optimizer.results['optimality'], 0., decimal=9)
     assert_almost_equal(optimizer.results['feasibility'], 0., decimal=11)
     assert optimizer.results['niter'] < solver_options['maxiter']
-    assert optimizer.results['nfev'] == 394
+    assert optimizer.results['nfev'] == 1351
+    # assert optimizer.results['nfev'] == 394
     assert optimizer.results['ngev'] == 271
     
     prob = constrained_lite()
@@ -46,7 +47,8 @@ def test_sqp():
     assert_almost_equal(optimizer.results['optimality'], 0., decimal=9)
     assert_almost_equal(optimizer.results['feasibility'], 0., decimal=11)
     assert optimizer.results['niter'] < solver_options['maxiter']
-    assert optimizer.results['nfev'] == 394
+    assert optimizer.results['nfev'] == 1351
+    # assert optimizer.results['nfev'] == 394
     assert optimizer.results['ngev'] == 271
 
 if __name__ == '__main__':

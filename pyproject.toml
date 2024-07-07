@@ -142,7 +142,6 @@ visualization = [
 [tool.pytest.ini_options]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-    "slsqp: marks tests as slsqp (deselect with '-m \"not slsqp\"')",
     "interfaces: marks tests as interfaces (deselect with '-m \"not interfaces\"')",
     "csdl: marks tests as csdl (deselect with '-m \"not csdl\"')",
     "csdl_alpha: marks tests as csdl_alpha (deselect with '-m \"not csdl_alpha\"')",
@@ -150,6 +149,7 @@ markers = [
     "jax: marks tests as jax (deselect with '-m \"not jax\"')",
     "snopt: marks tests as snopt (deselect with '-m \"not snopt\"')",
     "slsqp: marks tests as slsqp (deselect with '-m \"not slsqp\"')",
+    "cobyla: marks tests as cobyla (deselect with '-m \"not cobyla\"')",
     "pyslsqp: marks tests as pyslsqp (deselect with '-m \"not pyslsqp\"')",
     "ipopt: marks tests as ipopt (deselect with '-m \"not ipopt\"')",
     "qpsolvers: marks tests as qpsolvers (deselect with '-m \"not qpsolvers\"')",
@@ -163,8 +163,10 @@ omit = [
     "*/tests/*",
     # omit everything in the docs directory
     "/docs/*",
-    # omit this single file since snopta is deprecated and not used
+    # omit this single file since snopta is deprecated and not used anymore
     "modopt/external_libraries/snopt/snopta.py",
+    # omit this since scipy_optimizer is deprecated and not used anymore
+    "modopt/external_libraries/scipy/scipy_optimizer.py",
     # omit any development files
     "*/*_dev.py",
     # omit this single file since options dictionary is already tested in openmdao
