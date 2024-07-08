@@ -124,13 +124,13 @@ class ConvexQPSolvers(Optimizer):
         jac_0 = self.problem._compute_constraint_jacobian(self.x0)
 
         # Define the lower bounds for the variables: lb <= x
-        if self.problem.x_lower.all() == -np.inf:
+        if np.all(self.problem.x_lower == -np.inf):
             self.lb = None
         else:
             self.lb = self.problem.x_lower
 
         # Define the upper bounds for the variables: x <= ub
-        if self.problem.x_upper.all() == np.inf:
+        if np.all(self.problem.x_upper == np.inf):
             self.ub = None
         else:
             self.ub = self.problem.x_upper

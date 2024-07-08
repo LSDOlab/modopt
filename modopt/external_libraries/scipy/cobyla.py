@@ -7,6 +7,8 @@ from modopt import Optimizer
 class COBYLA(Optimizer):
     '''
     Class that interfaces modOpt with the COBYLA optimization algorithm from Scipy.
+    Constrained Optimization BY Linear Approximations or COBYLA is a gradient-free optimization algorithm.
+    COBYLA only supports inequality constraints and bounds.
     '''
     def initialize(self):
         '''
@@ -60,7 +62,7 @@ class COBYLA(Optimizer):
         xl = self.problem.x_lower
         xu = self.problem.x_upper
 
-        if xl.all() == -np.inf and xu.all() == np.inf:
+        if np.all(xl == -np.inf) and np.all(xu == np.inf):
             self.bounds = None
         else:
             self.bounds = Bounds(xl, xu, keep_feasible=False)

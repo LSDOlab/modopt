@@ -366,7 +366,7 @@ class Problem(object):
         '''
         Compute scaled bounds x_lower, x_upper, c_lower, 
         and c_upper for the optimizer.
-        THis method is overridden in CSDLProblem(), OpenMDAOProblem(), CUTEstProblem().
+        This method is overridden in CSDLProblem(), OpenMDAOProblem(), CUTEstProblem().
         Note that c_upper = None and c_lower = None if there are no constraints.
         '''
         self.x_lower = self.design_variables_dict.lower * self.x_scaler
