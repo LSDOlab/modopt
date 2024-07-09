@@ -1,4 +1,4 @@
-from modopt.external_libraries.scipy import SLSQP, COBYLA
+from modopt.external_libraries.scipy import SLSQP, COBYLA, BFGS, LBFGSB, NelderMead, COBYQA, TrustConstr
 from modopt.external_libraries.pyslsqp import PySLSQP
 from modopt.external_libraries.snopt import SNOPTc as SNOPT
 from modopt.external_libraries.ipopt import IPOPT
@@ -8,7 +8,7 @@ from modopt.external_libraries.qpsolvers import ConvexQPSolvers
 def optimize(prob, solver='SLSQP', **kwargs):
     """
     Optimize a given problem using a specified solver.
-    The available solvers are 'SLSQP', 'PySLSQP', 'COBYLA',
+    The available solvers are 'SLSQP', 'PySLSQP', 'COBYLA', 'BFGS',
     'SNOPT', 'IPOPT', 'CVXOPT', and 'ConvexQPSolvers'.
 
     Only performant algorithms can be used with this function
@@ -21,8 +21,10 @@ def optimize(prob, solver='SLSQP', **kwargs):
     ----------
     prob : Problem or ProblemLite
         The problem to be solved.
-    solver : {'SLSQP', 'PySLSQP', 'COBYLA', 'SNOPT', 'IPOPT', 'CVXOPT', 'ConvexQPSolvers'}, optional
+    solver : str, optional
         The solver to be used. Default is 'SLSQP'.
+        Available solvers are 'SLSQP', 'PySLSQP', 'COBYLA', 'BFGS',
+        'SNOPT', 'IPOPT', 'CVXOPT', and 'ConvexQPSolvers'.
     **kwargs
         Additional keyword arguments to be passed to the solver.
 
@@ -31,13 +33,16 @@ def optimize(prob, solver='SLSQP', **kwargs):
     dict
         The results of the optimization.
     """
-    valid_solvers = ['SLSQP', 'PySLSQP', 'COBYLA', 'SNOPT', 'IPOPT', 'CVXOPT', 'ConvexQPSolvers']
+    valid_solvers = ['SLSQP', 'PySLSQP', 'COBYLA', 'BFGS',
+                     'SNOPT', 'IPOPT', 'CVXOPT', 'ConvexQPSolvers']
     if solver == 'SLSQP':
         optimizer = SLSQP(prob, **kwargs)
     elif solver == 'PySLSQP':
         optimizer = PySLSQP(prob, **kwargs)
     elif solver == 'COBYLA':
         optimizer = COBYLA(prob, **kwargs)
+    elif solver == 'BFGS':
+        optimizer = BFGS(prob, **kwargs)
     elif solver == 'SNOPT':
         optimizer = SNOPT(prob, **kwargs)
     elif solver == 'IPOPT':

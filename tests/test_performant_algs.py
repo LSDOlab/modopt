@@ -81,7 +81,55 @@ def test_cobyla():
     assert str(exc_info.value) == 'Detected equality constraints in the problem. '\
                                   'COBYLA does not support equality constraints. '\
                                   'Use a different solver (PySLSQP, IPOPT, etc.) or remove the equality constraints.'
+
+@pytest.mark.bfgs
+@pytest.mark.interfaces
+def test_bfgs():
+    from modopt import BFGS
+    from all_problem_types import BoundConstrained, EqConstrained, IneqConstrained
+
+    prob = BoundConstrained()
+    with pytest.raises(Exception) as exc_info:
+        optimizer = BFGS(prob, solver_options={'maxiter':200, 'disp':False, 'gtol':1e-6})
     
+    assert exc_info.type is RuntimeError
+    assert str(exc_info.value) == 'BFGS does not support bounds on variables. ' \
+                                  'Please use a different optimizer.'
+    
+    probs = [EqConstrained(), IneqConstrained()]
+    for prob in probs:
+        with pytest.raises(Exception) as exc_info:
+            optimizer = BFGS(prob, solver_options={'maxiter':200, 'disp':False, 'gtol':1e-6})
+
+        assert exc_info.type is RuntimeError
+        assert str(exc_info.value) == 'BFGS does not support constraints. ' \
+                                      'Please use a different optimizer.'
+    
+    from all_problem_types import Unconstrained, unconstrained_lite
+
+    prob = Unconstrained()
+
+    optimizer = BFGS(prob, solver_options={'maxiter':200, 'disp':False, 'gtol':1e-12})
+    optimizer.solve()
+    print(optimizer.results)
+    optimizer.print_results(optimal_variables=True, optimal_gradient=True, optimal_hessian_inverse=True)
+    assert optimizer.results['success'] == True
+    assert optimizer.results['message'] == 'Optimization terminated successfully.'
+    assert_array_almost_equal(optimizer.results['x'], [0.0, 0.0], decimal=4)
+    assert_almost_equal(optimizer.results['fun'], 0.0, decimal=11)
+    
+
+    prob = unconstrained_lite()
+
+    optimizer = BFGS(prob, solver_options={'maxiter':200, 'disp':True, 'gtol':1e-12}, outputs=['x', 'obj'])
+    optimizer.solve()
+    print(optimizer.results)
+    optimizer.print_results(optimal_variables=True, optimal_gradient=True, optimal_hessian_inverse=True)
+    assert optimizer.results['success'] == True
+    assert optimizer.results['message'] == 'Optimization terminated successfully.'
+    assert_array_almost_equal(optimizer.results['x'], [0.0, 0.0], decimal=4)
+    assert_almost_equal(optimizer.results['fun'], 0.0, decimal=11)
+
 @pytest.mark.pyslsqp
 @pytest.mark.interfaces
 def test_pyslsqp():
@@ -265,6 +313,7 @@ def test_ipopt_exact_hess_lag():
 if __name__ == '__main__':
     test_slsqp()
     test_cobyla()
+    test_bfgs()
     test_pyslsqp()
     test_snopt()
     test_ipopt()

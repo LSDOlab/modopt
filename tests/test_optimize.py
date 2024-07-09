@@ -60,6 +60,29 @@ def test_cobyla():
     assert_array_almost_equal(results['x'], [0.5, -0.5], decimal=6)
     assert_almost_equal(results['fun'], 0.125, decimal=6)
 
+@pytest.mark.bfgs
+@pytest.mark.interfaces
+def test_bfgs():
+    from all_problem_types import Unconstrained, unconstrained_lite
+
+    prob = Unconstrained()
+
+    results = optimize(prob, solver="BFGS", solver_options={'maxiter':200, 'disp':False, 'gtol':1e-12})
+    print(results)
+    assert results['success'] == True
+    assert results['message'] == 'Optimization terminated successfully.'
+    assert_array_almost_equal(results['x'], [0.0, 0.0], decimal=4)
+    assert_almost_equal(results['fun'], 0.0, decimal=11)
+
+    prob = unconstrained_lite()
+
+    results = optimize(prob, solver="BFGS", solver_options={'maxiter':200, 'disp':True, 'gtol':1e-12}, outputs=['x', 'obj'])
+    print(results)
+    assert results['success'] == True
+    assert results['message'] == 'Optimization terminated successfully.'
+    assert_array_almost_equal(results['x'], [0.0, 0.0], decimal=4)
+    assert_almost_equal(results['fun'], 0.0, decimal=11)
+
 @pytest.mark.pyslsqp
 @pytest.mark.interfaces
 def test_pyslsqp():
@@ -258,11 +281,12 @@ def test_invalid_solver():
 
     assert exc_info.type is ValueError
     assert str(exc_info.value) == "Invalid solver named 'InvalidSolver' is specified. Valid solvers are: "\
-                                  "['SLSQP', 'PySLSQP', 'COBYLA', 'SNOPT', 'IPOPT', 'CVXOPT', 'ConvexQPSolvers']."
+                                  "['SLSQP', 'PySLSQP', 'COBYLA', 'BFGS', 'SNOPT', 'IPOPT', 'CVXOPT', 'ConvexQPSolvers']."
 
 if __name__ == '__main__':
     test_slsqp()
     test_cobyla()
+    test_bfgs()
     test_pyslsqp()
     test_snopt()
     test_ipopt()

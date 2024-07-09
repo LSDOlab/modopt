@@ -106,7 +106,6 @@ class SLSQP(Optimizer):
             self.constraints.append(con_dict_ineq2)
 
     def solve(self):
-        method = 'SLSQP'
         solver_options = self.solver_options.get_pure_dict()
         user_callback = solver_options.pop('callback')
 
@@ -122,7 +121,7 @@ class SLSQP(Optimizer):
             self.obj,
             self.x0,
             args=(),
-            method=method,
+            method='SLSQP',
             jac=self.grad,
             hess=None,
             hessp=None,

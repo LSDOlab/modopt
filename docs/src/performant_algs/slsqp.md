@@ -41,6 +41,6 @@ For more information on the Scipy SLSQP algorithm, visit
 * - `callback`
   - *callable* (`None`)
   - Function to be called after each major iteration. \
-    The function is called as`callback(x)`, where ``x`` is the \
+    The function is called as `callback(xk)`, where `xk` is the \
     optimization variable vector from the current major iteration.
 ```

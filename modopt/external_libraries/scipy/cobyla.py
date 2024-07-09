@@ -102,7 +102,6 @@ class COBYLA(Optimizer):
             self.constraints.append(con_dict_ineq2)
 
     def solve(self):
-        method = 'COBYLA'
         solver_options = self.solver_options.get_pure_dict()
         user_callback = solver_options.pop('callback')
 
@@ -118,7 +117,7 @@ class COBYLA(Optimizer):
             self.obj,
             self.x0,
             args=(),
-            method=method,
+            method='COBYLA',
             jac=None,
             hess=None,
             hessp=None,

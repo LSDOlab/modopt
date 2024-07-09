@@ -1,90 +1,131 @@
 import numpy as np
 from scipy.optimize import minimize, Bounds
 import time
+from modopt.utils.options_dictionary import OptionsDictionary
+from modopt import Optimizer
 
-from .scipy_optimizer import ScipyOptimizer
+class BFGS(Optimizer):
+    ''' 
+    Class that interfaces modOpt with the BFGS optimization algorithm from Scipy.
+    BFGS (Broyden-Fletcher-Goldfarb-Shanno) is a quasi-Newton optimization algorithm 
+    for unconstrained problems. Therefore, it does not support bounds or constraints.
+    '''
+    def initialize(self):
+        '''
+        Initialize the optimizer.
+        Declare options, solver_options and outputs.
+        '''
+        self.solver_name = 'scipy-bfgs'
+        self.options.declare('solver_options', types=dict, default={})
+        self.default_solver_options = {
+            'maxiter': (int, 200),      # len(x0) * 200 is the default in scipy.optimize.minimize
+            'gtol': (float, 1e-5),      # Gradient norm <= gtol for successful termination
+            'xrtol': (float, 0.0),      # Relative tolerance for x. Terminate successfully if norm[alpha*pk] <= (norm[xk] + xrtol) * xrtol
+            'norm': (float, np.inf),    # Order of gradient or step (alpha*pk) norm (inf is max, -inf is min)
+            'c1': (float, 1e-4),        # Armijo condition parameter
+            'c2': (float, 0.9),         # Curvature condition parameter, 0 < c1 < c2 < 1
+            'hess_inv0': (np.ndarray, np.identity(self.problem.nx)), # Initial inverse Hessian approximation
+            'return_all': (bool, False),# To return a list of the best solution at each major iteration in the final results dict
+            'disp': (bool, False),
+            'callback': ((type(None), callable), None),
+        }
 
+        # Used for verifying the keys and value-types of user-provided solver_options
+        self.solver_options = OptionsDictionary()
+        for key, value in self.default_solver_options.items():
+            self.solver_options.declare(key, types=value[0], default=value[1])
 
-class BFGS(ScipyOptimizer):
-    def declare_options(self):
-        self.solver_name += 'bfgs'
+        # Declare outputs
+        self.available_outputs = {
+            'x'  : (float, (self.problem.nx,)),
+            'obj': float
+            }
+        self.options.declare('outputs', values=([], ['x'], ['obj'], ['x', 'obj']), default=[])
 
-        # Solver-specific options exactly as in scipy with defaults
-        self.options.declare('maxiter',
-                             default=None,
-                             types=(int, type(None)))
-        self.options.declare('disp', default=True, types=bool)
-        self.options.declare('eps',
-                             default=1.4901161193847656e-08,
-                             types=float)
-        self.options.declare('finite_diff_rel_step',
-                             default=None,
-                             types=(type(None), np.ndarray))
-        self.options.declare('return_all', default=True, types=bool)
-        # Gradient norm
-        self.options.declare('gtol', default=1e-5, types=float)
-        # Order of gradient norm (inf is max, -inf is min)
-        self.options.declare('norm', default=np.inf, types=float)
+        # Define the initial guess, objective, gradient
+        self.x0   = self.problem.x0 * 1.0
+        self.obj  = self.problem._compute_objective
+        self.grad = self.problem._compute_objective_gradient
 
     def setup(self):
-        # start a new file for saving callback() save_xk()
-        pass
+        '''
+        Setup the optimizer.
+        Setup outputs.
+        Check the validity of user-provided 'solver_options'.
+        '''
+        self.setup_outputs()
+        self.solver_options.update(self.options['solver_options'])
+        
+        xl = self.problem.x_lower
+        xu = self.problem.x_upper
+        unbounded = (np.all(xl == -np.inf) and np.all(xu == np.inf))
+        if not unbounded:
+            raise RuntimeError('BFGS does not support bounds on variables. ' \
+                               'Please use a different optimizer.')
+        
+        if self.problem.constrained:
+            raise RuntimeError('BFGS does not support constraints. ' \
+                               'Please use a different optimizer.')
 
     def solve(self):
-        # Assign shorter names to variables and methods
-        method = 'BFGS'
-        # nx = self.problem.options[['nx']
-        # nc = self.options['nc']
+        solver_options = self.solver_options.get_pure_dict()
+        user_callback = solver_options.pop('callback')
 
-        x0 = self.problem.options['x0']
-        gtol = self.options['gtol']
-        norm = self.options['norm']
-        eps = self.options['eps']
-        finite_diff_rel_step = self.options['finite_diff_rel_step']
+        def callback(intermediate_result):
+            x = intermediate_result['x']
+            f = intermediate_result['fun']
+            self.update_outputs(x=x, obj=f)
+            if user_callback: user_callback(x, f)
 
-        # opt_tol = self.options['opt_tol']
-        # feas_tol = self.options['feas_tol']
+        self.update_outputs(x=self.x0, obj=self.obj(self.x0))
 
-        maxiter = self.options['maxiter']
-        disp = self.options['disp']
-        return_all = self.options['return_all']
-
-        obj = self.obj
-        grad = self.grad
-
-        # COBYLA does not support callback
-        callback = self.save_xk
-        disp = self.options['disp']
-        # con = self.con
-        # jac = self.jac
-
+        # Call the BFGS algorithm from scipy (options are specific to BFGS)
         start_time = time.time()
+        self.results = minimize(
+            self.obj,
+            self.x0,
+            args=(),
+            method='BFGS',
+            jac=self.grad,
+            hess=None,
+            hessp=None,
+            bounds=None,
+            constraints=None,
+            tol=None,
+            callback=callback,
+            options=solver_options
+            )
+        self.total_time = time.time() - start_time
 
-        # Call SLSQP algorithm from scipy (options are specific to SLSQP)
-        # Note: f_tol is the precision tolerance for the objective(not the same as opt_tol)
+        return self.results
+    
+    def print_results(self, 
+                      optimal_variables=False,
+                      optimal_gradient=False,
+                      optimal_hessian_inverse=False):
+        '''
+        Print the results of the optimization in modOpt's format.
+        '''
+        output  = "\n\tSolution from Scipy BFGS:"
+        output += "\n\t"+"-" * 100
 
-        # TODO: Make sure 'finite_diff_rel_step': None' is an option for BFGS
-        # TODO: What does return_all=True do, where does it return
-        #  a list of the best solution at each of the iterations? ANS: inside result
-        result = minimize(obj,
-                          x0,
-                          args=(),
-                          method=method,
-                          jac=grad,
-                          hess=None,
-                          hessp=None,
-                          bounds=None,
-                          constraints=None,
-                          tol=None,
-                          callback=callback,
-                          options={
-                              'gtol': gtol,
-                              'norm': norm,
-                              'eps': eps,
-                              'maxiter': maxiter,
-                              'disp': disp,
-                              'return_all': return_all,
-                          })
-        #  'finite_diff_rel_step': None})
+        output += f"\n\t{'Problem':25}: {self.problem_name}"
+        output += f"\n\t{'Solver':25}: {self.solver_name}"
+        output += f"\n\t{'Success':25}: {self.results['success']}"
+        output += f"\n\t{'Message':25}: {self.results['message']}"
+        output += f"\n\t{'Status':25}: {self.results['status']}"
+        output += f"\n\t{'Total time':25}: {self.total_time}"
+        output += f"\n\t{'Objective':25}: {self.results['fun']}"
+        output += f"\n\t{'Gradient norm':25}: {np.linalg.norm(self.results['jac'])}"
+        output += f"\n\t{'Total function evals':25}: {self.results['nfev']}"
+        output += f"\n\t{'Total gradient evals':25}: {self.results['njev']}"
+        output += f"\n\t{'Major iterations':25}: {self.results['nit']}"
+        if optimal_variables:
+            output += f"\n\t{'Optimal variables':25}: {self.results['x']}"
+        if optimal_gradient:
+            output += f"\n\t{'Optimal obj. gradient':25}: {self.results['jac']}"
+        if optimal_hessian_inverse:
+            output += f"\n\t{'Optimal Hessian inverse':25}: {self.results['hess_inv']}"
 
-        print(result)
+        output += '\n\t' + '-'*100
+        print(output)

@@ -67,6 +67,7 @@ Please visit the following pages for more information on any specific optimizer.
 performant_algs/slsqp
 performant_algs/pyslsqp
 performant_algs/cobyla
+performant_algs/bfgs
 performant_algs/sqp
 performant_algs/snopt
 performant_algs/ipopt
