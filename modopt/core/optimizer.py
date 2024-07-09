@@ -74,7 +74,7 @@ class Optimizer(object):
         d_outs = self.options['outputs']    # Declared outputs list
 
         if set(kwargs.keys()) != set(a_outs):
-            raise ValueError(f'Output(s) passed in to be updated {list(kwargs.keys())}' \
+            raise ValueError(f'Output(s) passed in to be updated {list(kwargs.keys())} ' \
                              f'do not match the available outputs {list(a_outs.keys())}.')
         
         if len(self.scalar_outputs) > 0:

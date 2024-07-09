@@ -32,7 +32,7 @@ class BeanFunction(Problem):
         dfdx2 = 2 * (1-x2) + 2 * (2*x2 - x1**2)
         grad['x'] = np.array([dfdx1, dfdx2])
 
-from modopt import PSO, NelderMead
+from modopt import PSO, NelderMeadSimplex
 
 prob = BeanFunction()
 
@@ -78,7 +78,7 @@ prob = BeanFunction()
 tol = 1e-6
 maxiter = 200
 l = 1.0
-optimizer = NelderMead(prob, maxiter=maxiter, tol=tol, initial_length=l)
+optimizer = NelderMeadSimplex(prob, maxiter=maxiter, tol=tol, initial_length=l)
 
 optimizer.solve()
 optimizer.print_results(summary_table=True)

@@ -18,7 +18,7 @@ from modopt.external_libraries.openmdao import (OpenMDAOProblem, )
 # from modopt.external_libraries.pycutest import (CUTEstProblem, )
 
 # import external optimizer library interfaces
-from modopt.external_libraries.scipy import (SLSQP, COBYLA, BFGS)
+from modopt.external_libraries.scipy import (SLSQP, COBYLA, BFGS, LBFGSB, TrustConstr, NelderMead, COBYQA)
 from modopt.external_libraries.pyslsqp import PySLSQP
 from modopt.external_libraries.snopt import SNOPTc as SNOPT
 from modopt.external_libraries.ipopt import IPOPT
@@ -47,7 +47,7 @@ from modopt.core.optimization_algorithms.sqp_dense import SQP
 from modopt.core.optimization_algorithms.sqp_surf import SQP_SURF
 
 # continuous gradient-free
-from modopt.core.optimization_algorithms.nelder_mead import NelderMead
+from modopt.core.optimization_algorithms.nelder_mead_simplex import NelderMeadSimplex
 from modopt.core.optimization_algorithms.pso import PSO
 
 # discrete gradient-free

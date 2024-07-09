@@ -6,7 +6,7 @@ from modopt.line_search_algorithms import ScipyLS, BacktrackingArmijo
 from modopt.merit_functions import AugmentedLagrangianEq, L2Eq
 
 
-class NelderMead(Optimizer):
+class NelderMeadSimplex(Optimizer):
     def initialize(self):
         self.solver_name = 'nelder_mead'
 

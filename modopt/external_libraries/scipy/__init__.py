@@ -6,6 +6,7 @@ from .lbfgs_b import LBFGSB
 from .tnc import TNC
 
 from .cobyla import COBYLA
+from .cobyqa import COBYQA
 from .slsqp import SLSQP
 from .trust_constr import TrustConstr
 

@@ -72,7 +72,7 @@ def test_nelder_mead():
     Test the Nelder-Mead algorithm for unconstrained problems.
     '''
     from numpy.testing import assert_array_equal, assert_array_almost_equal, assert_almost_equal
-    from modopt import NelderMead
+    from modopt import NelderMeadSimplex
 
     prob = BeanFunction()
     solver_options = {
@@ -80,7 +80,7 @@ def test_nelder_mead():
         'tol': 1e-6,
         'initial_length': 1.0, 
         }
-    optimizer = NelderMead(prob, **solver_options)
+    optimizer = NelderMeadSimplex(prob, **solver_options)
     optimizer.solve()
     print(optimizer.results)
     optimizer.print_results()
@@ -91,7 +91,7 @@ def test_nelder_mead():
     assert optimizer.results['niter'] <= solver_options['maxiter']
 
     prob = bean_function_lite()
-    optimizer = NelderMead(prob, **solver_options)
+    optimizer = NelderMeadSimplex(prob, **solver_options)
     optimizer.solve()
     print(optimizer.results)
     optimizer.print_results()
