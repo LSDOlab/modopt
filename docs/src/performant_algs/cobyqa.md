@@ -13,7 +13,14 @@ such as PySLSQP or IPOPT, if first order derivative information is available
 for the objective and constraints of your problem.
 ```
 
-To use the `COBYQA` solver, start by importing it as shown in the following code:
+Before using the `COBYQA` solver in modOpt, ensure that you 
+have the *cobyqa* optimizer installed.
+```{warning}
+*cobyqa* is available with *scipy>=1.14.0* which requires *python>=3.10.0*.
+If your machine cannot satisfy these requirements, install the 'cobyqa' 
+package by running `pip install cobyqa`.
+```
+To use the `COBYQA` solver in modOpt, start by importing it as shown in the following code:
 
 ```py
 from modopt import COBYQA
