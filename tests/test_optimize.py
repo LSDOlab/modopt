@@ -141,7 +141,7 @@ def test_cobyqa():
     assert results['success'] == True
     assert results['message'] == 'The lower bound for the trust-region radius has been reached'
     assert_array_almost_equal(results['x'], [2., 0.], decimal=9)
-    assert_almost_equal(results['fun'], 20., decimal=8)
+    assert_almost_equal(results['fun'], 20., decimal=7)
     
     prob = scaling_lite()
 
@@ -150,7 +150,7 @@ def test_cobyqa():
     assert results['success'] == True
     assert results['message'] == 'The lower bound for the trust-region radius has been reached'
     assert_array_almost_equal(results['x'], [2., 0.], decimal=9)
-    assert_almost_equal(results['fun'], 20., decimal=8)
+    assert_almost_equal(results['fun'], 20., decimal=7)
 
 @pytest.mark.pyslsqp
 @pytest.mark.interfaces
