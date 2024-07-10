@@ -1,5 +1,5 @@
 # Test the optimize function interface for SLSQP, PySLSQP, SNOPT, IPOPT, CVXOPT,
-# ConvexQPSolvers, COBYLA, and BFGS
+# ConvexQPSolvers, COBYLA, BFGS, LBFGSB, and NelderMead solvers.
 # The tests are exactly the same as in test_performant_algs.py, test_qpsolvers.py, and test_cvxopt.py
 
 from all_problem_types import Scaling, scaling_lite, Unconstrained, unconstrained_lite
@@ -106,6 +106,29 @@ def test_lbfgsb():
     assert results['success'] == True
     assert results['message'] == 'CONVERGENCE: NORM_OF_PROJECTED_GRADIENT_<=_PGTOL'
     assert_array_almost_equal(results['x'], [1.0, 0.0], decimal=3)
+    assert_almost_equal(results['fun'], 1.0, decimal=11)
+
+@pytest.mark.nelder_mead
+@pytest.mark.interfaces
+def test_nelder_mead():
+    from all_problem_types import BoundConstrained, bound_constrained_lite
+
+    prob = BoundConstrained()
+
+    results = optimize(prob, solver='NelderMead', solver_options={'maxiter':200, 'disp':False, 'fatol':1e-6, 'xatol':1e-6})
+    print(results)
+    assert results['success'] == True
+    assert results['message'] == 'Optimization terminated successfully.'
+    assert_array_almost_equal(results['x'], [1.0, 0.0], decimal=4)
+    assert_almost_equal(results['fun'], 1.0, decimal=11)
+    
+    prob = bound_constrained_lite()
+
+    results = optimize(prob, solver='NelderMead', solver_options={'maxiter':200, 'disp':True, 'fatol':1e-6, 'xatol':1e-6}, outputs=['x', 'obj'])
+    print(results)
+    assert results['success'] == True
+    assert results['message'] == 'Optimization terminated successfully.'
+    assert_array_almost_equal(results['x'], [1.0, 0.0], decimal=4)
     assert_almost_equal(results['fun'], 1.0, decimal=11)
 
 @pytest.mark.pyslsqp
@@ -314,6 +337,7 @@ if __name__ == '__main__':
     test_cobyla()
     test_bfgs()
     test_lbfgsb()
+    test_nelder_mead()
     test_pyslsqp()
     test_snopt()
     test_ipopt()

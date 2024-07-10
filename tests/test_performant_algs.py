@@ -1,4 +1,4 @@
-# Test SLSQP, PySLSQP, SNOPT, IPOPT, COBYLA, and BFGS
+# Test SLSQP, PySLSQP, SNOPT, IPOPT, COBYLA, BFGS, LBFGSB, NelderMead
 # The same tests are used for the sime optimize() function
 
 from all_problem_types import Scaling, scaling_lite, Unconstrained, unconstrained_lite
@@ -137,6 +137,15 @@ def test_lbfgsb():
     from modopt import LBFGSB
     from all_problem_types import BoundConstrained, bound_constrained_lite
 
+    prob = Scaling()
+
+    with pytest.raises(Exception) as exc_info:
+        optimizer = LBFGSB(prob, solver_options={'maxiter':200, 'iprint':0, 'gtol':1e-12})
+    
+    assert exc_info.type is RuntimeError
+    assert str(exc_info.value) == 'LBFGSB does not support constraints. '\
+                                  'Use a different solver (PySLSQP, IPOPT, etc.) or remove constraints.'
+
     prob = BoundConstrained()
 
     optimizer = LBFGSB(prob, solver_options={'maxiter':200, 'iprint':-1, 'gtol':1e-8, 'ftol':1e-12})
@@ -163,14 +172,44 @@ def test_lbfgsb():
     assert_array_almost_equal(optimizer.results['x'], [1.0, 0.0], decimal=3)
     assert_almost_equal(optimizer.results['fun'], 1.0, decimal=11)
 
+@pytest.mark.nelder_mead
+@pytest.mark.interfaces
+def test_nelder_mead():
+    import numpy as np
+    from modopt import NelderMead
+    from all_problem_types import BoundConstrained, bound_constrained_lite
+
     prob = Scaling()
 
     with pytest.raises(Exception) as exc_info:
-        optimizer = LBFGSB(prob, solver_options={'maxiter':200, 'iprint':0, 'gtol':1e-12})
+        optimizer = NelderMead(prob, solver_options={'maxiter':200, 'disp':True, 'fatol':1e-4})
     
     assert exc_info.type is RuntimeError
-    assert str(exc_info.value) == 'LBFGSB does not support constraints. '\
+    assert str(exc_info.value) == 'NelderMead does not support constraints. '\
                                   'Use a different solver (PySLSQP, IPOPT, etc.) or remove constraints.'
+
+    prob = BoundConstrained()
+
+    optimizer = NelderMead(prob, solver_options={'maxiter':200, 'disp':False, 'fatol':1e-6, 'xatol':1e-6})
+    optimizer.solve()
+    print(optimizer.results)
+    optimizer.print_results(optimal_variables=True, final_simplex=True)
+    assert optimizer.results['success'] == True
+    assert optimizer.results['message'] == 'Optimization terminated successfully.'
+    assert_array_almost_equal(optimizer.results['x'], [1.0, 0.0], decimal=4)
+    assert_almost_equal(optimizer.results['fun'], 1.0, decimal=11)
+    
+
+    prob = bound_constrained_lite()
+
+    optimizer = NelderMead(prob, solver_options={'maxiter':200, 'disp':True, 'fatol':1e-6, 'xatol':1e-6}, outputs=['x', 'obj'])
+    optimizer.solve()
+    print(optimizer.results)
+    optimizer.print_results(optimal_variables=True, final_simplex=True)
+    assert optimizer.results['success'] == True
+    assert optimizer.results['message'] == 'Optimization terminated successfully.'
+    assert_array_almost_equal(optimizer.results['x'], [1.0, 0.0], decimal=4)
+    assert_almost_equal(optimizer.results['fun'], 1.0, decimal=11)
     
 @pytest.mark.pyslsqp
 @pytest.mark.interfaces
@@ -397,6 +436,7 @@ if __name__ == '__main__':
     test_cobyla()
     test_bfgs()
     test_lbfgsb()
+    test_nelder_mead()
     test_pyslsqp()
     test_snopt()
     test_ipopt()

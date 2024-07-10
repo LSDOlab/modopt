@@ -1,22 +1,22 @@
 # LBFGSB
 
-The L-BFGS-B (Limited-memory BFGS with Bound constraints) algorithm, 
+The L-BFGS-B (Limited-memory BFGS with Bound constraints) algorithm
 is a gradient-based optimization algorithm.
-This solver uses the L-BFGS-B algorithm from the Scipy library.
+This solver uses the 'L-BFGS-B' algorithm from the Scipy library.
 ```{note}
-LBFGSB is a quasi-Newton optimization algorithm for large-scale bound-constrained problems.
+L-BFGS-B is a quasi-Newton optimization algorithm for large-scale bound-constrained problems.
 Therefore, it does not support other types of constraints.
-Please use general nonlinear programming algorithms like PySLSQP or IPOPT, 
+Please use general nonlinear programming algorithms like `PySLSQP` or `IPOPT`, 
 if your problem has constraints other than optimization variable bounds.
 ```
 
-To use LBFGSB, start by importing the optimizer as shown in the following code:
+To use the `LBFGSB` solver, start by importing it as shown in the following code:
 ```py
 from modopt import LBFGSB
 ```
 
 Options could be set by just passing them within the `solver_options` dictionary when 
-instantiating the LBFGSB optimizer object.
+instantiating the `LBFGSB` optimizer object.
 For example, we can set the maximum number of iterations `maxiter` 
 and the tolerance on the projected gradient `gtol` as shown below.
 
@@ -24,8 +24,8 @@ and the tolerance on the projected gradient `gtol` as shown below.
 optimizer = LBFGSB(prob, solver_options={'maxiter':1000, 'gtol':1e-6})
 ```
 
-The options available for the LBFGSB solver in modOpt are given in the following table.
-For more information on the Scipy L-BFGS-B algorithm, visit
+The options available for the `LBFGSB` solver in modOpt are given in the following table.
+For more information on the Scipy 'L-BFGS-B' algorithm, visit
 **[Scipy documentation](https://docs.scipy.org/doc/scipy/reference/optimize.minimize-lbfgsb.html)**.
 
 ```{list-table} LBFGSB solver options

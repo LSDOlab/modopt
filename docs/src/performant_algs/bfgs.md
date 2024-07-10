@@ -2,21 +2,21 @@
 
 The Broyden-Fletcher-Goldfarb-Shanno algorithm, also known as the BFGS algorithm, 
 is a gradient-based optimization algorithm.
-This solver uses the BFGS algorithm from the Scipy library.
+This solver uses the 'BFGS' algorithm from the Scipy library.
 ```{note}
-BFGS is a quasi-Newton optimization algorithm for unconstrained problems.
+`BFGS` is a quasi-Newton optimization algorithm for unconstrained problems.
 Therefore, it does not support bounds or constraints.
-Please use general nonlinear programming algorithms like PySLSQP or IPOPT, 
+Please use general nonlinear programming algorithms such as `PySLSQP` or `IPOPT`, 
 if your problem has bounds or constraints.
 ```
 
-To use BFGS, start by importing the optimizer as shown in the following code:
+To use the `BFGS` solver, start by importing it as shown in the following code:
 ```py
 from modopt import BFGS
 ```
 
 Options could be set by just passing them within the `solver_options` dictionary when 
-instantiating the BFGS optimizer object.
+instantiating the `BFGS` optimizer object.
 For example, we can set the maximum number of iterations `maxiter` 
 and the tolerance on the gradient norm `gtol` as shown below.
 
@@ -24,8 +24,8 @@ and the tolerance on the gradient norm `gtol` as shown below.
 optimizer = BFGS(prob, solver_options={'maxiter':1000, 'gtol':1e-6})
 ```
 
-The options available for the BFGS solver in modOpt are given in the following table.
-For more information on the Scipy BFGS algorithm, visit
+The options available for the `BFGS` solver in modOpt are given in the following table.
+For more information on the Scipy 'BFGS' algorithm, visit
 **[Scipy documentation](https://docs.scipy.org/doc/scipy/reference/optimize.minimize-bfgs.html)**.
 
 ```{list-table} BFGS solver options

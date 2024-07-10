@@ -13,7 +13,7 @@ def optimize(prob, solver='SLSQP', **kwargs):
     and is made available for users who are only interested in
     solving their optimization problems with solvers in the modOpt library.
     Developers of instructional algorithms are recommended to use
-    `Optimizer` subclasses such as SLSQP, Newton, NelderMead, etc. directly.
+    `Optimizer` subclasses such as SLSQP, Newton, SQP, etc. directly.
 
     Parameters
     ----------
@@ -22,7 +22,7 @@ def optimize(prob, solver='SLSQP', **kwargs):
     solver : str, optional
         The solver to be used. Default is 'SLSQP'.
         Available solvers are 'SLSQP', 'PySLSQP', 'COBYLA', 'BFGS',
-        'LBFGSB', 
+        'LBFGSB', 'NelderMead',
         'SNOPT', 'IPOPT', 'CVXOPT', and 'ConvexQPSolvers'.
     **kwargs
         Additional keyword arguments to be passed to the solver.
@@ -33,7 +33,7 @@ def optimize(prob, solver='SLSQP', **kwargs):
         The results of the optimization.
     """
     valid_solvers = ['SLSQP', 'PySLSQP', 'COBYLA', 'BFGS', 
-                     'LBFGSB',
+                     'LBFGSB', 'NelderMead',
                      'SNOPT', 'IPOPT', 'CVXOPT', 'ConvexQPSolvers']
     if solver == 'SLSQP':
         optimizer = SLSQP(prob, **kwargs)
@@ -45,6 +45,8 @@ def optimize(prob, solver='SLSQP', **kwargs):
         optimizer = BFGS(prob, **kwargs)
     elif solver == 'LBFGSB':
         optimizer = LBFGSB(prob, **kwargs)
+    elif solver == 'NelderMead':
+        optimizer = NelderMead(prob, **kwargs)
     elif solver == 'SNOPT':
         optimizer = SNOPT(prob, **kwargs)
     elif solver == 'IPOPT':
