@@ -113,6 +113,9 @@ cvxopt = [    # cvxopt is already installed with qpsolvers[open_source_solvers] 
 sqp = [
     "osqp", # osqp is already installed with qpsolvers[open_source_solvers]
 ]
+cobyqa = [
+    "cobyqa", # cobyqa is already installed with scipy>=1.14.0, which requires python>=3.10
+]
 pycutest = [
     "pycutest", # Needs manual installation of the CUTEst library with the test problems
 ]
@@ -134,6 +137,7 @@ interfaces = [
     "casadi", # Needed for the IPOPT interface
     "pyslsqp",
     # "osqp", # osqp is already installed with qpsolvers[open_source_solvers]
+    "cobyqa", # cobyqa is already installed with scipy>=1.14.0, which requires python>=3.10
 ]
 visualization = [
     "matplotlib",
@@ -153,8 +157,8 @@ markers = [
     "bfgs: marks tests as bfgs (deselect with '-m \"not bfgs\"')",
     "lbfgsb: marks tests as lbfgsb (deselect with '-m \"not lbfgsb\"')",
     "trust_constr: marks tests as trust_constr (deselect with '-m \"not trust_constr\"')",
-    "cobyqa: marks tests as cobyqa (deselect with '-m \"not cobyqa\"')",
     "nelder_mead: marks tests as nelder_mead (deselect with '-m \"not nelder_mead\"')",
+    "cobyqa: marks tests as cobyqa (deselect with '-m \"not cobyqa\"')",
     "pyslsqp: marks tests as pyslsqp (deselect with '-m \"not pyslsqp\"')",
     "ipopt: marks tests as ipopt (deselect with '-m \"not ipopt\"')",
     "qpsolvers: marks tests as qpsolvers (deselect with '-m \"not qpsolvers\"')",

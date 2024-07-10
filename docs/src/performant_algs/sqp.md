@@ -1,4 +1,4 @@
-# SQP (Sequential Quadratic Programming)
+# SQP
 
 While using the builtin SQP optimizer, you can follow the same process as in the previous section
 except when importing the optimizer.

@@ -131,6 +131,27 @@ def test_nelder_mead():
     assert_array_almost_equal(results['x'], [1.0, 0.0], decimal=4)
     assert_almost_equal(results['fun'], 1.0, decimal=11)
 
+@pytest.mark.cobyqa
+@pytest.mark.interfaces
+def test_cobyqa():
+    prob = Scaling()
+
+    results = optimize(prob, solver='COBYQA', solver_options={'maxiter':1000, 'debug':True, 'disp':False, 'feasibility_tol':1e-8})
+    print(results)
+    assert results['success'] == True
+    assert results['message'] == 'The lower bound for the trust-region radius has been reached'
+    assert_array_almost_equal(results['x'], [2., 0.], decimal=10)
+    assert_almost_equal(results['fun'], 20., decimal=8)
+    
+    prob = scaling_lite()
+
+    results = optimize(prob, solver='COBYQA', solver_options={'maxiter':1000, 'disp':True, 'feasibility_tol':1e-8, 'store_history':True}, outputs=['x', 'obj'])
+    print(results)
+    assert results['success'] == True
+    assert results['message'] == 'The lower bound for the trust-region radius has been reached'
+    assert_array_almost_equal(results['x'], [2., 0.], decimal=10)
+    assert_almost_equal(results['fun'], 20., decimal=8)
+
 @pytest.mark.pyslsqp
 @pytest.mark.interfaces
 def test_pyslsqp():
@@ -329,7 +350,7 @@ def test_invalid_solver():
 
     assert exc_info.type is ValueError
     assert str(exc_info.value) == "Invalid solver named 'InvalidSolver' is specified. Valid solvers are: "\
-                                  "['SLSQP', 'PySLSQP', 'COBYLA', 'BFGS', 'LBFGSB', 'NelderMead', "\
+                                  "['SLSQP', 'PySLSQP', 'COBYLA', 'BFGS', 'LBFGSB', 'NelderMead', 'COBYQA', "\
                                   "'SNOPT', 'IPOPT', 'CVXOPT', 'ConvexQPSolvers']."
 
 if __name__ == '__main__':
@@ -338,6 +359,7 @@ if __name__ == '__main__':
     test_bfgs()
     test_lbfgsb()
     test_nelder_mead()
+    test_cobyqa()
     test_pyslsqp()
     test_snopt()
     test_ipopt()

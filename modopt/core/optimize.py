@@ -1,4 +1,5 @@
-from modopt.external_libraries.scipy import SLSQP, COBYLA, BFGS, LBFGSB, NelderMead, COBYQA, TrustConstr
+from modopt.external_libraries.scipy import SLSQP, COBYLA, BFGS, LBFGSB, NelderMead, TrustConstr
+from modopt.external_libraries.cobyqa import COBYQA
 from modopt.external_libraries.pyslsqp import PySLSQP
 from modopt.external_libraries.snopt import SNOPTc as SNOPT
 from modopt.external_libraries.ipopt import IPOPT
@@ -22,7 +23,7 @@ def optimize(prob, solver='SLSQP', **kwargs):
     solver : str, optional
         The solver to be used. Default is 'SLSQP'.
         Available solvers are 'SLSQP', 'PySLSQP', 'COBYLA', 'BFGS',
-        'LBFGSB', 'NelderMead',
+        'LBFGSB', 'NelderMead', 'COBYQA', 
         'SNOPT', 'IPOPT', 'CVXOPT', and 'ConvexQPSolvers'.
     **kwargs
         Additional keyword arguments to be passed to the solver.
@@ -33,7 +34,7 @@ def optimize(prob, solver='SLSQP', **kwargs):
         The results of the optimization.
     """
     valid_solvers = ['SLSQP', 'PySLSQP', 'COBYLA', 'BFGS', 
-                     'LBFGSB', 'NelderMead',
+                     'LBFGSB', 'NelderMead', 'COBYQA',
                      'SNOPT', 'IPOPT', 'CVXOPT', 'ConvexQPSolvers']
     if solver == 'SLSQP':
         optimizer = SLSQP(prob, **kwargs)
@@ -47,6 +48,8 @@ def optimize(prob, solver='SLSQP', **kwargs):
         optimizer = LBFGSB(prob, **kwargs)
     elif solver == 'NelderMead':
         optimizer = NelderMead(prob, **kwargs)
+    elif solver == 'COBYQA':
+        optimizer = COBYQA(prob, **kwargs)
     elif solver == 'SNOPT':
         optimizer = SNOPT(prob, **kwargs)
     elif solver == 'IPOPT':

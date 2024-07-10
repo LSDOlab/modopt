@@ -18,7 +18,8 @@ from modopt.external_libraries.openmdao import (OpenMDAOProblem, )
 # from modopt.external_libraries.pycutest import (CUTEstProblem, )
 
 # import external optimizer library interfaces
-from modopt.external_libraries.scipy import (SLSQP, COBYLA, BFGS, LBFGSB, TrustConstr, NelderMead, COBYQA)
+from modopt.external_libraries.scipy import (SLSQP, COBYLA, BFGS, LBFGSB, TrustConstr, NelderMead)
+from modopt.external_libraries.cobyqa import COBYQA
 from modopt.external_libraries.pyslsqp import PySLSQP
 from modopt.external_libraries.snopt import SNOPTc as SNOPT
 from modopt.external_libraries.ipopt import IPOPT

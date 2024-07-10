@@ -70,6 +70,7 @@ performant_algs/cobyla
 performant_algs/bfgs
 performant_algs/lbfgsb
 performant_algs/nelder_mead
+performant_algs/cobyqa
 performant_algs/sqp
 performant_algs/snopt
 performant_algs/ipopt

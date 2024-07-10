@@ -211,6 +211,37 @@ def test_nelder_mead():
     assert_array_almost_equal(optimizer.results['x'], [1.0, 0.0], decimal=4)
     assert_almost_equal(optimizer.results['fun'], 1.0, decimal=11)
     
+@pytest.mark.cobyqa
+@pytest.mark.interfaces
+def test_cobyqa():
+    import numpy as np
+    from modopt import COBYQA
+
+    prob = Scaling()
+
+    optimizer = COBYQA(prob, solver_options={'maxiter':1000, 'debug':True, 'disp':False, 'feasibility_tol':1e-8})
+    # The following feas_tol breaks COBYQA -> gives very poor solution
+    # optimizer = COBYQA(prob, solver_options={'maxiter':1000, 'disp':False, 'feasibility_tol':1e-12})
+    optimizer.solve()
+    print(optimizer.results)
+    optimizer.print_results(optimal_variables=True)
+    assert optimizer.results['success'] == True
+    assert optimizer.results['message'] == 'The lower bound for the trust-region radius has been reached'
+    assert_array_almost_equal(optimizer.results['x'], [2., 0.], decimal=10)
+    assert_almost_equal(optimizer.results['fun'], 20., decimal=8)
+    
+    prob = scaling_lite()
+
+    optimizer = COBYQA(prob, solver_options={'maxiter':1000, 'disp':True, 'feasibility_tol':1e-8, 'store_history':True}, outputs=['x', 'obj'])
+    
+    optimizer.solve()
+    print(optimizer.results)
+    optimizer.print_results(optimal_variables=True, obj_history=True, max_con_viol_history=True)
+    assert optimizer.results['success'] == True
+    assert optimizer.results['message'] == 'The lower bound for the trust-region radius has been reached'
+    assert_array_almost_equal(optimizer.results['x'], [2., 0.], decimal=10)
+    assert_almost_equal(optimizer.results['fun'], 20., decimal=8)
+    
 @pytest.mark.pyslsqp
 @pytest.mark.interfaces
 def test_pyslsqp():
@@ -437,6 +468,7 @@ if __name__ == '__main__':
     test_bfgs()
     test_lbfgsb()
     test_nelder_mead()
+    test_cobyqa()
     test_pyslsqp()
     test_snopt()
     test_ipopt()
