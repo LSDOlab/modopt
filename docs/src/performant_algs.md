@@ -68,6 +68,7 @@ performant_algs/slsqp
 performant_algs/pyslsqp
 performant_algs/cobyla
 performant_algs/bfgs
+performant_algs/lbfgsb
 performant_algs/sqp
 performant_algs/snopt
 performant_algs/ipopt

@@ -94,7 +94,7 @@ def test_bfgs():
     
     assert exc_info.type is RuntimeError
     assert str(exc_info.value) == 'BFGS does not support bounds on variables. ' \
-                                  'Please use a different optimizer.'
+                                  'Use a different solver (PySLSQP, IPOPT, etc.) or remove bounds.'
     
     probs = [EqConstrained(), IneqConstrained()]
     for prob in probs:
@@ -103,7 +103,7 @@ def test_bfgs():
 
         assert exc_info.type is RuntimeError
         assert str(exc_info.value) == 'BFGS does not support constraints. ' \
-                                      'Please use a different optimizer.'
+                                      'Use a different solver (PySLSQP, IPOPT, etc.) or remove constraints.'
     
     from all_problem_types import Unconstrained, unconstrained_lite
 
@@ -130,6 +130,48 @@ def test_bfgs():
     assert_array_almost_equal(optimizer.results['x'], [0.0, 0.0], decimal=4)
     assert_almost_equal(optimizer.results['fun'], 0.0, decimal=11)
 
+@pytest.mark.lbfgsb
+@pytest.mark.interfaces
+def test_lbfgsb():
+    import numpy as np
+    from modopt import LBFGSB
+    from all_problem_types import BoundConstrained, bound_constrained_lite
+
+    prob = BoundConstrained()
+
+    optimizer = LBFGSB(prob, solver_options={'maxiter':200, 'iprint':-1, 'gtol':1e-8, 'ftol':1e-12})
+    optimizer.check_first_derivatives(prob.x0)
+    optimizer.solve()
+    print(optimizer.results)
+    optimizer.print_results(optimal_variables=True, optimal_gradient=True, optimal_hessian_inverse=True)
+    assert optimizer.results['success'] == True
+    # assert optimizer.results['message'] == 'CONVERGENCE: REL_REDUCTION_OF_F_<=_FACTR*EPSMCH'
+    assert optimizer.results['message'] == 'CONVERGENCE: NORM_OF_PROJECTED_GRADIENT_<=_PGTOL'
+    assert_array_almost_equal(optimizer.results['x'], [1.0, 0.0], decimal=3)
+    assert_almost_equal(optimizer.results['fun'], 1.0, decimal=11)
+    
+
+    prob = bound_constrained_lite()
+
+    optimizer = LBFGSB(prob, solver_options={'maxiter':200, 'iprint':1, 'gtol':1e-8, 'ftol':1e-12}, outputs=['x', 'obj'])
+    optimizer.check_first_derivatives(prob.x0)
+    optimizer.solve()
+    print(optimizer.results)
+    optimizer.print_results(optimal_variables=True, optimal_gradient=True, optimal_hessian_inverse=True)
+    assert optimizer.results['success'] == True
+    assert optimizer.results['message'] == 'CONVERGENCE: NORM_OF_PROJECTED_GRADIENT_<=_PGTOL'
+    assert_array_almost_equal(optimizer.results['x'], [1.0, 0.0], decimal=3)
+    assert_almost_equal(optimizer.results['fun'], 1.0, decimal=11)
+
+    prob = Scaling()
+
+    with pytest.raises(Exception) as exc_info:
+        optimizer = LBFGSB(prob, solver_options={'maxiter':200, 'iprint':0, 'gtol':1e-12})
+    
+    assert exc_info.type is RuntimeError
+    assert str(exc_info.value) == 'LBFGSB does not support constraints. '\
+                                  'Use a different solver (PySLSQP, IPOPT, etc.) or remove constraints.'
+    
 @pytest.mark.pyslsqp
 @pytest.mark.interfaces
 def test_pyslsqp():
@@ -310,12 +352,54 @@ def test_ipopt_exact_hess_lag():
     print(optimizer.results)
     assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=1)
 
+@pytest.mark.interfaces
+def test_errors():
+    import numpy as np
+    from modopt import Problem, ProblemLite, BFGS, LBFGSB
+    class QPNoGrad(Problem):
+        def setup(self):
+            self.add_design_variables('x', shape=(2,))
+            self.add_objective('f')
+        def setup_derivatives(self):
+            pass
+        def compute_objective(self, dvs, obj):
+            obj['f'] = np.sum(dvs['x']**2)
+            
+    # 1. Raise error when objective gradient is not declared for Problem() class
+    with pytest.raises(ValueError) as excinfo:
+        optimizer = BFGS(QPNoGrad())
+    assert str(excinfo.value) == "Objective gradient function is not declared in the Problem() subclass but is needed for BFGS."
+
+    with pytest.raises(ValueError) as excinfo:
+        optimizer = LBFGSB(QPNoGrad())
+    assert str(excinfo.value) == "Objective gradient function is not declared in the Problem() subclass but is needed for LBFGSB."
+
+    def qp_no_grad_lite():
+        x0 = np.array([500., 5.])
+        def obj(x):
+            return np.sum(x**2)
+        
+        return ProblemLite(x0, obj=obj, name='qp_no_jac_lite')
+
+    # 2. Raise warning when objective gradient is not declared for ProblemLite() class and use finite-differences
+    optimizer = BFGS(qp_no_grad_lite())
+    optimizer.solve()
+    assert optimizer.results['success']
+    assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=5)
+
+    optimizer = LBFGSB(qp_no_grad_lite())
+    optimizer.solve()
+    assert optimizer.results['success']
+    assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=6)
+
 if __name__ == '__main__':
     test_slsqp()
     test_cobyla()
     test_bfgs()
+    test_lbfgsb()
     test_pyslsqp()
     test_snopt()
     test_ipopt()
     test_ipopt_exact_hess_lag()
+    test_errors()
     print('All tests passed!')

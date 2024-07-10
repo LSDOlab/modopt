@@ -83,6 +83,31 @@ def test_bfgs():
     assert_array_almost_equal(results['x'], [0.0, 0.0], decimal=4)
     assert_almost_equal(results['fun'], 0.0, decimal=11)
 
+@pytest.mark.lbfgsb
+@pytest.mark.interfaces
+def test_lbfgsb():
+    import numpy as np
+    from all_problem_types import BoundConstrained, bound_constrained_lite
+
+    prob = BoundConstrained()
+
+    results = optimize(prob, solver='LBFGSB', solver_options={'maxiter':200, 'iprint':-1, 'gtol':1e-8, 'ftol':1e-12})
+    print(results)
+    assert results['success'] == True
+    assert results['message'] == 'CONVERGENCE: NORM_OF_PROJECTED_GRADIENT_<=_PGTOL'
+    assert_array_almost_equal(results['x'], [1.0, 0.0], decimal=3)
+    assert_almost_equal(results['fun'], 1.0, decimal=11)
+    
+
+    prob = bound_constrained_lite()
+
+    optimizer = optimize(prob, solver='LBFGSB', solver_options={'maxiter':200, 'iprint':1, 'gtol':1e-8, 'ftol':1e-12}, outputs=['x', 'obj'])
+    print(results)
+    assert results['success'] == True
+    assert results['message'] == 'CONVERGENCE: NORM_OF_PROJECTED_GRADIENT_<=_PGTOL'
+    assert_array_almost_equal(results['x'], [1.0, 0.0], decimal=3)
+    assert_almost_equal(results['fun'], 1.0, decimal=11)
+
 @pytest.mark.pyslsqp
 @pytest.mark.interfaces
 def test_pyslsqp():
@@ -281,12 +306,14 @@ def test_invalid_solver():
 
     assert exc_info.type is ValueError
     assert str(exc_info.value) == "Invalid solver named 'InvalidSolver' is specified. Valid solvers are: "\
-                                  "['SLSQP', 'PySLSQP', 'COBYLA', 'BFGS', 'SNOPT', 'IPOPT', 'CVXOPT', 'ConvexQPSolvers']."
+                                  "['SLSQP', 'PySLSQP', 'COBYLA', 'BFGS', 'LBFGSB', "\
+                                  "'SNOPT', 'IPOPT', 'CVXOPT', 'ConvexQPSolvers']."
 
 if __name__ == '__main__':
     test_slsqp()
     test_cobyla()
     test_bfgs()
+    test_lbfgsb()
     test_pyslsqp()
     test_snopt()
     test_ipopt()

@@ -4,29 +4,28 @@ import time
 from modopt.utils.options_dictionary import OptionsDictionary
 from modopt import Optimizer
 
-class BFGS(Optimizer):
-    ''' 
-    Class that interfaces modOpt with the BFGS optimization algorithm from Scipy.
-    BFGS (Broyden-Fletcher-Goldfarb-Shanno) is a quasi-Newton optimization algorithm 
-    for unconstrained problems. Therefore, it does not support bounds or constraints.
+class LBFGSB(Optimizer):
+    '''
+    Class that interfaces modOpt with the L-BFGS-B optimization algorithm from Scipy.
+    L-BFGS-B (Limited-memory BFGS with Bound constraints) 
+    is a quasi-Newton optimization algorithm for large-scale bound-constrained problems.
+    Therefore, it does not support other type of constraints.
     '''
     def initialize(self):
         '''
         Initialize the optimizer.
         Declare options, solver_options and outputs.
         '''
-        self.solver_name = 'scipy-bfgs'
+        self.solver_name = 'scipy-l-bfgs-b'
         self.options.declare('solver_options', types=dict, default={})
         self.default_solver_options = {
-            'maxiter': (int, 200),      # len(x0) * 200 is the default in scipy.optimize.minimize
-            'gtol': (float, 1e-5),      # Gradient norm <= gtol for successful termination
-            'xrtol': (float, 0.0),      # Relative tolerance for x. Terminate successfully if norm[alpha*pk] <= (norm[xk] + xrtol) * xrtol
-            'norm': (float, np.inf),    # Order of gradient or step (alpha*pk) norm (inf is max, -inf is min)
-            'c1': (float, 1e-4),        # Armijo condition parameter
-            'c2': (float, 0.9),         # Curvature condition parameter, 0 < c1 < c2 < 1
-            'hess_inv0': (np.ndarray, np.identity(self.problem.nx)), # Initial inverse Hessian approximation
-            'return_all': (bool, False),# To return a list of the best solution at each major iteration in the final results dict
-            'disp': (bool, False),
+            'maxfun': (int, 1000),  # Max num of function evaluations (default: 15000 in scipy.optimize.minimize)
+            'maxiter': (int, 200),  # Max num of iterations (default:15000 in scipy.optimize.minimize)
+            'maxls': (int, 20),     # Max num of line search steps (per major iteration)
+            'maxcor': (int, 10),    # Maximum number of variable metric corrections used to define the limited memory Hessian approximation
+            'ftol': (float, 2.22e-9),  # Terminate successfully if: `(f^k - f^{k+1})/max{|f^k|,|f^{k+1}|,1} <= ftol`
+            'gtol': (float, 1e-5),  # Terminate successfully if: `max{|proj g_i | i = 1, ..., n} <= gtol`, where `proj g_i` is the i-th component of the projected gradient.
+            'iprint': (int, -1),    # Controls the frequency of output (<0, =0, 0<iprint<99, =99, =100, >100)
             'callback': ((type(None), callable), None),
         }
 
@@ -34,7 +33,7 @@ class BFGS(Optimizer):
         self.solver_options = OptionsDictionary()
         for key, value in self.default_solver_options.items():
             self.solver_options.declare(key, types=value[0], default=value[1])
-
+        
         # Declare outputs
         self.available_outputs = {
             'x'  : (float, (self.problem.nx,)),
@@ -50,31 +49,37 @@ class BFGS(Optimizer):
     def setup(self):
         '''
         Setup the optimizer.
-        Setup outputs.
+        Setup outputs, bounds, and constraints.
         Check the validity of user-provided 'solver_options'.
         '''
         self.setup_outputs()
         self.solver_options.update(self.options['solver_options'])
-        
+        self.setup_bounds()
+        if self.problem.constrained:
+            raise RuntimeError('LBFGSB does not support constraints. ' \
+                               'Use a different solver (PySLSQP, IPOPT, etc.) or remove constraints.')
+
+        # Check if gradient is declared and raise error/warning for Problem/ProblemLite
+        self.check_if_callbacks_are_declared('grad', 'Objective gradient', 'LBFGSB')
+
+    def setup_bounds(self):
+        '''
+        Adapt bounds as a Scipy Bounds() object.
+        Only for  Nelder-Mead, L-BFGS-B, TNC, SLSQP, Powell, trust-constr, COBYLA, and COBYQA methods.
+        '''
         xl = self.problem.x_lower
         xu = self.problem.x_upper
-        unbounded = (np.all(xl == -np.inf) and np.all(xu == np.inf))
-        if not unbounded:
-            raise RuntimeError('BFGS does not support bounds on variables. ' \
-                               'Use a different solver (PySLSQP, IPOPT, etc.) or remove bounds.')
-        
-        if self.problem.constrained:
-            raise RuntimeError('BFGS does not support constraints. ' \
-                               'Use a different solver (PySLSQP, IPOPT, etc.) or remove constraints.')
-        
-        # Check if gradient is declared and raise error/warning for Problem/ProblemLite
-        self.check_if_callbacks_are_declared('grad', 'Objective gradient', 'BFGS')
+
+        if np.all(xl == -np.inf) and np.all(xu == np.inf):
+            self.bounds = None
+        else:
+            self.bounds = Bounds(xl, xu, keep_feasible=False)
 
     def solve(self):
         solver_options = self.solver_options.get_pure_dict()
         user_callback = solver_options.pop('callback')
 
-        def callback(intermediate_result):
+        def callback(intermediate_result): 
             x = intermediate_result['x']
             f = intermediate_result['fun']
             self.update_outputs(x=x, obj=f)
@@ -82,17 +87,17 @@ class BFGS(Optimizer):
 
         self.update_outputs(x=self.x0, obj=self.obj(self.x0))
 
-        # Call the BFGS algorithm from scipy (options are specific to BFGS)
+        # Call the L-BFGS-B algorithm from scipy (options are specific to L-BFGS-B)
         start_time = time.time()
         self.results = minimize(
             self.obj,
             self.x0,
             args=(),
-            method='BFGS',
+            method='L-BFGS-B',
             jac=self.grad,
             hess=None,
             hessp=None,
-            bounds=None,
+            bounds=self.bounds,
             constraints=None,
             tol=None,
             callback=callback,
@@ -100,16 +105,18 @@ class BFGS(Optimizer):
             )
         self.total_time = time.time() - start_time
 
+        self.results['hess_inv'] = self.results['hess_inv'].todense()
+
         return self.results
     
-    def print_results(self, 
-                      optimal_variables=False,
-                      optimal_gradient=False,
-                      optimal_hessian_inverse=False):
+    def print_results(self,
+                    optimal_variables=False,
+                    optimal_gradient=False,
+                    optimal_hessian_inverse=False):
         '''
         Print the results of the optimization in modOpt's format.
         '''
-        output  = "\n\tSolution from Scipy BFGS:"
+        output  = "\n\tSolution from Scipy L-BFGS-B:"
         output += "\n\t"+"-" * 100
 
         output += f"\n\t{'Problem':25}: {self.problem_name}"

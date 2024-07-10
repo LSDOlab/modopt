@@ -24,7 +24,7 @@ and the tolerance on the gradient norm `gtol` as shown below.
 optimizer = BFGS(prob, solver_options={'maxiter':1000, 'gtol':1e-6})
 ```
 
-The options available for the BFGS solver in modOpt is given in the following table.
+The options available for the BFGS solver in modOpt are given in the following table.
 For more information on the Scipy BFGS algorithm, visit
 **[Scipy documentation](https://docs.scipy.org/doc/scipy/reference/optimize.minimize-bfgs.html)**.
 

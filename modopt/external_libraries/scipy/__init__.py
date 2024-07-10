@@ -2,7 +2,7 @@ from .nelder_mead import NelderMead
 from .powell import Powell
 from .cg import CG
 from .bfgs import BFGS
-from .lbfgs_b import LBFGSB
+from .lbfgsb import LBFGSB
 from .tnc import TNC
 
 from .cobyla import COBYLA
