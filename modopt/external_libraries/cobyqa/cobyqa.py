@@ -1,11 +1,15 @@
 import numpy as np
 from scipy.optimize import Bounds, LinearConstraint, NonlinearConstraint #, minimize
+import warnings
 try: 
     # import latest cobyqa if available
     from cobyqa import minimize
 except ImportError:
     # else access cobyqa installed with Scipy>=1.14.0 (requires python>=3.10)
-    from scipy._lib.cobyqa import minimize
+    try:
+        from scipy._lib.cobyqa import minimize
+    except ImportError:
+        warnings.warn("'cobyqa' could not be imported. Install cobyqa using 'pip install cobyqa' for using COBYQA optimizer.")
 import time
 from modopt.utils.options_dictionary import OptionsDictionary
 from modopt import Optimizer
