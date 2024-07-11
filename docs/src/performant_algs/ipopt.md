@@ -30,51 +30,51 @@ Some of the most commonly applicable options are given below:
   - Type (default value)
   - Description
 * - `max_iter`
-  - *int* (3000)
+  - *int* (`3000`)
   - Maximum number of iterations.
 * - `max_wall_time`
-  - *float* (1e+20)
+  - *float* (`1e+20`)
   - Maximum number of walltime clock seconds.
 * - `max_cpu_time`
-  - *float* (1e+20)
+  - *float* (`1e+20`)
   - Maximum number of cpu seconds.
 * - `tol`
-  - *float* (1e-8)
+  - *float* (`1e-8`)
   - Convergence tolerance for the algorithm.
 * - `print_level`
-  - *int* (5)
+  - *int* (`5`)
   - Controls the verbosity level for the console output. \
-    Valid range is between 0 and 12. \
+    Valid range is between `0` and `12`. \
     The output becomes more detailed as this value increases.
 * - `output_file`
-  - *str* ("ipopt_output.txt")
+  - *str* (`"ipopt_output.txt"`)
   - Output filename.
 * - `file_print_level`
-  - *int* (12)
+  - *int* (`12`)
   - Controls the verbosity level for the output file. \
-    Valid range is between 0 and 12. \
+    Valid range is between `0` and `12`. \
     The file output becomes more detailed as this value increases.
 * - `file_append`
-  - *str* ("no")
+  - *str* (`"no"`)
   - Determines whether to append to the output file. \
-    Valid values are "yes" or "no".
+    Valid values are `"yes"` or `"no"`.
 * - `print_user_options`
-  - *str* ("yes")
+  - *str* (`"yes"`)
   - Determines whether to print all options set by the user. \
-    Valid values are "yes" or "no".
+    Valid values are `"yes"` or `"no"`.
 * - `print_advanced_options`
-  - *str* ("no")
+  - *str* (`"no"`)
   - Determines whether to print the advanced options also. \
-    Valid values are "yes" or "no".
+    Valid values are `"yes"` or `"no"`.
 * - `linear_solver`
-  - *str* ("mumps")
-  - Determines which linear solver to use for computing the step direction. \
-    Valid values are "ma27",  "ma57",  "ma77",  "ma86",  "ma97",  "pardiso", \
-    "pardisomkl", "spral", "wsmp", "mumps", or "custom".
+  - *str* (`"mumps"`)
+  - Linear solver to use for computing the step direction. \
+    Valid values are "ma27",  "ma57",  "ma77",  "ma86",  "ma97",  \
+    "pardiso", "pardisomkl", "spral", "wsmp", "mumps", or "custom".
 * - `hessian_approximation`
-  - *str* ("limited-memory")
-  - Set this to "exact" to force IPOPT to use the user-defined second derivatives \
+  - *str* (`"limited-memory"`)
+  - Set `"exact"` to force IPOPT to use user-defined second derivatives \
     (objective/Lagrangian Hessian for unconstrained/constrained problems). \
-    By default, set to "limited-memory" which uses a limited-memory quasi-Newton \
+    Default is "limited-memory" which uses a limited-memory quasi-Newton \
     Hessian approximation.
 ```

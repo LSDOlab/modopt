@@ -156,9 +156,9 @@ class COBYQA(Optimizer):
         output += f"\n\t{'Total iterations':25}: {self.results['nit']}"
         if optimal_variables:
             output += f"\n\t{'Optimal variables':25}: {self.results['x']}"
-        if obj_history:
+        if obj_history and self.solver_options['store_history']:
             output += f"\n\t{'Objective history':25}: {self.results['fun_history']}"
-        if max_con_viol_history:
+        if max_con_viol_history and self.solver_options['store_history']:
             output += f"\n\t{'Max. con. viol. history':25}: {self.results['maxcv_history']}"
 
         output += '\n\t' + '-'*100

@@ -17,7 +17,7 @@ Before using the `COBYQA` solver in modOpt, ensure that you
 have the *cobyqa* optimizer installed.
 ```{warning}
 *cobyqa* is available with *scipy>=1.14.0* which requires *python>=3.10.0*.
-If your machine cannot satisfy these requirements, install the 'cobyqa' 
+If your machine does not satisfy these requirements, install the 'cobyqa' 
 package by running `pip install cobyqa`.
 ```
 To use the `COBYQA` solver in modOpt, start by importing it as shown in the following code:
@@ -76,7 +76,7 @@ For more information on the COBYQA algorithm and for advanced options, visit
   - *int* (`2*n+1`)
   - Number of interpolation points used to build the quadratic model \
     of the objective and constraint functions. \
-    Must satisfy `0<nb_points<=(n+1)*(n+2)//2`.
+    Must satisfy `0<nb_points<=(n+1)*(n+2)//2`, where `n=len(x)`.
 * - `scale`
   - *bool* (`False`)
   - Set to `True` to scale the variables according to the bounds. \

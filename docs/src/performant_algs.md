@@ -1,4 +1,4 @@
-# Performant optimization algorithms
+# Performant algorithms
 
 Unlike the instructional algorithms, users have an easy, alternate way to optimize using
 the performant algorithms.

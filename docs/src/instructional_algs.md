@@ -1,4 +1,4 @@
-# Instructional optimization algorithms
+# Instructional algorithms
 
 ```{toctree}
 :maxdepth: 1

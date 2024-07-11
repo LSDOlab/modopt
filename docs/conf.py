@@ -115,7 +115,11 @@ html_theme_options = {
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-# html_static_path = ['_static']
+html_static_path = ['_static']
+# To include the custom CSS in your Sphinx project, add or modify the html_static_path variable 
+# to include the directory containing your custom CSS file, and 
+# use the html_css_files variable to specify the path to the custom CSS file relative to the html_static_path.
+html_css_files = ['custom.css',]
 
 
 import glob
