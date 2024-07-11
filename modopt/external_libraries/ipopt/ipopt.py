@@ -1,5 +1,5 @@
 import numpy as np
-from modopt import Optimizer
+from modopt import Optimizer, CSDLProblem, CSDLAlphaProblem, OpenMDAOProblem
 import warnings
 import time
 try:
@@ -12,6 +12,8 @@ class IPOPT(Optimizer):
     Class that interfaces modOpt with the IPOPT in the CasADi package.
     IPOPT is an open-source interior point algorithm that can solve 
     nonlinear programming problems with equality and inequality constraints.
+    It can make use of second order information in the form of the Hessian of 
+    the objective or the Hessian of the Lagrangian.
     '''
     def initialize(self, ):
         self.solver_name = 'ipopt'
@@ -36,6 +38,25 @@ class IPOPT(Optimizer):
         self.nx = self.problem.nx * 1
         self.nc = self.problem.nc * 1
 
+        # Define the IPOPT specific options that the nlp solver need to pass to the IPOPT solver
+        nlp_options = {'ipopt': self.options['solver_options']}
+        # By default, switch to first-order information only
+        # [for using exact obj/lag Hessian, user has to set 'hessian_approximation': 'exact' in solver_options]
+        if 'hessian_approximation' not in nlp_options['ipopt']:
+            nlp_options['ipopt']['hessian_approximation'] = 'limited-memory'
+
+        # Check if the user has declared the callbacks for the Hessian when using 'exact' Hessian approximation
+        if nlp_options['ipopt']['hessian_approximation'] == 'exact':
+            if isinstance(self.problem, (CSDLProblem, CSDLAlphaProblem, OpenMDAOProblem)):
+                raise ValueError("Exact Hessians are not available with 'OpenMDAOProblem', 'CSDLProblem' or 'CSDLAlphaProblem'.")
+            else:
+                if not self.problem.constrained:
+                    self.check_if_callbacks_are_declared('obj_hess', 'Objective Hessian', 'IPOPT')
+                else:
+                    self.check_if_callbacks_are_declared('lag_hess', 'Lagrangian Hessian', 'IPOPT')
+
+        self.nlp_options = nlp_options
+
     def setup_constraints(self, ):
         pass
 
@@ -44,13 +65,7 @@ class IPOPT(Optimizer):
         x0 = self.x0
         lbx = self.problem.x_lower
         ubx = self.problem.x_upper
-
-        # Define the IPOPT specific options that the nlp solver need to pass to the IPOPT solver
-        options = {'ipopt': self.options['solver_options']}
-        # By default, switch to first-order information only
-        # [for using exact lagrangian Hessian, user has to set 'hessian_approximation': 'exact' in solver_options]
-        if 'hessian_approximation' not in options['ipopt']:
-            options['ipopt']['hessian_approximation'] = 'limited-memory'
+        options = self.nlp_options
 
         # Create an optimization variable
         x = MX.sym("x", self.nx)

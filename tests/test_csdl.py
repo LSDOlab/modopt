@@ -2,44 +2,43 @@
 
 import pytest
 
+from modopt import CSDLProblem
+from csdl import Model
+
+# minimize x^4 + y^4 subject to x>=0, x+y=1, x-y>=1.
+
+class QuarticFunc(Model):
+    def initialize(self):
+        pass
+
+    def define(self):
+        x = self.create_input('x', val=1.)
+        y = self.create_input('y', val=2.)
+
+        z = x**4 + y**4
+        self.register_output('z', z)
+
+        constraint_1 = x + y
+        constraint_2 = x - y
+        self.register_output('constraint_1', constraint_1)
+        self.register_output('constraint_2', constraint_2)
+
+        self.add_design_variable('x', lower=0., scaler=100.)
+        self.add_design_variable('y', scaler=0.2)
+        self.add_objective('z', scaler=3.)
+        self.add_constraint('constraint_1', equals=1., scaler=20.)
+        self.add_constraint('constraint_2', lower=1., scaler=5.)
+
+# from csdl_om import Simulator
+from python_csdl_backend import Simulator
+sim = Simulator(QuarticFunc())
+prob = CSDLProblem(problem_name='quartic',simulator=sim)
+
 @pytest.mark.interfaces
 @pytest.mark.csdl
 def test_csdl():
     import numpy as np
     from numpy.testing import assert_array_equal, assert_array_almost_equal, assert_almost_equal
-    from modopt import CSDLProblem
-    from csdl import Model
-
-    # minimize x^4 + y^4 subject to x>=0, x+y=1, x-y>=1.
-
-    class QuarticFunc(Model):
-        def initialize(self):
-            pass
-
-        def define(self):
-            x = self.create_input('x', val=1.)
-            y = self.create_input('y', val=2.)
-
-            z = x**4 + y**4
-            self.register_output('z', z)
-
-            constraint_1 = x + y
-            constraint_2 = x - y
-            self.register_output('constraint_1', constraint_1)
-            self.register_output('constraint_2', constraint_2)
-
-            self.add_design_variable('x', lower=0., scaler=100.)
-            self.add_design_variable('y', scaler=0.2)
-            self.add_objective('z', scaler=3.)
-            self.add_constraint('constraint_1', equals=1., scaler=20.)
-            self.add_constraint('constraint_2', lower=1., scaler=5.)
-
-    # from csdl_om import Simulator
-    from python_csdl_backend import Simulator
-
-    sim = Simulator(QuarticFunc())
-    
-    prob = CSDLProblem(problem_name='quartic',simulator=sim)
 
     assert prob.problem_name == 'quartic'
     assert prob.constrained == True
@@ -74,40 +73,39 @@ def test_csdl():
     assert_almost_equal(optimizer.results['fun'], 3., decimal=11)
     # assert_almost_equal(optimizer.results['objective'], 3., decimal=11)
 
+from modopt import CSDLAlphaProblem
+import csdl_alpha as csdl
+
+# minimize x^4 + y^4 subject to x>=0, x+y=1, x-y>=1.
+rec = csdl.Recorder()
+rec.start()
+
+x = csdl.Variable(name = 'x', value=1.)
+y = csdl.Variable(name = 'y', value=2.)
+x.set_as_design_variable(lower = 0.0, scaler=100.0)
+y.set_as_design_variable(scaler=0.2)
+
+z = x**4 + y**4
+z.add_name('z')
+z.set_as_objective(scaler=3.)
+
+constraint_1 = x + y
+constraint_2 = x - y
+constraint_1.add_name('constraint_1')
+constraint_2.add_name('constraint_2')
+constraint_1.set_as_constraint(lower=1., upper=1., scaler=20.)
+constraint_2.set_as_constraint(lower=1., scaler=5.)
+
+rec.stop()
+sim = csdl.experimental.PySimulator(rec)
+alpha_prob = CSDLAlphaProblem(problem_name='quartic', simulator=sim)
 
 @pytest.mark.interfaces
 @pytest.mark.csdl_alpha
 def test_csdl_alpha():
     import numpy as np
     from numpy.testing import assert_array_equal, assert_array_almost_equal, assert_almost_equal
-    from modopt import CSDLAlphaProblem
-    import csdl_alpha as csdl
-
-    # minimize x^4 + y^4 subject to x>=0, x+y=1, x-y>=1.
-    rec = csdl.Recorder()
-    rec.start()
-
-    x = csdl.Variable(name = 'x', value=1.)
-    y = csdl.Variable(name = 'y', value=2.)
-    x.set_as_design_variable(lower = 0.0, scaler=100.0)
-    y.set_as_design_variable(scaler=0.2)
-
-    z = x**4 + y**4
-    z.add_name('z')
-    z.set_as_objective(scaler=3.)
-
-    constraint_1 = x + y
-    constraint_2 = x - y
-    constraint_1.add_name('constraint_1')
-    constraint_2.add_name('constraint_2')
-    constraint_1.set_as_constraint(lower=1., upper=1., scaler=20.)
-    constraint_2.set_as_constraint(lower=1., scaler=5.)
-
-    rec.stop()
-
-    sim = csdl.experimental.PySimulator(rec)
-
-    prob = CSDLAlphaProblem(problem_name='quartic', simulator=sim)
+    prob = alpha_prob
 
     assert prob.problem_name == 'quartic'
     assert prob.constrained == True

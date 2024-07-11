@@ -2,70 +2,71 @@
 
 import pytest
 
+from modopt import OpenMDAOProblem
+import openmdao.api as om
+
+# minimize x^4 + y^4 subject to x>=0, x+y=1, x-y>=1.
+
+class QuarticFunc(om.ExplicitComponent):
+    def setup(self): 
+        # add_inputs
+        self.add_input('x', 1.)
+        self.add_input('y', 1.)
+        
+        # add_outputs
+        self.add_output('objective')
+        self.add_output('constraint_1')
+        self.add_output('constraint_2')
+
+        # declare_partials
+        self.declare_partials(of='objective', wrt='*')
+        # self.declare_partials(of='objective', wrt='*', method='cs')
+        self.declare_partials(of='constraint_1', wrt='x', val=1.)
+        self.declare_partials(of='constraint_1', wrt='y', val=1.)
+        self.declare_partials(of='constraint_2', wrt='x', val=1.)
+        self.declare_partials(of='constraint_2', wrt='y', val=-1.)
+
+    def compute(self, inputs, outputs):
+        x = inputs['x']
+        y = inputs['y']
+
+        outputs['objective'] = x**4 + y**4
+        outputs['constraint_1'] = x + y
+        outputs['constraint_2'] = x - y
+
+    def compute_partials(self, inputs, partials):
+        x = inputs['x']
+        y = inputs['y']
+
+        partials['objective', 'x'] = 4 * x**3
+        partials['objective', 'y'] = 4 * y**3
+
+# Create OpenMDAO Problem
+om_prob = om.Problem()
+# Add subsystem to the OpenMDAO Problem model
+om_prob.model.add_subsystem('quartic', QuarticFunc(), promotes=['*'])
+
+# Add optimization variables and functions to the Problem model
+om_prob.model.add_design_var('x', lower=0., scaler=100., adder=1.)
+om_prob.model.add_design_var('y', scaler=0.2, adder=0.)
+om_prob.model.add_objective('objective', scaler=3., adder=1.)
+om_prob.model.add_constraint('constraint_1', equals=1., scaler=20., adder=0.)
+om_prob.model.add_constraint('constraint_2', lower=1., scaler=5., adder=1.)
+
+# Setup the OpenMDAO problem
+om_prob.setup()
+
+# Set initial values
+om_prob.set_val('x', 1.0)
+om_prob.set_val('y', 2.0)
+
+prob = OpenMDAOProblem(problem_name='quartic', om_problem=om_prob)
+
 @pytest.mark.interfaces
 @pytest.mark.openmdao
 def test_openmdao():
     import numpy as np
     from numpy.testing import assert_array_equal, assert_array_almost_equal, assert_almost_equal
-    from modopt import OpenMDAOProblem
-    import openmdao.api as om
-
-    # minimize x^4 + y^4 subject to x>=0, x+y=1, x-y>=1.
-
-    class QuarticFunc(om.ExplicitComponent):
-        def setup(self): 
-            # add_inputs
-            self.add_input('x', 1.)
-            self.add_input('y', 1.)
-            
-            # add_outputs
-            self.add_output('objective')
-            self.add_output('constraint_1')
-            self.add_output('constraint_2')
-
-            # declare_partials
-            self.declare_partials(of='objective', wrt='*')
-            # self.declare_partials(of='objective', wrt='*', method='cs')
-            self.declare_partials(of='constraint_1', wrt='x', val=1.)
-            self.declare_partials(of='constraint_1', wrt='y', val=1.)
-            self.declare_partials(of='constraint_2', wrt='x', val=1.)
-            self.declare_partials(of='constraint_2', wrt='y', val=-1.)
-
-        def compute(self, inputs, outputs):
-            x = inputs['x']
-            y = inputs['y']
-
-            outputs['objective'] = x**4 + y**4
-            outputs['constraint_1'] = x + y
-            outputs['constraint_2'] = x - y
-
-        def compute_partials(self, inputs, partials):
-            x = inputs['x']
-            y = inputs['y']
-
-            partials['objective', 'x'] = 4 * x**3
-            partials['objective', 'y'] = 4 * y**3
-
-    # Create OpenMDAO Problem
-    om_prob = om.Problem()
-    # Add subsystem to the OpenMDAO Problem model
-    om_prob.model.add_subsystem('quartic', QuarticFunc(), promotes=['*'])
-
-    # Add optimization variables and functions to the Problem model
-    om_prob.model.add_design_var('x', lower=0., scaler=100., adder=1.)
-    om_prob.model.add_design_var('y', scaler=0.2, adder=0.)
-    om_prob.model.add_objective('objective', scaler=3., adder=1.)
-    om_prob.model.add_constraint('constraint_1', equals=1., scaler=20., adder=0.)
-    om_prob.model.add_constraint('constraint_2', lower=1., scaler=5., adder=1.)
-
-    # Setup the OpenMDAO problem
-    om_prob.setup()
-
-    # Set initial values
-    om_prob.set_val('x', 1.0)
-    om_prob.set_val('y', 2.0)
-
-    prob = OpenMDAOProblem(problem_name='quartic', om_problem=om_prob)
 
     assert prob.problem_name == 'quartic'
     assert prob.constrained == True

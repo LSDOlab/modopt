@@ -462,6 +462,56 @@ def test_errors():
     assert optimizer.results['success']
     assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=6)
 
+    # 3. Raise error when no hessians are available for IPOPT
+    from modopt import IPOPT, TrustConstr
+    from test_csdl import prob as csdl_prob
+    from test_csdl import alpha_prob
+    from test_openmdao import prob as om_prob
+
+    for prob in [csdl_prob, alpha_prob, om_prob]:
+        with pytest.raises(ValueError) as excinfo:
+            optimizer = IPOPT(prob, solver_options={'hessian_approximation':'exact'})
+        assert str(excinfo.value) == "Exact Hessians are not available with 'OpenMDAOProblem', 'CSDLProblem' or 'CSDLAlphaProblem'."
+
+    class QPNoHess(Problem):
+        def setup(self):
+            self.add_design_variables('x', shape=(2,))
+            self.add_objective('f')
+        def setup_derivatives(self):
+            self.declare_objective_gradient(wrt='x', vals=None)
+        def compute_objective(self, dvs, obj):
+            obj['f'] = np.sum(dvs['x']**2)
+        def compute_objective_gradient(self, dvs, grad):
+            grad['x'] = 2 * dvs['x']
+       
+    with pytest.raises(ValueError) as excinfo:
+        optimizer = IPOPT(QPNoHess(), solver_options={'hessian_approximation':'exact'})
+    assert str(excinfo.value) == "Objective Hessian function is not declared in the Problem() subclass but is needed for IPOPT."
+    
+    # 4. Raise warning when Lagrangian Hessian is not declared for ProblemLite() class and use finite-differences in IPOPT
+    def qp_no_hess_lite():
+        x0 = np.array([500., 5.])
+        cl = np.array([1., 1.])
+        cu = np.array([1., np.inf])
+        xl = np.array([0., -np.inf])
+        xu = np.array([np.inf, np.inf])
+        def obj(x):
+            return np.sum(x**2)
+        def grad(x):    
+            return 2 * x
+        def con(x):
+            return np.array([x[0] + x[1], x[0] - x[1]])
+        def jac(x):
+            return np.array([[1., 1.], [1., -1]])
+        
+        return ProblemLite(x0, obj=obj, grad=grad, con=con, jac=jac,
+                           xl=xl, xu=xu, cl=cl, cu=cu, name='qp_no_hess_lite')
+    
+    optimizer = IPOPT(qp_no_hess_lite(), solver_options={'hessian_approximation':'exact'})
+    optimizer.solve()
+    optimizer.print_results()
+    assert_array_almost_equal(optimizer.results['x'], [1., 0.], decimal=8)
+
 if __name__ == '__main__':
     test_slsqp()
     test_cobyla()
