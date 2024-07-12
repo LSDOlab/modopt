@@ -1,4 +1,4 @@
-# Test SLSQP, PySLSQP, SNOPT, IPOPT, COBYLA, BFGS, LBFGSB, NelderMead
+# Test SLSQP, PySLSQP, SNOPT, IPOPT, COBYLA, BFGS, LBFGSB, NelderMead, COBYQA, TrustConstr
 # The same tests are used for the sime optimize() function
 
 from all_problem_types import Scaling, scaling_lite, Unconstrained, unconstrained_lite
@@ -241,6 +241,41 @@ def test_cobyqa():
     assert optimizer.results['message'] == 'The lower bound for the trust-region radius has been reached'
     assert_array_almost_equal(optimizer.results['x'], [2., 0.], decimal=9)
     assert_almost_equal(optimizer.results['fun'], 20., decimal=7)
+
+@pytest.mark.trust_constr
+@pytest.mark.interfaces
+def test_trust_constr():
+    import numpy as np
+    from modopt import TrustConstr
+
+    prob = Scaling()
+
+    optimizer = TrustConstr(prob, solver_options={'maxiter':1000, 'verbose':0, 'gtol':1e-15})
+    optimizer.check_first_derivatives(prob.x0)
+    optimizer.solve()
+    print(optimizer.results)
+    optimizer.print_results(optimal_variables=True, optimal_gradient=True, optimal_constraints=True, 
+                            optimal_constraints_jacobian=True, optimal_lagrange_multipliers=True,
+                            optimal_lagrangian_gradient=True)
+    assert optimizer.results['success'] == True
+    # assert optimizer.results['message'] == '`gtol` termination condition is satisfied.'
+    assert optimizer.results['message'] == '`xtol` termination condition is satisfied.'
+    assert_array_almost_equal(optimizer.results['x'], [2., 0.], decimal=11)
+    assert_almost_equal(optimizer.results['fun'], 20., decimal=11)
+
+    prob = scaling_lite()
+
+    optimizer = TrustConstr(prob, solver_options={'maxiter':1000, 'verbose':3, 'gtol':1e-15}, outputs=['x', 'obj', 'opt', 'time', 'grad'])
+    optimizer.check_first_derivatives(prob.x0)
+    optimizer.solve()
+    print(optimizer.results)
+    optimizer.print_results(optimal_variables=True, optimal_gradient=True, optimal_constraints=True,
+                            optimal_constraints_jacobian=True, optimal_lagrange_multipliers=True,
+                            optimal_lagrangian_gradient=True)
+    assert optimizer.results['success'] == True
+    assert optimizer.results['message'] == '`xtol` termination condition is satisfied.'
+    assert_array_almost_equal(optimizer.results['x'], [2., 0.], decimal=11)
+    assert_almost_equal(optimizer.results['fun'], 20., decimal=11)
     
 @pytest.mark.pyslsqp
 @pytest.mark.interfaces
@@ -364,10 +399,103 @@ def test_ipopt():
     print(optimizer.results)
     assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=1)
 
+@pytest.mark.trust_constr
+@pytest.mark.interfaces
+def test_trust_constr_exact_hess():
+    from all_problem_types import (SecondOrderScaling, second_order_scaling_lite, 
+                                   SecondOrderBoundConstrained, second_order_bound_constrained_lite,
+                                   SecondOrderUnconstrained, second_order_unconstrained_lite)
+    import numpy as np
+    from modopt import TrustConstr
+
+    prob = SecondOrderScaling()
+
+    solver_options = {'maxiter': 1000, 'verbose': 0, 'gtol': 1e-15, 'ignore_exact_hessian': False}
+    
+    optimizer = TrustConstr(prob, solver_options=solver_options)
+    optimizer.check_first_derivatives(prob.x0)
+    optimizer.solve()
+    print(optimizer.results)
+    optimizer.print_results(optimal_variables=True, optimal_gradient=True,
+                            optimal_constraints=True, optimal_constraints_jacobian=True,
+                            optimal_lagrange_multipliers=True, optimal_lagrangian_gradient=True)
+    assert optimizer.results['success'] == True
+    assert optimizer.results['message'] == '`xtol` termination condition is satisfied.'
+    assert_array_almost_equal(optimizer.results['x'], [2., 0.], decimal=11)
+    assert_almost_equal(optimizer.results['fun'], 20., decimal=11)
+
+    prob = second_order_scaling_lite()
+
+    optimizer = TrustConstr(prob, solver_options=solver_options)
+    optimizer.check_first_derivatives(prob.x0)
+    optimizer.solve()
+    print(optimizer.results)
+    optimizer.print_results(optimal_variables=True, optimal_gradient=True,
+                            optimal_constraints=True, optimal_constraints_jacobian=True,
+                            optimal_lagrange_multipliers=True, optimal_lagrangian_gradient=True)
+    assert optimizer.results['success'] == True
+    assert optimizer.results['message'] == '`xtol` termination condition is satisfied.'
+    assert_array_almost_equal(optimizer.results['x'], [2., 0.], decimal=11)
+    assert_almost_equal(optimizer.results['fun'], 20., decimal=3)
+    
+    # test bound constrained problem
+    prob = SecondOrderBoundConstrained()
+
+    optimizer = TrustConstr(prob, solver_options=solver_options)
+    optimizer.check_first_derivatives(prob.x0)
+    optimizer.solve()
+    print(optimizer.results)
+    optimizer.print_results(optimal_variables=True, optimal_gradient=True,
+                            optimal_constraints=True, optimal_constraints_jacobian=True,
+                            optimal_lagrange_multipliers=True, optimal_lagrangian_gradient=True)
+    assert optimizer.results['message'] == '`gtol` termination condition is satisfied.'
+    assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=3)
+
+    prob = second_order_bound_constrained_lite()
+
+    optimizer = TrustConstr(prob, solver_options=solver_options)
+    optimizer.check_first_derivatives(prob.x0)
+    optimizer.solve()
+    print(optimizer.results)
+    optimizer.print_results(optimal_variables=True, optimal_gradient=True,
+                            optimal_constraints=True, optimal_constraints_jacobian=True,
+                            optimal_lagrange_multipliers=True, optimal_lagrangian_gradient=True)
+    assert optimizer.results['message'] == '`gtol` termination condition is satisfied.'
+    assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=3)
+
+    # test unconstrained problem
+    prob = SecondOrderUnconstrained()
+
+    optimizer = TrustConstr(prob, solver_options=solver_options)
+    optimizer.check_first_derivatives(prob.x0)
+    optimizer.solve()
+    print(optimizer.results)
+    optimizer.print_results(optimal_variables=True, optimal_gradient=True,
+                            optimal_constraints=True, optimal_constraints_jacobian=True,
+                            optimal_lagrange_multipliers=True, optimal_lagrangian_gradient=True)
+    assert optimizer.results['success'] == True
+    assert optimizer.results['message'] == '`xtol` termination condition is satisfied.'
+    assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=4)
+
+    prob = second_order_unconstrained_lite()
+
+    optimizer = TrustConstr(prob, solver_options=solver_options)
+    optimizer.check_first_derivatives(prob.x0)
+    optimizer.solve()
+    print(optimizer.results)
+    optimizer.print_results(optimal_variables=True, optimal_gradient=True,
+                            optimal_constraints=True, optimal_constraints_jacobian=True,
+                            optimal_lagrange_multipliers=True, optimal_lagrangian_gradient=True)
+    assert optimizer.results['success'] == True
+    assert optimizer.results['message'] == '`xtol` termination condition is satisfied.'
+    assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=4)
+
 @pytest.mark.ipopt
 @pytest.mark.interfaces
-def test_ipopt_exact_hess_lag():
-    from all_problem_types import SecondOrderScaling, second_order_scaling_lite, SecondOrderUnconstrained, second_order_unconstrained_lite
+def test_ipopt_exact_hess():
+    from all_problem_types import (SecondOrderScaling, second_order_scaling_lite, 
+                                   SecondOrderBoundConstrained, second_order_bound_constrained_lite,
+                                   SecondOrderUnconstrained, second_order_unconstrained_lite)
     import numpy as np
     from modopt import IPOPT
 
@@ -402,10 +530,10 @@ def test_ipopt_exact_hess_lag():
     assert_almost_equal(optimizer.results['lam_c'], [ -5.333334058, -53.333340585], decimal=9)
     assert_almost_equal(optimizer.results['lam_x'], [-4.54553843e-06,  0.], decimal=11)
 
-    # test unconstrained problem
+    # test bound constrained problem
     # IPOPT performs poorly on the following unconstrained problem. 
     # Need to increase the tolerance to 1e-10 for a decent solution accurate upto 1 decimal.
-    prob = SecondOrderUnconstrained()
+    prob = SecondOrderBoundConstrained()
     solver_options['tol'] = 1e-10
 
     optimizer = IPOPT(prob, solver_options=solver_options)
@@ -414,13 +542,30 @@ def test_ipopt_exact_hess_lag():
     print(optimizer.results)
     assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=1)
 
-    prob = second_order_unconstrained_lite()
+    prob = second_order_bound_constrained_lite()
 
     optimizer = IPOPT(prob, solver_options=solver_options)
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
     print(optimizer.results)
     assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=1)
+
+    # test unconstrained problem
+    prob = SecondOrderUnconstrained()
+
+    optimizer = IPOPT(prob, solver_options=solver_options)
+    optimizer.check_first_derivatives(prob.x0)
+    optimizer.solve()
+    print(optimizer.results)
+    assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=2)
+
+    prob = second_order_unconstrained_lite()
+
+    optimizer = IPOPT(prob, solver_options=solver_options)
+    optimizer.check_first_derivatives(prob.x0)
+    optimizer.solve()
+    print(optimizer.results)
+    assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=2)
 
 @pytest.mark.interfaces
 def test_errors():
@@ -519,9 +664,11 @@ if __name__ == '__main__':
     test_lbfgsb()
     test_nelder_mead()
     test_cobyqa()
+    test_trust_constr()
     test_pyslsqp()
     test_snopt()
     test_ipopt()
-    test_ipopt_exact_hess_lag()
+    test_trust_constr_exact_hess()
+    test_ipopt_exact_hess()
     test_errors()
     print('All tests passed!')

@@ -23,7 +23,7 @@ def optimize(prob, solver='SLSQP', **kwargs):
     solver : str, optional
         The solver to be used. Default is 'SLSQP'.
         Available solvers are 'SLSQP', 'PySLSQP', 'COBYLA', 'BFGS',
-        'LBFGSB', 'NelderMead', 'COBYQA', 
+        'LBFGSB', 'NelderMead', 'COBYQA', TrustConstr',
         'SNOPT', 'IPOPT', 'CVXOPT', and 'ConvexQPSolvers'.
     **kwargs
         Additional keyword arguments to be passed to the solver.
@@ -34,7 +34,7 @@ def optimize(prob, solver='SLSQP', **kwargs):
         The results of the optimization.
     """
     valid_solvers = ['SLSQP', 'PySLSQP', 'COBYLA', 'BFGS', 
-                     'LBFGSB', 'NelderMead', 'COBYQA',
+                     'LBFGSB', 'NelderMead', 'COBYQA', 'TrustConstr',
                      'SNOPT', 'IPOPT', 'CVXOPT', 'ConvexQPSolvers']
     if solver == 'SLSQP':
         optimizer = SLSQP(prob, **kwargs)
@@ -50,6 +50,8 @@ def optimize(prob, solver='SLSQP', **kwargs):
         optimizer = NelderMead(prob, **kwargs)
     elif solver == 'COBYQA':
         optimizer = COBYQA(prob, **kwargs)
+    elif solver == 'TrustConstr':
+        optimizer = TrustConstr(prob, **kwargs)
     elif solver == 'SNOPT':
         optimizer = SNOPT(prob, **kwargs)
     elif solver == 'IPOPT':

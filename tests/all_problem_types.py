@@ -8,9 +8,10 @@
 #  6. Constrained (both nonlinear and linear eq/ineq constraints with bounds on design variables)
 #  7. Scaling (Constrained problem with scaling on design variables, objective, and constraints)
 #  8. FiniteDiff (Constrained problem with scaling taht uses finite differencing for grad, hess, hvp, jac, and jvp)
-#  9. SecondOrderUnconstrained (Unconstrained problem with scaling that uses analytical objective hessian, for ipopt)
-# 10. SecondOrderScaling (Constrained problem with scaling that uses analytical lagrangian hessian, for ipopt)
-# 11. ConvexQP (Convex quadratic problem with bounds on design variables and linear eq/ineq constraints for ConvexQPSolvers)
+#  9. SecondOrderUnconstrained (Unconstrained problem with scaling that uses analytical objective hessian, for ipopt, trust-constr)
+# 10. SecondOrderBoundConstrained (Bound constrained problem with scaling that uses analytical objective hessian, for ipopt, trust-constr)
+# 11. SecondOrderScaling (Constrained problem with scaling that uses analytical lagrangian hessian, for ipopt, trust-constr)
+# 12. ConvexQP (Convex quadratic problem with bounds on design variables and linear eq/ineq constraints for ConvexQPSolvers)
 
 
 from modopt import Problem, ProblemLite
@@ -427,8 +428,6 @@ class SecondOrderUnconstrained(Problem):
     def setup(self):
         self.add_design_variables('x',
                                   shape=(2, ),
-                                  lower=np.array([0., -np.inf]),
-                                  upper=np.array([np.inf, np.inf]),
                                   scaler=np.array([2., 0.2]),
                                   vals=np.array([50., 5.]))
                                 #   vals=np.array([500., 5.])) # slsqp diverges when starting from these initial values
@@ -453,6 +452,52 @@ class SecondOrderUnconstrained(Problem):
 def second_order_unconstrained_lite():
     # x0 = np.array([500., 5.]) # slsqp diverges when starting from these initial values
     x0 = np.array([50., 5.])
+    x_sc = np.array([2., 0.2])
+    o_sc = 20
+    def obj(x):
+        return np.sum(x**4)
+    def grad(x):    
+        return 4 * x ** 3
+    def obj_hess(x):
+        return np.array([[12*x[0]**2, 0], [0, 12*x[1]**2]])
+    
+    return ProblemLite(x0, obj=obj, grad=grad,
+                       x_scaler=x_sc, o_scaler=o_sc,
+                       obj_hess=obj_hess, name='second_order_unconstrained_lite')
+
+class SecondOrderBoundConstrained(Problem):
+    def initialize(self):
+        self.problem_name = 'second_order_bound_constrained'
+
+    def setup(self):
+        self.add_design_variables('x',
+                                  shape=(2, ),
+                                  lower=np.array([0., -np.inf]),
+                                  upper=np.array([np.inf, np.inf]),
+                                  scaler=np.array([2., 0.2]),
+                                  vals=np.array([50., 5.]))
+                                #   vals=np.array([500., 5.])) # slsqp diverges when starting from these initial values
+        
+        self.add_objective('f', scaler=20.)
+
+    def setup_derivatives(self):
+        self.declare_objective_gradient(wrt='x')
+        self.declare_objective_hessian(of='x', wrt='x')
+
+    def compute_objective(self, dvs, obj):
+        x = dvs['x']
+        obj['f'] = np.sum(x**4)
+
+    def compute_objective_gradient(self, dvs, grad):
+        grad['x'] = 4 * dvs['x'] ** 3
+
+    def compute_objective_hessian(self, dvs, obj_hess):
+        x = dvs['x']
+        obj_hess['x', 'x'] = np.array([[12*x[0]**2, 0], [0, 12*x[1]**2]])
+
+def second_order_bound_constrained_lite():
+    # x0 = np.array([500., 5.]) # slsqp diverges when starting from these initial values
+    x0 = np.array([50., 5.])
     xl = np.array([0., -np.inf])
     xu = np.array([np.inf, np.inf])
     x_sc = np.array([2., 0.2])
@@ -467,7 +512,7 @@ def second_order_unconstrained_lite():
     return ProblemLite(x0, obj=obj, grad=grad,
                        xl=xl, xu=xu, 
                        x_scaler=x_sc, o_scaler=o_sc,
-                       obj_hess=obj_hess, name='second_order_unconstrained_lite')
+                       obj_hess=obj_hess, name='second_order_bound_constrained_lite')
 
 class SecondOrderScaling(Problem):
     def initialize(self):

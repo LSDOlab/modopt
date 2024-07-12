@@ -1,8 +1,13 @@
 # SNOPT
 
-To use SNOPT, follow the same process for other optimizers 
-except when importing the optimizer.
-You can import the optimizer as shown in the following code:
+SNOPT (Sparse Nonlinear OPTimizer) is a gradient-based optimization algorithm that uses a 
+sequential quadratic programming (SQP) to solve general nonlinear programming problems.
+It uses the BFGS algorithm to approximate the Hessian of the Lagrangian.
+
+To use the `SNOPT` solver in modOpt, you need to have it installed on your machine along with its Python interface.
+The binaries can be obtained from **[SNOPT's official website](https://ccom.ucsd.edu/~optimizers/downloads/)**,
+and the Python interface from **[GitHub](https://github.com/snopt/snopt-python/tree/snopt-only)**.
+Once these are installed correctly, you can import the `SNOPT` solver from modOpt as shown in the following code:
 
 ```py
 from modopt import SNOPT

@@ -1,10 +1,13 @@
 # IPOPT
 
-To use IPOPT, first install CasADi with `pip install casadi`.
-You can then follow the same process as for other optimizers
-except when importing the optimizer.
+IPOPT (Interior Point OPTimizer) is a gradient-based optimization algorithm that uses an 
+interior point method to solve general nonlinear programming problems.
+It can utilize second-order derivative information in the form of the Hessian of 
+the objective for unconstrained problems or the Hessian of the Lagrangian for constrained 
+problems. This solver uses the 'ipopt' algorithm from the CasADi library.
 
-You need to import the optimizer as shown in the following code:
+To use the `IPOPT` solver in modOpt, first install CasADi with `pip install casadi`.
+You can then import the `IPOPT` solver from modOpt as shown in the following code:
 
 ```py
 from modopt import IPOPT

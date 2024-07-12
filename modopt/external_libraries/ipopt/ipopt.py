@@ -13,7 +13,8 @@ class IPOPT(Optimizer):
     IPOPT is an open-source interior point algorithm that can solve 
     nonlinear programming problems with equality and inequality constraints.
     It can make use of second order information in the form of the Hessian of 
-    the objective or the Hessian of the Lagrangian.
+    the objective for unconstrained problems or the Hessian of the Lagrangian for constrained 
+    problems.
     '''
     def initialize(self, ):
         self.solver_name = 'ipopt'

@@ -152,6 +152,30 @@ def test_cobyqa():
     assert_array_almost_equal(results['x'], [2., 0.], decimal=9)
     assert_almost_equal(results['fun'], 20., decimal=7)
 
+@pytest.mark.trust_constr
+@pytest.mark.interfaces
+def test_trust_constr():
+    import numpy as np
+    from modopt import TrustConstr
+
+    prob = Scaling()
+
+    results = optimize(prob, solver='TrustConstr', solver_options={'maxiter':1000, 'verbose':0, 'gtol':1e-15})
+    print(results)
+    assert results['success'] == True
+    assert results['message'] == '`xtol` termination condition is satisfied.'
+    assert_array_almost_equal(results['x'], [2., 0.], decimal=11)
+    assert_almost_equal(results['fun'], 20., decimal=11)
+    
+    prob = scaling_lite()
+
+    results = optimize(prob, solver='TrustConstr', solver_options={'maxiter':1000, 'verbose':3, 'gtol':1e-15}, outputs=['x', 'obj', 'opt', 'time', 'grad'])
+    print(results)
+    assert results['success'] == True
+    assert results['message'] == '`xtol` termination condition is satisfied.'
+    assert_array_almost_equal(results['x'], [2., 0.], decimal=11)
+    assert_almost_equal(results['fun'], 20., decimal=11)
+
 @pytest.mark.pyslsqp
 @pytest.mark.interfaces
 def test_pyslsqp():
@@ -253,54 +277,6 @@ def test_ipopt():
     print(results)
     assert_array_almost_equal(results['x'], [0., 0.], decimal=1)
 
-@pytest.mark.ipopt
-@pytest.mark.interfaces
-def test_ipopt_exact_hess_lag():
-    from all_problem_types import SecondOrderScaling, second_order_scaling_lite, SecondOrderUnconstrained, second_order_unconstrained_lite
-
-    prob = SecondOrderScaling()
-    solver_options = {
-        'print_level': 5, 
-        'print_frequency_iter': 1, 
-        'print_frequency_time': 0, 
-        'print_timing_statistics': 'yes',
-        'hessian_approximation': 'exact',
-    }
-    results = optimize(prob, solver='IPOPT', solver_options=solver_options)
-    print(results)
-    assert_array_almost_equal(results['x'], [2., 0.], decimal=6)
-    assert_almost_equal(results['f'], 20., decimal=5)
-    assert_almost_equal(results['c'], [5, 0.5], decimal=6)
-    assert_almost_equal(results['lam_c'], [ -5.333334058, -53.333340585], decimal=9)
-    assert_almost_equal(results['lam_x'], [-4.54553843e-06,  0.], decimal=11)
-    
-
-    prob = second_order_scaling_lite()
-
-    results = optimize(prob, solver='IPOPT', solver_options=solver_options)
-    print(results)
-    assert_array_almost_equal(results['x'], [2., 0.], decimal=6)
-    assert_almost_equal(results['f'], 20., decimal=5)
-    assert_almost_equal(results['c'], [5, 0.5], decimal=6)
-    assert_almost_equal(results['lam_c'], [ -5.333334058, -53.333340585], decimal=9)
-    assert_almost_equal(results['lam_x'], [-4.54553843e-06,  0.], decimal=11)
-
-    # test unconstrained problem
-    # IPOPT performs poorly on the following unconstrained problem. 
-    # Need to increase the tolerance to 1e-10 for a decent solution accurate upto 1 decimal.
-    prob = SecondOrderUnconstrained()
-    solver_options['tol'] = 1e-10
-
-    results = optimize(prob, solver='IPOPT', solver_options=solver_options)
-    print(results)
-    assert_array_almost_equal(results['x'], [0., 0.], decimal=1)
-
-    prob = second_order_unconstrained_lite()
-
-    results = optimize(prob, solver='IPOPT', solver_options=solver_options)
-    print(results)
-    assert_array_almost_equal(results['x'], [0., 0.], decimal=1)
-
 @pytest.mark.interfaces
 @pytest.mark.qpsolvers
 def test_qpsolvers(): 
@@ -351,7 +327,7 @@ def test_invalid_solver():
     assert exc_info.type is ValueError
     assert str(exc_info.value) == "Invalid solver named 'InvalidSolver' is specified. Valid solvers are: "\
                                   "['SLSQP', 'PySLSQP', 'COBYLA', 'BFGS', 'LBFGSB', 'NelderMead', 'COBYQA', "\
-                                  "'SNOPT', 'IPOPT', 'CVXOPT', 'ConvexQPSolvers']."
+                                  "'TrustConstr', 'SNOPT', 'IPOPT', 'CVXOPT', 'ConvexQPSolvers']."
 
 if __name__ == '__main__':
     test_slsqp()
@@ -360,10 +336,10 @@ if __name__ == '__main__':
     test_lbfgsb()
     test_nelder_mead()
     test_cobyqa()
+    test_trust_constr()
     test_pyslsqp()
     test_snopt()
     test_ipopt()
-    test_ipopt_exact_hess_lag()
     test_qpsolvers()
     test_cvxopt()
     test_invalid_solver()
