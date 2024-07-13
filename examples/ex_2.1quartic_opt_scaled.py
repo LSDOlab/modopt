@@ -63,7 +63,7 @@ if __name__ == "__main__":
         }
 
     # Set up your optimizer with the problem
-    optimizer = SLSQP(prob, solver_options={'maxiter':20}, outputs=['x'])
+    optimizer = SLSQP(prob, solver_options={'maxiter':20}, readable_outputs=['x'])
     # optimizer = PySLSQP(prob, solver_options={'maxiter': 20, 'acc': 1e-6})
     # optimizer = SQP(prob, maxiter=20)
     # optimizer = SNOPT(prob, solver_options=snopt_options)

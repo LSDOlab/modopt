@@ -196,5 +196,4 @@ omit = [
     # "modopt/core/optimization_algorithms/simulated_annealing.py",
     # "modopt/core/optimization_algorithms/interior_point.py",
     # "modopt/external_libraries/pycutest/*",
-    # "modopt/external_libraries/cvxopt/*",
     ]

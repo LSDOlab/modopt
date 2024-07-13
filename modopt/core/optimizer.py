@@ -28,8 +28,8 @@ class Optimizer(object):
 
     def setup_outputs(self):
         dir = self.problem_name + '_outputs'
-        a_outs = self.available_outputs     # Available outputs dictionary
-        d_outs = self.options['outputs']    # Declared outputs list
+        a_outs = self.available_outputs             # Available outputs dictionary
+        d_outs = self.options['readable_outputs']   # Declared outputs list
 
         self.scalar_outputs = [out for out in a_outs.keys() if not isinstance(a_outs[out], tuple)]
         # Write the header of the summary_table file
@@ -56,7 +56,7 @@ class Optimizer(object):
 
         for key in d_outs:
             if key not in a_outs:
-                raise ValueError(f'Invalid output "{key}" is declared.' \
+                raise ValueError(f'Invalid readable output "{key}" is declared.' \
                                  f'Available outputs are {list(a_outs.keys())}.')
             with open(dir + '/' + key + '.out', 'w') as f:
                 pass
@@ -70,8 +70,8 @@ class Optimizer(object):
 
     def update_outputs(self, **kwargs):
         dir = self.problem_name + '_outputs'
-        a_outs = self.available_outputs     # Available outputs dictionary
-        d_outs = self.options['outputs']    # Declared outputs list
+        a_outs = self.available_outputs             # Available outputs dictionary
+        d_outs = self.options['readable_outputs']   # Declared outputs list
 
         if set(kwargs.keys()) != set(a_outs):
             raise ValueError(f'Output(s) passed in to be updated {list(kwargs.keys())} ' \
@@ -91,7 +91,7 @@ class Optimizer(object):
 
         self.out_dict = copy.deepcopy(kwargs)
 
-        # Write the declared outputs to the corresponding files
+        # Write the declared readable outputs to the corresponding files
         for key in d_outs:
             value = kwargs[key]
             if key in self.scalar_outputs:

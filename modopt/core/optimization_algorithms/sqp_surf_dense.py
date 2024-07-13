@@ -36,7 +36,7 @@ class SQP_SURF(Optimizer):
         self.options.declare('maxiter', default=1000, types=int)
         self.options.declare('opt_tol', default=1e-7, types=float)
         self.options.declare('feas_tol', default=1e-7, types=float)
-        self.options.declare('outputs', types=list, default=[])
+        self.options.declare('readable_outputs', types=list, default=[])
 
         self.available_outputs = {
             'major': int,

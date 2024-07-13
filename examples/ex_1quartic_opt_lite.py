@@ -26,7 +26,7 @@ class SteepestDescent(Optimizer):
         self.options.declare('opt_tol', types=float)
         # Enable user to specify, as a list, which among the available outputs
         # need to be written to output files
-        self.options.declare('outputs', types=list, default=[])
+        self.options.declare('readable_outputs', types=list, default=[])
 
         # Specify format of outputs available from your optimizer after each iteration
         self.available_outputs = {
@@ -111,7 +111,7 @@ from modopt import Newton, QuasiNewton, SQP
 optimizer = SteepestDescent(prob,
                             opt_tol=opt_tol,
                             maxiter=maxiter,
-                            outputs=['itr', 'obj', 'x', 'opt', 'time'])
+                            readable_outputs=['itr', 'obj', 'x', 'opt', 'time'])
 optimizer = Newton(prob, opt_tol=opt_tol)
 optimizer = QuasiNewton(prob, opt_tol=opt_tol)
 

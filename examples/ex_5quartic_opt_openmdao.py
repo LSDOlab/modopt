@@ -80,7 +80,7 @@ if __name__ == "__main__":
 
     # Setup your preferred optimizer (here, SLSQP) with the Problem object 
     # Pass in the options for your chosen optimizer
-    optimizer = SLSQP(prob, solver_options={'maxiter':20, 'ftol':1e-6}, outputs=['x'])
+    optimizer = SLSQP(prob, solver_options={'maxiter':20, 'ftol':1e-6}, readable_outputs=['x'])
     # optimizer = SQP(prob, maxiter=20)
     snopt_options = {
         'Infinite bound': 1.0e20, 

@@ -17,7 +17,7 @@ class SimulatedAnnealing(Optimizer):
         self.options.declare('T0', default=1., types=float)
         self.options.declare('std_dev_tol', default=1., types=float)
         self.options.declare('std_dev_sample_size', default=1000, types=int)
-        self.options.declare('outputs', types=list, default=[])
+        self.options.declare('readable_outputs', types=list, default=[])
 
         self.available_outputs = {
             'itr': int,

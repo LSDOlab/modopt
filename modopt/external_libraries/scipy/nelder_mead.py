@@ -38,7 +38,7 @@ class NelderMead(Optimizer):
             'x'  : (float, (self.problem.nx,)),
             'obj': float
             }
-        self.options.declare('outputs', values=([], ['x'], ['obj'], ['x', 'obj']), default=[])
+        self.options.declare('readable_outputs', values=([], ['x'], ['obj'], ['x', 'obj']), default=[])
 
         # Define the initial guess, objective
         self.x0   = self.problem.x0 * 1.0

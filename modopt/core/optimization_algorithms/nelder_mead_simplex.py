@@ -16,7 +16,7 @@ class NelderMeadSimplex(Optimizer):
         self.options.declare('maxiter', default=200, types=int)
         self.options.declare('initial_length', default=1., types=float)
         self.options.declare('tol', default=1e-4, types=float)
-        self.options.declare('outputs', types=list, default=[])
+        self.options.declare('readable_outputs', types=list, default=[])
 
         self.available_outputs = {
             'itr': int,

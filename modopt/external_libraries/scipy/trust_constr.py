@@ -26,7 +26,7 @@ class TrustConstr(Optimizer):
         self.options.declare('solver_options', types=dict, default={})
         self.default_solver_options = {
             'maxiter': (int, 500),            # Maximum number of iterations
-            'gtol': (float, 1e-8),            # Terminate sucessfully when both the inf norm (max abs value) of the Lag. gradient 
+            'gtol': (float, 1e-8),            # Terminate successfully when both the inf norm (max abs value) of the Lag. gradient 
                                               # and the con. violation are less than `gtol`.
             'xtol': (float, 1e-8),            # Terminate successfully when `tr_radius < xtol`
             'barrier_tol': (float, 1e-8),     # Terminate successfully when the barrier parameter decays below `barrier_tol`
@@ -75,7 +75,7 @@ class TrustConstr(Optimizer):
             'cg_stop_cond': float,
             'time': float,
             }
-        self.options.declare('outputs', types=list, default=[])
+        self.options.declare('readable_outputs', types=list, default=[])
 
         # Define the initial guess, objective, gradient, constraints, jacobian
         self.x0   = self.problem.x0 * 1.0

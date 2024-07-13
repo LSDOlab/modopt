@@ -14,7 +14,7 @@ class SteepestDescent(Optimizer):
 
         self.options.declare('maxiter', types=int, default=1000)
         self.options.declare('opt_tol', types=float, default=1e-5)
-        self.options.declare('outputs', types=list, default=[])
+        self.options.declare('readable_outputs', types=list, default=[])
 
         self.available_outputs = {
             'itr': int,

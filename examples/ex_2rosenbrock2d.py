@@ -60,7 +60,7 @@ if __name__ == "__main__":
     # optimizer = SteepestDescent(prob,
     #                             opt_tol=opt_tol,
     #                             maxiter=maxiter,
-    #                             outputs=['itr', 'obj', 'x', 'opt', 'time'])
+    #                             readable_outputs=['itr', 'obj', 'x', 'opt', 'time'])
     # optimizer = Newton(prob, opt_tol=opt_tol)
     optimizer = QuasiNewton(prob, opt_tol=opt_tol)
 

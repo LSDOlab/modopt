@@ -22,7 +22,7 @@ class L2PenaltyEq(Optimizer):
         self.options.declare('opt_tol', types=float)
         self.options.declare('feas_tol', types=float)
         self.options.declare('rho', types=float, default=1000000.)
-        self.options.declare('outputs', types=list, default=[])
+        self.options.declare('readable_outputs', types=list, default=[])
 
         self.available_outputs = {
             'itr': int,

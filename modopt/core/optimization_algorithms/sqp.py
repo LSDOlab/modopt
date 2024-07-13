@@ -42,7 +42,7 @@ class SQP(Optimizer):
         self.options.declare('maxiter', default=1000, types=int)
         self.options.declare('opt_tol', default=1e-7, types=float)
         self.options.declare('feas_tol', default=1e-7, types=float)
-        self.options.declare('outputs', types=list, default=[])
+        self.options.declare('readable_outputs', types=list, default=[])
         self.options.declare('callback',
                              default=lambda: None,
                              types=(MethodType, FunctionType))

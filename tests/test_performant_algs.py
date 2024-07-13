@@ -29,7 +29,7 @@ def test_slsqp():
     prob = scaling_lite()
 
     # optimizer = PySLSQP(prob, solver_options={'acc':1e-6, 'maxiter':20, 'summary_filename':'scaling_lite_summary.out'})
-    optimizer = SLSQP(prob, solver_options={'maxiter':50, 'disp':True}, outputs=['x'])
+    optimizer = SLSQP(prob, solver_options={'maxiter':50, 'disp':True}, readable_outputs=['x'])
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
     print(optimizer.results)
@@ -63,7 +63,7 @@ def test_cobyla():
     prob = ineq_constrained_lite()
     prob.x0 = np.array([50., 5.])
 
-    optimizer = COBYLA(prob, solver_options={'maxiter':1000, 'disp':False, 'tol':1e-6}, outputs=['x'])
+    optimizer = COBYLA(prob, solver_options={'maxiter':1000, 'disp':False, 'tol':1e-6}, readable_outputs=['x'])
     optimizer.solve()
     print(optimizer.results)
     optimizer.print_results(optimal_variables=True)
@@ -121,7 +121,7 @@ def test_bfgs():
 
     prob = unconstrained_lite()
 
-    optimizer = BFGS(prob, solver_options={'maxiter':200, 'disp':True, 'gtol':1e-12}, outputs=['x', 'obj'])
+    optimizer = BFGS(prob, solver_options={'maxiter':200, 'disp':True, 'gtol':1e-12}, readable_outputs=['x', 'obj'])
     optimizer.solve()
     print(optimizer.results)
     optimizer.print_results(optimal_variables=True, optimal_gradient=True, optimal_hessian_inverse=True)
@@ -162,7 +162,7 @@ def test_lbfgsb():
 
     prob = bound_constrained_lite()
 
-    optimizer = LBFGSB(prob, solver_options={'maxiter':200, 'iprint':1, 'gtol':1e-8, 'ftol':1e-12}, outputs=['x', 'obj'])
+    optimizer = LBFGSB(prob, solver_options={'maxiter':200, 'iprint':1, 'gtol':1e-8, 'ftol':1e-12}, readable_outputs=['x', 'obj'])
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
     print(optimizer.results)
@@ -202,7 +202,7 @@ def test_nelder_mead():
 
     prob = bound_constrained_lite()
 
-    optimizer = NelderMead(prob, solver_options={'maxiter':200, 'disp':True, 'fatol':1e-6, 'xatol':1e-6}, outputs=['x', 'obj'])
+    optimizer = NelderMead(prob, solver_options={'maxiter':200, 'disp':True, 'fatol':1e-6, 'xatol':1e-6}, readable_outputs=['x', 'obj'])
     optimizer.solve()
     print(optimizer.results)
     optimizer.print_results(optimal_variables=True, final_simplex=True)
@@ -232,7 +232,7 @@ def test_cobyqa():
     
     prob = scaling_lite()
 
-    optimizer = COBYQA(prob, solver_options={'maxiter':1000, 'disp':True, 'feasibility_tol':1e-8, 'store_history':True}, outputs=['x', 'obj'])
+    optimizer = COBYQA(prob, solver_options={'maxiter':1000, 'disp':True, 'feasibility_tol':1e-8, 'store_history':True}, readable_outputs=['x', 'obj'])
     
     optimizer.solve()
     print(optimizer.results)
@@ -265,7 +265,7 @@ def test_trust_constr():
 
     prob = scaling_lite()
 
-    optimizer = TrustConstr(prob, solver_options={'maxiter':1000, 'verbose':3, 'gtol':1e-15}, outputs=['x', 'obj', 'opt', 'time', 'grad'])
+    optimizer = TrustConstr(prob, solver_options={'maxiter':1000, 'verbose':3, 'gtol':1e-15}, readable_outputs=['x', 'obj', 'opt', 'time', 'grad'])
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
     print(optimizer.results)

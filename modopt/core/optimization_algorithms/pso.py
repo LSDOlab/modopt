@@ -19,7 +19,7 @@ class PSO(Optimizer):
         self.options.declare('inertia_weight', default=0.8, types=float)
         self.options.declare('cognitive_coeff', default=0.1, types=float)
         self.options.declare('social_coeff', default=0.1, types=float)
-        self.options.declare('outputs', types=list, default=[])
+        self.options.declare('readable_outputs', types=list, default=[])
 
         self.available_outputs = {
             'itr': int,

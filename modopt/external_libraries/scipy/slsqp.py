@@ -30,7 +30,7 @@ class SLSQP(Optimizer):
 
         # Declare outputs
         self.available_outputs = {'x': (float, (self.problem.nx,))}
-        self.options.declare('outputs', values=([],['x']), default=[])
+        self.options.declare('readable_outputs', values=([],['x']), default=[])
 
         # Define the initial guess, objective, gradient, constraints, jacobian
         self.x0   = self.problem.x0 * 1.0

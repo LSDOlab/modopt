@@ -54,7 +54,7 @@ def test_cobyla():
     prob = ineq_constrained_lite()
     prob.x0 = np.array([50., 5.])
 
-    results = optimize(prob, solver='COBYLA', solver_options={'maxiter':1000, 'disp':False, 'tol':1e-6}, outputs=['x'])
+    results = optimize(prob, solver='COBYLA', solver_options={'maxiter':1000, 'disp':False, 'tol':1e-6}, readable_outputs=['x'])
     assert results['success'] == True
     assert results['message'] == 'Optimization terminated successfully.'
     assert_array_almost_equal(results['x'], [0.5, -0.5], decimal=6)
@@ -76,7 +76,7 @@ def test_bfgs():
 
     prob = unconstrained_lite()
 
-    results = optimize(prob, solver="BFGS", solver_options={'maxiter':200, 'disp':True, 'gtol':1e-12}, outputs=['x', 'obj'])
+    results = optimize(prob, solver="BFGS", solver_options={'maxiter':200, 'disp':True, 'gtol':1e-12}, readable_outputs=['x', 'obj'])
     print(results)
     assert results['success'] == True
     assert results['message'] == 'Optimization terminated successfully.'
@@ -101,7 +101,7 @@ def test_lbfgsb():
 
     prob = bound_constrained_lite()
 
-    optimizer = optimize(prob, solver='LBFGSB', solver_options={'maxiter':200, 'iprint':1, 'gtol':1e-8, 'ftol':1e-12}, outputs=['x', 'obj'])
+    optimizer = optimize(prob, solver='LBFGSB', solver_options={'maxiter':200, 'iprint':1, 'gtol':1e-8, 'ftol':1e-12}, readable_outputs=['x', 'obj'])
     print(results)
     assert results['success'] == True
     assert results['message'] == 'CONVERGENCE: NORM_OF_PROJECTED_GRADIENT_<=_PGTOL'
@@ -124,7 +124,7 @@ def test_nelder_mead():
     
     prob = bound_constrained_lite()
 
-    results = optimize(prob, solver='NelderMead', solver_options={'maxiter':200, 'disp':True, 'fatol':1e-6, 'xatol':1e-6}, outputs=['x', 'obj'])
+    results = optimize(prob, solver='NelderMead', solver_options={'maxiter':200, 'disp':True, 'fatol':1e-6, 'xatol':1e-6}, readable_outputs=['x', 'obj'])
     print(results)
     assert results['success'] == True
     assert results['message'] == 'Optimization terminated successfully.'
@@ -145,7 +145,7 @@ def test_cobyqa():
     
     prob = scaling_lite()
 
-    results = optimize(prob, solver='COBYQA', solver_options={'maxiter':1000, 'disp':True, 'feasibility_tol':1e-8, 'store_history':True}, outputs=['x', 'obj'])
+    results = optimize(prob, solver='COBYQA', solver_options={'maxiter':1000, 'disp':True, 'feasibility_tol':1e-8, 'store_history':True}, readable_outputs=['x', 'obj'])
     print(results)
     assert results['success'] == True
     assert results['message'] == 'The lower bound for the trust-region radius has been reached'
@@ -169,7 +169,7 @@ def test_trust_constr():
     
     prob = scaling_lite()
 
-    results = optimize(prob, solver='TrustConstr', solver_options={'maxiter':1000, 'verbose':3, 'gtol':1e-15}, outputs=['x', 'obj', 'opt', 'time', 'grad'])
+    results = optimize(prob, solver='TrustConstr', solver_options={'maxiter':1000, 'verbose':3, 'gtol':1e-15}, readable_outputs=['x', 'obj', 'opt', 'time', 'grad'])
     print(results)
     assert results['success'] == True
     assert results['message'] == '`xtol` termination condition is satisfied.'

@@ -207,7 +207,7 @@ class ScipyOptimizer(Optimizer):
     # # trust-constr can call with more information
     # # Overrides base class update_outputs()
     # def update_outputs(self, xk, optimize_result=None):
-    #     if len(self.options['outputs']) > 0:
+    #     if len(self.options['readable_outputs']) > 0:
     #         name = self.problem_name
     #         with open(name + '_x.out', 'a') as f:
     #             np.savetxt(f, xk.reshape(1, xk.size))
