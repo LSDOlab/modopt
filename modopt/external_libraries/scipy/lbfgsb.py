@@ -54,6 +54,8 @@ class LBFGSB(Optimizer):
         Check the validity of user-provided 'solver_options'.
         '''
         self.solver_options.update(self.options['solver_options'])
+        self.options_to_pass = self.solver_options.get_pure_dict()
+        self.user_callback = self.options_to_pass.pop('callback')
         self.setup_bounds()
         if self.problem.constrained:
             raise RuntimeError('LBFGSB does not support constraints. ' \
@@ -76,14 +78,12 @@ class LBFGSB(Optimizer):
             self.bounds = Bounds(xl, xu, keep_feasible=False)
 
     def solve(self):
-        solver_options = self.solver_options.get_pure_dict()
-        user_callback = solver_options.pop('callback')
 
         def callback(intermediate_result): 
             x = intermediate_result['x']
             f = intermediate_result['fun']
             self.update_outputs(x=x, obj=f)
-            if user_callback: user_callback(x, f)
+            if self.user_callback: self.user_callback(x, f)
 
         self.update_outputs(x=self.x0, obj=self.obj(self.x0))
 
@@ -101,7 +101,7 @@ class LBFGSB(Optimizer):
             constraints=None,
             tol=None,
             callback=callback,
-            options=solver_options
+            options=self.options_to_pass
             )
         self.total_time = time.time() - start_time
 

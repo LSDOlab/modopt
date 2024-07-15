@@ -63,6 +63,8 @@ class PySLSQP(Optimizer):
         '''
         # Check if user-provided solver_options have valid keys and value-types
         self.solver_options.update(self.options['solver_options'])
+        self.options_to_pass = self.solver_options.get_pure_dict()
+        self.user_callback = self.options_to_pass.pop('callback')
 
         if self.problem.constrained:
             self.setup_constraints()
@@ -138,11 +140,9 @@ class PySLSQP(Optimizer):
         xu = self.problem.x_upper
         meq = self.nc_e if self.problem.constrained else 0
         
-        solver_options = self.solver_options.get_pure_dict()
-        user_callback = solver_options.pop('callback')
         def callback(x):
             self.update_outputs(x=x)
-            if user_callback: user_callback(x)
+            if self.user_callback: self.user_callback(x) 
 
         self.update_outputs(x=self.x0)
 
@@ -150,7 +150,7 @@ class PySLSQP(Optimizer):
         start_time = time.time()
         self.results = optimize(x0, obj=obj, con=con, grad=grad, jac=jac, 
                                 xl=xl, xu=xu, meq=meq, callback=callback, 
-                                **solver_options)
+                                **self.options_to_pass)
         self.total_time = time.time() - start_time
 
         self.run_post_processing()

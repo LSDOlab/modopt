@@ -49,6 +49,8 @@ class COBYLA(Optimizer):
         Check the validity of user-provided 'solver_options'.
         '''
         self.solver_options.update(self.options['solver_options'])
+        self.options_to_pass = self.solver_options.get_pure_dict()
+        self.user_callback = self.options_to_pass.pop('callback')
         self.setup_bounds()
         if self.problem.constrained:
             self.setup_constraints()
@@ -103,12 +105,10 @@ class COBYLA(Optimizer):
             self.constraints.append(con_dict_ineq2)
 
     def solve(self):
-        solver_options = self.solver_options.get_pure_dict()
-        user_callback = solver_options.pop('callback')
 
         def callback(x): 
             self.update_outputs(x=x)
-            if user_callback: user_callback(x) 
+            if self.user_callback: self.user_callback(x) 
 
         self.update_outputs(x=self.x0)
 
@@ -126,7 +126,7 @@ class COBYLA(Optimizer):
             constraints=self.constraints,
             tol=None,
             callback=callback,
-            options=solver_options
+            options=self.options_to_pass
             )
         self.total_time = time.time() - start_time
 

@@ -95,6 +95,9 @@ class TrustConstr(Optimizer):
         '''
         # Check if user-provided solver_options have valid keys and value-types
         self.solver_options.update(self.options['solver_options'])
+        self.options_to_pass = self.solver_options.get_pure_dict()
+        self.options_to_pass.pop('ignore_exact_hessian')
+        self.user_callback = self.options_to_pass.pop('callback')
         # Adapt bounds as scipy Bounds() object
         self.setup_bounds()
 
@@ -158,10 +161,6 @@ class TrustConstr(Optimizer):
         self.ineq_constrained = True if len(lci) + len(uci) > 0 else False
 
     def solve(self):
-        solver_options = self.solver_options.get_pure_dict()
-        solver_options.pop('ignore_exact_hessian')
-        user_callback = solver_options.pop('callback')
-
         constrained = self.problem.constrained
         bounded     = bool(self.bounds)
         tr_ip = self.tr_interior_point
@@ -205,7 +204,7 @@ class TrustConstr(Optimizer):
                 cg_stop_cond=intermediate_result['cg_stop_cond'],
                 time=intermediate_result['execution_time']
                 )
-            if user_callback: user_callback(intermediate_result)
+            if self.user_callback: self.user_callback(intermediate_result)
 
         # Call the trust-constr algorithm from scipy (options are specific to trust-constr)
         start_time = time.time()
@@ -221,7 +220,7 @@ class TrustConstr(Optimizer):
             constraints=self.constraints,
             tol=None,
             callback=callback,
-            options=solver_options
+            options=self.options_to_pass
             )
         self.total_time = time.time() - start_time
 
