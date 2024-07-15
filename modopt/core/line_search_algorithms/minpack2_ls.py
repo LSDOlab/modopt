@@ -57,18 +57,18 @@ class Minpack2LS(LineSearch):
         f = self.options['f']
         g = self.options['g']
 
-        num_f_evals = 0
-        num_g_evals = 0
+        nfev = 0
+        ngev = 0
 
         if f0 is None:
             f1 = f(x)
-            num_f_evals = 1
+            nfev = 1
         else:
             f1 = f0 * 1.
 
         if g0 is None:
             g1 = g(x)
-            num_g_evals = 1
+            ngev = 1
         else:
             g1 = g0 * 1.
 
@@ -93,7 +93,7 @@ class Minpack2LS(LineSearch):
         if alpha == None:
             converged = False
 
-        num_f_evals += new_f_evals
-        num_g_evals += new_g_evals
+        nfev += new_f_evals
+        ngev += new_g_evals
 
-        return alpha, f2, g2, slope2, num_f_evals, num_g_evals, converged
+        return alpha, f2, g2, slope2, nfev, ngev, converged

@@ -1,6 +1,8 @@
 import numpy as np
 import scipy as sp
 import os, shutil, copy
+from datetime import datetime
+import contextlib
 
 from modopt.utils.options_dictionary import OptionsDictionary
 from modopt.utils.general_utils import pad_name
@@ -23,53 +25,76 @@ class Optimizer(object):
         self._setup()
 
     def _setup(self):
+        # Setup outputs to be written to file
+        self.setup_outputs()
         # User defined optimizer-specific setup
         self.setup()
 
     def setup_outputs(self):
-        dir = self.problem_name + '_outputs'
-        a_outs = self.available_outputs             # Available outputs dictionary
-        d_outs = self.options['readable_outputs']   # Declared outputs list
+        '''
+        Set up the files to write the outputs of the optimization problem.
+        Three different types of outputs are written:
+            1. Summary table: Contains the scalar outputs of the optimization problem
+            2. Readable outputs: Contains the declared readable outputs
+            3. Recorder outputs: Contains all the outputs of the optimization problem, if recording is enabled
+        '''
+        now       = datetime.now()
+        timestamp = self.timestamp = now.strftime("%Y-%m-%d_%H.%M.%S.%f")
+        dir       = self.out_dir = f"{self.problem_name}_outputs/{timestamp}"
+        a_outs    = self.available_outputs             # Available outputs dictionary
+        d_outs    = self.options['readable_outputs']   # Declared outputs list
 
         self.scalar_outputs = [out for out in a_outs.keys() if not isinstance(a_outs[out], tuple)]
-        # Write the header of the summary_table file
-        if len(self.scalar_outputs) > 0:
+        s_outs = self.scalar_outputs
+
+        # Create the outputs directory
+        # if len(s_outs) > 0 or len(d_outs) > 0 or self.options['recording']:        
+        os.makedirs(dir)
+
+        # 1. Write the header of the summary_table file
+        if len(s_outs) > 0:
             header =''
-            for key in self.scalar_outputs:
+            for key in s_outs:
                 if a_outs[key] in (int, np.int_, np.int32, np.int64):
-                    header += "%16s " % key
+                    header += "%10s " % key
                 elif a_outs[key] in (float, np.float_, np.float32, np.float64):
                     header += "%16s " % key
 
-            with open('modOpt_summary.out', 'w') as f:
+            with open(f"{dir}/modOpt_summary.out", 'w') as f:
                 f.write(header)
 
-        if len(d_outs) == 0:
-            return
-        
-        try:
-            shutil.rmtree(dir)
-            print("Outputs directory ", dir, " already exists. Overwriting...")
-        except FileNotFoundError:
-            pass
-        os.mkdir(dir)
-
+        # 2. Create the readable output files
         for key in d_outs:
             if key not in a_outs:
                 raise ValueError(f'Invalid readable output "{key}" is declared.' \
                                  f'Available outputs are {list(a_outs.keys())}.')
-            with open(dir + '/' + key + '.out', 'w') as f:
+            with open(f"{dir}/{key}.out", 'w') as f:
                 pass
 
     def setup(self, ):
         pass
 
     def run_post_processing(self):
-        pass
+        '''
+        Run the post-processing functions of the optimizer.
+        1. Print the results of the optimization problem
+        2. Write the outputs to the corresponding files
+        3. Run the lsdo_dashboard processing
+        '''
+        with open(f"{self.out_dir}/modOpt_results.out", 'w') as f:
+            with contextlib.redirect_stdout(f):
+                self.print_results(all=True)
         # TODO: Add lsdo_dashboard processing
 
     def update_outputs(self, **kwargs):
-        dir = self.problem_name + '_outputs'
+        '''
+        Update and write the outputs of the optimization problem to the corresponding files.
+        Three different types of outputs are written:
+            1. Summary table: Contains the scalar outputs of the optimization problem
+            2. Readable outputs: Contains the declared readable outputs
+            3. Recorder outputs: Contains all the outputs of the optimization problem, if recording is enabled
+        '''
+        dir    = self.out_dir
         a_outs = self.available_outputs             # Available outputs dictionary
         d_outs = self.options['readable_outputs']   # Declared outputs list
 
@@ -77,33 +102,35 @@ class Optimizer(object):
             raise ValueError(f'Output(s) passed in to be updated {list(kwargs.keys())} ' \
                              f'do not match the available outputs {list(a_outs.keys())}.')
         
+        # 1. Write the scalar outputs to the summary file
         if len(self.scalar_outputs) > 0:
             # Print summary_table row
             new_row ='\n'
             for key in self.scalar_outputs:
                 if a_outs[key] in (int, np.int_, np.int32, np.int64):
-                    new_row += "%16i " % kwargs[key]
+                    new_row += "%10i " % kwargs[key]
                 elif a_outs[key] in (float, np.float_, np.float32, np.float64):
                     new_row += "%16.6E " % kwargs[key]
 
-            with open('modOpt_summary.out', 'a') as f:
+            with open(f"{dir}/modOpt_summary.out", 'a') as f:
                 f.write(new_row)
 
-        self.out_dict = copy.deepcopy(kwargs)
-
-        # Write the declared readable outputs to the corresponding files
+        # 2. Write the declared readable outputs to the corresponding files
         for key in d_outs:
             value = kwargs[key]
             if key in self.scalar_outputs:
                 if np.isscalar(value) and np.isreal(value):
-                    with open(dir + '/' + key + '.out', 'a') as f:
+                    with open(f"{dir}/{key}.out", 'a') as f:
                         np.savetxt(f, [value])
                 else:
                     raise ValueError(f'Value of "{key}" is not a real-valued scalar.')        
             else:
                 # Multidim. arrays will be flattened (c-major/row major) before writing to a file
-                with open(dir + '/' + key + '.out', 'a') as f:
+                with open(f"{dir}/{key}.out", 'a') as f:
                     np.savetxt(f, value.reshape(1, value.size))
+        
+        # 3. TODO: Write the outputs to the recording files
+        self.out_dict = out_dict = copy.deepcopy(kwargs)
 
     def check_if_callbacks_are_declared(self, cb, cb_str, solver_str):
         if cb not in self.problem.user_defined_callbacks:
@@ -113,7 +140,7 @@ class Optimizer(object):
                 warnings.warn(f"{cb_str} function is not provided in the ProblemLite() container but is needed for {solver_str}. "\
                               f"The optimizer will use finite differences to compute the {cb_str}.")
 
-    def print_results(self, summary_table=False):
+    def print_results(self, summary_table=False, all=False):
 
         # TODO: Testing to verify the design variable data
         # print(

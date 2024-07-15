@@ -62,8 +62,8 @@ class SQP_SURF(Optimizer):
             'opt': float,
             'feas': float,
             'time': float,
-            'num_f_evals': int,
-            'num_g_evals': int,
+            'nfev': int,
+            'ngev': int,
             'step': float,
             'rho': float,
             'merit': float,
@@ -86,7 +86,6 @@ class SQP_SURF(Optimizer):
         return self.jac_in(x[:self.nx], x[self.nx:])
 
     def setup(self):
-        self.setup_outputs()
         # self.setup_constraints()
         nx = self.nx = self.problem.nx
         ny = self.ny = self.problem.ny
@@ -525,8 +524,8 @@ class SQP_SURF(Optimizer):
         opt_satisfied, opt = self.opt_check(pi_k, c_k, g_k, J_k)
         feas_satisfied, feas = self.feas_check(z_k, c_k)
         tol_satisfied = (opt_satisfied and feas_satisfied)
-        num_f_evals = 1
-        num_g_evals = 1
+        nfev = 1
+        ngev = 1
 
         # Evaluate merit function value
         MF.set_rho(rho_k)
@@ -556,8 +555,8 @@ class SQP_SURF(Optimizer):
                             opt=opt,
                             feas=feas,
                             time=time.time() - start_time,
-                            num_f_evals=num_f_evals,
-                            num_g_evals=num_g_evals,
+                            nfev=nfev,
+                            ngev=ngev,
                             step=0.,
                             rho=rho_k,
                             merit=mf_k)
@@ -701,8 +700,8 @@ class SQP_SURF(Optimizer):
             # alpha, mf_new, new_f_evals, new_g_evals, converged = LSB.search(
             #     x=v_k, p=p_k, f0=mf_k, g0=mfg_k)
 
-            num_f_evals += new_f_evals
-            num_g_evals += new_g_evals
+            nfev += new_f_evals
+            ngev += new_g_evals
 
             # if not converged:  # Fallback: Backtracking LS
             #     if self.consecutive_ls_failures <= 1:
@@ -711,8 +710,8 @@ class SQP_SURF(Optimizer):
             #         alpha, mf_new, new_f_evals, new_g_evals, converged = LSB.search(
             #             x=v_k, p=p_k, f0=mf_k, g0=mfg_k)
 
-            #         num_f_evals += new_f_evals
-            #         num_g_evals += new_g_evals
+            #         nfev += new_f_evals
+            #         ngev += new_g_evals
 
             # A step of length 1e-4 is taken along p_k if line search does not converge
             if not converged:
@@ -876,8 +875,8 @@ class SQP_SURF(Optimizer):
                 opt=opt,
                 feas=feas,
                 time=time.time() - start_time,
-                num_f_evals=num_f_evals,
-                num_g_evals=num_g_evals,
+                nfev=nfev,
+                ngev=ngev,
                 rho=rho_k,
                 step=alpha,
                 # merit=mf_new)

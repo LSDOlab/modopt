@@ -14,20 +14,12 @@ from .snopt_optimizer import SNOPTOptimizer
 
 
 class SNOPTc(SNOPTOptimizer):
-    def declare_options(self):
-        self.solver_name += 'c'
-
-        # Solver-specific options exactly as in SNOPT with defaults
-        # self.options.declare('maxiter', default=100, types=int)
-
     def setup(self):
+        self.solver_name += '-c'
         self.update_SNOPT_options_object()
         self.setup_bounds()
         if self.problem.constrained:
             self.setup_constraints()
-
-    # def setup_constraints(self, ):
-    #     pass
 
     def solve(self):
         append = self.solver_options['append2file']
@@ -39,7 +31,6 @@ class SNOPTc(SNOPTOptimizer):
         # ObjRow = 1
         n = self.problem.nx
         m = self.problem.nc
-        # print(m)
         # nF = self.problem.nc + 1
 
         obj = self.obj
@@ -117,34 +108,54 @@ class SNOPTc(SNOPTOptimizer):
             m = 1
             locA = np.ones((n + 1, ))
             locA[0] = 0
-            self.results = snoptc(snoptc_objconFG,
-                                  nnObj=nnObj,
-                                  nnCon=nnCon,
-                                  nnJac=nnJac,
-                                  x0=np.append(x0, 0.),
-                                  J=(np.array([0]), np.array([0]), locA),
-                                  name=self.problem_name,
-                                  iObj=0,
-                                  bl=np.append(bl, -inf),
-                                  bu=np.append(bu, inf),
-                                  options=self.SNOPT_options_object,
-                                  m=m,
-                                  n=n,
-                                  append2file=append)
+            solution = snoptc(snoptc_objconFG,
+                              nnObj=nnObj,
+                              nnCon=nnCon,
+                              nnJac=nnJac,
+                              x0=np.append(x0, 0.),
+                              J=(np.array([0]), np.array([0]), locA),
+                              name=self.problem_name,
+                              iObj=0,
+                              bl=np.append(bl, -inf),
+                              bu=np.append(bu, inf),
+                              options=self.SNOPT_options_object,
+                              m=m,
+                              n=n,
+                              append2file=append)
         else:
-            self.results = snoptc(snoptc_objconFG,
-                                  nnObj=nnObj,
-                                  nnCon=nnCon,
-                                  nnJac=nnJac,
-                                  x0=x0c0,
-                                  J=J,
-                                  name=self.problem_name,
-                                  iObj=0,
-                                  bl=bl,
-                                  bu=bu,
-                                  options=self.SNOPT_options_object,
-                                  append2file=append)
+            solution = snoptc(snoptc_objconFG,
+                              nnObj=nnObj,
+                              nnCon=nnCon,
+                              nnJac=nnJac,
+                              x0=x0c0,
+                              J=J,
+                              name=self.problem_name,
+                              iObj=0,
+                              bl=bl,
+                              bu=bu,
+                              options=self.SNOPT_options_object,
+                              append2file=append)
 
         self.total_time = time.time() - start_time
+
+        n = self.problem.nx
+        m = self.problem.nc
+        self.results = {}
+        self.results['x']           = solution.x[:n]
+        self.results['c']           = solution.x[n:n+m]
+        self.results['x_states']    = solution.states[:n]
+        self.results['c_states']    = solution.states[n:n+m]
+        self.results['lmult_x']     = solution.rc[:n]
+        self.results['lmult_c']     = solution.rc[n:n+m]
+        self.results['info']        = solution.info
+
+        self.results['niter']       = solution.iterations
+        self.results['n_majiter']   = solution.major_itns
+        self.results['nS']          = solution.nS
+        self.results['nInf']        = solution.num_inf
+        self.results['sInf']        = solution.sum_inf
+        self.results['obj']         = solution.objective
+
+        self.run_post_processing()
 
         return self.results

@@ -24,14 +24,13 @@ class Newton(Optimizer):
             'x': (float, (self.problem.nx, )),
             'opt': float,
             'time': float,
-            'num_f_evals': int,
-            'num_g_evals': int,
+            'nfev': int,
+            'ngev': int,
             'step': float,
         }
 
 
     def setup(self):
-        self.setup_outputs()
         self.LS = ScipyLS(f=self.obj, g=self.grad)
 
     def solve(self):
@@ -60,8 +59,8 @@ class Newton(Optimizer):
         itr = 0
 
         opt = np.linalg.norm(g_k)
-        num_f_evals = 1
-        num_g_evals = 1
+        nfev = 1
+        ngev = 1
 
         # Initializing declared outputs
         self.update_outputs(itr=0,
@@ -69,8 +68,8 @@ class Newton(Optimizer):
                             obj=f_k,
                             opt=opt,
                             time=time.time() - start_time,
-                            num_f_evals=num_f_evals,
-                            num_g_evals=num_g_evals,
+                            nfev=nfev,
+                            ngev=ngev,
                             step=0.)
 
         while (opt > opt_tol and itr < maxiter):
@@ -87,8 +86,8 @@ class Newton(Optimizer):
             alpha, f_k, g_k, slope_new, new_f_evals, new_g_evals, converged = LS.search(
                 x=x_k, p=p_k, f0=f_k, g0=g_k)
 
-            num_f_evals += new_f_evals
-            num_g_evals += new_g_evals
+            nfev += new_f_evals
+            ngev += new_g_evals
 
             # A step of length 1e-4 is taken along p_k if line search does not converge
             if not converged:
@@ -96,14 +95,14 @@ class Newton(Optimizer):
                 x_k += p_k * alpha
                 f_k = obj(x_k)
                 g_k = grad(x_k)
-                num_f_evals += 1
-                num_g_evals += 1
+                nfev += 1
+                ngev += 1
 
             else:
                 x_k += alpha * p_k
                 if g_k == 'Unavailable':
                     g_k = grad(x_k)
-                    num_g_evals += 1
+                    ngev += 1
 
             H_k = hess(x_k)
 
@@ -118,12 +117,10 @@ class Newton(Optimizer):
                                 obj=f_k,
                                 opt=opt,
                                 time=time.time() - start_time,
-                                num_f_evals=num_f_evals,
-                                num_g_evals=num_g_evals,
+                                nfev=nfev,
+                                ngev=ngev,
                                 step=alpha)
 
-        # Run post-processing for the Optimizer() base class
-        self.run_post_processing()
         self.total_time = time.time() - start_time
         converged = opt <= opt_tol
 
@@ -131,11 +128,14 @@ class Newton(Optimizer):
             'x': x_k, 
             'f': f_k, 
             'optimality': opt, 
-            'nfev': num_f_evals, 
-            'ngev': num_g_evals,
+            'nfev': nfev, 
+            'ngev': ngev,
             'niter': itr, 
             'time': self.total_time,
             'converged': converged,
             }
+        
+        # Run post-processing for the Optimizer() base class
+        self.run_post_processing()
         
         return self.results

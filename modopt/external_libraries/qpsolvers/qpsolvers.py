@@ -86,11 +86,20 @@ class ConvexQPSolvers(Optimizer):
                                   'qpswift', 'quadprog', 'scs', 'nppro']
         self.options.declare('solver_options', types=dict, default={})
 
+        # Declare outputs
+        self.available_outputs = {}
+        self.options.declare('readable_outputs', values=([],), default=[])
+
         # Defined only for checking derivatives
-        self.obj = self.problem._compute_objective
+        self.x0   = self.problem.x0 * 1.
+        self.obj  = self.problem._compute_objective
         self.grad = self.problem._compute_objective_gradient
-        self.con = self.problem._compute_constraints
-        self.jac = self.problem._compute_constraint_jacobian
+        self.obj_hess = self.problem._compute_objective_hessian
+        self.active_callbacks = ['obj', 'grad', 'obj_hess']
+        if self.problem.constrained:
+            self.con = self.problem._compute_constraints
+            self.jac = self.problem._compute_constraint_jacobian
+            self.active_callbacks += ['con', 'jac']
 
     def setup(self, ):
         '''
@@ -107,8 +116,6 @@ class ConvexQPSolvers(Optimizer):
         if 'verbose' not in self.options['solver_options']:
             self.options['solver_options']['verbose'] = True
 
-        self.x0 = self.problem.x0 * 1.
-
         # Check if gradient/Jacobian/Hessian are declared and raise error/warning for Problem/ProblemLite
         # NOTE: Objective Hessian and gradient needs to declared even if running a QP feasibility problem
         self.check_if_callbacks_are_declared('grad', 'Objective gradient', 'ConvexQPSolvers')
@@ -117,11 +124,8 @@ class ConvexQPSolvers(Optimizer):
             self.check_if_callbacks_are_declared('jac', 'Constraint Jacobian', 'ConvexQPSolvers')
 
         # Define the cost matrix and cost vector
-        self.P = self.problem._compute_objective_hessian(self.x0)
-        self.q = self.problem._compute_objective_gradient(self.x0) - self.P @ self.x0
-        
-        con_0 = self.problem._compute_constraints(self.x0)
-        jac_0 = self.problem._compute_constraint_jacobian(self.x0)
+        self.P = self.obj_hess(self.x0)
+        self.q = self.grad(self.x0) - self.P @ self.x0
 
         # Define the lower bounds for the variables: lb <= x
         if np.all(self.problem.x_lower == -np.inf):
@@ -135,45 +139,51 @@ class ConvexQPSolvers(Optimizer):
         else:
             self.ub = self.problem.x_upper
 
-        # Identify eq constraint bounds
-        c_lower = self.problem.c_lower
-        c_upper = self.problem.c_upper
+        self.A = None
+        self.b = None
+        self.G = None
+        self.h = None
 
-        # Compute the constant component vector for the linear constraints
-        k = con_0 - jac_0 @ self.x0
+        if self.problem.constrained:
+            self.setup_constraints()
 
-        eqi = np.where(c_lower == c_upper)[0]
+    def setup_constraints(self, ):
+            con_0 = self.con(self.x0)
+            jac_0 = self.jac(self.x0)
 
-        # Define the linear equality constraint: Ax = b
-        if len(eqi) > 0:
-            self.A = jac_0[eqi]
-            self.b = c_upper[eqi] - k[eqi]
-        else:
-            self.A = None
-            self.b = None
+            # Identify eq constraint bounds
+            c_lower = self.problem.c_lower
+            c_upper = self.problem.c_upper
 
-        # Identify constraints with only lower bounds
-        lci = np.where((c_lower != -np.inf) & (c_lower != c_upper))[0]
-        # Identify constraints with only upper bounds
-        uci = np.where((c_upper !=  np.inf) & (c_lower != c_upper))[0]
+            # Compute the constant component vector for the linear constraints
+            k = con_0 - jac_0 @ self.x0
 
-        # Setup the linear inequality constraint: Gx <= h
-        G = np.zeros((0, self.problem.nx), dtype=float)
-        h = np.array([])
+            eqi = np.where(c_lower == c_upper)[0]
 
-        if len(uci) > 0:
-            G = np.append(G, jac_0[uci], axis=0)
-            h = np.append(h, c_upper[uci] - k[uci])
-        if len(lci) > 0:
-            G = np.append(G, -jac_0[lci], axis=0)
-            h = np.append(h, k[lci] - c_lower[lci])
-        
-        if len(lci) + len(uci) > 0:
-            self.G = G
-            self.h = h
-        else:
-            self.G = None
-            self.h = None
+            # Define the linear equality constraint: Ax = b
+            if len(eqi) > 0:
+                self.A = jac_0[eqi]
+                self.b = c_upper[eqi] - k[eqi]
+
+            # Identify constraints with only lower bounds
+            lci = np.where((c_lower != -np.inf) & (c_lower != c_upper))[0]
+            # Identify constraints with only upper bounds
+            uci = np.where((c_upper !=  np.inf) & (c_lower != c_upper))[0]
+
+            # Setup the linear inequality constraint: Gx <= h
+            G = np.zeros((0, self.problem.nx), dtype=float)
+            h = np.array([])
+
+            if len(uci) > 0:
+                G = np.append(G, jac_0[uci], axis=0)
+                h = np.append(h, c_upper[uci] - k[uci])
+            if len(lci) > 0:
+                G = np.append(G, -jac_0[lci], axis=0)
+                h = np.append(h, k[lci] - c_lower[lci])
+            
+            if len(lci) + len(uci) > 0:
+                self.G = G
+                self.h = h
 
     def solve(self, ):
         '''
@@ -223,11 +233,16 @@ class ConvexQPSolvers(Optimizer):
         self.results = asdict(solution)
         self.results.pop('obj')         # obj returned by qpsolvers does not include the constant term so remove it
         self.results['objective']       = self.obj(solution.x)  # compute the objective value for the problem
-        self.results['constraints']     = self.con(solution.x)  # compute the constraints value for the problem
+        if self.problem.constrained:
+            self.results['constraints'] = self.con(solution.x)  # compute the constraints value for the problem
+        else:
+            self.results['constraints'] = []
         self.results['primal_residual'] = solution.primal_residual()
         self.results['dual_residual']   = solution.dual_residual()
         self.results['duality_gap']     = solution.duality_gap()
         self.results['time']            = self.total_time
+
+        self.run_post_processing()
 
         return self.results
         
@@ -235,7 +250,8 @@ class ConvexQPSolvers(Optimizer):
                       optimal_variables=False,
                       optimal_constraints=False,
                       optimal_dual_variables=False,
-                      extras=False):
+                      extras=False,
+                      all=False):
 
         output  = "\n\tSolution from qpsolvers:"
         output += "\n\t"+"-" * 100
@@ -249,15 +265,15 @@ class ConvexQPSolvers(Optimizer):
         output += f"\n\t{'Duality gap':40}: {self.results['duality_gap']}"
         output += f"\n\t{'Total time':40}: {self.results['time']}"
 
-        if optimal_variables:
+        if optimal_variables or all:
             output += f"\n\t{'Optimal variables':40}: {self.results['x']}"
-        if optimal_constraints:
+        if optimal_constraints or all:
             output += f"\n\t{'Optimal constraints':40}: {self.results['constraints']}"
-        if optimal_dual_variables:
+        if optimal_dual_variables or all:
             output += f"\n\t{'Optimal dual variables (bounds)':40}: {self.results['z_box']}"
             output += f"\n\t{'Optimal dual variables (eq constraints)':40}: {self.results['y']}"
             output += f"\n\t{'Optimal dual variables (ineq cons.)':40}: {self.results['z']}"
-        if extras:
+        if extras or all:
             output += f"\n\t{'Extras':40}: {self.results['extras']}"
 
         output += '\n\t' + '-'*100

@@ -37,8 +37,10 @@ class COBYLA(Optimizer):
 
         self.x0   = self.problem.x0 * 1.0
         self.obj  = self.problem._compute_objective
+        self.active_callbacks = ['obj']
         if self.problem.constrained:
             self.con  = self.problem._compute_constraints
+            self.active_callbacks += ['con']
 
     def setup(self):
         '''
@@ -46,7 +48,6 @@ class COBYLA(Optimizer):
         Setup outputs, bounds, and constraints.
         Check the validity of user-provided 'solver_options'.
         '''
-        self.setup_outputs()
         self.solver_options.update(self.options['solver_options'])
         self.setup_bounds()
         if self.problem.constrained:
@@ -129,9 +130,11 @@ class COBYLA(Optimizer):
             )
         self.total_time = time.time() - start_time
 
+        self.run_post_processing()
+
         return self.results
     
-    def print_results(self, optimal_variables=False):
+    def print_results(self, optimal_variables=False, all=False):
         '''
         Print the results of the optimization in modOpt's format.
         '''
@@ -147,7 +150,7 @@ class COBYLA(Optimizer):
         output += f"\n\t{'Objective':25}: {self.results['fun']}"
         output += f"\n\t{'Total function evals':25}: {self.results['nfev']}"
         output += f"\n\t{'Max. constraint violation':25}: {self.results['maxcv']}"
-        if optimal_variables:
+        if optimal_variables or all:
             output += f"\n\t{'Optimal variables':25}: {self.results['x']}"
 
         output += '\n\t' + '-'*100

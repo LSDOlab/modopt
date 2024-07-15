@@ -43,6 +43,7 @@ class NelderMead(Optimizer):
         # Define the initial guess, objective
         self.x0   = self.problem.x0 * 1.0
         self.obj  = self.problem._compute_objective
+        self.active_callbacks = ['obj']
 
     def setup(self):
         '''
@@ -50,7 +51,6 @@ class NelderMead(Optimizer):
         Setup outputs, bounds, and constraints.
         Check the validity of user-provided 'solver_options'.
         '''
-        self.setup_outputs()
         self.solver_options.update(self.options['solver_options'])
         self.setup_bounds()
         if self.problem.constrained:
@@ -104,12 +104,15 @@ class NelderMead(Optimizer):
             'coordinates': self.results['final_simplex'][0],
             'obj_values': self.results['final_simplex'][1]
             }
+        
+        self.run_post_processing()
 
         return self.results
     
     def print_results(self, 
                       optimal_variables=False,
-                      final_simplex=False):
+                      final_simplex=False,
+                      all=False):
         '''
         Print the results of the optimization in modOpt's format.
         '''
@@ -125,9 +128,9 @@ class NelderMead(Optimizer):
         output += f"\n\t{'Objective':25}: {self.results['fun']}"
         output += f"\n\t{'Total function evals':25}: {self.results['nfev']}"
         output += f"\n\t{'Total iterations':25}: {self.results['nit']}"
-        if optimal_variables:
+        if optimal_variables or all:
             output += f"\n\t{'Optimal variables':25}: {self.results['x']}"
-        if final_simplex:
+        if final_simplex or all:
             output += f"\n\t{'Final simplex':25}: {self.results['final_simplex']}"
 
         output += '\n\t' + '-'*100

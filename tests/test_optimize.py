@@ -219,18 +219,18 @@ def test_snopt():
 
     results = optimize(prob, solver='SNOPT', solver_options=snopt_options)
     print(results)
-    assert results.info == 1
-    assert_array_almost_equal(results.x[:prob.nx], [2., 0.], decimal=11)
-    assert_almost_equal(results.objective, 20., decimal=11)
+    assert results['info'] == 1
+    assert_array_almost_equal(results['x'], [2., 0.], decimal=11)
+    assert_almost_equal(results['obj'], 20., decimal=11)
     
 
     prob = scaling_lite()
 
     results = optimize(prob, solver='SNOPT', solver_options=snopt_options)
     # print(results)
-    assert results.info == 1
-    assert_array_almost_equal(results.x[:prob.nx], [2., 0.], decimal=11)
-    assert_almost_equal(results.objective, 20., decimal=11)
+    assert results['info'] == 1
+    assert_array_almost_equal(results['x'], [2., 0.], decimal=11)
+    assert_almost_equal(results['obj'], 20., decimal=11)
 
 @pytest.mark.ipopt
 @pytest.mark.interfaces

@@ -39,7 +39,6 @@ class SteepestDescent(Optimizer):
         }
 
     def solve(self):
-        self.setup_outputs()
         nx = self.problem.nx
         x = self.problem.x0
         opt_tol = self.options['opt_tol']

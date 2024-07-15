@@ -46,6 +46,7 @@ class BFGS(Optimizer):
         self.x0   = self.problem.x0 * 1.0
         self.obj  = self.problem._compute_objective
         self.grad = self.problem._compute_objective_gradient
+        self.acive_callbacks = ['obj', 'grad']
 
     def setup(self):
         '''
@@ -53,7 +54,6 @@ class BFGS(Optimizer):
         Setup outputs.
         Check the validity of user-provided 'solver_options'.
         '''
-        self.setup_outputs()
         self.solver_options.update(self.options['solver_options'])
         
         xl = self.problem.x_lower
@@ -100,12 +100,15 @@ class BFGS(Optimizer):
             )
         self.total_time = time.time() - start_time
 
+        self.run_post_processing()
+
         return self.results
     
     def print_results(self, 
                       optimal_variables=False,
                       optimal_gradient=False,
-                      optimal_hessian_inverse=False):
+                      optimal_hessian_inverse=False,
+                      all=False):
         '''
         Print the results of the optimization in modOpt's format.
         '''
@@ -123,11 +126,11 @@ class BFGS(Optimizer):
         output += f"\n\t{'Total function evals':25}: {self.results['nfev']}"
         output += f"\n\t{'Total gradient evals':25}: {self.results['njev']}"
         output += f"\n\t{'Major iterations':25}: {self.results['nit']}"
-        if optimal_variables:
+        if optimal_variables or all:
             output += f"\n\t{'Optimal variables':25}: {self.results['x']}"
-        if optimal_gradient:
+        if optimal_gradient or all:
             output += f"\n\t{'Optimal obj. gradient':25}: {self.results['jac']}"
-        if optimal_hessian_inverse:
+        if optimal_hessian_inverse or all:
             output += f"\n\t{'Optimal Hessian inverse':25}: {self.results['hess_inv']}"
 
         output += '\n\t' + '-'*100

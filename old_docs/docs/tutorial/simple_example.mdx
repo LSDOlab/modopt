@@ -100,10 +100,7 @@ class SteepestDescent(Optimizer):
             'time': float,
         }
 
-        
-
     def solve(self):
-        self.setup_outputs()
         nx = self.problem.nx
         x = self.problem.x0
         opt_tol = self.options['opt_tol']
@@ -169,6 +166,8 @@ class SteepestDescent(Optimizer):
             'itr': itr,
             'time': self.total_time
         }
+
+        self.run_post_processing()
 
         return self.results
 ```

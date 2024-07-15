@@ -33,14 +33,13 @@ class NewtonLagrange(Optimizer):
             'opt': float,
             'feas': float,
             'time': float,
-            'num_f_evals': int,
-            'num_g_evals': int,
+            'nfev': int,
+            'ngev': int,
             'step': float,
             'merit': float,
         }
 
     def setup(self):
-        self.setup_outputs()
         nx = self.problem.nx
         nc = self.problem.nc
         self.QN = BFGS(nx=self.problem.nx)
@@ -108,8 +107,8 @@ class NewtonLagrange(Optimizer):
 
         opt = np.linalg.norm(gL_k[:nx])
         feas = np.linalg.norm(c_k)
-        num_f_evals = 1
-        num_g_evals = 1
+        nfev = 1
+        ngev = 1
 
         # Initializing declared outputs
         self.update_outputs(itr=0,
@@ -120,8 +119,8 @@ class NewtonLagrange(Optimizer):
                             opt=opt,
                             feas=feas,
                             time=time.time() - start_time,
-                            num_f_evals=num_f_evals,
-                            num_g_evals=num_g_evals,
+                            nfev=nfev,
+                            ngev=ngev,
                             step=0.,
                             merit=mf_k)
 
@@ -153,8 +152,8 @@ class NewtonLagrange(Optimizer):
             alpha, mf_k, new_f_evals, new_g_evals, converged = LS.search(
                 x=v_k, p=p_k, f0=mf_k, g0=mfg_k)
 
-            num_f_evals += new_f_evals
-            num_g_evals += new_g_evals
+            nfev += new_f_evals
+            ngev += new_g_evals
 
             # A step of length 1e-4 is taken along p_k if line search does not converge
             if not converged:
@@ -175,8 +174,8 @@ class NewtonLagrange(Optimizer):
             c_k = con(x_k)
             J_k = jac(x_k)
 
-            num_f_evals += 1
-            num_g_evals += 1
+            nfev += 1
+            ngev += 1
 
             # L_k = OF.evaluate_function(x_k, pi_k, f_k, c_k)
             gL_k_new = OF.evaluate_gradient(x_k, pi_k, f_k, c_k, g_k,
@@ -211,13 +210,11 @@ class NewtonLagrange(Optimizer):
                                 opt=opt,
                                 feas=feas,
                                 time=time.time() - start_time,
-                                num_f_evals=num_f_evals,
-                                num_g_evals=num_g_evals,
+                                nfev=nfev,
+                                ngev=ngev,
                                 step=alpha,
                                 merit=mf_k)
 
-        # Run post-processing for the Optimizer() base class
-        self.run_post_processing()
         self.total_time = time.time() - start_time
         converged = (opt <= opt_tol and feas <= feas_tol)
 
@@ -228,9 +225,14 @@ class NewtonLagrange(Optimizer):
             'pi': pi_k,
             'optimality': opt,
             'feasibility': feas,
-            'nfev': num_f_evals, 
-            'ngev': num_g_evals,
+            'nfev': nfev, 
+            'ngev': ngev,
             'niter': itr, 
             'time': self.total_time,
             'converged': converged,
             }
+        
+        # Run post-processing for the Optimizer() base class
+        self.run_post_processing()
+
+        return self.results

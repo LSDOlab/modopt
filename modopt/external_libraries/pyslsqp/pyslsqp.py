@@ -35,6 +35,7 @@ class PySLSQP(Optimizer):
             'load_filename': ((type(None), str), None),
             'warm_start': (bool, False),
             'hot_start': (bool, False),
+            'callback': ((type(None), callable), None),
         }
         # Used for verifying the keys and value-types of user-provided solver_options, 
         # and generating an updated pure Python dictionary to provide pyslsqp.optimize()
@@ -42,10 +43,19 @@ class PySLSQP(Optimizer):
         for key, value in self.default_solver_options.items():
             self.solver_options.declare(key, types=value[0], default=value[1])
 
+        # Declare outputs
+        self.available_outputs = {'x': (float, (self.problem.nx,)),}
+        self.options.declare('readable_outputs', values=([],['x']), default=[])
+
+        self.x0 = self.problem.x0 * 1.
+        self.nx = self.problem.nx * 1
         self.obj = self.problem._compute_objective
         self.grad = self.problem._compute_objective_gradient
-        self.con_in = self.problem._compute_constraints
-        self.jac_in = self.problem._compute_constraint_jacobian
+        self.active_callbacks = ['obj', 'grad']
+        if self.problem.constrained:
+            self.con_in = self.problem._compute_constraints
+            self.jac_in = self.problem._compute_constraint_jacobian
+            self.active_callbacks += ['con', 'jac']
 
     def setup(self):
         '''
@@ -54,8 +64,6 @@ class PySLSQP(Optimizer):
         # Check if user-provided solver_options have valid keys and value-types
         self.solver_options.update(self.options['solver_options'])
 
-        self.x0 = self.problem.x0 * 1.
-        self.nx = self.problem.nx * 1
         if self.problem.constrained:
             self.setup_constraints()
 
@@ -114,7 +122,6 @@ class PySLSQP(Optimizer):
 
         return j
 
-
     def solve(self):
         # Set up the problem
         x0 = self.x0
@@ -130,16 +137,77 @@ class PySLSQP(Optimizer):
         xl = self.problem.x_lower
         xu = self.problem.x_upper
         meq = self.nc_e if self.problem.constrained else 0
-        solver_options = self.solver_options.get_pure_dict() # = self.options['solver_options']
+        
+        solver_options = self.solver_options.get_pure_dict()
+        user_callback = solver_options.pop('callback')
+        def callback(x):
+            self.update_outputs(x=x)
+            if user_callback: user_callback(x)
+
+        self.update_outputs(x=self.x0)
 
         # Run the optimization
         start_time = time.time()
-        self.results = optimize(x0, obj=obj, con=con, grad=grad, jac=jac, xl=xl, xu=xu, meq=meq, **solver_options)
+        self.results = optimize(x0, obj=obj, con=con, grad=grad, jac=jac, 
+                                xl=xl, xu=xu, meq=meq, callback=callback, 
+                                **solver_options)
         self.total_time = time.time() - start_time
+
+        self.run_post_processing()
+
+        print(self.results)
         
         return self.results
     
-    def print_results(self, **kwargs):
-        warnings.warn('PySLSQP prints the final results by default. '
-                      'To suppress the results, set `solver_options={"iprint":0}`. '
-                      'Check the summary file "slsqp_summary.out" for the summary of optimization.')
+    def print_results(self,
+                      optimal_variables=False,
+                      optimal_gradient=False,
+                      optimal_constraints=False,
+                      optimal_jacobian=False,
+                      optimal_multipliers=False,
+                      all=False):
+        
+        output  = "\n\tSolution from PySLSQP:"
+        output += "\n\t"+"-" * 100
+
+        output += f"\n\t{'Problem':30}: {self.problem_name}"
+        output += f"\n\t{'Solver':30}: {self.solver_name}"
+        output += f"\n\t{'Success':30}: {self.results['success']}"
+        output += f"\n\t{'Message':30}: {self.results['message']}"
+        output += f"\n\t{'Status':30}: {self.results['status']}"
+        output += f"\n\t{'Objective':30}: {self.results['objective']}"
+        output += f"\n\t{'Optimality':30}: {self.results['optimality']}"
+        output += f"\n\t{'Feasibility':30}: {self.results['feasibility']}"
+        output += f"\n\t{'Gradient norm':30}: {np.linalg.norm(self.results['gradient'])}"
+        output += f"\n\t{'Major iterations':30}: {self.results['num_majiter']}"
+        output += f"\n\t{'Total function evals':30}: {self.results['nfev']}"
+        output += f"\n\t{'Total gradient evals':30}: {self.results['ngev']}"
+        output += f"\n\t{'Total time':30}: {self.total_time}"
+        output += f"\n\t{'Function eval. time':30}: {self.results['fev_time']}"
+        output += f"\n\t{'Derivative eval. time':30}: {self.results['gev_time']}"
+        output += f"\n\t{'Optimizer time':30}: {self.results['optimizer_time']}"
+        output += f"\n\t{'Processing time':30}: {self.results['processing_time']}"
+        output += f"\n\t{'Visualization time':30}: {self.results['visualization_time']}"
+        output += f"\n\t{'Summary saved in':30}: {self.solver_options['summary_filename']}"
+        if 'save_filename' in self.results.keys():
+            output += f"\n\t{'Iteration data saved in':30}: {self.solver_options['save_filename']}"
+        if 'plot_filename' in self.results.keys():
+            output += f"\n\t{'Plot saved in':30}: {self.solver_options['plot_filename']}"
+        if 'nfev_reused_in_hotstart' in self.results.keys():
+            output += f"\n\t{'Fun. evals reused (hotstart)':30}: {self.solver_options['nfev_reused_in_hotstart']}"
+        if 'ngev_reused_in_hotstart' in self.results.keys():
+            output += f"\n\t{'Der. evals reused (hotstart)':30}: {self.solver_options['ngev_reused_in_hotstart']}"
+
+        if optimal_variables or all:
+            output += f"\n\t{'Optimal variables':30}: {self.results['x']}"
+        if optimal_gradient or all:
+            output += f"\n\t{'Optimal obj. gradient':30}: {self.results['gradient']}"
+        if optimal_constraints or all:
+            output += f"\n\t{'Optimal constraints':30}: {self.results['constraints']}"
+        if optimal_multipliers or all:
+            output += f"\n\t{'Optimal multipliers (constr.)':30}: {self.results['multipliers']}"
+        if optimal_jacobian or all:
+            output += f"\n\t{'Optimal Jacobian':30}: {self.results['jacobian']}"
+
+        output += '\n\t' + '-'*100
+        print(output)

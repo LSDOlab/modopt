@@ -81,9 +81,11 @@ class TrustConstr(Optimizer):
         self.x0   = self.problem.x0 * 1.0
         self.obj  = self.problem._compute_objective
         self.grad = self.problem._compute_objective_gradient
+        self.active_callbacks = ['obj', 'grad']
         if self.problem.constrained:
             self.con  = self.problem._compute_constraints
             self.jac  = self.problem._compute_constraint_jacobian
+            self.active_callbacks += ['con', 'jac']
 
     def setup(self):
         '''
@@ -91,8 +93,6 @@ class TrustConstr(Optimizer):
         Setup outputs, bounds, and constraints.
         Check the validity of user-provided 'solver_options'.
         '''
-        # Setup outputs to be written to file
-        self.setup_outputs()
         # Check if user-provided solver_options have valid keys and value-types
         self.solver_options.update(self.options['solver_options'])
         # Adapt bounds as scipy Bounds() object
@@ -110,8 +110,10 @@ class TrustConstr(Optimizer):
             if not self.problem.constrained:
                 if 'obj_hess' in self.problem.user_defined_callbacks:
                     self.obj_hess = self.problem._compute_objective_hessian
+                    self.active_callbacks += ['obj_hess']
                 elif 'obj_hvp' in self.problem.user_defined_callbacks: # use hvp only if hess is not available
                     self.obj_hvp = self.problem._compute_objective_hvp
+                    self.active_callbacks += ['obj_hvp']
             else:
                 if 'lag_hess' in self.problem.user_defined_callbacks:
                     # NOTE: Hack to use Lagrangian Hessian instead of the weighted sum of just the constraint Hessians without the objective Hessian
@@ -120,6 +122,7 @@ class TrustConstr(Optimizer):
                     #       This could BREAK in the future if the scipy trust-constr algorithm changes.
                     self.obj_hess = lambda x: coo_array((self.problem.nx, self.problem.nx), dtype=np.float64)
                     self.con_hess = lambda x, v: self.problem._compute_lagrangian_hessian(x, v)
+                    self.active_callbacks += ['lag_hess']
         
         # Set up constraints
         if self.problem.constrained:
@@ -222,6 +225,8 @@ class TrustConstr(Optimizer):
             )
         self.total_time = time.time() - start_time
 
+        self.run_post_processing()
+
         return self.results
     
     def print_results(self, 
@@ -230,7 +235,8 @@ class TrustConstr(Optimizer):
                       optimal_constraints=False,
                       optimal_constraints_jacobian=False,
                       optimal_lagrange_multipliers=False,
-                      optimal_lagrangian_gradient=False,):
+                      optimal_lagrangian_gradient=False,
+                      all=False):
         '''
         Print the results of the optimization in modOpt's format.
         '''
@@ -277,18 +283,18 @@ class TrustConstr(Optimizer):
         output += f"\n\t{'Total iterations':30}: {self.results['nit']}"
         output += f"\n\t{'CG iterations':30}: {self.results['cg_niter']}"
 
-        if optimal_variables:
+        if optimal_variables or all:
             output += f"\n\t{'Optimal variables':30}: {self.results['x']}"
-        if optimal_gradient:
+        if optimal_gradient or all:
             output += f"\n\t{'Optimal obj. gradient':30}: {self.results['grad']}"
-        if optimal_constraints:
+        if optimal_constraints or all:
             output += f"\n\t{'Optimal constraints':30}: {con}"
-        if optimal_constraints_jacobian:
+        if optimal_constraints_jacobian or all:
             output += f"\n\t{'Optimal con. Jacobian':30}: {jac}"
-        if optimal_lagrange_multipliers:
+        if optimal_lagrange_multipliers or all:
             output += f"\n\t{'Optimal Lag. mult. (bounds)':30}: {lmult_x}"
             output += f"\n\t{'Optimal Lag. mult. (constr.)':30}: {lmult_c}"
-        if optimal_lagrangian_gradient:
+        if optimal_lagrangian_gradient or all:
             output += f"\n\t{'Optimal Lag. gradient':30}: {self.results['lagrangian_grad']}"
 
         output += '\n\t' + '-'*100

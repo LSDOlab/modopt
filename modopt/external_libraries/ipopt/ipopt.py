@@ -23,13 +23,20 @@ class IPOPT(Optimizer):
         # e.g., {'print_level': 5, 'linear_solver': 'ma57', 'tol': 1e-8, 'max_iter': 1000, file_print_level: 5,
         # 'hessian_approximation': 'limited-memory'}
         self.options.declare('solver_options', default={}, types=dict)
+
+        # Declare outputs
+        self.available_outputs = {}
+        self.options.declare('readable_outputs', values=([],), default=[])
         
         self.obj = self.problem._compute_objective
         self.grad = self.problem._compute_objective_gradient
-        self.con = self.problem._compute_constraints
-        self.jac = self.problem._compute_constraint_jacobian
         self.obj_hess = self.problem._compute_objective_hessian
-        self.lag_hess = self.problem._compute_lagrangian_hessian
+        self.active_callbacks = ['obj', 'grad']
+        if self.problem.constrained:
+            self.con = self.problem._compute_constraints
+            self.jac = self.problem._compute_constraint_jacobian
+            self.lag_hess = self.problem._compute_lagrangian_hessian
+            self.active_callbacks += ['con', 'jac']
 
     def setup(self):
         '''
@@ -53,8 +60,10 @@ class IPOPT(Optimizer):
             else:
                 if not self.problem.constrained:
                     self.check_if_callbacks_are_declared('obj_hess', 'Objective Hessian', 'IPOPT')
+                    self.active_callbacks += ['obj_hess']
                 else:
                     self.check_if_callbacks_are_declared('lag_hess', 'Lagrangian Hessian', 'IPOPT')
+                    self.active_callbacks += ['lag_hess']
 
         self.nlp_options = nlp_options
 
@@ -118,7 +127,7 @@ class IPOPT(Optimizer):
             results = solver(x0=x0, lbx=lbx, ubx=ubx)
 
         self.total_time = time.time() - start_time
-        
+
         self.results = {
             'x': np.array(results['x']).reshape((self.nx,)),
             'f': np.array(results['f'])[0],
@@ -128,13 +137,35 @@ class IPOPT(Optimizer):
             'lam_p': np.array(results['lam_p']),
             'time' : self.total_time,
             }
+        
+        self.run_post_processing()
 
         return self.results
     
-    def print_results(self, **kwargs):
-        warnings.warn('IPOPT prints the final results by default. '
-                      'To suppress the results, set `solver_options={"print_level":0}`. '
-                      'Check the output file "ipopt_output.txt" for the detailed outputs from the optimization.')
+    def print_results(self, 
+                      optimal_variables=False,
+                      optimal_constraints=False,
+                      optimal_multipliers=False,
+                      all=False,):
+        
+        output  = "\n\tSolution from ipopt:"
+        output += "\n\t"+"-" * 100
+
+        output += f"\n\t{'Problem':35}: {self.problem_name}"
+        output += f"\n\t{'Solver':35}: {self.solver_name}"
+        output += f"\n\t{'Objective':35}: {self.results['f']}"
+        output += f"\n\t{'Total time':35}: {self.results['time']}"
+        
+        if optimal_variables or all:
+            output += f"\n\t{'Optimal variables':35}: {self.results['x']}"
+        if optimal_constraints or all:
+            output += f"\n\t{'Optimal constraints':35}: {self.results['c']}"        
+        if optimal_multipliers or all:
+            output += f"\n\t{'Optimal multipliers (bounds)':35}: {self.results['lam_x']}"       
+            output += f"\n\t{'Optimal multipliers (constr.)':35}: {self.results['lam_c']}"
+
+        output += '\n\t' + '-'*100
+        print(output)
         
     def generate_objective_callback(self,):
         nx   = self.nx

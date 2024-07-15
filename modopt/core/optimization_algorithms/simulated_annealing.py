@@ -29,9 +29,6 @@ class SimulatedAnnealing(Optimizer):
             'time': float,
         }
 
-    def setup(self):
-        self.setup_outputs()
-        
     def cool(self, T, itr):
         return 0.9 * T
         # # another possible cooling schedule
@@ -140,8 +137,6 @@ class SimulatedAnnealing(Optimizer):
                                 temp=T,
                                 time=time.time() - start_time,)
 
-        # Run post-processing for the Optimizer() base class
-        self.run_post_processing()
         self.total_time = time.time() - start_time
         converged = f_sd <= tol
         improvement = (f0 - f_best)/f0
@@ -158,3 +153,8 @@ class SimulatedAnnealing(Optimizer):
             'nmoves': num_moves,
             'improvement': improvement,
         }
+
+        # Run post-processing for the Optimizer() base class
+        self.run_post_processing()
+
+        return self.results

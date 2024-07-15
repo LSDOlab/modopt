@@ -28,12 +28,9 @@ class PSO(Optimizer):
             'x': (float, (self.problem.nx, )),
             'f_sd': float,
             'time': float,
-            'num_f_evals': int,
+            'nfev': int,
         }
 
-    def setup(self):
-        self.setup_outputs()
-        
     def solve(self):
         # Assign shorter names to variables and methods
         nx = self.problem.nx
@@ -78,7 +75,7 @@ class PSO(Optimizer):
 
         # Iteration counter
         itr = 0
-        num_f_evals = 0
+        nfev = 0
 
         # Seed should be removed if benchmarking against other algorithms
         # with many runs of the same problem from random initializations
@@ -109,7 +106,7 @@ class PSO(Optimizer):
                 x_p = x_k[i] + v_k[i]
                 x_k[i] = np.clip(x_p, x_min, x_max)
 
-            num_f_evals += population
+            nfev += population
             f_sd = np.std(f_k)
 
             # <<<<<<<<<<<<<<<<<<<
@@ -130,12 +127,10 @@ class PSO(Optimizer):
                                 # obj=np.min(f_k),
                                 f_sd=f_sd,
                                 time=time.time() - start_time,
-                                num_f_evals=num_f_evals,)
+                                nfev=nfev,)
             
             itr += 1
             
-        # Run post-processing for the Optimizer() base class
-        self.run_post_processing()
         self.total_time = time.time() - start_time
         converged = f_sd <= tol
 
@@ -143,8 +138,13 @@ class PSO(Optimizer):
             'x': x_best_g, 
             'f': f_best_g, 
             'f_sd': f_sd, 
-            'nfev': num_f_evals, 
+            'nfev': nfev, 
             'niter': itr-1, 
             'time': self.total_time,
             'converged': converged,
             }
+        
+        # Run post-processing for the Optimizer() base class
+        self.run_post_processing()
+
+        return self.results

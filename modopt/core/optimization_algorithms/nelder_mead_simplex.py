@@ -25,12 +25,9 @@ class NelderMeadSimplex(Optimizer):
             'x': (float, (self.problem.nx, )),
             'f_sd': float,
             'time': float,
-            'num_f_evals': int,
+            'nfev': int,
         }
 
-    def setup(self):
-        self.setup_outputs()
-        
     def solve(self):
         # Assign shorter names to variables and methods
         nx = self.problem.nx
@@ -57,7 +54,7 @@ class NelderMeadSimplex(Optimizer):
             f_k[i] = obj(x_k[i])
 
         f_sd = np.std(f_k)
-        num_f_evals = nx + 1
+        nfev = nx + 1
 
         # # Initializing declared outputs
         self.update_outputs(itr=0,
@@ -65,7 +62,7 @@ class NelderMeadSimplex(Optimizer):
                             obj=np.min(f_k),
                             f_sd=f_sd,
                             time=time.time() - start_time,
-                            num_f_evals=num_f_evals,)
+                            nfev=nfev,)
 
         while (f_sd > tol and itr < maxiter):
             itr_start = time.time()
@@ -94,14 +91,14 @@ class NelderMeadSimplex(Optimizer):
             # Reflect the worst point about the centroid
             x_r = x_c + (x_c - x_k[-1])
             f_r = obj(x_r)
-            num_f_evals += 1
+            nfev += 1
             
             # When the reflection is better than the best
             if f_r < f_k[0]:
                 # Try expansion along the reflected point
                 x_e = x_c + 2 * (x_c - x_k[-1])
                 f_e = obj(x_e)
-                num_f_evals += 1
+                nfev += 1
 
                 if f_e < f_k[0]:
                     x_k[-1] = x_e
@@ -121,7 +118,7 @@ class NelderMeadSimplex(Optimizer):
                     # Inner contraction
                     x_ic = x_c - 0.5 * (x_c - x_k[-1])
                     f_ic = obj(x_ic)
-                    num_f_evals += 1
+                    nfev += 1
 
                     if f_ic < f_k[-1]:
                         x_k[-1] = x_ic
@@ -130,7 +127,7 @@ class NelderMeadSimplex(Optimizer):
                         for i in range(1, nx+1):
                             x_k[i] = x_k[0] + 0.5 * (x_k[i] - x_k[0])
                             f_k[i] = obj(x_k[i])
-                            num_f_evals += 1
+                            nfev += 1
 
                 # When the reflection is better than the worst
                 # but worse than the second worst
@@ -138,7 +135,7 @@ class NelderMeadSimplex(Optimizer):
                     # Outer contraction
                     x_oc = x_c + 0.5 * (x_c - x_k[-1])
                     f_oc = obj(x_oc)
-                    num_f_evals += 1
+                    nfev += 1
 
                     if f_oc < f_r:
                         x_k[-1] = x_oc
@@ -147,7 +144,7 @@ class NelderMeadSimplex(Optimizer):
                         for i in range(1, nx+1):
                             x_k[i] = x_k[0] + 0.5 * (x_k[i] - x_k[0])
                             f_k[i] = obj(x_k[i])
-                            num_f_evals += 1
+                            nfev += 1
 
             f_sd = np.std(f_k)
 
@@ -160,19 +157,22 @@ class NelderMeadSimplex(Optimizer):
                                 obj=np.min(f_k),
                                 f_sd=f_sd,
                                 time=time.time() - start_time,
-                                num_f_evals=num_f_evals,)
-
-        # Run post-processing for the Optimizer() base class
-        self.run_post_processing()
-        self.total_time = time.time() - start_time
+                                nfev=nfev,)
+            
         converged = f_sd <= tol
+        self.total_time = time.time() - start_time
 
         self.results = {
             'x': x_k[np.argmin(f_k)], 
             'f': np.min(f_k), 
             'f_sd': f_sd, 
-            'nfev': num_f_evals,
+            'nfev': nfev,
             'niter': itr,
             'time': self.total_time,
             'converged': converged,
         }
+
+        # Run post-processing for the Optimizer() base class
+        self.run_post_processing()
+
+        return self.results

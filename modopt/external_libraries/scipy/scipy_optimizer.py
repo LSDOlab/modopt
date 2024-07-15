@@ -216,7 +216,7 @@ class ScipyOptimizer(Optimizer):
     #     if (optimize_result is not None) and (optimize_result != True):
     #         pass
 
-    def print_results(self, optimal_variables=False):
+    def print_results(self, optimal_variables=False, all=False):
 
         output  = "\n\tSolution from Scipy:"
         output += "\n\t"+"-" * 100
@@ -233,7 +233,7 @@ class ScipyOptimizer(Optimizer):
             output += f"\n\t{'Total gradient evals':25}: {self.results['njev']}"
         if 'nit' in self.results:
             output += f"\n\t{'Major iterations':25}: {self.results['nit']}"
-        if optimal_variables:
+        if optimal_variables or all:
             output += f"\n\t{'Optimal variables':25}: {self.results['x']}"
 
         output += '\n\t' + '-'*100

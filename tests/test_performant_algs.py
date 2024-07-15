@@ -299,7 +299,7 @@ def test_pyslsqp():
 
     prob = scaling_lite()
 
-    optimizer = PySLSQP(prob, solver_options={'acc':1e-6, 'maxiter':20, 'summary_filename':'scaling_lite_summary.out'})
+    optimizer = PySLSQP(prob, solver_options={'acc':1e-6, 'maxiter':20, 'summary_filename':'scaling_lite_summary.out'}, readable_outputs=['x'])
     # optimizer = SLSQP(prob, solver_options={'maxiter':50, 'disp':True})
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
@@ -328,9 +328,9 @@ def test_snopt():
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
     print(optimizer.results)
-    assert optimizer.results.info == 1
-    assert_array_almost_equal(optimizer.results.x[:prob.nx], [2., 0.], decimal=11)
-    assert_almost_equal(optimizer.results.objective, 20., decimal=11)
+    assert optimizer.results['info'] == 1
+    assert_array_almost_equal(optimizer.results['x'], [2., 0.], decimal=11)
+    assert_almost_equal(optimizer.results['obj'], 20., decimal=11)
     
 
     prob = scaling_lite()
@@ -339,9 +339,9 @@ def test_snopt():
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
     # print(optimizer.results)
-    assert optimizer.results.info == 1
-    assert_array_almost_equal(optimizer.results.x[:prob.nx], [2., 0.], decimal=11)
-    assert_almost_equal(optimizer.results.objective, 20., decimal=11)
+    assert optimizer.results['info'] == 1
+    assert_array_almost_equal(optimizer.results['x'], [2., 0.], decimal=11)
+    assert_almost_equal(optimizer.results['obj'], 20., decimal=11)
 
 @pytest.mark.ipopt
 @pytest.mark.interfaces

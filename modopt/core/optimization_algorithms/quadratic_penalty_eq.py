@@ -33,14 +33,13 @@ class L2PenaltyEq(Optimizer):
             'opt': float,
             'feas': float,
             'time': float,
-            'num_f_evals': int,
-            'num_g_evals': int,
+            'nfev': int,
+            'ngev': int,
             'step': float,
             'merit': float,
         }
 
     def setup(self):
-        self.setup_outputs()
         nx = self.problem.nx
         nc = self.problem.nc
         self.OF = L2Eq(nx=nx,
@@ -92,8 +91,8 @@ class L2PenaltyEq(Optimizer):
 
         opt = np.linalg.norm(ofg_k)
         feas = np.linalg.norm(c_k)
-        num_f_evals = 1
-        num_g_evals = 1
+        nfev = 1
+        ngev = 1
 
         # Initializing declared outputs
         self.update_outputs(itr=0,
@@ -103,8 +102,8 @@ class L2PenaltyEq(Optimizer):
                             opt=opt,
                             feas=feas,
                             time=time.time() - start_time,
-                            num_f_evals=num_f_evals,
-                            num_g_evals=num_g_evals,
+                            nfev=nfev,
+                            ngev=ngev,
                             step=0.,
                             merit=of_k)
 
@@ -131,8 +130,8 @@ class L2PenaltyEq(Optimizer):
             alpha, of_k, new_f_evals, new_g_evals, converged = LS.search(
                 x=x_k, p=p_k, f0=of_k, g0=ofg_k)
 
-            num_f_evals += new_f_evals
-            num_g_evals += new_g_evals
+            nfev += new_f_evals
+            ngev += new_g_evals
 
             # A step of length 1e-4 is taken along p_k if line search does not converge
             if not converged:
@@ -165,8 +164,8 @@ class L2PenaltyEq(Optimizer):
                 w_k = (ofg_new - ofg_k)
                 ofg_k = ofg_new
 
-            num_f_evals += 1
-            num_g_evals += 1
+            nfev += 1
+            ngev += 1
 
             opt = np.linalg.norm(ofg_k)
             feas = np.linalg.norm(c_k)
@@ -189,13 +188,11 @@ class L2PenaltyEq(Optimizer):
                                 opt=opt,
                                 feas=feas,
                                 time=time.time() - start_time,
-                                num_f_evals=num_f_evals,
-                                num_g_evals=num_g_evals,
+                                nfev=nfev,
+                                ngev=ngev,
                                 step=alpha,
                                 merit=of_k)
 
-        # Run post-processing for the Optimizer() base class
-        self.run_post_processing()
         self.total_time = time.time() - start_time
         converged = (opt <= opt_tol and feas <= feas_tol)
 
@@ -206,9 +203,14 @@ class L2PenaltyEq(Optimizer):
             'rho': rho,
             'optimality': opt,
             'feasibility': feas,
-            'nfev': num_f_evals, 
-            'ngev': num_g_evals,
+            'nfev': nfev, 
+            'ngev': ngev,
             'niter': itr, 
             'time': self.total_time,
             'converged': converged,
             }
+        
+        # Run post-processing for the Optimizer() base class
+        self.run_post_processing()
+
+        return self.results

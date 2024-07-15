@@ -25,13 +25,12 @@ class QuasiNewton(Optimizer):
             'x': (float, (self.problem.nx, )),
             'opt': float,
             'time': float,
-            'num_f_evals': int,
-            'num_g_evals': int,
+            'nfev': int,
+            'ngev': int,
             'step': float,
         }
 
     def setup(self):
-        self.setup_outputs()
         self.LS = ScipyLS(f=self.obj, g=self.grad)
         self.QN = BFGS(nx=self.problem.nx)
 
@@ -59,8 +58,8 @@ class QuasiNewton(Optimizer):
         itr = 0
 
         opt = np.linalg.norm(g_k)
-        num_f_evals = 1
-        num_g_evals = 1
+        nfev = 1
+        ngev = 1
 
         # Initializing declared outputs
         self.update_outputs(itr=0,
@@ -68,8 +67,8 @@ class QuasiNewton(Optimizer):
                             obj=f_k,
                             opt=opt,
                             time=time.time() - start_time,
-                            num_f_evals=num_f_evals,
-                            num_g_evals=num_g_evals,
+                            nfev=nfev,
+                            ngev=ngev,
                             step=0.)
 
         while (opt > opt_tol and itr < maxiter):
@@ -89,8 +88,8 @@ class QuasiNewton(Optimizer):
             alpha, f_k, g_new, slope_new, new_f_evals, new_g_evals, converged = LS.search(
                 x=x_k, p=p_k, f0=f_k, g0=g_k)
 
-            num_f_evals += new_f_evals
-            num_g_evals += new_g_evals
+            nfev += new_f_evals
+            ngev += new_g_evals
 
             # A step of length 1e-4 is taken along p_k if line search does not converge
             if not converged:
@@ -127,12 +126,10 @@ class QuasiNewton(Optimizer):
                                 obj=f_k,
                                 opt=opt,
                                 time=time.time() - start_time,
-                                num_f_evals=num_f_evals,
-                                num_g_evals=num_g_evals,
+                                nfev=nfev,
+                                ngev=ngev,
                                 step=alpha)
 
-        # Run post-processing for the Optimizer() base class
-        self.run_post_processing()
         self.total_time = time.time() - start_time
         converged = opt <= opt_tol
 
@@ -140,11 +137,14 @@ class QuasiNewton(Optimizer):
             'x': x_k, 
             'f': f_k, 
             'optimality': opt, 
-            'nfev': num_f_evals, 
-            'ngev': num_g_evals,
+            'nfev': nfev, 
+            'ngev': ngev,
             'niter': itr, 
             'time': self.total_time,
             'converged': converged,
             }
+        
+        # Run post-processing for the Optimizer() base class
+        self.run_post_processing()
         
         return self.results

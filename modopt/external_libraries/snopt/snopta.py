@@ -6,13 +6,8 @@ from .snopt_optimizer import SNOPTOptimizer
 
 
 class SNOPTa(SNOPTOptimizer):
-    def declare_options(self):
-        self.solver_name += 'a'
-
-        # Solver-specific options exactly as in SNOPT with defaults
-        # self.options.declare('maxiter', default=100, types=int)
-
     def setup(self):
+        self.solver_name += '-a'
         self.update_SNOPT_options_object()
         self.setup_bounds()
         if self.problem.constrained:
@@ -64,7 +59,7 @@ class SNOPTa(SNOPTOptimizer):
 
             return status, F, G
 
-        results = snopta(
+        self.results = snopta(
             snopta_objconFG,
             n,
             nF,
@@ -84,6 +79,6 @@ class SNOPTa(SNOPTOptimizer):
         end_time = time.time()
         self.total_time = end_time - start_time
 
-        print(results)
+        self.run_post_processing()
 
-        self.results = results
+        return self.results

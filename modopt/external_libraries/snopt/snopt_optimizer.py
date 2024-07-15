@@ -13,7 +13,7 @@ from modopt.utils.options_dictionary import OptionsDictionary
 
 class SNOPTOptimizer(Optimizer):
     def initialize(self):
-        self.solver_name = 'snopt_'
+        self.solver_name = 'snopt'
         self.options.declare('solver_options', types=dict, default={})
 
         self.default_solver_options = {
@@ -120,6 +120,10 @@ class SNOPTOptimizer(Optimizer):
         for key, value in self.default_solver_options.items():
             self.solver_options.declare(key, types=value[2], default=value[1])
 
+        # Declare outputs
+        self.available_outputs = {}
+        self.options.declare('readable_outputs', values=([],), default=[])
+
         # Declare method specific options (implemented in the respective algorithm)
         self.declare_options()
 
@@ -127,18 +131,23 @@ class SNOPTOptimizer(Optimizer):
             if callable(self.problem._compute_all):
                 self.compute_all = self.problem._compute_all
 
-        self.obj = self.problem._compute_objective
         self.x0 = self.problem.x0
+        self.obj = self.problem._compute_objective
         self.grad = self.problem._compute_objective_gradient
+        self.active_callbacks = ['obj', 'grad']
 
         if self.problem.nc > 0:
             # Uncomment the line below after testing our sqp_optimizer with atomics_lite
             # pC_px = DenseMatrix(self.problem.pC_px).numpy_array()
             self.con = self.problem._compute_constraints
             self.jac = self.problem._compute_constraint_jacobian
+            self.active_callbacks += ['con', 'jac']
             # Uncomment the 2 lines below after testing our sqp_optimizer with atomics_lite
             # if pC_px.any() != 0:
             #     self.jac = lambda x: pC_px
+
+    def declare_options(self):
+        pass
 
     def update_SNOPT_options_object(self):
         # Check if user-provided solver_options have valid keys and value-types
@@ -164,13 +173,36 @@ class SNOPTOptimizer(Optimizer):
         self.c_lower = np.where(cl == -np.inf, -inf, cl)
         self.c_upper = np.where(cu ==  np.inf,  inf, cu)
 
-    def print_results(self, **kwargs):
-        # TODO: Use pthon file snopt.py and mics.py and result() object to print in modopt format
-        # print("\n", "\t" * 1, "==============")
-        # print("\t" * 1, "SNOPT summary:")
-        # print("\t" * 1, "==============", "\n")
-        # print("\t" * 1, "Problem", "\t" * 3, ':', self.problem_name)
-        # print("\t" * 1, "Solver", "\t" * 3, ':', self.solver_name)
+    def print_results(self, 
+                      optimal_variables=False,
+                      optimal_constraints=False,
+                      optimal_multipliers=False,
+                      all=False):
+        output  = "\n\tSolution from SNOPT:"
+        output += "\n\t"+"-" * 100
 
-        # print(self.results)
+        output += f"\n\t{'Problem':35}: {self.problem_name}"
+        output += f"\n\t{'Solver':35}: {self.solver_name}"
+        output += f"\n\t{'EXIT Code':35}: {self.results['info']}"
+        output += f"\n\t{'Objective':35}: {self.results['obj']}"
+        output += f"\n\t{'Num. of infeasible constraints':35}: {self.results['nInf']}"
+        output += f"\n\t{'Sum. of infeasibilities':35}: {self.results['sInf']}"
+        output += f"\n\t{'Num. of superbasic variables':35}: {self.results['nS']}"
+        output += f"\n\t{'Major iterations':35}: {self.results['n_majiter']}"
+        output += f"\n\t{'Total iterations':35}: {self.results['niter']}"
+        output += f"\n\t{'Total time':35}: {self.total_time}"
+
+        if optimal_variables or all:
+            output += f"\n\t{'Optimal variables':35}: {self.results['x']}"
+            output += f"\n\t{'Final states (variables)':35}: {self.results['x_states']}"
+        if optimal_constraints or all:
+            output += f"\n\t{'Optimal constraints':35}: {self.results['c']}"
+            output += f"\n\t{'Final states (constraints)':35}: {self.results['c_states']}"
+        if optimal_multipliers or all:
+            output += f"\n\t{'Optimal multipliers (bounds)':35}: {self.results['lmult_x']}"
+            output += f"\n\t{'Optimal multipliers (constr.)':35}: {self.results['lmult_c']}"
+
+        output += '\n\t' + '-'*100
+
+        print(output)
         pass

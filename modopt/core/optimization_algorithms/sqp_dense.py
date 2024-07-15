@@ -50,15 +50,14 @@ class SQP(Optimizer):
             'opt': float,
             'feas': float,
             'time': float,
-            'num_f_evals': int,
-            'num_g_evals': int,
+            'nfev': int,
+            'ngev': int,
             'step': float,
             'rho': float,
             'merit': float,
         }
 
     def setup(self):
-        self.setup_outputs()
         self.setup_constraints()
         nx = self.nx
         nc = self.nc
@@ -388,8 +387,8 @@ class SQP(Optimizer):
         c_k = con(x_k)
         J_k = jac(x_k)
 
-        num_f_evals = 1
-        num_g_evals = 1
+        nfev = 1
+        ngev = 1
 
         B_k = np.identity(nx)
 
@@ -449,8 +448,8 @@ class SQP(Optimizer):
                             opt=opt,
                             feas=feas,
                             time=time.time() - start_time,
-                            num_f_evals=num_f_evals,
-                            num_g_evals=num_g_evals,
+                            nfev=nfev,
+                            ngev=ngev,
                             step=0.,
                             rho=rho_k,
                             merit=mf_k)
@@ -565,15 +564,15 @@ class SQP(Optimizer):
             # alpha, mf_new, new_f_evals, new_g_evals, converged = LSB.search(
             #     x=v_k, p=p_k, f0=mf_k, g0=mfg_k)
 
-            num_f_evals += new_f_evals
-            num_g_evals += new_g_evals
+            nfev += new_f_evals
+            ngev += new_g_evals
 
             # if not converged:  # Backup: Backtracking LS
             #     alpha, mf_new, new_f_evals, new_g_evals, converged = LSB.search(
             #         x=v_k, p=p_k, f0=mf_k, g0=mfg_k)
 
-            #     num_f_evals += new_f_evals
-            #     num_g_evals += new_g_evals
+            #     nfev += new_f_evals
+            #     ngev += new_g_evals
 
             # A step of length 1e-4 is taken along p_k if line search does not converge
             if not converged:
@@ -584,8 +583,8 @@ class SQP(Optimizer):
                 alpha = 0.91
                 d_k = p_k * 0.1
                 print("###### FAILED LINE SEARCH #######")
-                num_f_evals += 1  # Commented because of bug in Scipy line search: calls f twice with amax before failure
-                num_g_evals += 1
+                nfev += 1  # Commented because of bug in Scipy line search: calls f twice with amax before failure
+                ngev += 1
 
             else:
                 # print('converged, px_norm=', np.linalg.norm(p_x))
@@ -615,8 +614,8 @@ class SQP(Optimizer):
 
             # print('after LS model evals:', self.problem.model_evals)
             # print('after LS deriv evals:', self.problem.deriv_evals)
-            # print('after LS num_f_evals:', num_f_evals)
-            # print('after LS num_g_evals:', num_g_evals)
+            # print('after LS nfev:', nfev)
+            # print('after LS ngev:', ngev)
 
             # Slack reset
             # if rho_k[0] == 0:
@@ -696,8 +695,8 @@ class SQP(Optimizer):
                 opt=opt,
                 feas=feas,
                 time=time.time() - start_time,
-                num_f_evals=num_f_evals,
-                num_g_evals=num_g_evals,
+                nfev=nfev,
+                ngev=ngev,
                 rho=rho_k,
                 step=alpha,
                 # merit=mf_new)
@@ -712,8 +711,6 @@ class SQP(Optimizer):
             # print('s_k', s_k[0])
             # print('B_k_norm', np.linalg.norm(B_k))
 
-        # Run post-processing for the Optimizer() base class
-        self.run_post_processing()
         self.total_time = time.time() - start_time
         converged = tol_satisfied
 
@@ -724,11 +721,14 @@ class SQP(Optimizer):
             'pi': pi_k,
             'optimality': opt,
             'feasibility': feas,
-            'nfev': num_f_evals,
-            'ngev': num_g_evals,
+            'nfev': nfev,
+            'ngev': ngev,
             'niter': itr,
             'time': self.total_time,
             'converged': converged
         }
 
+        # Run post-processing for the Optimizer() base class
+        self.run_post_processing()
 
+        return self.results

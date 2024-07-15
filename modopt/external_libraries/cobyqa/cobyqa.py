@@ -61,8 +61,10 @@ class COBYQA(Optimizer):
         # Define the initial guess, objective, constraints
         self.x0   = self.problem.x0 * 1.0
         self.obj  = self.problem._compute_objective
+        self.active_callbacks = ['obj']
         if self.problem.constrained:
             self.con  = self.problem._compute_constraints
+            self.active_callbacks += ['con']
 
     def setup(self):
         '''
@@ -70,8 +72,6 @@ class COBYQA(Optimizer):
         Setup outputs, bounds, and constraints.
         Check the validity of user-provided 'solver_options'.
         '''
-        # Setup outputs to be written to file
-        self.setup_outputs()
         # Check if user-provided solver_options have valid keys and value-types
         self.solver_options.update(self.options['solver_options'])
         # Adapt bounds as scipy Bounds() object
@@ -136,12 +136,15 @@ class COBYQA(Optimizer):
             )
         self.total_time = time.time() - start_time
 
+        self.run_post_processing()
+
         return self.results
     
     def print_results(self, 
                       optimal_variables=False,
                       obj_history=False,
-                      max_con_viol_history=False):
+                      max_con_viol_history=False,
+                      all=False):
         '''
         Print the results of the optimization in modOpt's format.
         '''
@@ -158,11 +161,11 @@ class COBYQA(Optimizer):
         output += f"\n\t{'Max. constraint violation':25}: {self.results['maxcv']}"
         output += f"\n\t{'Total function evals':25}: {self.results['nfev']}"
         output += f"\n\t{'Total iterations':25}: {self.results['nit']}"
-        if optimal_variables:
+        if optimal_variables or all:
             output += f"\n\t{'Optimal variables':25}: {self.results['x']}"
-        if obj_history and self.solver_options['store_history']:
+        if (obj_history or all) and self.solver_options['store_history']:
             output += f"\n\t{'Objective history':25}: {self.results['fun_history']}"
-        if max_con_viol_history and self.solver_options['store_history']:
+        if (max_con_viol_history or all) and self.solver_options['store_history'] and self.problem.constrained:
             output += f"\n\t{'Max. con. viol. history':25}: {self.results['maxcv_history']}"
 
         output += '\n\t' + '-'*100

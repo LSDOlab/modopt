@@ -39,12 +39,20 @@ class CVXOPT(Optimizer):
         for key, value in self.default_solver_options.items():
             self.solver_options.declare(key, types=value[0], default=value[1])
 
+        # Declare outputs
+        self.available_outputs = {}
+        self.options.declare('readable_outputs', values=([],), default=[])
+
         self.obj = self.problem._compute_objective
         self.grad = self.problem._compute_objective_gradient
-        self.con_in = self.problem._compute_constraints
-        self.jac_in = self.problem._compute_constraint_jacobian
         self.obj_hess = self.problem._compute_objective_hessian
-        self.lag_hess = self.problem._compute_lagrangian_hessian
+        self.active_callbacks = ['obj', 'grad', 'obj_hess']
+        if self.problem.constrained:
+            self.con_in = self.problem._compute_constraints
+            self.jac_in = self.problem._compute_constraint_jacobian
+            self.lag_hess = self.problem._compute_lagrangian_hessian
+            self.active_callbacks.remove('obj_hess')
+            self.active_callbacks += ['con_in', 'jac_in', 'lag_hess']
 
     def setup(self):
         '''
@@ -281,15 +289,18 @@ class CVXOPT(Optimizer):
         else:
             self.results['constraints'] = []
 
+        self.run_post_processing()
+
         return self.results
 
     def print_results(self, 
                       optimal_variables=False,
                       optimal_constraints=False,
                       optimal_dual_variables=False,
-                      optimal_slack_variables=False):
+                      optimal_slack_variables=False,
+                      all=False):
 
-        output  = "\n\tSolution from cvxopt:"
+        output  = "\n\tSolution from CVXOPT:"
         output += "\n\t"+"-" * 100
 
         output += f"\n\t{'Problem':40}: {self.problem_name}"
@@ -298,15 +309,15 @@ class CVXOPT(Optimizer):
         output += f"\n\t{'Objective':40}: {self.results['objective']}"
         output += f"\n\t{'Total time':40}: {self.results['time']}"
         
-        if optimal_variables:
+        if optimal_variables or all:
             output += f"\n\t{'Optimal variables':40}: {self.results['x']}"
-        if optimal_constraints:
+        if optimal_constraints or all:
             output += f"\n\t{'Optimal constraints':40}: {self.results['constraints']}"        
-        if optimal_dual_variables:
+        if optimal_dual_variables or all:
             output += f"\n\t{'Optimal dual variables (linear eq)':40}: {self.results['y']}"       
             output += f"\n\t{'Optimal dual variables (linear ineq)':40}: {self.results['zl']} (merged with nonlinear ineq since specifying linear ineq constraints is not supported in modOpt)"       
             output += f"\n\t{'Optimal dual variables (nonlinear ineq)':40}: {self.results['znl']}"     
-        if optimal_slack_variables:
+        if optimal_slack_variables or all:
             output += f"\n\t{'Optimal slack variables (linear ineq)':40}: {self.results['sl']} (merged with nonlinear ineq since specifying linear ineq constraints is not supported in modOpt)"       
             output += f"\n\t{'Optimal slack variables (nonlinear ineq)':40}: {self.results['snl']}"
 
