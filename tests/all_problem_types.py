@@ -180,7 +180,7 @@ class IneqConstrained(Problem):
         self.add_constraints('c',
                              shape=(1, ),
                              lower=np.array([1.]),
-                             upper=np.array([np.inf]),)
+                             upper=np.array([100.]),)
 
     def setup_derivatives(self):
         self.declare_objective_gradient(wrt='x')
@@ -208,7 +208,7 @@ def ineq_constrained_lite():
     # x0 = np.array([500., 5.]) # slsqp diverges when starting from these initial values
     x0 = np.array([50., 5.])
     cl = np.array([1.])
-    cu = np.array([np.inf])
+    cu = np.array([100.])
     def obj(x):
         return np.sum(x**4)
     def grad(x):    

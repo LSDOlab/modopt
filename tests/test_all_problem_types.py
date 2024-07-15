@@ -99,7 +99,7 @@ def test_ProblemClass(): # 8 problems
     assert_array_equal(prob.x_lower, np.array([-np.inf, -np.inf]))
     assert_array_equal(prob.x_upper, np.array([np.inf, np.inf]))
     assert_array_equal(prob.c_lower, [1.])
-    assert_array_equal(prob.c_upper, [np.inf])
+    assert_array_equal(prob.c_upper, [100.])
 
     optimizer = SLSQP(prob, solver_options={'maxiter':50, 'disp':True, 'ftol':1e-12})
     optimizer.solve()
@@ -265,7 +265,7 @@ def test_ProblemLiteClass(): # 8 problems
     assert_array_equal(prob.x_lower, np.array([-np.inf, -np.inf]))
     assert_array_equal(prob.x_upper, np.array([np.inf, np.inf]))
     assert_array_equal(prob.c_lower, [1.])
-    assert_array_equal(prob.c_upper, [np.inf])
+    assert_array_equal(prob.c_upper, [100.])
 
     optimizer = SLSQP(prob, solver_options={'maxiter':50, 'disp':True, 'ftol':1e-12})
     optimizer.solve()

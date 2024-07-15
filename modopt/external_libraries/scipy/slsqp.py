@@ -38,8 +38,8 @@ class SLSQP(Optimizer):
         self.grad = self.problem._compute_objective_gradient
         self.active_callbacks = ['obj', 'grad']
         if self.problem.constrained:
-            self.con  = self.problem._compute_constraints
-            self.jac  = self.problem._compute_constraint_jacobian
+            self.con_in  = self.problem._compute_constraints
+            self.jac_in  = self.problem._compute_constraint_jacobian
             self.active_callbacks += ['con', 'jac']
 
     def setup(self):
@@ -74,6 +74,26 @@ class SLSQP(Optimizer):
         else:
             self.bounds = Bounds(xl, xu, keep_feasible=False)
 
+    def con(self, x):
+        '''
+        Cache and compute the constraints.
+        '''
+        if self.con_call_counter % self.num_con_types == 0:
+            self.cached_c = self.con_in(x)
+        self.con_call_counter += 1
+
+        return self.cached_c
+    
+    def jac(self, x):
+        '''
+        Cache and compute the jacobina.
+        '''
+        if self.jac_call_counter % self.num_con_types == 0:
+            self.cached_j = self.jac_in(x)
+        self.jac_call_counter += 1
+
+        return self.cached_j
+
     def setup_constraints(self):
         '''
         Adapt constraints as a list of dictionaries with constraints =0 or  >= 0.
@@ -107,6 +127,12 @@ class SLSQP(Optimizer):
             con_dict_ineq2['jac'] = lambda x: -self.jac(x)[uci]
             self.constraints.append(con_dict_ineq2)
 
+        # Next 3 variables are used for caching the constraints and jacobian
+        self.num_con_types = int(len(lci) > 0) + int(len(uci) > 0) + int(len(eqi) > 0)
+        self.con_call_counter = 0
+        self.jac_call_counter = 0
+        print(self.num_con_types)
+
     def solve(self):
 
         def callback(x): 
@@ -114,6 +140,12 @@ class SLSQP(Optimizer):
             if self.user_callback: self.user_callback(x) 
 
         self.update_outputs(x=self.x0)
+
+        # Reset the counters for caching the constraints and Jacobian prior to running the optimization
+        # This is necessary as any other function call (e.g. self.check_first_derivatives) 
+        # prior to the optimization will increment the counters
+        self.con_call_counter = 0
+        self.jac_call_counter = 0
 
         # Call the SLSQP algorithm from scipy (options are specific to SLSQP)
         start_time = time.time()

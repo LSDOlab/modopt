@@ -86,23 +86,16 @@ class COBYLA(Optimizer):
         lci = np.where((cl != -np.inf) & (cl != cu))[0]
         uci = np.where((cu !=  np.inf) & (cl != cu))[0]
 
-        self.constraints = []
         if len(eqi) > 0:
             raise RuntimeError('Detected equality constraints in the problem. '\
                                'COBYLA does not support equality constraints. '\
                                'Use a different solver (PySLSQP, IPOPT, etc.) or remove the equality constraints.')
-
-        if len(lci) > 0:
-            con_dict_ineq1 = {}
-            con_dict_ineq1['type'] = 'ineq'
-            con_dict_ineq1['fun'] = lambda x: self.con(x)[lci] - cl[lci]
-            self.constraints.append(con_dict_ineq1)
-
-        if len(uci) > 0:
-            con_dict_ineq2 = {}
-            con_dict_ineq2['type'] = 'ineq'
-            con_dict_ineq2['fun'] = lambda x: cu[uci] - self.con(x)[uci]
-            self.constraints.append(con_dict_ineq2)
+        
+        # problem is constrained (with no equalities), set up constraints list of dictionaries
+        def fun(x):
+            c = self.con(x)
+            return np.concatenate((c[lci] - cl[lci], cu[uci] - c[uci]))
+        self.constraints = ({'type': 'ineq', 'fun': fun}, )
 
     def solve(self):
 
