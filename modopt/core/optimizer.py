@@ -159,7 +159,7 @@ class Optimizer(object):
         print(output)
 
         if summary_table:
-            with open(f"{self.dir}/modOpt_summary.out", 'r') as f:
+            with open(f"{self.out_dir}/modOpt_summary.out", 'r') as f:
                 # lines = f.readlines()
                 lines = f.read().splitlines()
 
