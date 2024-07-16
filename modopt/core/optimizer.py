@@ -18,6 +18,11 @@ class Optimizer(object):
         self.problem = problem
         self.problem_name = problem.problem_name
         self.solver_name = 'unnamed_solver'
+        self.options.declare('recording', default=False, types=bool)
+        self.options.declare('hot_start_from', default=None, types=(type(None), str))
+        self.options.declare('visualize', default=[], types=list)
+        self.update_outputs_counter = 0
+
         self.options.declare('formulation', default='rs', types=str)
 
         self.initialize()
@@ -25,18 +30,19 @@ class Optimizer(object):
         self._setup()
 
     def _setup(self):
-        # Setup outputs to be written to file
-        self.setup_outputs()
         # User defined optimizer-specific setup
         self.setup()
+        # Setup outputs to be written to file
+        self.setup_outputs()
 
     def setup_outputs(self):
         '''
-        Set up the files to write the outputs of the optimization problem.
-        Three different types of outputs are written:
-            1. Summary table: Contains the scalar outputs of the optimization problem
-            2. Readable outputs: Contains the declared readable outputs
-            3. Recorder outputs: Contains all the outputs of the optimization problem, if recording is enabled
+        Set up the directory and open files to write the outputs of the optimization problem.
+        Four different types of outputs are written:
+            1. Summary table:    Single file with the scalar outputs of the optimization problem.
+            2. Readable outputs: A file for each readable_output declared.
+            3. Recorder outputs: Contains all the outputs of the optimization problem, if recording is enabled.
+            4. Results:          Single file with the print_results() string (no setup needed).
         '''
         now       = datetime.now()
         timestamp = self.timestamp = now.strftime("%Y-%m-%d_%H.%M.%S.%f")
@@ -49,11 +55,11 @@ class Optimizer(object):
 
         # Create the outputs directory
         # if len(s_outs) > 0 or len(d_outs) > 0 or self.options['recording']:        
-        os.makedirs(dir)
+        os.makedirs(dir) # recursively create the directory
 
         # 1. Write the header of the summary_table file
         if len(s_outs) > 0:
-            header =''
+            header = "%10s " % '#'
             for key in s_outs:
                 if a_outs[key] in (int, np.int_, np.int32, np.int64):
                     header += "%10s " % key
@@ -71,6 +77,10 @@ class Optimizer(object):
             with open(f"{dir}/{key}.out", 'w') as f:
                 pass
 
+        # 3. Create the recorder output files
+        if self.options['recording']:
+            pass
+
     def setup(self, ):
         pass
 
@@ -84,6 +94,9 @@ class Optimizer(object):
         with open(f"{self.out_dir}/modOpt_results.out", 'w') as f:
             with contextlib.redirect_stdout(f):
                 self.print_results(all=True)
+        if self.options['recording']:
+            pass
+        
         # TODO: Add lsdo_dashboard processing
 
     def update_outputs(self, **kwargs):
@@ -105,7 +118,7 @@ class Optimizer(object):
         # 1. Write the scalar outputs to the summary file
         if len(self.scalar_outputs) > 0:
             # Print summary_table row
-            new_row ='\n'
+            new_row ='\n' + "%10i " % self.update_outputs_counter
             for key in self.scalar_outputs:
                 if a_outs[key] in (int, np.int_, np.int32, np.int64):
                     new_row += "%10i " % kwargs[key]
@@ -129,8 +142,12 @@ class Optimizer(object):
                 with open(f"{dir}/{key}.out", 'a') as f:
                     np.savetxt(f, value.reshape(1, value.size))
         
-        # 3. TODO: Write the outputs to the recording files
+        # 3. Write the outputs to the recording files
         self.out_dict = out_dict = copy.deepcopy(kwargs)
+        if self.options['recording']:
+            pass
+                
+        self.update_outputs_counter += 1
 
     def check_if_callbacks_are_declared(self, cb, cb_str, solver_str):
         if cb not in self.problem.user_defined_callbacks:

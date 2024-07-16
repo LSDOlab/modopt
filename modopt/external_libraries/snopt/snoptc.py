@@ -20,6 +20,12 @@ class SNOPTc(SNOPTOptimizer):
         self.setup_bounds()
         if self.problem.constrained:
             self.setup_constraints()
+        
+        if self.options['hot_start_from'] is not None:
+            if self.solver_options['Verify level'] is None: # Verify level default is 0
+                warnings.warn("Hot-starting might fail with default 'Verify level' (=0).")
+            elif self.solver_options['Verify level'] >= 0:
+                warnings.warn("Hot-starting might fail with 'Verify level' >= 0.")
 
     def solve(self):
         append = self.solver_options['append2file']
@@ -41,7 +47,7 @@ class SNOPTc(SNOPTOptimizer):
             con = self.con
             jac = self.jac
             J = np.ones((m, n))
-            x0c0 = np.concatenate((x0, con(x0)))
+            x0c0 = np.concatenate((x0, np.zeros((m, ))))
 
         start_time = time.time()
         if self.problem.constrained:
