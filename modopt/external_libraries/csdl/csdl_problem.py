@@ -62,9 +62,12 @@ class CSDLProblem(OptProblem):
         self.nx = len(self.x0)
         self.nc = len(sim.constraints())        # TODO: will sim.constraints() before sim.run() work?
         self.declared_variables = ['dv', 'obj', 'grad']
+        self.o_scaler = self.x_scaler = 1.0
+        self.c_scaler = None
         if self.nc > 0:
             self.constrained = True
             self.declared_variables += ['con', 'jac']
+            self.c_scaler = 1.0
 
     def raise_issues_with_user_setup(self, ):
         pass

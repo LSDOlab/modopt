@@ -35,7 +35,9 @@ class Problem(object):
         Note that only one objective is supported by modOpt currently.
     obj_scaler : dict
         Dictionary with objective names as keys and objective.
-        scalers as values. Default value for objective scalers is 1.0. 
+        scalers as values. Default value for objective scalers is 1.0.
+    o_scaler: float
+        Objective scaler to use for single objective optimization.
     lag : dict
         Dictionary with the objective name as key and current Lagrangian
         function value as value.
@@ -774,6 +776,7 @@ class Problem(object):
         print(f'Setting objective name as "{name}".')
         self.obj[name] = 1.
         self.obj_scaler[name] = scaler
+        self.o_scaler = scaler * 1.     # Only for single objective problems
         self.lag[name] = 1.
 
         if 'obj' not in self.declared_variables:
@@ -1549,7 +1552,6 @@ class Problem(object):
 
     # WRAPPER FOR USER-DEFINED COMPUTE METHODS BELOW (USED BY Optimizer() OBJECTS):
     # =============================================================================
-    
     def _compute_objective(self, x):
         '''
         Wrapper for user-defined compute_objective(). 

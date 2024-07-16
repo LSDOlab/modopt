@@ -64,9 +64,12 @@ class OpenMDAOProblem(Problem):
         con_values = list(con_values_dict.values())
         self.nc = sum([value.size for value in con_values])
         self.declared_variables = ['dv', 'obj', 'grad']
+        self.o_scaler = self.x_scaler = 1.0
+        self.c_scaler = None
         if self.nc > 0:
             self.constrained = True
             self.declared_variables += ['con', 'jac']
+            self.c_scaler = 1.0
 
         self.model_evals = 1                    # num of model evals
         self.fail1 = False                      # NotImplemented: failure of functions
@@ -179,7 +182,7 @@ class OpenMDAOProblem(Problem):
             c_u = np.concatenate((c_u, (u * np.ones((size,))).flatten()))
 
         self.c_lower = np.where(c_l == -1.0e30, -np.inf, c_l)
-        self.c_upper = np.where(c_u == 1.0e30, np.inf, c_u)
+        self.c_upper = np.where(c_u ==  1.0e30,  np.inf, c_u)
 
         # if self.SURF_mode:
         #     # For R(x,y) >= 0

@@ -53,7 +53,7 @@ class CSDLAlphaProblem(OptProblem):
         if oScaler is not None:
             if not (oScaler.shape == (1,)):
                 raise ValueError(f'Objective scaler dimensions must be (1,) for single objective optimization. shape(oScaler) = {oScaler.shape}')
-        self.f_scaler = oScaler * 1.0 if oScaler is not None else 1.0
+        self.o_scaler = oScaler * 1.0 if oScaler is not None else 1.0
         
         self.model_evals = 0                    # number of model evaluations
         self.deriv_evals = 0                    # number of derivative evaluations
@@ -73,15 +73,15 @@ class CSDLAlphaProblem(OptProblem):
         f_us, c_us = sim.run_forward()
         
         if f_us is not None:
-            if self.f_scaler is None:
+            if self.o_scaler is None:
                 raise ValueError('Objective scaler is None but objective function returned a value. Please provide a valid scaler.')     
             if f_us.shape != (1,):
                 raise ValueError(f'Only single objective optimization is supported but returned multiple objectives. shape(objective) = {f_us.shape}')
             if np.isnan(np.sum(f_us)) or np.isinf(np.sum(f_us)):
                 raise Exception('Objective returned NAN/INF for the first run. Please check the model setup.')
-            self.f_s = f_us * self.f_scaler
+            self.f_s = f_us * self.o_scaler
         else:
-            if self.f_scaler is not None:
+            if self.o_scaler is not None:
                 raise ValueError('Objective scaler is not None, but objective function returned None. Please check the model setup.')
             
         if c_us is not None:
@@ -104,15 +104,15 @@ class CSDLAlphaProblem(OptProblem):
         g_us, j_us = sim.compute_optimization_derivatives()
 
         if g_us is not None:
-            if self.f_scaler is None:
+            if self.o_scaler is None:
                 raise ValueError('Objective scaler is None but objective gradient returned a value. Please provide a valid scaler.')
             if g_us.shape != (1, self.nx):
                 raise ValueError(f'Objective gradient must be a row vector of shape (1, {self.nx}) but computed gradient has shape {g_us.shape}.')
             if np.isnan(np.sum(g_us)) or np.isinf(np.sum(g_us)):
                 raise Exception('Objective gradient contains NAN/INF for the first run. Please check the model setup.')
-            self.g_s = g_us[0] * self.f_scaler / self.x_scaler
+            self.g_s = g_us[0] * self.o_scaler / self.x_scaler
         else:
-            if self.f_scaler is not None:
+            if self.o_scaler is not None:
                 raise ValueError('Objective scaler is not None, but objective gradient returned None. Please check the model setup.')
             
         if j_us is not None:
@@ -152,7 +152,7 @@ class CSDLAlphaProblem(OptProblem):
                     f_us, c_us = sim.run_forward()
                     self.fail1 = False
                     if f_us is not None:
-                        self.f_s = f_us * self.f_scaler
+                        self.f_s = f_us * self.o_scaler
                         if np.isnan(np.sum(f_us)) or np.isinf(np.sum(f_us)):
                             raise Exception('Objective returned NAN/INF. Please check the model.')
                             
@@ -182,7 +182,7 @@ class CSDLAlphaProblem(OptProblem):
                         g_us, j_us = sim.compute_optimization_derivatives()
                         self.fail2 = False
                         if g_us is not None:
-                            self.g_s = g_us[0] * self.f_scaler / self.x_scaler # g_us is a 2d matrix of gradients for each objective
+                            self.g_s = g_us[0] * self.o_scaler / self.x_scaler # g_us is a 2d matrix of gradients for each objective
                             if np.isnan(np.sum(g_us)) or np.isinf(np.sum(g_us)):
                                 raise Exception('Objective gradient contains NAN/INF. Please check the model.')
                         
