@@ -137,6 +137,9 @@ class ProblemLite(object):
         if obj is not None:
             self.obj = obj
         else:
+            if any(cb is not None for cb in [grad, obj_hess, obj_hvp]):
+                raise ValueError('Objective function "obj" is not provided but at least one of '\
+                                '"grad", "obj_hess", or "obj_hvp" is declared.')
             print('Objective function not provided. Running a feasibility problem.')
             self.obj = lambda x: 0.0
             self.grad = lambda x: np.zeros((self.nx,))
@@ -177,9 +180,9 @@ class ProblemLite(object):
             elif not grad_free:
                 self.lag_grad = lambda x, mu: self.grad(x) + np.dot(mu, self.jac(x))
         else:
-            if any(cb is not None for cb in [vjp, jvp, lag, lag_grad, lag_hess, lag_hvp]):
+            if any(cb is not None for cb in [jac, vjp, jvp, lag, lag_grad, lag_hess, lag_hvp]):
                 raise ValueError('Constraint function "con" is not provided but at least one of '\
-                                 '"vjp", "jvp", "lag", "lag_grad", "lag_hess", or "lag_hvp" is declared.')
+                                 '"jac", "vjp", "jvp", "lag", "lag_grad", "lag_hess", or "lag_hvp" is declared.')
             if cl is not None or cu is not None or c_scaler != 1.0:
                 raise ValueError('If "con" function is not provided, "cl", "cu", and "c_scaler" must not be declared.')
 
