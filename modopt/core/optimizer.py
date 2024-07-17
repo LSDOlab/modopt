@@ -11,8 +11,18 @@ from modopt.core.problem import Problem
 from modopt.core.problem_lite import ProblemLite
 import warnings
 
+try:
+    import h5py
+except ImportError:
+    warnings.warn("h5py not found, recording disabled")
+
 class Optimizer(object):
     def __init__(self, problem, **kwargs):
+
+        now       = datetime.now()
+        self.timestamp = now.strftime("%Y-%m-%d_%H.%M.%S.%f")
+        self.out_dir = f"{problem.problem_name}_outputs/{self.timestamp}"
+        self.modopt_output_files  = [f"directory: {self.out_dir}", 'modopt_results.out']
 
         self.options = OptionsDictionary()
         self.problem = problem
@@ -44,9 +54,7 @@ class Optimizer(object):
             3. Recorder outputs: Contains all the outputs of the optimization problem, if recording is enabled.
             4. Results:          Single file with the print_results() string (no setup needed).
         '''
-        now       = datetime.now()
-        timestamp = self.timestamp = now.strftime("%Y-%m-%d_%H.%M.%S.%f")
-        dir       = self.out_dir = f"{self.problem_name}_outputs/{timestamp}"
+        dir       = self.out_dir
         a_outs    = self.available_outputs             # Available outputs dictionary
         d_outs    = self.options['readable_outputs']   # Declared outputs list
 
@@ -66,8 +74,9 @@ class Optimizer(object):
                 elif a_outs[key] in (float, np.float_, np.float32, np.float64):
                     header += "%16s " % key
 
-            with open(f"{dir}/modOpt_summary.out", 'w') as f:
+            with open(f"{dir}/modopt_summary.out", 'w') as f:
                 f.write(header)
+            self.modopt_output_files += ["modopt_summary.out"]
 
         # 2. Create the readable output files
         for key in d_outs:
@@ -76,10 +85,43 @@ class Optimizer(object):
                                  f'Available outputs are {list(a_outs.keys())}.')
             with open(f"{dir}/{key}.out", 'w') as f:
                 pass
+            self.modopt_output_files += [f"{key}.out"]
 
         # 3. Create the recorder output files
         if self.options['recording']:
-            pass
+            constrained = self.problem.constrained
+            self.callback_record  = h5py.File(f'{dir}/callback_record.h5py', 'a')
+            self.optimizer_record = opt_rec = h5py.File(f'{dir}/optimizer_record.h5py', 'a')
+            self.modopt_output_files += ['callback_record.h5py', 'optimizer_record.h5py']
+
+            self.problem._recording = True
+            self.problem._record_file = self.callback_record
+
+            opt_rec.attrs['problem_name']   = self.problem_name
+            opt_rec.attrs['solver_name']    = self.solver_name
+            opt_rec.attrs['modopt_output_files'] = self.modopt_output_files
+            solver_opts = self.solver_options.get_pure_dict()
+            for key, value in solver_opts.items():
+                value = 'None' if value is None else value
+                if isinstance(value, (int, float, bool, str, np.ndarray)):
+                    opt_rec.attrs[f'solver_options-{key}'] = value
+            opt_rec.attrs['readable_outputs'] = d_outs
+            opt_rec.attrs['recording'] = str(self.options['recording'])
+            opt_rec.attrs['hot_start_from'] = str(self.options['hot_start_from'])
+            opt_rec.attrs['visualize'] = self.options['visualize']
+            opt_rec.attrs['timestamp'] = self.timestamp
+            opt_rec.attrs['constrained'] = constrained
+            opt_rec.attrs['nx'] = self.problem.nx
+            opt_rec.attrs['nc'] = self.problem.nc
+
+            opt_rec.attrs['x0'] = self.problem.x0 / self.problem.x_scaler
+            opt_rec.attrs['x_scaler'] = self.problem.x_scaler
+            opt_rec.attrs['o_scaler'] = self.problem.o_scaler # Only for single-objective problems
+            opt_rec.attrs['x_lower']  = self.problem.x_lower / self.problem.x_scaler
+            opt_rec.attrs['x_upper']  = self.problem.x_upper / self.problem.x_scaler
+            opt_rec.attrs['c_scaler'] = self.problem.c_scaler if constrained else 'None'
+            opt_rec.attrs['c_lower']  = self.problem.c_lower / self.problem.c_scaler if constrained else 'None'
+            opt_rec.attrs['c_upper']  = self.problem.c_upper / self.problem.c_scaler if constrained else 'None'
 
     def setup(self, ):
         pass
@@ -91,11 +133,14 @@ class Optimizer(object):
         2. Write the outputs to the corresponding files
         3. Run the lsdo_dashboard processing
         '''
-        with open(f"{self.out_dir}/modOpt_results.out", 'w') as f:
+        with open(f"{self.out_dir}/modopt_results.out", 'w') as f:
             with contextlib.redirect_stdout(f):
                 self.print_results(all=True)
         if self.options['recording']:
-            pass
+            file  = self.optimizer_record
+            group = file.create_group('results')
+            for key, value in self.results.items():
+                group[key] = value
         
         # TODO: Add lsdo_dashboard processing
 
@@ -125,7 +170,7 @@ class Optimizer(object):
                 elif a_outs[key] in (float, np.float_, np.float32, np.float64):
                     new_row += "%16.6E " % kwargs[key]
 
-            with open(f"{dir}/modOpt_summary.out", 'a') as f:
+            with open(f"{dir}/modopt_summary.out", 'a') as f:
                 f.write(new_row)
 
         # 2. Write the declared readable outputs to the corresponding files
@@ -145,7 +190,10 @@ class Optimizer(object):
         # 3. Write the outputs to the recording files
         self.out_dict = out_dict = copy.deepcopy(kwargs)
         if self.options['recording']:
-            pass
+            group_name = 'iter_' + str(self.update_outputs_counter)
+            group = self.optimizer_record.create_group(group_name)
+            for var, value in out_dict.items():
+                group[var] = value
                 
         self.update_outputs_counter += 1
 
@@ -176,7 +224,7 @@ class Optimizer(object):
         print(output)
 
         if summary_table:
-            with open(f"{self.out_dir}/modOpt_summary.out", 'r') as f:
+            with open(f"{self.out_dir}/modopt_summary.out", 'r') as f:
                 # lines = f.readlines()
                 lines = f.read().splitlines()
 
