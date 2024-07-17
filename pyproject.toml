@@ -148,6 +148,7 @@ visualization = [
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "interfaces: marks tests as interfaces (deselect with '-m \"not interfaces\"')",
+    "recording: marks tests as recording (deselect with '-m \"not recording\"')",
     "csdl: marks tests as csdl (deselect with '-m \"not csdl\"')",
     "csdl_alpha: marks tests as csdl_alpha (deselect with '-m \"not csdl_alpha\"')",
     "openmdao: marks tests as openmdao (deselect with '-m \"not openmdao\"')",

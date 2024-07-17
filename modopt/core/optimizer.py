@@ -31,7 +31,7 @@ class Optimizer(object):
         self.options.declare('recording', default=False, types=bool)
         self.options.declare('hot_start_from', default=None, types=(type(None), str))
         self.options.declare('visualize', default=[], types=list)
-        self.update_outputs_counter = 0
+        self.update_outputs_count = 0
 
         self.options.declare('formulation', default='rs', types=str)
 
@@ -44,6 +44,8 @@ class Optimizer(object):
         self.setup()
         # Setup outputs to be written to file
         self.setup_outputs()
+        if self.options['hot_start_from'] is not None:
+            self.setup_hot_start()
 
     def setup_outputs(self):
         '''
@@ -51,8 +53,8 @@ class Optimizer(object):
         Four different types of outputs are written:
             1. Summary table:    Single file with the scalar outputs of the optimization problem.
             2. Readable outputs: A file for each readable_output declared.
-            3. Recorder outputs: Contains all the outputs of the optimization problem, if recording is enabled.
-            4. Results:          Single file with the print_results() string (no setup needed).
+            3. Recorder:         Contains all the outputs of the optimization problem, if recording is enabled.
+            4. Results:          Single file with the readable print_results() string (no setup needed).
         '''
         dir       = self.out_dir
         a_outs    = self.available_outputs             # Available outputs dictionary
@@ -87,41 +89,48 @@ class Optimizer(object):
                 pass
             self.modopt_output_files += [f"{key}.out"]
 
-        # 3. Create the recorder output files
+        # 3. Create the recorder output file and write the attributes
         if self.options['recording']:
             constrained = self.problem.constrained
-            self.callback_record  = h5py.File(f'{dir}/callback_record.h5py', 'a')
-            self.optimizer_record = opt_rec = h5py.File(f'{dir}/optimizer_record.h5py', 'a')
-            self.modopt_output_files += ['callback_record.h5py', 'optimizer_record.h5py']
+            self.record  = rec = h5py.File(f'{dir}/record.h5py', 'a')
+            self.problem._record = self.record
+            self.modopt_output_files += ['record.h5py']
 
-            self.problem._recording = True
-            self.problem._record_file = self.callback_record
-
-            opt_rec.attrs['problem_name']   = self.problem_name
-            opt_rec.attrs['solver_name']    = self.solver_name
-            opt_rec.attrs['modopt_output_files'] = self.modopt_output_files
+            rec.attrs['problem_name']   = self.problem_name
+            rec.attrs['solver_name']    = self.solver_name
+            rec.attrs['modopt_output_files'] = self.modopt_output_files
             solver_opts = self.solver_options.get_pure_dict()
             for key, value in solver_opts.items():
                 value = 'None' if value is None else value
                 if isinstance(value, (int, float, bool, str, np.ndarray)):
-                    opt_rec.attrs[f'solver_options-{key}'] = value
-            opt_rec.attrs['readable_outputs'] = d_outs
-            opt_rec.attrs['recording'] = str(self.options['recording'])
-            opt_rec.attrs['hot_start_from'] = str(self.options['hot_start_from'])
-            opt_rec.attrs['visualize'] = self.options['visualize']
-            opt_rec.attrs['timestamp'] = self.timestamp
-            opt_rec.attrs['constrained'] = constrained
-            opt_rec.attrs['nx'] = self.problem.nx
-            opt_rec.attrs['nc'] = self.problem.nc
+                    rec.attrs[f'solver_options-{key}'] = value
+            rec.attrs['readable_outputs'] = d_outs
+            rec.attrs['recording'] = str(self.options['recording'])
+            rec.attrs['hot_start_from'] = str(self.options['hot_start_from'])
+            rec.attrs['visualize'] = self.options['visualize']
+            rec.attrs['timestamp'] = self.timestamp
+            rec.attrs['constrained'] = constrained
+            rec.attrs['nx'] = self.problem.nx
+            rec.attrs['nc'] = self.problem.nc
 
-            opt_rec.attrs['x0'] = self.problem.x0 / self.problem.x_scaler
-            opt_rec.attrs['x_scaler'] = self.problem.x_scaler
-            opt_rec.attrs['o_scaler'] = self.problem.o_scaler # Only for single-objective problems
-            opt_rec.attrs['x_lower']  = self.problem.x_lower / self.problem.x_scaler
-            opt_rec.attrs['x_upper']  = self.problem.x_upper / self.problem.x_scaler
-            opt_rec.attrs['c_scaler'] = self.problem.c_scaler if constrained else 'None'
-            opt_rec.attrs['c_lower']  = self.problem.c_lower / self.problem.c_scaler if constrained else 'None'
-            opt_rec.attrs['c_upper']  = self.problem.c_upper / self.problem.c_scaler if constrained else 'None'
+            rec.attrs['x0']       = self.problem.x0 / self.problem.x_scaler
+            rec.attrs['x_scaler'] = self.problem.x_scaler
+            rec.attrs['o_scaler'] = self.problem.o_scaler # Only for single-objective problems
+            rec.attrs['x_lower']  = self.problem.x_lower / self.problem.x_scaler
+            rec.attrs['x_upper']  = self.problem.x_upper / self.problem.x_scaler
+            rec.attrs['c_scaler'] = self.problem.c_scaler if constrained else 'None'
+            rec.attrs['c_lower']  = self.problem.c_lower / self.problem.c_scaler if constrained else 'None'
+            rec.attrs['c_upper']  = self.problem.c_upper / self.problem.c_scaler if constrained else 'None'
+
+    def setup_hot_start(self):
+        '''
+        Open the hot-start record file, compute the number of callbacks found in it,
+        and pass both to the problem object.
+        '''
+        self.hot_start_record                 = h5py.File(self.options['hot_start_from'], 'r')
+        num_callbacks_found = len([key for key in list(self.hot_start_record.keys()) if key.startswith('callback_')])
+        self.problem._hot_start_record        = self.hot_start_record
+        self.problem._num_callbacks_found     = num_callbacks_found
 
     def setup(self, ):
         pass
@@ -129,18 +138,18 @@ class Optimizer(object):
     def run_post_processing(self):
         '''
         Run the post-processing functions of the optimizer.
-        1. Print the results of the optimization problem
-        2. Write the outputs to the corresponding files
+        1. Write the print_results() output to the the results.out file
+        2. Write self.results to the record file
         3. Run the lsdo_dashboard processing
         '''
         with open(f"{self.out_dir}/modopt_results.out", 'w') as f:
             with contextlib.redirect_stdout(f):
                 self.print_results(all=True)
         if self.options['recording']:
-            file  = self.optimizer_record
-            group = file.create_group('results')
+            group = self.record.create_group('results')
             for key, value in self.results.items():
                 group[key] = value
+            group['total_callbacks_to_problem'] = self.problem._callback_count
         
         # TODO: Add lsdo_dashboard processing
 
@@ -163,7 +172,7 @@ class Optimizer(object):
         # 1. Write the scalar outputs to the summary file
         if len(self.scalar_outputs) > 0:
             # Print summary_table row
-            new_row ='\n' + "%10i " % self.update_outputs_counter
+            new_row ='\n' + "%10i " % self.update_outputs_count
             for key in self.scalar_outputs:
                 if a_outs[key] in (int, np.int_, np.int32, np.int64):
                     new_row += "%10i " % kwargs[key]
@@ -190,12 +199,12 @@ class Optimizer(object):
         # 3. Write the outputs to the recording files
         self.out_dict = out_dict = copy.deepcopy(kwargs)
         if self.options['recording']:
-            group_name = 'iter_' + str(self.update_outputs_counter)
-            group = self.optimizer_record.create_group(group_name)
+            group_name = 'iteration_' + str(self.update_outputs_count)
+            group = self.record.create_group(group_name)
             for var, value in out_dict.items():
                 group[var] = value
                 
-        self.update_outputs_counter += 1
+        self.update_outputs_count += 1
 
     def check_if_callbacks_are_declared(self, cb, cb_str, solver_str):
         if cb not in self.problem.user_defined_callbacks:
