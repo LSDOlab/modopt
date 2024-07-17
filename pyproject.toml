@@ -24,6 +24,7 @@ dependencies = [
     'numpy>=1.24,<2',
     'scipy>=1.10,<2',
     'array_manager @ git+https://github.com/anugrahjo/array_manager.git@modopt',
+    'h5py>=3.11.0,<4',
 ]
 classifiers=[
     'Development Status :: 4 - Beta',

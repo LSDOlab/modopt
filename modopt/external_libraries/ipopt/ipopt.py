@@ -46,12 +46,21 @@ class IPOPT(Optimizer):
         self.nx = self.problem.nx * 1
         self.nc = self.problem.nc * 1
 
-        # Define the IPOPT specific options that the nlp solver need to pass to the IPOPT solver
-        nlp_options = {'ipopt': self.options['solver_options']}
         # By default, switch to first-order information only
         # [for using exact obj/lag Hessian, user has to set 'hessian_approximation': 'exact' in solver_options]
-        if 'hessian_approximation' not in nlp_options['ipopt']:
-            nlp_options['ipopt']['hessian_approximation'] = 'limited-memory'
+        ipopt_options = {
+            'sb' : 'yes',
+            'output_file': 'ipopt_output.txt',
+            'hessian_approximation': 'limited-memory',
+            'print_level': 5,
+            'file_print_level': 12,
+        }
+        ipopt_options.update(self.options['solver_options'])
+        ipopt_options['output_file'] = self.out_dir + '/' + ipopt_options['output_file']
+
+        # Define the IPOPT specific options that the nlp solver need to pass to the IPOPT solver
+        nlp_options = {}
+        nlp_options['ipopt'] = ipopt_options
 
         # Check if the user has declared the callbacks for the Hessian when using 'exact' Hessian approximation
         if nlp_options['ipopt']['hessian_approximation'] == 'exact':

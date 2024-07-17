@@ -111,7 +111,7 @@ def test_csdl_alpha():
     assert prob.constrained == True
     assert prob.options['jac_format'] == 'dense'
     assert_array_equal(prob.obj_scaler, {})
-    assert_array_equal(prob.f_scaler, 3.)
+    assert_array_equal(prob.o_scaler, 3.)
     assert_array_equal(prob.x_scaler, np.array([100., 0.2]))
     assert_array_equal(prob.c_scaler, np.array([20., 5.]))
     assert_array_equal(prob.x0, np.array([100., 0.4]))

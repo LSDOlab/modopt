@@ -157,7 +157,12 @@ class SNOPTOptimizer(Optimizer):
         for key in self.solver_options:
             if key in ['append2file', 'continue_on_failure']:
                 continue
-            self.SNOPT_options_object.setOption(key, self.solver_options[key])
+            if 'filename' in key:
+                filename = self.solver_options[key]
+                filepath = f"{self.out_dir}/{filename}" if filename else None
+                self.SNOPT_options_object.setOption(key, filepath)
+            else:
+                self.SNOPT_options_object.setOption(key, self.solver_options[key])
 
     def setup_bounds(self):
         inf = self.solver_options['Infinite bound']

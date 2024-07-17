@@ -11,6 +11,8 @@ __pycache__
 *_junk*
 *_dev*
 
+# modopt outputs directory
+*_outputs/
 # default output file for ipopt
 ipopt_output.txt
 # OpenMDAO generated reports
