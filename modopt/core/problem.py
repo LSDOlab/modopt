@@ -9,7 +9,6 @@ import warnings
 
 from copy import deepcopy
 
-
 class Problem(object):
     '''
     Base class for defining optimization problems in modOpt.
@@ -46,7 +45,7 @@ class Problem(object):
     declared_variables: list
         List of problem variables declared by the user.
         It can at most be ['dv', 'obj', 'grad', 'con', 'jac', 'jvp', 'vjp', 
-        'obj_hess', 'obj_hvp','lag_grad', 'lag_hess', 'lag_hvp']
+        'obj_hess', 'obj_hvp', 'lag', 'lag_grad', 'lag_hess', 'lag_hvp']
 
     x_lower : np.ndarray or NoneType
         Vector of (scaled) lower bounds for the design variables.
@@ -300,7 +299,7 @@ class Problem(object):
             output += header
 
             idx = 0
-            lag_declared = any(x in self.declared_variables for x in ['lag_grad', 'lag_hess', 'lag_hvp'])
+            lag_declared = any(x in self.declared_variables for x in ['lag', 'lag_grad', 'lag_hess', 'lag_hvp'])
             if lag_declared: # print lagrange multipliers
                 con_template = "\n\t{idx:>5} | {name:<10} | {scaler:<+.6e} | {lower:<+.6e} | {value:<+.6e} | {upper:<+.6e} | {lag:<+.6e}"
                 obj_s = list(obj_scaler.values())[0]
@@ -633,12 +632,17 @@ class Problem(object):
 
             # Add back pF_px only for a gradient-based feasibility problem since 
             # it was deleted in delete_unnecessary_attributes_allocated()
-            if 'jac' in self.declared_variables: # checking if gradients are declared for constraints
+            if 'jac' in self.declared_variables: # checking if Jacobian is declared for constraints
                 self.pF_px = Vector(self.design_variables_dict)
                 self.pF_px.allocate(data=np.zeros((self.nx, )), setup_views=False)
         if 'con' in self.declared_variables:
             if self.compute_constraints.__func__ == Problem.compute_constraints:
                 raise Exception("Constraints are declared but compute_constraints() method is not implemented.")
+        if 'lag' in self.declared_variables:
+            if 'con' not in self.declared_variables:
+                raise Exception("Lagrangian is declared but no constraints are declared.")
+            if self.compute_lagrangian.__func__ == Problem.compute_lagrangian:
+                raise Exception("Lagrangian is declared but compute_lagrangian() method is not implemented.")
         if 'grad' in self.declared_variables:
             if self.compute_objective_gradient.__func__ == Problem.compute_objective_gradient:
                 raise Exception("Objective gradient is declared but compute_objective_gradient() method is not implemented."
@@ -759,8 +763,6 @@ class Problem(object):
         '''
         User calls this method within Problem.setup() method
         to add an objective with a name and a scaler.
-        It also adds a Lagrangian dict with the objective name
-        as key and default value as 1.0.
 
         Parameters
         ----------
@@ -769,15 +771,14 @@ class Problem(object):
         scaler : float, default=1.
             Objective scaling factor.
         '''
-        # Setting objective name and initializing it with key=name and value=1.
         if len(self.obj)>0:
             raise KeyError('Only one objective is allowed for a problem.')
 
         print(f'Setting objective name as "{name}".')
+        # Setting objective name and initializing it with key=name and value=1.
         self.obj[name] = 1.
         self.obj_scaler[name] = scaler
         self.o_scaler = scaler * 1.     # Only for single objective problems
-        self.lag[name] = 1.
 
         if 'obj' not in self.declared_variables:
             self.declared_variables.append('obj')
@@ -844,6 +845,29 @@ class Problem(object):
         
         # Update the number of constraints
         self.nc += np.prod(shape)
+
+    def declare_lagrangian(self, name='obj'):
+        '''
+        User calls this method within Problem.setup() method
+        to add the Lagrangian dict with the objective name
+        as key and default value 1.0.
+
+        Parameters
+        ----------
+        name : str, default='obj'
+            Objective name corresponding to the Lagrangian.
+        '''
+        if len(self.obj) == 0:
+            raise KeyError('No objective is declared for the Lagrangian.')
+        if len(self.obj) > 1:
+            raise KeyError('Only one objective is allowed with Lagrangian computation.')
+
+        print(f'Setting Lagrangian name as "{name}".')
+        # Setting Lagrangian name and initializing it with key=name and value=1.
+        self.lag[name] = 1.
+
+        if 'lag' not in self.declared_variables:
+            self.declared_variables.append('lag')
 
     def declare_objective_gradient(self, wrt, vals=None):
         '''
@@ -1577,7 +1601,7 @@ class Problem(object):
             return (objectives[0] * objective_scalers[0])[0]
         return (objectives[0] * objective_scalers[0])
     
-    def _compute_lagrangian(self, x, z, auto=False):
+    def _compute_lagrangian(self, x, z):
         '''
         Wrapper for user-defined compute_lagrangian(). 
         Arguments here are numpy arrays as opposed to array_manager.Vector. 
@@ -1590,17 +1614,14 @@ class Problem(object):
             Design variable vector.
         z : np.ndarray
             Lagrange multiplier vector.
-        auto : bool, default=False
-            auto=True implies the Problem() object automatically computes the
-            Lagrangian for the optimizer if the user has not
-            implemented a compute_lagrangian() method.
 
         Returns
         -------
         float
             Lagrangian function value.
         '''
-        if auto:
+        if 'lag' not in self.declared_variables:
+            warnings.warn('Lagrangian not declared. Computing Lagrangian using objective and constraint functions.')
             return self._compute_objective(x) - np.inner(z.flatten(), self._compute_constraints(x).flatten())
         self.x.set_data(x / self.x_scaler)
         objective_scaler = list(self.obj_scaler.values())[0]
@@ -1629,7 +1650,7 @@ class Problem(object):
         objective_scaler = list(self.obj_scaler.values())[0]
         return self.pF_px.get_data() * objective_scaler / self.x_scaler
     
-    def _compute_lagrangian_gradient(self, x, z, auto=False):
+    def _compute_lagrangian_gradient(self, x, z):
         '''
         Wrapper for user-defined compute_lagrangian_gradient(). 
         Arguments are numpy arrays, performs problem- and optimizer-independent scaling.
@@ -1640,18 +1661,15 @@ class Problem(object):
             Design variable vector.
         z : np.ndarray
             Lagrange multiplier vector.
-        auto : bool, default=False
-            auto=True implies Problem() object automatically computes the
-            Lagrangian for the optimizer if the user has not
-            implemented a compute_lagrangian() method.
-
         
         Returns
         -------
         np.ndarray
             1-dimensional Lagrangian gradient vector.
         '''
-        if auto:
+        if 'lag_grad' not in self.declared_variables:
+            warnings.warn('Lagrangian gradient not declared. Computing Lagrangian gradient using '\
+                          'objective gradient and constraint Jacobian functions.')
             g = self._compute_objective_gradient(x)
             J  = self._compute_constraint_jacobian(x)
             return  g - J.T @ z.flatten()
@@ -1684,7 +1702,7 @@ class Problem(object):
         # return self.obj_hess.get_std_array() * objective_scaler / np.outer(self.x_scaler, self.x_scaler)
         x_scaler_row = self.x_scaler.reshape(1, self.x_scaler.size)
         return self.obj_hess.get_std_array() * (objective_scaler / x_scaler_row) / x_scaler_row.T
-    
+
     def _compute_lagrangian_hessian(self, x, z):
         '''
         Wrapper for user-defined compute_lagrangian_hessian(). 

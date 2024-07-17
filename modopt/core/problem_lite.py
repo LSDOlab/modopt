@@ -41,7 +41,7 @@ class ProblemLite(object):
 
     def __init__(self, x0, name='unnamed_problem', obj=None, con=None, grad=None, jac=None, obj_hess=None, lag_hess=None, 
                  fd_step=1e-6, vp_fd_step=1e-6, xl=None, xu=None, cl=None, cu=None, x_scaler=1., o_scaler=1., c_scaler=1.,
-                 jvp=None, vjp=None, obj_hvp=None, lag_hvp=None, grad_free=False):
+                 jvp=None, vjp=None, obj_hvp=None, lag_hvp=None, lag=None, lag_grad=None, grad_free=False):
         '''
         Initialize the optimization problem with the given design variables, objective, constraints, and their derivatives.
 
@@ -100,11 +100,18 @@ class ProblemLite(object):
         lag_hvp : callable
             Hessian-vector product function for the Lagrangian.
             Signature: lag_hvp(x: np.ndarray, mu: np.ndarray, v: np.ndarray) -> np.ndarray
+        lag : callable
+            Lagrangian function.
+            Signature: lag(x: np.ndarray, mu: np.ndarray) -> float
+        lag_grad : callable
+            Gradient of the Lagrangian function.
+            Signature: lag_grad(x: np.ndarray, mu: np.ndarray) -> np.ndarray
         grad_free : bool, default=False
             If True, the optimizer will not use the gradient information.
         '''
-        self.check_types(x0, name, obj, con, grad, jac, obj_hess, lag_hess, fd_step, vp_fd_step, xl, xu, cl, cu, x_scaler, o_scaler, c_scaler, grad_free)
-        allowed_callbacks = ['obj', 'con', 'grad', 'jac', 'obj_hess', 'lag_hess', 'jvp', 'vjp', 'obj_hvp', 'lag_hvp']
+        self.check_types(x0, name, obj, con, grad, jac, obj_hess, lag_hess, fd_step, vp_fd_step, 
+                         xl, xu, cl, cu, x_scaler, o_scaler, c_scaler, lag, lag_grad, grad_free)
+        allowed_callbacks = ['obj', 'con', 'grad', 'jac', 'obj_hess', 'lag_hess', 'jvp', 'vjp', 'obj_hvp', 'lag_hvp', 'lag', 'lag_grad']
         local_vars = locals()
         self.user_defined_callbacks = [key for key in allowed_callbacks if local_vars[key] is not None]
         self.problem_name = name
@@ -159,10 +166,22 @@ class ProblemLite(object):
                 c0 = self.con(x)
                 return np.array([(self.con(x + fd_step*np.eye(self.nx)[:,i]) - c0) / fd_step[i] for i in range(self.nx)]).T
             self.jac = fd_jac
-            
-        if con is not None:
-            self.lag = lambda x, mu: self.obj(x) + np.dot(mu, self.con(x))
-            self.lag_grad = lambda x, mu: self.grad(x) + np.dot(mu, self.jac(x))
+        
+        if self.constrained:
+            if lag is not None:
+                self.lag = lag
+            else:
+                self.lag = lambda x, mu: self.obj(x) + np.dot(mu, self.con(x))
+            if lag_grad is not None:
+                self.lag_grad = lag_grad
+            elif not grad_free:
+                self.lag_grad = lambda x, mu: self.grad(x) + np.dot(mu, self.jac(x))
+        else:
+            if any(cb is not None for cb in [vjp, jvp, lag, lag_grad, lag_hess, lag_hvp]):
+                raise ValueError('Constraint function "con" is not provided but at least one of '\
+                                 '"vjp", "jvp", "lag", "lag_grad", "lag_hess", or "lag_hvp" is declared.')
+            if cl is not None or cu is not None or c_scaler != 1.0:
+                raise ValueError('If "con" function is not provided, "cl", "cu", and "c_scaler" must not be declared.')
 
         if obj_hess is not None:
             self.obj_hess = obj_hess
@@ -272,7 +291,8 @@ class ProblemLite(object):
 
         self.check_shapes(x0, xl, xu, cl, cu, x_scaler, o_scaler, c_scaler)
 
-    def check_types(self, x0, name, obj, con, grad, jac, obj_hess, lag_hess, fd_step, vp_fd_step, xl, xu, cl, cu, x_scaler, o_scaler, c_scaler, grad_free):
+    def check_types(self, x0, name, obj, con, grad, jac, obj_hess, lag_hess, fd_step, vp_fd_step, 
+                    xl, xu, cl, cu, x_scaler, o_scaler, c_scaler, lag, lag_grad, grad_free):
         if not isinstance(x0, np.ndarray):
             raise TypeError('Initial guess x0 must be a numpy array.')
         if not isinstance(name, str):
@@ -283,9 +303,10 @@ class ProblemLite(object):
             for func, name in zip(func_list, name_list):
                 if func is not None and not callable(func):
                     raise TypeError(f'{name} must be a callable function.')
-        check_callable([obj, con, grad, jac, obj_hess, lag_hess], 
+        check_callable([obj, con, grad, jac, obj_hess, lag_hess, lag, lag_grad], 
                        ['Objective function "obj"', 'Constraint function "con"', 'Objective gradient "grad"', 
-                        'Constraint Jacobian "jac"', 'Objective Hessian "obj_hess"', 'Lagrangian Hessian "lag_hess"'])
+                        'Constraint Jacobian "jac"', 'Objective Hessian "obj_hess"', 'Lagrangian Hessian "lag_hess"',
+                        'Lagrangian "lag"', 'Lagrangian gradient "lag_grad"'])
         def check_real_scalar(val_list, name_list):
             for val, name in zip(val_list, name_list):
                 if not np.isscalar(val) or not np.isreal(val):
@@ -328,11 +349,6 @@ class ProblemLite(object):
                 raise ValueError(f'Upper bounds vector for constraints must be a real number or of shape ({self.nc},) but got shape {cu.shape}.')
             if self.c_scaler.shape != (self.nc,):
                 raise ValueError(f'The constraint scaler vector must be a real number or of shape ({self.nc},) but got shape {c_scaler.shape}.')
-        else:
-            if cl is not None or cu is not None or c_scaler != 1.0:
-                raise ValueError('If "con" function is not provided, "cl", "cu", and "c_scaler" must not be declared.')
-            if self.jvp is not None or self.vjp is not None or self.lag_hvp is not None:
-                raise ValueError('If "con" function is not provided, "jvp", "vjp", and "lag_hvp" must not be declared.')
 
     def _funcs(self, x):
         '''
