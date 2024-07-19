@@ -65,8 +65,9 @@ class PySLSQP(Optimizer):
         self.solver_options.update(self.options['solver_options'])
         self.options_to_pass = self.solver_options.get_pure_dict()
         self.user_callback = self.options_to_pass.pop('callback')
-        self.options_to_pass['summary_filename'] = self.out_dir + '/' + self.options_to_pass['summary_filename']
-        self.options_to_pass['save_filename'] = self.out_dir + '/' + self.options_to_pass['save_filename']
+        if hasattr(self, 'out_dir'):
+            self.options_to_pass['summary_filename'] = self.out_dir + '/' + self.options_to_pass['summary_filename']
+            self.options_to_pass['save_filename']    = self.out_dir + '/' + self.options_to_pass['save_filename']
 
         if self.problem.constrained:
             self.setup_constraints()

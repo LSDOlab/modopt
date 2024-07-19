@@ -1,5 +1,6 @@
 from modopt.utils.options_dictionary import OptionsDictionary
 from modopt.utils.general_utils import pad_name
+from modopt.core.recording_and_hotstart import record, hot_start
 
 import numpy as np
 import warnings
@@ -294,6 +295,15 @@ class ProblemLite(object):
 
         self.check_shapes(x0, xl, xu, cl, cu, x_scaler, o_scaler, c_scaler)
 
+        # private attributes for recording and hot-starting
+        self._record                = None
+        self._callback_count        = 0
+        self._hot_start_mode        = False
+        self._hot_start_record      = None
+        self._num_callbacks_found   = 0
+        self._hot_start_tol         = None
+        self._reused_callback_count = 0
+
     def check_types(self, x0, name, obj, con, grad, jac, obj_hess, lag_hess, fd_step, vp_fd_step, 
                     xl, xu, cl, cu, x_scaler, o_scaler, c_scaler, lag, lag_grad, grad_free):
         if not isinstance(x0, np.ndarray):
@@ -379,6 +389,8 @@ class ProblemLite(object):
             self.ngev += 1
             self.gev_time += time.time() - g_start
 
+    @record(['x'],['obj'])
+    @hot_start(['x'],['obj'])
     def _compute_objective(self, x):
         '''
         Compute the (scaled) objective function at the given x.
@@ -386,6 +398,8 @@ class ProblemLite(object):
         self._funcs(x)
         return self.f
     
+    @record(['x'],['grad'])
+    @hot_start(['x'],['grad'])
     def _compute_objective_gradient(self, x):
         '''
         Compute the (scaled) gradient of the objective function at the given x.
@@ -393,6 +407,8 @@ class ProblemLite(object):
         self._derivs(x)
         return self.g
     
+    @record(['x'],['con'])
+    @hot_start(['x'],['con'])
     def _compute_constraints(self, x):
         '''
         Compute the (scaled) constraints at the given x.
@@ -400,6 +416,8 @@ class ProblemLite(object):
         self._funcs(x)
         return self.c
     
+    @record(['x'],['jac'])
+    @hot_start(['x'],['jac'])
     def _compute_constraint_jacobian(self, x):
         '''
         Compute the (scaled) Jacobian of the constraints at the given x.
@@ -407,12 +425,16 @@ class ProblemLite(object):
         self._derivs(x)
         return self.j
     
+    @record(['x'],['obj_hess'])
+    @hot_start(['x'],['obj_hess'])
     def _compute_objective_hessian(self, x):
         '''
         Compute the (scaled) Hessian of the objective at the given x.
         '''
         return self.obj_hess(x/self.x_scaler) * self.o_scaler * np.outer(1 / self.x_scaler, 1 / self.x_scaler)
     
+    @record(['x','mu'],['lag_hess'])
+    @hot_start(['x','mu'],['lag_hess'])
     def _compute_lagrangian_hessian(self, x, mu):
         '''
         Compute the (scaled) Hessian of the Lagrangian at the given x and mu.
@@ -420,6 +442,8 @@ class ProblemLite(object):
         self.warm_mu[:] = mu
         return self.lag_hess(x/self.x_scaler, mu*self.c_scaler/self.o_scaler) * self.o_scaler * np.outer(1 / self.x_scaler, 1 / self.x_scaler)
     
+    @record(['x','mu'],['lag'])
+    @hot_start(['x','mu'],['lag'])
     def _compute_lagrangian(self, x, mu):
         '''
         Compute the (scaled) Lagrangian at the given x and mu.
@@ -430,6 +454,8 @@ class ProblemLite(object):
         self.warm_mu[:] = mu
         return self.f + np.dot(mu, self.c)
     
+    @record(['x','mu'],['lag_grad'])
+    @hot_start(['x','mu'],['lag_grad'])
     def _compute_lagrangian_gradient(self, x, mu):
         '''
         Compute the (scaled) gradient of the Lagrangian at the given x and mu.
@@ -440,6 +466,8 @@ class ProblemLite(object):
         self.warm_mu[:] = mu
         return self.g + np.dot(mu, self.j)
     
+    @record(['x','v'],['jvp'])
+    @hot_start(['x','v'],['jvp'])
     def _compute_constraint_jvp(self, x, v):
         '''
         Compute the (scaled) Jacobian-vector product at the given x and v.
@@ -458,6 +486,8 @@ class ProblemLite(object):
             fd_jvp = (c1 - c0) / self.vp_fd_step
             return fd_jvp * self.c_scaler
     
+    @record(['x','v'],['vjp'])
+    @hot_start(['x','v'],['vjp'])
     def _compute_constraint_vjp(self, x, v):
         '''
         Compute the (scaled) vector-Jacobian product at the given x and v.
@@ -468,7 +498,9 @@ class ProblemLite(object):
             warnings.warn("No constraint VJP function is declared. Computing full Jacobian to get VJP.")
             j = self.jac(x/self.x_scaler) * np.outer(self.c_scaler, 1 / self.x_scaler)
             return v @ j
-        
+    
+    @record(['x','v'],['obj_hvp'])
+    @hot_start(['x','v'],['obj_hvp'])
     def _compute_objective_hvp(self, x, v):
         '''
         Compute the (scaled) objective Hessian-vector product at the given x and v.
@@ -486,7 +518,9 @@ class ProblemLite(object):
             g1 = self.grad(x/self.x_scaler + h)
             fd_hvp = (g1 - g0) / self.vp_fd_step
             return fd_hvp * self.o_scaler / self.x_scaler
-        
+
+    @record(['x','mu','v'],['lag_hvp'])
+    @hot_start(['x','mu','v'],['lag_hvp'])
     def _compute_lagrangian_hvp(self, x, mu, v):
         '''
         Compute the (scaled) Lagrangian Hessian-vector product at the given x, v, and mu.

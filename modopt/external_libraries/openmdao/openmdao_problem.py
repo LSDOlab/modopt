@@ -2,6 +2,7 @@ import numpy as np
 import scipy as sp
 import warnings
 from modopt import Problem
+from modopt.core.recording_and_hotstart import hot_start, record
 try:
     from openmdao.api import Problem as OMProblem
 except:
@@ -88,6 +89,11 @@ class OpenMDAOProblem(Problem):
 #             if tol_dict[state_name] < warm_tol:
 #                 return True
 #         return False
+
+
+    def _setup_scalers(self, ):
+        pass
+    
     def raise_issues_with_user_setup(self, ):
         pass
     
@@ -202,6 +208,8 @@ class OpenMDAOProblem(Problem):
         pass
     
     # TODO: Add decorators for checking if x is warm and for updating dvs
+    @record(['x'], ['obj'])
+    @hot_start(['x'], ['obj'])
     def _compute_objective(self, x, guess_dict=None, tol_dict=None, 
                            force_rerun=False, check_failure=False):
         om_prob = self.options['om_problem']
@@ -213,6 +221,8 @@ class OpenMDAOProblem(Problem):
         return obj_values[0][0]
         # return failure_flag, sim.objective()
 
+    @record(['x'], ['grad'])
+    @hot_start(['x'], ['grad'])
     def _compute_objective_gradient(self, x, guess_dict=None, tol_dict=None, 
                                     force_rerun=False, check_failure=False):
         om_prob = self.options['om_problem']
@@ -224,6 +234,8 @@ class OpenMDAOProblem(Problem):
         # return np.concatenate([self.totals_dict[self.obj_name, dv_name][0] for dv_name in self.dv_names])
         return self.totals[0]
 
+    @record(['x'], ['con'])
+    @hot_start(['x'], ['con'])
     def _compute_constraints(self, x, guess_dict=None, tol_dict=None, 
                              force_rerun=False, check_failure=False):
         om_prob = self.options['om_problem']
@@ -236,6 +248,8 @@ class OpenMDAOProblem(Problem):
         # c = np.concatenate([value.flatten() for value in con_values])
         return np.concatenate(con_values)
 
+    @record(['x'], ['jac'])
+    @hot_start(['x'], ['jac'])
     def _compute_constraint_jacobian(self, x, guess_dict=None, tol_dict=None, 
                                      force_rerun=False, check_failure=False):
         om_prob = self.options['om_problem']
@@ -247,6 +261,8 @@ class OpenMDAOProblem(Problem):
         # return np.concatenate([np.concatenate([self.totals_dict[con_name, dv_name] for con_name in self.con_names]) for dv_name in self.dv_names], axis=1)
         return self.totals[1:]
 
+    @record(['x'], ['failure', 'obj', 'con', 'grad', 'jac'])
+    @hot_start(['x'], ['failure', 'obj', 'con', 'grad', 'jac'])
     def _compute_all(self, x, force_rerun=False, check_failure=False):                              # only for SNOPTC, (NOT meant for SURF)
         om_prob = self.options['om_problem']
         print('Computing all at once >>>>>>>>>>')

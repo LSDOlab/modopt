@@ -2,6 +2,7 @@ import numpy as np
 import scipy as sp
 import warnings
 from modopt import Problem as OptProblem
+from modopt.core.recording_and_hotstart import hot_start, record
 
 try:
     # from csdl_alpha.experimental import PySimulator
@@ -221,6 +222,8 @@ class CSDLAlphaProblem(OptProblem):
         pass
     
     # TODO: Add decorators for checking if x is warm and for updating dvs
+    @record(['x'], ['obj'])
+    @hot_start(['x'], ['obj'])
     def _compute_objective(self, x, guess_dict=None, tol_dict=None, 
                            force_rerun=False, check_failure=False):
         print('Computing objective >>>>>>>>>>')
@@ -230,6 +233,8 @@ class CSDLAlphaProblem(OptProblem):
         return self._get_objective()
         # return failure_flag, sim.objective()
 
+    @record(['x'], ['grad'])
+    @hot_start(['x'], ['grad'])
     def _compute_objective_gradient(self, x, guess_dict=None, tol_dict=None, 
                                     force_rerun=False, check_failure=False):
         print('Computing gradient >>>>>>>>>>')
@@ -238,6 +243,8 @@ class CSDLAlphaProblem(OptProblem):
         print('---------Computed gradient---------')
         return self._get_objective_gradient()
 
+    @record(['x'], ['con'])
+    @hot_start(['x'], ['con'])
     def _compute_constraints(self, x, guess_dict=None, tol_dict=None, 
                              force_rerun=False, check_failure=False):
         print('Computing constraints >>>>>>>>>>')
@@ -246,6 +253,8 @@ class CSDLAlphaProblem(OptProblem):
         print('---------Computed constraints---------')
         return self._get_constraints()
 
+    @record(['x'], ['jac'])
+    @hot_start(['x'], ['jac'])
     def _compute_constraint_jacobian(self, x, guess_dict=None, tol_dict=None, 
                                      force_rerun=False, check_failure=False):
         print('Computing Jacobian >>>>>>>>>>')
@@ -254,6 +263,8 @@ class CSDLAlphaProblem(OptProblem):
         print('---------Computed Jacobian---------')
         return self._get_constraint_jacobian()
 
+    @record(['x'], ['failure', 'obj', 'con', 'grad', 'jac'])
+    @hot_start(['x'], ['failure', 'obj', 'con', 'grad', 'jac'])
     def _compute_all(self, x, force_rerun=False, check_failure=False):                              # only for SNOPTC, (NOT meant for SURF)
         print('Computing all at once >>>>>>>>>>')
         # self.check_if_warm_and_run_model(x, force_rerun=force_rerun, check_failure=check_failure)                 # This is rqd, o/w warm derivs skip model evals --> not sure since the warm_x and warm_x_deriv are always equal for compute_all

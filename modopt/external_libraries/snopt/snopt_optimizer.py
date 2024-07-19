@@ -157,7 +157,7 @@ class SNOPTOptimizer(Optimizer):
         for key in self.solver_options:
             if key in ['append2file', 'continue_on_failure']:
                 continue
-            if 'filename' in key:
+            if 'filename' in key and hasattr(self, 'out_dir'):
                 filename = self.solver_options[key]
                 filepath = f"{self.out_dir}/{filename}" if filename else None
                 self.SNOPT_options_object.setOption(key, filepath)

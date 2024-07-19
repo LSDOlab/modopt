@@ -2,6 +2,7 @@ import numpy as np
 import scipy as sp
 import warnings
 from modopt import Problem as OptProblem
+from modopt.core.recording_and_hotstart import hot_start, record
 
 try:
     from python_csdl_backend import Simulator
@@ -69,6 +70,9 @@ class CSDLProblem(OptProblem):
             self.declared_variables += ['con', 'jac']
             self.c_scaler = 1.0
 
+    def _setup_scalers(self, ):
+        pass
+
     def raise_issues_with_user_setup(self, ):
         pass
 
@@ -86,7 +90,7 @@ class CSDLProblem(OptProblem):
         if not self.SURF_mode:      # for pure RS/FS 
             if (not np.array_equal(self.warm_x, x)) or force_rerun:
                 sim.update_design_variables(x)
-                self.fail1 = sim.run(check_failure=check_failure)
+                self.fail1 = bool(sim.run(check_failure=check_failure))
                 self.model_evals += 1
                 self.warm_x[:] = x
             return
@@ -97,7 +101,7 @@ class CSDLProblem(OptProblem):
                 for state_name in self.state_names: 
                     self.warm_guess_dict[state_name] = guess_dict[state_name]
                     self.warm_tol_dict[state_name]   = tol_dict[state_name]
-                self.fail1 = sim.run(check_failure=check_failure)
+                self.fail1 = bool(sim.run(check_failure=check_failure))
                 self.model_evals += 1
                 self.warm_x[:] = x
             return
@@ -110,7 +114,7 @@ class CSDLProblem(OptProblem):
                 self.check_if_warm_and_run_model(x, force_rerun=force_rerun, check_failure=check_failure)
                 f2 = sim.compute_total_derivatives(check_failure=check_failure)
                 self.deriv_evals += 1
-                self.fail2 = (self.fail1 and f2)
+                self.fail2 = (self.fail1 and bool(f2))
                 self.warm_x_deriv[:] = x
             return
         else:                       # only for SURF
@@ -118,7 +122,7 @@ class CSDLProblem(OptProblem):
                 self.check_if_warm_and_run_model(x, guess_dict, tol_dict, force_rerun, check_failure)
                 f2 = sim.compute_SURF_derivatives(check_failure=check_failure)
                 self.deriv_evals += 1
-                self.fail2 = (self.fail1 and f2)
+                self.fail2 = (self.fail1 and bool(f2))
                 self.warm_x_deriv[:] = x
             return
 
@@ -182,6 +186,8 @@ class CSDLProblem(OptProblem):
         pass
     
     # TODO: Add decorators for checking if x is warm and for updating dvs
+    @record(['x'], ['obj'])
+    @hot_start(['x'], ['obj'])
     def _compute_objective(self, x, guess_dict=None, tol_dict=None, 
                            force_rerun=False, check_failure=False):
         sim = self.options['simulator']
@@ -192,6 +198,8 @@ class CSDLProblem(OptProblem):
         return sim.objective()[0]
         # return failure_flag, sim.objective()
 
+    @record(['x'], ['grad'])
+    @hot_start(['x'], ['grad'])
     def _compute_objective_gradient(self, x, guess_dict=None, tol_dict=None, 
                                     force_rerun=False, check_failure=False):
         sim = self.options['simulator']
@@ -201,6 +209,8 @@ class CSDLProblem(OptProblem):
         print('---------Computed gradient---------')
         return self._get_objective_gradient()
 
+    @record(['x'], ['con'])
+    @hot_start(['x'], ['con'])
     def _compute_constraints(self, x, guess_dict=None, tol_dict=None, 
                              force_rerun=False, check_failure=False):
         sim = self.options['simulator']
@@ -210,6 +220,8 @@ class CSDLProblem(OptProblem):
         print('---------Computed constraints---------')
         return self._get_constraints()
 
+    @record(['x'], ['jac'])
+    @hot_start(['x'], ['jac'])
     def _compute_constraint_jacobian(self, x, guess_dict=None, tol_dict=None, 
                                      force_rerun=False, check_failure=False):
         sim = self.options['simulator']
@@ -219,6 +231,8 @@ class CSDLProblem(OptProblem):
         print('---------Computed Jacobian---------')
         return self._get_constraint_jacobian()
 
+    @record(['x'], ['failure', 'obj', 'con', 'grad', 'jac'])
+    @hot_start(['x'], ['failure', 'obj', 'con', 'grad', 'jac'])
     def _compute_all(self, x, force_rerun=False, check_failure=False):                              # only for SNOPTC, (NOT meant for SURF)
         sim = self.options['simulator']
         print('Computing all at once >>>>>>>>>>')

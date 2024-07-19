@@ -131,7 +131,6 @@ class SLSQP(Optimizer):
         self.num_con_types = int(len(lci) > 0) + int(len(uci) > 0) + int(len(eqi) > 0)
         self.con_call_counter = 0
         self.jac_call_counter = 0
-        print(self.num_con_types)
 
     def solve(self):
 

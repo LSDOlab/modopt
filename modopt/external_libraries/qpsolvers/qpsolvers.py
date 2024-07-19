@@ -111,8 +111,8 @@ class ConvexQPSolvers(Optimizer):
             self.solver_name += self.options['solver_options']['solver']
         else:
             raise ValueError("Please specify a 'solver' in the 'solver_options' dictionary. "\
-                             f"Solvers available on your machine are: {self.available_solvers}"\
-                             f"Solvers supported by 'qpsolvers' are: {self.supported_solvers}")
+                             f"Solvers available on your machine are: {self.available_solvers}. "\
+                             f"Solvers supported by 'qpsolvers' are: {self.supported_solvers}.")
         if 'verbose' not in self.options['solver_options']:
             self.options['solver_options']['verbose'] = True
 
@@ -148,42 +148,42 @@ class ConvexQPSolvers(Optimizer):
             self.setup_constraints()
 
     def setup_constraints(self, ):
-            con_0 = self.con(self.x0)
-            jac_0 = self.jac(self.x0)
+        con_0 = self.con(self.x0)
+        jac_0 = self.jac(self.x0)
 
-            # Identify eq constraint bounds
-            c_lower = self.problem.c_lower
-            c_upper = self.problem.c_upper
+        # Identify eq constraint bounds
+        c_lower = self.problem.c_lower
+        c_upper = self.problem.c_upper
 
-            # Compute the constant component vector for the linear constraints
-            k = con_0 - jac_0 @ self.x0
+        # Compute the constant component vector for the linear constraints
+        k = con_0 - jac_0 @ self.x0
 
-            eqi = np.where(c_lower == c_upper)[0]
+        eqi = np.where(c_lower == c_upper)[0]
 
-            # Define the linear equality constraint: Ax = b
-            if len(eqi) > 0:
-                self.A = jac_0[eqi]
-                self.b = c_upper[eqi] - k[eqi]
+        # Define the linear equality constraint: Ax = b
+        if len(eqi) > 0:
+            self.A = jac_0[eqi]
+            self.b = c_upper[eqi] - k[eqi]
 
-            # Identify constraints with only lower bounds
-            lci = np.where((c_lower != -np.inf) & (c_lower != c_upper))[0]
-            # Identify constraints with only upper bounds
-            uci = np.where((c_upper !=  np.inf) & (c_lower != c_upper))[0]
+        # Identify constraints with only lower bounds
+        lci = np.where((c_lower != -np.inf) & (c_lower != c_upper))[0]
+        # Identify constraints with only upper bounds
+        uci = np.where((c_upper !=  np.inf) & (c_lower != c_upper))[0]
 
-            # Setup the linear inequality constraint: Gx <= h
-            G = np.zeros((0, self.problem.nx), dtype=float)
-            h = np.array([])
+        # Setup the linear inequality constraint: Gx <= h
+        G = np.zeros((0, self.problem.nx), dtype=float)
+        h = np.array([])
 
-            if len(uci) > 0:
-                G = np.append(G, jac_0[uci], axis=0)
-                h = np.append(h, c_upper[uci] - k[uci])
-            if len(lci) > 0:
-                G = np.append(G, -jac_0[lci], axis=0)
-                h = np.append(h, k[lci] - c_lower[lci])
-            
-            if len(lci) + len(uci) > 0:
-                self.G = G
-                self.h = h
+        if len(uci) > 0:
+            G = np.append(G, jac_0[uci], axis=0)
+            h = np.append(h, c_upper[uci] - k[uci])
+        if len(lci) > 0:
+            G = np.append(G, -jac_0[lci], axis=0)
+            h = np.append(h, k[lci] - c_lower[lci])
+        
+        if len(lci) + len(uci) > 0:
+            self.G = G
+            self.h = h
 
     def solve(self, ):
         '''
@@ -230,7 +230,8 @@ class ConvexQPSolvers(Optimizer):
         self.total_time = time.time() - start_time
         
         from dataclasses import asdict
-        self.results = asdict(solution)
+        self.results = {name: getattr(solution, name) for name in ['problem', 'x', 'y', 'z', 'z_box', 'obj', 'found', 'extras']}
+        # self.results = asdict(solution)
         self.results.pop('obj')         # obj returned by qpsolvers does not include the constant term so remove it
         self.results['objective']       = self.obj(solution.x)  # compute the objective value for the problem
         if self.problem.constrained:

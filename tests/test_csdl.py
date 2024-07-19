@@ -43,9 +43,10 @@ def test_csdl():
     assert prob.problem_name == 'quartic'
     assert prob.constrained == True
     assert prob.options['jac_format'] == 'dense'
-    assert_array_equal(prob.obj_scaler, {})                                 # no scaling done by modopt
-    assert_array_equal(prob.x_scaler, np.array([], dtype=np.float64))       # no scaling done by modopt
-    assert_array_equal(prob.c_scaler, np.array([], dtype=np.float64))       # no scaling done by modopt
+    assert_array_equal(prob.obj_scaler, {})     # no scaling done by modopt
+    assert prob.o_scaler == 1.                  # no scaling done by modopt
+    assert prob.x_scaler == 1.                  # no scaling done by modopt
+    assert prob.c_scaler == 1.                  # no scaling done by modopt
     assert_array_equal(prob.x0, np.array([100., 0.4]))
     assert_array_equal(prob.x_lower, np.array([0, -np.inf]))
     assert_array_equal(prob.x_upper, np.array([np.inf, np.inf]))

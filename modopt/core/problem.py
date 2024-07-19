@@ -3,6 +3,7 @@ from array_manager.api import DenseMatrix, COOMatrix, CSRMatrix, CSCMatrix
 
 from modopt.utils.options_dictionary import OptionsDictionary
 from modopt.utils.general_utils import pad_name
+from modopt.core.recording_and_hotstart import record, hot_start
 
 import numpy as np
 import warnings
@@ -149,6 +150,15 @@ class Problem(object):
         self.lag = {}
         self.constrained = False
         self.declared_variables = []
+
+        # private attributes for recording and hot-starting
+        self._record                = None
+        self._callback_count        = 0
+        self._hot_start_mode        = False
+        self._hot_start_record      = None
+        self._num_callbacks_found   = 0
+        self._hot_start_tol         = None
+        self._reused_callback_count = 0
 
         ###############################
         # Only for the SURF algorithm #
@@ -1576,6 +1586,8 @@ class Problem(object):
 
     # WRAPPER FOR USER-DEFINED COMPUTE METHODS BELOW (USED BY Optimizer() OBJECTS):
     # =============================================================================
+    @record(['x'],['obj'])
+    @hot_start(['x'],['obj'])
     def _compute_objective(self, x):
         '''
         Wrapper for user-defined compute_objective(). 
@@ -1601,6 +1613,8 @@ class Problem(object):
             return (objectives[0] * objective_scalers[0])[0]
         return (objectives[0] * objective_scalers[0])
     
+    @record(['x', 'z'],['lag'])
+    @hot_start(['x', 'z'],['lag'])
     def _compute_lagrangian(self, x, z):
         '''
         Wrapper for user-defined compute_lagrangian(). 
@@ -1629,6 +1643,8 @@ class Problem(object):
         self.compute_lagrangian(self.x, self.lag_mult, self.lag)
         return self.lag * objective_scaler
 
+    @record(['x'],['grad'])
+    @hot_start(['x'],['grad'])
     def _compute_objective_gradient(self, x):
         '''
         Wrapper for user-defined compute_objective_gradient(). 
@@ -1650,6 +1666,8 @@ class Problem(object):
         objective_scaler = list(self.obj_scaler.values())[0]
         return self.pF_px.get_data() * objective_scaler / self.x_scaler
     
+    @record(['x', 'z'],['lag_grad'])
+    @hot_start(['x', 'z'],['lag_grad'])
     def _compute_lagrangian_gradient(self, x, z):
         '''
         Wrapper for user-defined compute_lagrangian_gradient(). 
@@ -1661,7 +1679,7 @@ class Problem(object):
             Design variable vector.
         z : np.ndarray
             Lagrange multiplier vector.
-        
+
         Returns
         -------
         np.ndarray
@@ -1679,6 +1697,8 @@ class Problem(object):
         self.compute_lagrangian_gradient(self.x, self.lag_mult, self.pL_px)
         return self.pL_px.get_data() * objective_scaler / self.x_scaler
 
+    @record(['x'],['obj_hess'])
+    @hot_start(['x'],['obj_hess'])
     def _compute_objective_hessian(self, x):
         '''
         Wrapper for user-defined compute_objective_hessian(). 
@@ -1703,6 +1723,8 @@ class Problem(object):
         x_scaler_row = self.x_scaler.reshape(1, self.x_scaler.size)
         return self.obj_hess.get_std_array() * (objective_scaler / x_scaler_row) / x_scaler_row.T
 
+    @record(['x', 'z'],['lag_hess'])
+    @hot_start(['x', 'z'],['lag_hess'])    
     def _compute_lagrangian_hessian(self, x, z):
         '''
         Wrapper for user-defined compute_lagrangian_hessian(). 
@@ -1730,6 +1752,8 @@ class Problem(object):
         x_scaler_row = self.x_scaler.reshape(1, self.x_scaler.size)
         return self.lag_hess.get_std_array() * (objective_scaler / x_scaler_row) / x_scaler_row.T
 
+    @record(['x', 'v'],['obj_hvp'])
+    @hot_start(['x', 'v'],['obj_hvp'])
     def _compute_objective_hvp(self, x, v):
         '''
         Wrapper for user-defined compute_objective_hvp(). 
@@ -1753,6 +1777,8 @@ class Problem(object):
         objective_scaler = list(self.obj_scaler.values())[0]
         return self.obj_hvp.get_data() * objective_scaler / self.x_scaler
     
+    @record(['x', 'z', 'v'],['lag_hvp'])
+    @hot_start(['x', 'z', 'v'],['lag_hvp'])
     def _compute_lagrangian_hvp(self, x, z, v):
         '''
         Wrapper for user-defined compute_lagrangian_hvp(). 
@@ -1779,6 +1805,8 @@ class Problem(object):
         self.compute_lagrangian_hvp(self.x, self.lag_mult, self.vec_hvp, self.lag_hvp)
         return self.lag_hvp.get_data() * objective_scaler / self.x_scaler
 
+    @record(['x'],['con'])
+    @hot_start(['x'],['con'])
     def _compute_constraints(self, x):
         '''
         Wrapper for user-defined compute_constraints(). 
@@ -1799,6 +1827,8 @@ class Problem(object):
         # print('con', self.con.get_data())
         return self.con.get_data() * self.c_scaler
 
+    @record(['x'],['jac'])
+    @hot_start(['x'],['jac'])
     def _compute_constraint_jacobian(self, x):
         '''
         Wrapper for user-defined compute_constraint_jacobian(). 
@@ -1820,6 +1850,8 @@ class Problem(object):
         # print('jac', self.jac.get_std_array())
         return self.jac.get_std_array() * np.outer(self.c_scaler, 1./self.x_scaler)
     
+    @record(['x', 'v'],['jvp'])
+    @hot_start(['x', 'v'],['jvp'])
     def _compute_constraint_jvp(self, x, v):
         '''
         Wrapper for user-defined compute_constraint_jvp(). 
@@ -1843,6 +1875,8 @@ class Problem(object):
         # print('jvp', self.jvp.get_data())
         return self.jvp.get_data() * self.c_scaler
     
+    @record(['x', 'v'],['vjp'])
+    @hot_start(['x', 'v'],['vjp'])
     def _compute_constraint_vjp(self, x, v):
         '''
         Wrapper for user-defined compute_constraint_vjp(). 

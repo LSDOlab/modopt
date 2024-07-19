@@ -21,8 +21,6 @@ class Optimizer(object):
 
         now       = datetime.now()
         self.timestamp = now.strftime("%Y-%m-%d_%H.%M.%S.%f")
-        self.out_dir = f"{problem.problem_name}_outputs/{self.timestamp}"
-        self.modopt_output_files  = [f"directory: {self.out_dir}", 'modopt_results.out']
 
         self.options = OptionsDictionary()
         self.problem = problem
@@ -30,22 +28,51 @@ class Optimizer(object):
         self.solver_name = 'unnamed_solver'
         self.options.declare('recording', default=False, types=bool)
         self.options.declare('hot_start_from', default=None, types=(type(None), str))
+        self.options.declare('hot_start_atol', default=0., types=float)
+        self.options.declare('hot_start_rtol', default=0., types=float)
         self.options.declare('visualize', default=[], types=list)
+        self.options.declare('turn_off_outputs', False, types=bool)
         self.update_outputs_count = 0
 
         self.options.declare('formulation', default='rs', types=str)
 
         self.initialize()
         self.options.update(kwargs)
+
+        # Create the outputs directory
+        if not self.options['turn_off_outputs']:
+            self.out_dir = f"{problem.problem_name}_outputs/{self.timestamp}"
+            self.modopt_output_files  = [f"directory: {self.out_dir}", 'modopt_results.out']
+            os.makedirs(self.out_dir) # recursively create the directory
+        else:
+            if self.options['recording']:
+                raise ValueError("Cannot record with 'turn_off_outputs=True'.")
+            if self.options['readable_outputs'] != []:
+                raise ValueError("Cannot write 'readable_outputs' with 'turn_off_outputs=True'.")
+
+        # Hot starting and recording should start even before setup() is called
+        # since there might be callbacks in the setup() function
+        self.record  = self.problem._record = None      # Reset if using the same problem object again
+        self.problem._callback_count        = 0         # Reset if using the same problem object again
+        self.problem._reused_callback_count = 0         # Reset if using the same problem object again
+        self.problem._hot_start_mode        = False     # Reset if using the same problem object again
+        self.problem._hot_start_record      = None      # Reset if using the same problem object again
+        self.problem._num_callbacks_found   = 0         # Reset if using the same problem object again
+        self.problem._hot_start_tol         = None      # Reset if using the same problem object again
+        
+        if self.options['recording']:
+            self.record  = self.problem._record = h5py.File(f'{self.out_dir}/record.h5py', 'a')
+        if self.options['hot_start_from'] is not None:
+            self.setup_hot_start()
+            
         self._setup()
 
     def _setup(self):
         # User defined optimizer-specific setup
         self.setup()
         # Setup outputs to be written to file
-        self.setup_outputs()
-        if self.options['hot_start_from'] is not None:
-            self.setup_hot_start()
+        if not self.options['turn_off_outputs']:
+            self.setup_outputs()
 
     def setup_outputs(self):
         '''
@@ -62,10 +89,6 @@ class Optimizer(object):
 
         self.scalar_outputs = [out for out in a_outs.keys() if not isinstance(a_outs[out], tuple)]
         s_outs = self.scalar_outputs
-
-        # Create the outputs directory
-        # if len(s_outs) > 0 or len(d_outs) > 0 or self.options['recording']:        
-        os.makedirs(dir) # recursively create the directory
 
         # 1. Write the header of the summary_table file
         if len(s_outs) > 0:
@@ -92,18 +115,32 @@ class Optimizer(object):
         # 3. Create the recorder output file and write the attributes
         if self.options['recording']:
             constrained = self.problem.constrained
-            self.record  = rec = h5py.File(f'{dir}/record.h5py', 'a')
-            self.problem._record = self.record
+            rec = self.record
             self.modopt_output_files += ['record.h5py']
 
             rec.attrs['problem_name']   = self.problem_name
             rec.attrs['solver_name']    = self.solver_name
             rec.attrs['modopt_output_files'] = self.modopt_output_files
-            solver_opts = self.solver_options.get_pure_dict()
-            for key, value in solver_opts.items():
-                value = 'None' if value is None else value
-                if isinstance(value, (int, float, bool, str, np.ndarray)):
-                    rec.attrs[f'solver_options-{key}'] = value
+            if hasattr(self, 'default_solver_options'):
+                solver_opts = self.solver_options.get_pure_dict()
+                for key, value in solver_opts.items():
+                    value = 'None' if value is None else value
+                    if isinstance(value, (int, float, bool, str, np.ndarray)):
+                        rec.attrs[f'solver_options-{key}'] = value
+            elif self.solver_name == 'ipopt': # ipopt-specific
+                for key, value in self.nlp_options['ipopt'].items():
+                    if isinstance(value, (int, float, bool, str, np.ndarray)):
+                        rec.attrs[f'solver_options-{key}'] = value
+            elif self.solver_name.startswith('convex_qpsolvers'): # convex_qpsolvers-specific
+                for key, value in self.options['solver_options'].items():
+                    if isinstance(value, (int, float, bool, str, np.ndarray)):
+                        rec.attrs[f'solver_options-{key}'] = value
+            else: # for inbuilt solvers
+                opts = self.options.get_pure_dict()
+                for key, value in opts.items():
+                    value = 'None' if value is None else value
+                    if isinstance(value, (int, float, bool, str, np.ndarray)):
+                        rec.attrs[f'options-{key}'] = value
             rec.attrs['readable_outputs'] = d_outs
             rec.attrs['recording'] = str(self.options['recording'])
             rec.attrs['hot_start_from'] = str(self.options['hot_start_from'])
@@ -129,8 +166,10 @@ class Optimizer(object):
         '''
         self.hot_start_record                 = h5py.File(self.options['hot_start_from'], 'r')
         num_callbacks_found = len([key for key in list(self.hot_start_record.keys()) if key.startswith('callback_')])
+        self.problem._hot_start_mode          = True
         self.problem._hot_start_record        = self.hot_start_record
         self.problem._num_callbacks_found     = num_callbacks_found
+        self.problem._hot_start_tol           = (self.options['hot_start_rtol'], self.options['hot_start_atol'])
 
     def setup(self, ):
         pass
@@ -142,13 +181,22 @@ class Optimizer(object):
         2. Write self.results to the record file
         3. Run the lsdo_dashboard processing
         '''
+        if self.options['turn_off_outputs']:
+            return
+        
         with open(f"{self.out_dir}/modopt_results.out", 'w') as f:
             with contextlib.redirect_stdout(f):
                 self.print_results(all=True)
         if self.options['recording']:
             group = self.record.create_group('results')
             for key, value in self.results.items():
-                group[key] = value
+                if self.solver_name.startswith('convex_qpsolvers') and key in ['problem', 'extras']:
+                    continue
+                if isinstance(value, dict):
+                    for k, v in value.items():
+                        group[f"{key}-{k}"] = v
+                else:
+                    group[key] = value
             group['total_callbacks_to_problem'] = self.problem._callback_count
         
         # TODO: Add lsdo_dashboard processing
@@ -161,6 +209,9 @@ class Optimizer(object):
             2. Readable outputs: Contains the declared readable outputs
             3. Recorder outputs: Contains all the outputs of the optimization problem, if recording is enabled
         '''
+        if self.options['turn_off_outputs']:
+            return
+
         dir    = self.out_dir
         a_outs = self.available_outputs             # Available outputs dictionary
         d_outs = self.options['readable_outputs']   # Declared outputs list
@@ -274,8 +325,8 @@ class Optimizer(object):
         constrained = False
         if nc != 0:
             constrained = True
-            con = self.con
-            jac = self.jac
+            con = self.problem._compute_constraints
+            jac = self.problem._compute_constraint_jacobian
 
         ###############################
         # Only for the SURF algorithm #

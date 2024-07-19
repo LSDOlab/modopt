@@ -56,7 +56,8 @@ class IPOPT(Optimizer):
             'file_print_level': 12,
         }
         ipopt_options.update(self.options['solver_options'])
-        ipopt_options['output_file'] = self.out_dir + '/' + ipopt_options['output_file']
+        if hasattr(self, 'out_dir'):
+            ipopt_options['output_file'] = self.out_dir + '/' + ipopt_options['output_file']
 
         # Define the IPOPT specific options that the nlp solver need to pass to the IPOPT solver
         nlp_options = {}
