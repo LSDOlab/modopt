@@ -90,7 +90,31 @@ def test_visualization_recording_hot_start():
         assert len(callbacks)  == 79
         assert len(iterations) == 17
 
+
+@pytest.mark.slsqp
+@pytest.mark.interfaces
+def test_errors():
+    prob    = Scaling()
+    with pytest.raises(ValueError) as exc_info:
+        optimizer = SLSQP(prob, visualize=['x[0]'], turn_off_outputs=True)
+    assert str(exc_info.value) == "Cannot visualize with 'turn_off_outputs=True'."
+
+    with pytest.raises(ValueError) as exc_info:
+        optimizer = SLSQP(prob, visualize=['apple'])
+    assert str(exc_info.value) == f"Unavailable variable 'apple' is declared for visualization. " \
+                                  f"Available variables for visualization are ['con', 'grad', 'jac', 'obj', 'x']."
+    
+    with pytest.raises(ValueError) as exc_info:
+        optimizer = SLSQP(prob, visualize=['obj[0]'])
+    assert str(exc_info.value) == "Scalar variable 'obj' is indexed for visualization."
+
+    with pytest.raises(ValueError) as exc_info:
+        optimizer = SLSQP(prob, visualize=['x'])
+    assert str(exc_info.value) == f"Non-scalar variable 'x' is not indexed for visualization. " \
+                                  f"Provide an index to a scalar entry in 'x' for visualization."
+
 if __name__ == '__main__':
     test_visualization()
     test_visualization_recording_hot_start()
+    test_errors()
     print('All tests passed!')

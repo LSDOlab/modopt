@@ -188,19 +188,19 @@ class Optimizer(object):
         Variables can be either optimizer outputs or callback inputs/outputs.
         '''
         visualize_vars   = []
-        available_vars  = list(self.available_outputs.keys()) + self.active_callbacks + ['x']
+        available_vars  = sorted(list(set(list(self.available_outputs.keys()) + self.active_callbacks + ['x'])))
         for s_var in self.options['visualize']: # scalar variables
             var = s_var.split('[')[0]
             if var not in available_vars:
-                raise ValueError(f'Unavailable variable "{var}" is declared for visualization. ' \
-                                 f'Available variables for visualization are {available_vars}.')
-            if s_var in self.scalar_outputs + ['obj', 'lag']:
+                raise ValueError(f"Unavailable variable '{var}' is declared for visualization. " \
+                                 f"Available variables for visualization are {available_vars}.")
+            if var in self.scalar_outputs + ['obj', 'lag']:
                 if var != s_var:
-                    raise ValueError(f'Scalar variable "{s_var}" is indexed for visualization.')
+                    raise ValueError(f"Scalar variable '{var}' is indexed for visualization.")
             else:
                 if var == s_var:
-                    raise ValueError(f'Non-scalar variable "{var}" is not indexed for visualization. ' \
-                                     f'Provide an index to a scalar entry in "{var}" for visualization.')
+                    raise ValueError(f"Non-scalar variable '{var}' is not indexed for visualization. " \
+                                     f"Provide an index to a scalar entry in '{var}' for visualization.")
             
             if var in self.available_outputs.keys():
                 visualize_vars.append(s_var)

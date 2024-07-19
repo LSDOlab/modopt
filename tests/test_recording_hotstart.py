@@ -406,6 +406,19 @@ def test_compute_all_hot_start():
         assert len(callbacks)  == 6
         assert len(iterations) == 0
 
+@pytest.mark.slsqp
+@pytest.mark.recording
+@pytest.mark.interfaces
+def test_errors():
+    prob    = Scaling()
+    with pytest.raises(ValueError) as exc_info:
+        optimizer = SLSQP(prob, recording=True, turn_off_outputs=True)
+    assert str(exc_info.value) == "Cannot record with 'turn_off_outputs=True'."
+    
+    with pytest.raises(ValueError) as exc_info:
+        optimizer = SLSQP(prob, readable_outputs=['x'], turn_off_outputs=True)
+    assert str(exc_info.value) == "Cannot write 'readable_outputs' with 'turn_off_outputs=True'."
+
 if __name__ == '__main__':
     test_recording()
     test_csdl_recording()
@@ -416,4 +429,5 @@ if __name__ == '__main__':
     test_csdl_hot_start()
     test_openmdao_hot_start()
     test_compute_all_hot_start()
+    test_errors()
     print('All tests passed!')
