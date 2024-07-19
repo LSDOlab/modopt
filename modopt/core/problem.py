@@ -151,7 +151,7 @@ class Problem(object):
         self.constrained = False
         self.declared_variables = []
 
-        # private attributes for recording and hot-starting
+        # private attributes for recording, hot-starting, and visualization
         self._record                = None
         self._callback_count        = 0
         self._hot_start_mode        = False
@@ -159,6 +159,7 @@ class Problem(object):
         self._num_callbacks_found   = 0
         self._hot_start_tol         = None
         self._reused_callback_count = 0
+        self._visualizer            = None
 
         ###############################
         # Only for the SURF algorithm #

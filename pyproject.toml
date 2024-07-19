@@ -25,6 +25,7 @@ dependencies = [
     'scipy>=1.10,<2',
     'array_manager @ git+https://github.com/anugrahjo/array_manager.git@modopt',
     'h5py>=3.11.0,<4',
+    "matplotlib>=3.4,<4",
 ]
 classifiers=[
     'Development Status :: 4 - Beta',
@@ -70,9 +71,11 @@ dev = [
     "modopt[docs, test]",
 ]
 deploy = [
-    "numpy==1.26.4",   # Fixed to the latest version that was compatible at the time of writing
-    "scipy==1.13.1",   # Fixed to the latest version that was compatible at the time of writing
+    "numpy==1.26.4",    # Fixed to the latest version that was compatible at the time of writing
+    "scipy==1.13.1",    # Fixed to the latest version that was compatible at the time of writing
     'array_manager @ git+https://github.com/anugrahjo/array_manager.git@modopt',
+    'h5py==3.11.0',     # Fixed to the latest version that was compatible at the time of writing
+    "matplotlib==3.9.0",# Fixed to the latest version that was compatible at the time of writing
 ]
 # Includes the list of all dependencies required to build the docs
 docs = [
@@ -149,6 +152,7 @@ markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "interfaces: marks tests as interfaces (deselect with '-m \"not interfaces\"')",
     "recording: marks tests as recording (deselect with '-m \"not recording\"')",
+    "visualization: marks tests as visualization (deselect with '-m \"not visualization\"')",
     "csdl: marks tests as csdl (deselect with '-m \"not csdl\"')",
     "csdl_alpha: marks tests as csdl_alpha (deselect with '-m \"not csdl_alpha\"')",
     "openmdao: marks tests as openmdao (deselect with '-m \"not openmdao\"')",
@@ -174,6 +178,8 @@ omit = [
     "*/tests/*",
     # omit everything in the docs directory
     "/docs/*",
+    # omit this single file since visualization is not tested on the cloud
+    "modopt/core/visualization.py",
     # omit this single file since snopta is deprecated and not used anymore
     "modopt/external_libraries/snopt/snopta.py",
     # omit this since scipy_optimizer is deprecated and not used anymore

@@ -295,7 +295,7 @@ class ProblemLite(object):
 
         self.check_shapes(x0, xl, xu, cl, cu, x_scaler, o_scaler, c_scaler)
 
-        # private attributes for recording and hot-starting
+        # private attributes for recording, hot-starting, and visualization
         self._record                = None
         self._callback_count        = 0
         self._hot_start_mode        = False
@@ -303,6 +303,7 @@ class ProblemLite(object):
         self._num_callbacks_found   = 0
         self._hot_start_tol         = None
         self._reused_callback_count = 0
+        self._visualizer            = None
 
     def check_types(self, x0, name, obj, con, grad, jac, obj_hess, lag_hess, fd_step, vp_fd_step, 
                     xl, xu, cl, cu, x_scaler, o_scaler, c_scaler, lag, lag_grad, grad_free):

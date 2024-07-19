@@ -9,6 +9,7 @@ from modopt.utils.general_utils import pad_name
 # from io import StringIO
 from modopt.core.problem import Problem
 from modopt.core.problem_lite import ProblemLite
+from modopt.core.visualization import Visualizer
 import warnings
 
 try:
@@ -19,7 +20,7 @@ except ImportError:
 class Optimizer(object):
     def __init__(self, problem, **kwargs):
 
-        now       = datetime.now()
+        now = datetime.now()
         self.timestamp = now.strftime("%Y-%m-%d_%H.%M.%S.%f")
 
         self.options = OptionsDictionary()
@@ -39,6 +40,10 @@ class Optimizer(object):
         self.initialize()
         self.options.update(kwargs)
 
+        # compute the scalar outputs from the optimizer after initialization
+        a_outs = self.available_outputs
+        self.scalar_outputs = [out for out in a_outs.keys() if not isinstance(a_outs[out], tuple)]
+
         # Create the outputs directory
         if not self.options['turn_off_outputs']:
             self.out_dir = f"{problem.problem_name}_outputs/{self.timestamp}"
@@ -49,6 +54,8 @@ class Optimizer(object):
                 raise ValueError("Cannot record with 'turn_off_outputs=True'.")
             if self.options['readable_outputs'] != []:
                 raise ValueError("Cannot write 'readable_outputs' with 'turn_off_outputs=True'.")
+            if self.options['visualize'] != []:
+                raise ValueError("Cannot visualize with 'turn_off_outputs=True'.")
 
         # Hot starting and recording should start even before setup() is called
         # since there might be callbacks in the setup() function
@@ -59,11 +66,17 @@ class Optimizer(object):
         self.problem._hot_start_record      = None      # Reset if using the same problem object again
         self.problem._num_callbacks_found   = 0         # Reset if using the same problem object again
         self.problem._hot_start_tol         = None      # Reset if using the same problem object again
+        self.problem._visualizer            = None      # Reset if using the same problem object again
         
         if self.options['recording']:
             self.record  = self.problem._record = h5py.File(f'{self.out_dir}/record.h5py', 'a')
         if self.options['hot_start_from'] is not None:
             self.setup_hot_start()
+        if self.options['visualize'] != []:
+            # NOTE: This will neglect 'obj_hess', 'lag_hess' active_callbacks for IPOPT
+            #       and 'obj_hess', 'lag_hess', 'obj_hvp' for TrustConstr 
+            #       since these get added in the setup() function.
+            self.setup_visualization()
             
         self._setup()
 
@@ -83,12 +96,10 @@ class Optimizer(object):
             3. Recorder:         Contains all the outputs of the optimization problem, if recording is enabled.
             4. Results:          Single file with the readable print_results() string (no setup needed).
         '''
-        dir       = self.out_dir
-        a_outs    = self.available_outputs             # Available outputs dictionary
-        d_outs    = self.options['readable_outputs']   # Declared outputs list
-
-        self.scalar_outputs = [out for out in a_outs.keys() if not isinstance(a_outs[out], tuple)]
-        s_outs = self.scalar_outputs
+        dir     = self.out_dir
+        a_outs  = self.available_outputs             # Available outputs dictionary
+        d_outs  = self.options['readable_outputs']   # Declared outputs list
+        s_outs  = self.scalar_outputs                # Scalar outputs list
 
         # 1. Write the header of the summary_table file
         if len(s_outs) > 0:
@@ -171,6 +182,40 @@ class Optimizer(object):
         self.problem._num_callbacks_found     = num_callbacks_found
         self.problem._hot_start_tol           = (self.options['hot_start_rtol'], self.options['hot_start_atol'])
 
+    def setup_visualization(self,):
+        '''
+        Setup the visualization for scalar variables of the optimization problem.
+        Variables can be either optimizer outputs or callback inputs/outputs.
+        '''
+        visualize_vars   = []
+        available_vars  = list(self.available_outputs.keys()) + self.active_callbacks + ['x']
+        for s_var in self.options['visualize']: # scalar variables
+            var = s_var.split('[')[0]
+            if var not in available_vars:
+                raise ValueError(f'Unavailable variable "{var}" is declared for visualization. ' \
+                                 f'Available variables for visualization are {available_vars}.')
+            if s_var in self.scalar_outputs + ['obj', 'lag']:
+                if var != s_var:
+                    raise ValueError(f'Scalar variable "{s_var}" is indexed for visualization.')
+            else:
+                if var == s_var:
+                    raise ValueError(f'Non-scalar variable "{var}" is not indexed for visualization. ' \
+                                     f'Provide an index to a scalar entry in "{var}" for visualization.')
+            
+            if var in self.available_outputs.keys():
+                visualize_vars.append(s_var)
+            if var in self.active_callbacks + ['x']:
+                visualize_vars.append('callback_' + s_var)
+        
+        # No need to visualize callbacks if all variables are optimizer outputs
+        visualize_callbacks = True
+        if all(s_var.split('[')[0] in self.available_outputs.keys() for s_var in self.options['visualize']):
+            visualize_callbacks = False
+        
+        self.visualizer = Visualizer(self.problem_name, visualize_vars, self.out_dir)
+        if visualize_callbacks:
+            self.problem._visualizer = self.visualizer
+            
     def setup(self, ):
         pass
 
@@ -179,7 +224,7 @@ class Optimizer(object):
         Run the post-processing functions of the optimizer.
         1. Write the print_results() output to the the results.out file
         2. Write self.results to the record file
-        3. Run the lsdo_dashboard processing
+        3. Save and close the visualization plot
         '''
         if self.options['turn_off_outputs']:
             return
@@ -199,7 +244,9 @@ class Optimizer(object):
                     group[key] = value
             group['total_callbacks_to_problem'] = self.problem._callback_count
         
-        # TODO: Add lsdo_dashboard processing
+        if self.options['visualize'] != []:
+            self.visualizer.close_plot()
+            self.vis_time = self.visualizer.vis_time  
 
     def update_outputs(self, **kwargs):
         '''
@@ -211,6 +258,10 @@ class Optimizer(object):
         '''
         if self.options['turn_off_outputs']:
             return
+        
+        self.out_dict = out_dict = copy.deepcopy(kwargs)
+        if self.options['visualize'] != []:
+            self.visualizer.update_plot(out_dict)
 
         dir    = self.out_dir
         a_outs = self.available_outputs             # Available outputs dictionary
@@ -248,7 +299,6 @@ class Optimizer(object):
                     np.savetxt(f, value.reshape(1, value.size))
         
         # 3. Write the outputs to the recording files
-        self.out_dict = out_dict = copy.deepcopy(kwargs)
         if self.options['recording']:
             group_name = 'iteration_' + str(self.update_outputs_count)
             group = self.record.create_group(group_name)

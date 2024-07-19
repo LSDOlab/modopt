@@ -1,3 +1,4 @@
+# Decorators for recording, hot-starting and visualizing the optimization callbacks.
 
 import numpy as np
 import warnings
@@ -59,6 +60,14 @@ def record(in_names, out_names):
                 else:
                     # print(f"Recording output {out_name[0]}: {results}")
                     outputs[out_names[0]] = results
+
+            # Update the visualizer [TODO: can be moved out of recording decorator]
+            if self._visualizer:
+                in_var_dict  = dict(zip(in_names, args))
+                out_var_dict = dict(zip(out_names, results)) if len(out_names) > 1 else {out_names[0]: results}
+                var_dict     = {**in_var_dict, **out_var_dict}
+                callback_var_dict = {f'callback_{var}': var_dict[var] for var in var_dict}
+                self._visualizer.update_plot(callback_var_dict)
 
             self._callback_count += 1
             return results

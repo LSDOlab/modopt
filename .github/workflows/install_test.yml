@@ -68,7 +68,7 @@ jobs:
         MYARCH: "pc64.lnx.gfo"
         PYCUTEST_CACHE: ${{github.workspace}}/pycutest_cache
       run: |
-        pytest -m "not snopt" tests/ --cov=modopt --cov-report lcov
+        pytest -m "not snopt and not visualization" tests/ --cov=modopt --cov-report lcov
 
       # Upload the coverage report to coveralls
     - name: Coveralls GitHub Action
