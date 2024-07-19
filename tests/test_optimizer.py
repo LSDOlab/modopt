@@ -38,6 +38,10 @@ def test_turn_off_outputs():
         assert_almost_equal(results['c'], [5, 0.5], decimal=9)
         assert os.path.exists('ipopt_output.txt')
 
+@pytest.mark.interfaces
+@pytest.mark.snopt
+def test_turn_off_outputs_snopt():
+    for prob in [Scaling(), scaling_lite()]:
         optimizer = SNOPT(prob, solver_options={'Major optimality':1e-8}, turn_off_outputs=True)
         assert not hasattr(optimizer, 'out_dir')
         results = optimizer.solve()
@@ -50,4 +54,5 @@ def test_turn_off_outputs():
 
 if __name__ == "__main__":
     test_turn_off_outputs()
+    test_turn_off_outputs_snopt()
     print("All tests passed!")
