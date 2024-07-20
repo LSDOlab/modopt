@@ -182,16 +182,19 @@ class SLSQP(Optimizer):
         output += f"\n\t{'Solver':25}: {self.solver_name}"
         output += f"\n\t{'Success':25}: {self.results['success']}"
         output += f"\n\t{'Message':25}: {self.results['message']}"
-        output += f"\n\t{'Status':25}: {self.results['status']}"
+        if 'status' in self.results:
+            output += f"\n\t{'Status':25}: {self.results['status']}"
         output += f"\n\t{'Total time':25}: {self.total_time}"
         output += f"\n\t{'Objective':25}: {self.results['fun']}"
-        output += f"\n\t{'Gradient norm':25}: {np.linalg.norm(self.results['jac'])}"
+        if 'jac' in self.results:
+            output += f"\n\t{'Gradient norm':25}: {np.linalg.norm(self.results['jac'])}"
         output += f"\n\t{'Total function evals':25}: {self.results['nfev']}"
         output += f"\n\t{'Total gradient evals':25}: {self.results['njev']}"
-        output += f"\n\t{'Major iterations':25}: {self.results['nit']}"
+        if 'nit' in self.results:
+            output += f"\n\t{'Major iterations':25}: {self.results['nit']}"
         if optimal_variables or all:
             output += f"\n\t{'Optimal variables':25}: {self.results['x']}"
-        if optimal_gradient or all:
+        if (optimal_gradient or all) and 'jac' in self.results:
             output += f"\n\t{'Optimal obj. gradient':25}: {self.results['jac']}"
 
         output += '\n\t' + '-'*100

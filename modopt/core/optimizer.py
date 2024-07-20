@@ -242,7 +242,7 @@ class Optimizer(object):
                         group[f"{key}-{k}"] = v
                 else:
                     group[key] = value
-            group['total_callbacks_to_problem'] = self.problem._callback_count
+            group['total_callbacks'] = self.problem._callback_count
         
         if self.options['visualize'] != []:
             self.visualizer.close_plot()

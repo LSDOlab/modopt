@@ -127,8 +127,8 @@ class ProblemLite(object):
         self.x_scaler = x_scaler * np.ones((nx,))
 
         self.x0 = np.asfarray(x0) * x_scaler
-        self.x_lower = xl * x_scaler if xl is not None else np.full(nx, -np.inf)
-        self.x_upper = xu * x_scaler if xu is not None else np.full(nx,  np.inf)
+        self.x_lower = xl * self.x_scaler if xl is not None else np.full(nx, -np.inf)
+        self.x_upper = xu * self.x_scaler if xu is not None else np.full(nx,  np.inf)
 
         self.jvp = jvp
         self.vjp = vjp
@@ -254,8 +254,8 @@ class ProblemLite(object):
         # Once nc is known from the first call to con(x0), update the cl, cu, c_scaler, mu sizes
         if self.constrained:
             self.c_scaler = c_scaler * np.ones((nc,))
-            self.c_lower = cl * c_scaler if cl is not None else np.full(nc, -np.inf)
-            self.c_upper = cu * c_scaler if cu is not None else np.full(nc,  np.inf)
+            self.c_lower = cl * self.c_scaler if cl is not None else np.full(nc, -np.inf)
+            self.c_upper = cu * self.c_scaler if cu is not None else np.full(nc,  np.inf)
             self.warm_mu = self.mu = np.full((self.nc,), 0.) if self.constrained else None
 
         else:
