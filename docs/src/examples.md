@@ -22,4 +22,5 @@ _temp/examples/ex_5quartic_opt_openmdao
 _temp/examples/ex_7modularity_NewtonLagrange
 _temp/examples/ex_8bean_function
 _temp/examples/ex_9traveling_salesman
+_temp/examples/ex_10benchmarking
 ```
