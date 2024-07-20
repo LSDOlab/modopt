@@ -31,8 +31,6 @@ def generate_performance_profiles(data):
         The keys are the solver names and the values are the proportion of problems
         solved under the performance ratio corresponding to entries in Tau.
     '''
-    if plt is None:
-        raise ImportError("matplotlib not found, cannot plot performance profile.")
     
     # Get the unique solvers and problems
     solvers  = np.unique([key[1] for key in data.keys()])
@@ -92,6 +90,10 @@ def plot_performance_profiles(data, save_figname='performance.pdf'):
     save_figname : str, optional
         Path to save the performance profile plot. Default is 'performance.pdf'.
     '''
+    
+    if plt is None:
+        raise ImportError("matplotlib not found, cannot plot performance profile.")
+    
     fig, ax = plt.subplots()
     ax.set_title('Performance Profile')
     ax.set_xlabel('Performance Ratio')

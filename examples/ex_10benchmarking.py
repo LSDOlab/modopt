@@ -1,4 +1,4 @@
-'''Benchamrk optimization algorithms on four simple problems'''
+'''Benchmark optimization algorithms on four simple problems'''
 
 import numpy as np
 from modopt import ProblemLite
