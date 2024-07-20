@@ -69,7 +69,7 @@ class Optimizer(object):
         self.problem._visualizer            = None      # Reset if using the same problem object again
         
         if self.options['recording']:
-            self.record  = self.problem._record = h5py.File(f'{self.out_dir}/record.h5py', 'a')
+            self.record  = self.problem._record = h5py.File(f'{self.out_dir}/record.hdf5', 'a')
         if self.options['hot_start_from'] is not None:
             self.setup_hot_start()
         if self.options['visualize'] != []:
@@ -127,7 +127,7 @@ class Optimizer(object):
         if self.options['recording']:
             constrained = self.problem.constrained
             rec = self.record
-            self.modopt_output_files += ['record.h5py']
+            self.modopt_output_files += ['record.hdf5']
 
             rec.attrs['problem_name']   = self.problem_name
             rec.attrs['solver_name']    = self.solver_name

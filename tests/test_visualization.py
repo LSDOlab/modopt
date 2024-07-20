@@ -48,7 +48,7 @@ def test_visualization_recording_hot_start():
         assert prob._callback_count == 79
         assert prob._reused_callback_count == 0
 
-        filename    = f'{optimizer.out_dir}/record.h5py'
+        filename    = f'{optimizer.out_dir}/record.hdf5'
         file        = h5py.File(filename, 'r')
         groups      = list(file.keys())
         callbacks   = [key for key in groups if key.startswith('callback_')]
@@ -82,7 +82,7 @@ def test_visualization_recording_hot_start():
         assert prob._callback_count == 79
         assert prob._reused_callback_count == 79
 
-        filename    = f'{optimizer.out_dir}/record.h5py'
+        filename    = f'{optimizer.out_dir}/record.hdf5'
         file        = h5py.File(filename, 'r')
         groups      = list(file.keys())
         callbacks   = [key for key in groups if key.startswith('callback_')]

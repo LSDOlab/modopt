@@ -17,7 +17,7 @@ class Visualizer:
         '''
         Initialize the visualizer with the scalar variables to visualize. 
         The variables should be a list of strings, where each string is the name of a variable to visualize. 
-        Some examples for the variables are as follows (depends on the optimizer used):
+        Some examples for the variables are as follows (availability depends on the optimizer used):
             - 'obj'         : the objective function value
             - 'opt'         : the optimality measure
             - 'feas'        : the feasibility measure
