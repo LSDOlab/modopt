@@ -47,7 +47,7 @@ def test_turn_off_outputs_snopt():
         results = optimizer.solve()
         assert optimizer.results['info'] == 1
         assert_array_almost_equal(results['x'], [2., 0.], decimal=11)
-        assert_almost_equal(results['obj'], 20., decimal=11)
+        assert_almost_equal(results['objective'], 20., decimal=11)
         assert os.path.exists('SNOPT_summary.out')
         assert os.path.exists('SNOPT_print.out')
 

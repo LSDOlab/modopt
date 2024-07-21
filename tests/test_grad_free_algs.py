@@ -52,7 +52,7 @@ def test_pso():
     optimizer.print_results()
 
     assert_array_almost_equal(optimizer.results['x'], [1.21314, 0.82414], decimal=2)
-    assert_almost_equal(optimizer.results['f'], 0.09194, decimal=5)
+    assert_almost_equal(optimizer.results['objective'], 0.09194, decimal=5)
     assert optimizer.results['converged']
     assert optimizer.results['niter'] <= solver_options['maxiter']
 
@@ -63,7 +63,7 @@ def test_pso():
     optimizer.print_results()
 
     assert_array_almost_equal(optimizer.results['x'], [1.21314, 0.82414], decimal=2)
-    assert_almost_equal(optimizer.results['f'], 0.09194, decimal=5)
+    assert_almost_equal(optimizer.results['objective'], 0.09194, decimal=5)
     assert optimizer.results['converged']
     assert optimizer.results['niter'] <= solver_options['maxiter']
 
@@ -86,7 +86,7 @@ def test_nelder_mead():
     optimizer.print_results()
 
     assert_array_almost_equal(optimizer.results['x'], [1.21314, 0.82414], decimal=3)
-    assert_almost_equal(optimizer.results['f'], 0.09194, decimal=5)
+    assert_almost_equal(optimizer.results['objective'], 0.09194, decimal=5)
     assert optimizer.results['converged']
     assert optimizer.results['niter'] <= solver_options['maxiter']
 
@@ -97,7 +97,7 @@ def test_nelder_mead():
     optimizer.print_results()
 
     assert_array_almost_equal(optimizer.results['x'], [1.21314, 0.82414], decimal=3)
-    assert_almost_equal(optimizer.results['f'], 0.09194, decimal=5)
+    assert_almost_equal(optimizer.results['objective'], 0.09194, decimal=5)
     assert optimizer.results['converged']
     assert optimizer.results['niter'] <= solver_options['maxiter']
 

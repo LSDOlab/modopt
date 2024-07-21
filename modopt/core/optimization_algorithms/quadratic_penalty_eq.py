@@ -198,7 +198,7 @@ class L2PenaltyEq(Optimizer):
 
         self.results = {
             'x': x_k, 
-            'f': f_k,
+            'objective': f_k,
             'c': c_k,
             'rho': rho,
             'optimality': opt,

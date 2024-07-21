@@ -330,7 +330,7 @@ def test_snopt():
     print(optimizer.results)
     assert optimizer.results['info'] == 1
     assert_array_almost_equal(optimizer.results['x'], [2., 0.], decimal=11)
-    assert_almost_equal(optimizer.results['obj'], 20., decimal=11)
+    assert_almost_equal(optimizer.results['objective'], 20., decimal=11)
     
 
     prob = scaling_lite()
@@ -341,7 +341,7 @@ def test_snopt():
     # print(optimizer.results)
     assert optimizer.results['info'] == 1
     assert_array_almost_equal(optimizer.results['x'], [2., 0.], decimal=11)
-    assert_almost_equal(optimizer.results['obj'], 20., decimal=11)
+    assert_almost_equal(optimizer.results['objective'], 20., decimal=11)
 
 @pytest.mark.ipopt
 @pytest.mark.interfaces

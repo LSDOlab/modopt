@@ -3,7 +3,6 @@ import time
 
 from modopt import Optimizer
 from modopt.line_search_algorithms import ScipyLS
-from modopt.utils.options_dictionary import OptionsDictionary
 
 class SteepestDescent(Optimizer):
     def initialize(self):
@@ -48,8 +47,8 @@ class SteepestDescent(Optimizer):
 
         # Set intial values for current iterates
         x_k = x0 * 1.
-        f_k = self.obj(x_k)
-        g_k = self.grad(x_k)
+        f_k = obj(x_k)
+        g_k = grad(x_k)
 
         # Iteration counter
         itr = 0
@@ -117,7 +116,7 @@ class SteepestDescent(Optimizer):
 
         self.results = {
             'x': x_k, 
-            'f': f_k, 
+            'objective': f_k, 
             'optimality': opt, 
             'nfev': nfev, 
             'ngev': ngev,

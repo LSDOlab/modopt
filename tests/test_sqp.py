@@ -20,7 +20,7 @@ def test_sqp():
 
     assert optimizer.results['converged']
     assert_array_almost_equal(optimizer.results['x'], [1., 0.], decimal=11)
-    assert_almost_equal(optimizer.results['f'], 1., decimal=10)
+    assert_almost_equal(optimizer.results['objective'], 1., decimal=10)
     assert_array_almost_equal(optimizer.results['c'], [1., 0., 0., 0.], decimal=11)
     assert_array_almost_equal(optimizer.results['pi'], [0., 1.7836, 1.3333, 0.4503], decimal=3)
     assert_almost_equal(optimizer.results['optimality'], 0., decimal=9)
@@ -41,7 +41,7 @@ def test_sqp():
 
     assert optimizer.results['converged']
     assert_array_almost_equal(optimizer.results['x'], [1., 0.], decimal=11)
-    assert_almost_equal(optimizer.results['f'], 1., decimal=10)
+    assert_almost_equal(optimizer.results['objective'], 1., decimal=10)
     assert_array_almost_equal(optimizer.results['c'], [1., 0., 0., 0.], decimal=11)
     assert_array_almost_equal(optimizer.results['pi'], [0., 1.7836, 1.3333, 0.4503], decimal=3)
     assert_almost_equal(optimizer.results['optimality'], 0., decimal=9)

@@ -28,8 +28,8 @@ class BeanFunction(Problem):
     def compute_objective_gradient(self, dvs, grad):
         x1 = dvs['x'][0]
         x2 = dvs['x'][1]
-        dfdx1 = 2 * (1-x1) - 2*x1 * (2*x2 - x1**2)
-        dfdx2 = 2 * (1-x2) + 2 * (2*x2 - x1**2)
+        dfdx1 = -2 * (1-x1) - 2*x1 * (2*x2 - x1**2)
+        dfdx2 = -2 * (1-x2) + 2 * (2*x2 - x1**2)
         grad['x'] = np.array([dfdx1, dfdx2])
 
 from modopt import PSO, NelderMeadSimplex
@@ -65,7 +65,7 @@ optimizer.print_results(summary_table=True)
 print('PSO results:')
 
 print('optimized_dvs:', optimizer.results['x'])
-print('optimized_obj:', optimizer.results['f'])
+print('optimized_obj:', optimizer.results['objective'])
 print('final population obj std dev:', optimizer.results['f_sd'])
 print('total number of function evaluations:', optimizer.results['nfev'])
 print('total number of iterations:', optimizer.results['niter'])
@@ -91,7 +91,7 @@ optimizer.print_results(summary_table=True)
 print('Nelder-Mead results:')
 
 print('optimized_dvs:', optimizer.results['x'])
-print('optimized_obj:', optimizer.results['f'])
+print('optimized_obj:', optimizer.results['objective'])
 print('final simplex obj std dev:', optimizer.results['f_sd'])
 print('total number of function evaluations:', optimizer.results['nfev'])
 print('total number of iterations:', optimizer.results['niter'])

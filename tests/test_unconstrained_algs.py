@@ -20,7 +20,7 @@ def test_steeepest_descent():
 
     assert optimizer.results['converged']
     assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=1)
-    assert_almost_equal(optimizer.results['f'], 0., decimal=6)
+    assert_almost_equal(optimizer.results['objective'], 0., decimal=6)
     assert_almost_equal(optimizer.results['optimality'], 0., decimal=4)
     assert optimizer.results['niter'] < solver_options['maxiter']
     assert optimizer.results['nfev'] == 98
@@ -37,7 +37,7 @@ def test_steeepest_descent():
 
     assert optimizer.results['converged']
     assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=1)
-    assert_almost_equal(optimizer.results['f'], 0., decimal=6)
+    assert_almost_equal(optimizer.results['objective'], 0., decimal=6)
     assert_almost_equal(optimizer.results['optimality'], 0., decimal=4)
     assert optimizer.results['niter'] < solver_options['maxiter']
     assert optimizer.results['nfev'] == 98
@@ -59,7 +59,7 @@ def test_quasi_newton():
     
     assert optimizer.results['converged']
     assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=4)
-    assert_almost_equal(optimizer.results['f'], 0., decimal=11)
+    assert_almost_equal(optimizer.results['objective'], 0., decimal=11)
     assert_almost_equal(optimizer.results['optimality'], 0., decimal=11)
     assert optimizer.results['niter'] < solver_options['maxiter']
     assert optimizer.results['nfev'] == 106
@@ -76,7 +76,7 @@ def test_quasi_newton():
     
     assert optimizer.results['converged']
     assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=4)
-    assert_almost_equal(optimizer.results['f'], 0., decimal=11)
+    assert_almost_equal(optimizer.results['objective'], 0., decimal=11)
     assert_almost_equal(optimizer.results['optimality'], 0., decimal=11)
     assert optimizer.results['niter'] < solver_options['maxiter']
     assert optimizer.results['nfev'] == 106
@@ -136,7 +136,7 @@ def test_newton():
     
     assert optimizer.results['converged']
     assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=5)
-    assert_almost_equal(optimizer.results['f'], 0., decimal=11)
+    assert_almost_equal(optimizer.results['objective'], 0., decimal=11)
     assert_almost_equal(optimizer.results['optimality'], 0., decimal=11)
     assert optimizer.results['niter'] < solver_options['maxiter']
     assert optimizer.results['nfev'] == 42
@@ -154,7 +154,7 @@ def test_newton():
     
     assert optimizer.results['converged']
     assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=5)
-    assert_almost_equal(optimizer.results['f'], 0., decimal=11)
+    assert_almost_equal(optimizer.results['objective'], 0., decimal=11)
     assert_almost_equal(optimizer.results['optimality'], 0., decimal=11)
     assert optimizer.results['niter'] < solver_options['maxiter']
     assert optimizer.results['nfev'] == 42

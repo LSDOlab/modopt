@@ -135,7 +135,7 @@ class QuasiNewton(Optimizer):
 
         self.results = {
             'x': x_k, 
-            'f': f_k, 
+            'objective': f_k, 
             'optimality': opt, 
             'nfev': nfev, 
             'ngev': ngev,

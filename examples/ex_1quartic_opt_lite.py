@@ -98,6 +98,14 @@ class SteepestDescent(Optimizer):
         end_time = time.time()
         self.total_time = end_time - start_time
 
+        self.results = {'x': x_k,
+                        'objective': f_k,
+                        'optimality': opt,
+                        'niter': itr,
+                        'time': self.total_time,
+                        'converged': opt <= opt_tol}
+        
+        return self.results
 
 # Set your optimality tolerance
 opt_tol = 1E-8
@@ -135,7 +143,7 @@ print('Optimizer data')
 print('num_iterations:', optimizer.results['niter'])
 print('optimized_dvs:', optimizer.results['x'])
 print('optimization_time:', optimizer.results['time'])
-print('optimized_obj:', optimizer.results['f'])
+print('optimized_obj:', optimizer.results['objective'])
 print('final_optimality:', optimizer.results['optimality'])
 
 print('\n')

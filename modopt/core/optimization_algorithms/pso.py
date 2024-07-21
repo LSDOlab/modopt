@@ -136,7 +136,7 @@ class PSO(Optimizer):
 
         self.results = {
             'x': x_best_g, 
-            'f': f_best_g, 
+            'objective': f_best_g, 
             'f_sd': f_sd, 
             'nfev': nfev, 
             'niter': itr-1, 

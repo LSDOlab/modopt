@@ -160,7 +160,7 @@ class SNOPTc(SNOPTOptimizer):
         self.results['nS']          = solution.nS
         self.results['nInf']        = solution.num_inf
         self.results['sInf']        = solution.sum_inf
-        self.results['obj']         = solution.objective
+        self.results['objective']   = solution.objective
 
         self.run_post_processing()
 

@@ -19,7 +19,7 @@ def test_newton_lagrange():
 
     assert optimizer.results['converged']
     assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=11)
-    assert_almost_equal(optimizer.results['f'], 0., decimal=11)
+    assert_almost_equal(optimizer.results['objective'], 0., decimal=11)
     assert_almost_equal(optimizer.results['c'], 0., decimal=11)
     assert_almost_equal(optimizer.results['pi'], 0., decimal=11)
     assert_almost_equal(optimizer.results['optimality'], 0., decimal=11)
@@ -39,7 +39,7 @@ def test_newton_lagrange():
 
     assert optimizer.results['converged']
     assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=11)
-    assert_almost_equal(optimizer.results['f'], 0., decimal=11)
+    assert_almost_equal(optimizer.results['objective'], 0., decimal=11)
     assert_almost_equal(optimizer.results['c'], 0., decimal=11)
     assert_almost_equal(optimizer.results['pi'], 0., decimal=11)
     assert_almost_equal(optimizer.results['optimality'], 0., decimal=11)
@@ -64,7 +64,7 @@ def test_l2_penalty_eq():
     
     assert optimizer.results['converged']
     assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=4)
-    assert_almost_equal(optimizer.results['f'], 0., decimal=11)
+    assert_almost_equal(optimizer.results['objective'], 0., decimal=11)
     assert_almost_equal(optimizer.results['optimality'], 0., decimal=8)
     assert optimizer.results['niter'] < solver_options['maxiter']
     assert optimizer.results['nfev'] == 146
@@ -81,7 +81,7 @@ def test_l2_penalty_eq():
     
     assert optimizer.results['converged']
     assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=4)
-    assert_almost_equal(optimizer.results['f'], 0., decimal=11)
+    assert_almost_equal(optimizer.results['objective'], 0., decimal=11)
     assert_almost_equal(optimizer.results['optimality'], 0., decimal=8)
     assert optimizer.results['niter'] < solver_options['maxiter']
     assert optimizer.results['nfev'] == 146

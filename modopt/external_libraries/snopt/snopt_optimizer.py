@@ -189,7 +189,7 @@ class SNOPTOptimizer(Optimizer):
         output += f"\n\t{'Problem':35}: {self.problem_name}"
         output += f"\n\t{'Solver':35}: {self.solver_name}"
         output += f"\n\t{'EXIT Code':35}: {self.results['info']}"
-        output += f"\n\t{'Objective':35}: {self.results['obj']}"
+        output += f"\n\t{'Objective':35}: {self.results['objective']}"
         output += f"\n\t{'Num. of infeasible constraints':35}: {self.results['nInf']}"
         output += f"\n\t{'Sum. of infeasibilities':35}: {self.results['sInf']}"
         output += f"\n\t{'Num. of superbasic variables':35}: {self.results['nS']}"

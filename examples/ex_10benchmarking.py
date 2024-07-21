@@ -86,7 +86,7 @@ for i, prob in enumerate([prob1, prob2, prob3, prob4]):
     print('\tTime:', opt_time)
     print('\tSuccess:', success)
     print('\tOptimized vars:', optimizer.results['x'])
-    print('\tOptimized obj:', optimizer.results['obj'])
+    print('\tOptimized obj:', optimizer.results['objective'])
     performance[prob.problem_name, 'SNOPT'] = {'time': opt_time,
                                                'success': success}
 

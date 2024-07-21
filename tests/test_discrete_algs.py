@@ -89,7 +89,7 @@ def test_simulated_annealing():
         55, 11, 15, 54, 77, 75, 96, 13, 73,  8, 46, 12, 41, 17, 99
         ])
     assert_almost_equal(optimizer.results['f0'], 4576.3359328082515, decimal=11)
-    assert_almost_equal(optimizer.results['f'], 961.3934251787592, decimal=11)
+    assert_almost_equal(optimizer.results['objective'], 961.3934251787592, decimal=11)
     assert optimizer.results['converged']
     assert optimizer.results['niter'] <= solver_options['maxiter']
     assert optimizer.results['niter'] == 11394
@@ -113,7 +113,7 @@ def test_simulated_annealing():
         45, 15, 12, 90, 76, 52, 32, 40, 24, 98, 66,  7, 63, 83, 99
         ])
     assert_almost_equal(optimizer.results['f0'], 4576.3359328082515, decimal=11)
-    assert_almost_equal(optimizer.results['f'], 927.3480749017356, decimal=11)
+    assert_almost_equal(optimizer.results['objective'], 927.3480749017356, decimal=11)
     assert optimizer.results['converged']
     assert optimizer.results['niter'] <= solver_options['maxiter']
     assert optimizer.results['niter'] == 14105

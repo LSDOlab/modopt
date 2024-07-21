@@ -143,7 +143,7 @@ class SimulatedAnnealing(Optimizer):
 
         self.results = {
             'x': x_best,
-            'f': f_best,
+            'objective': f_best,
             'f0': f0,
             'f_sd': f_sd,
             'nfev': itr+1,

@@ -82,7 +82,7 @@ if __name__ == "__main__":
     print('num_iterations:', optimizer.results['niter'])
     print('optimized_dvs:', optimizer.results['x'])
     print('optimization_time:', optimizer.results['time'])
-    print('optimized_obj:', optimizer.results['f'])
+    print('optimized_obj:', optimizer.results['objective'])
     print('final_optimality:', optimizer.results['optimality'])
 
     print('\n')

@@ -164,7 +164,7 @@ class NelderMeadSimplex(Optimizer):
 
         self.results = {
             'x': x_k[np.argmin(f_k)], 
-            'f': np.min(f_k), 
+            'objective': np.min(f_k), 
             'f_sd': f_sd, 
             'nfev': nfev,
             'niter': itr,

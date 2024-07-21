@@ -716,7 +716,7 @@ class SQP(Optimizer):
 
         self.results = {
             'x': x_k,
-            'f': f_k,
+            'objective': f_k,
             'c': c_k,
             'pi': pi_k,
             'optimality': opt,

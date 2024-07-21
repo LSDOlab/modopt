@@ -161,9 +161,9 @@ class SteepestDescent(Optimizer):
 
         self.results = {
             'x': x_k,
-            'obj': f_k,
-            'opt': opt,
-            'itr': itr,
+            'objective': f_k,
+            'optimality': opt,
+            'niter': itr,
             'time': self.total_time
         }
 
@@ -210,11 +210,11 @@ optimizer.print_results(summary_table=True)
 # verify it with the print_results() above
 
 print('\n')
-print(optimizer.results['itr'])
+print(optimizer.results['niter'])
 print(optimizer.results['x'])
 print(optimizer.results['time'])
-print(optimizer.results['obj'])
-print(optimizer.results['opt'])
+print(optimizer.results['objective'])
+print(optimizer.results['optimality'])
 
 ```
 

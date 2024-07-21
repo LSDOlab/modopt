@@ -26,6 +26,7 @@ class Newton(Optimizer):
             'time': float,
             'nfev': int,
             'ngev': int,
+            'nhev': int,
             'step': float,
         }
 
@@ -51,9 +52,9 @@ class Newton(Optimizer):
 
         # Set intial values for current iterates
         x_k = x0 * 1.
-        f_k = self.obj(x_k)
-        g_k = self.grad(x_k)
-        H_k = self.hess(x_k)
+        f_k = obj(x_k)
+        g_k = grad(x_k)
+        H_k = hess(x_k)
 
         # Iteration counter
         itr = 0
@@ -61,6 +62,7 @@ class Newton(Optimizer):
         opt = np.linalg.norm(g_k)
         nfev = 1
         ngev = 1
+        nhev = 1
 
         # Initializing declared outputs
         self.update_outputs(itr=0,
@@ -70,6 +72,7 @@ class Newton(Optimizer):
                             time=time.time() - start_time,
                             nfev=nfev,
                             ngev=ngev,
+                            nhev=nhev,
                             step=0.)
 
         while (opt > opt_tol and itr < maxiter):
@@ -105,6 +108,7 @@ class Newton(Optimizer):
                     ngev += 1
 
             H_k = hess(x_k)
+            nhev += 1
 
             opt = np.linalg.norm(g_k)
 
@@ -119,6 +123,7 @@ class Newton(Optimizer):
                                 time=time.time() - start_time,
                                 nfev=nfev,
                                 ngev=ngev,
+                                nhev=nhev,
                                 step=alpha)
 
         self.total_time = time.time() - start_time
@@ -126,10 +131,11 @@ class Newton(Optimizer):
 
         self.results = {
             'x': x_k, 
-            'f': f_k, 
+            'objective': f_k, 
             'optimality': opt, 
             'nfev': nfev, 
             'ngev': ngev,
+            'nhev': nhev,
             'niter': itr, 
             'time': self.total_time,
             'converged': converged,

@@ -85,5 +85,5 @@ if __name__ == "__main__":
     # The following print might not work for interfaced optimizers like SLSQP, COBYLA, SNOPT, PySLSQP ...
     # print('optimize_time:', optimizer.total_time)
     print('optimized_dvs:', optimizer.results['x'])
-    # print('optimized_obj:', optimizer.results['obj'])
+    # print('optimized_obj:', optimizer.results['objective'])
     # print('optimized_cons:', optimizer.results['constraints'])
