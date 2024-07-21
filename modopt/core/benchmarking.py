@@ -51,7 +51,7 @@ def generate_performance_profiles(data):
                 perf_ratio[(problem, solver)] = np.inf
 
     # Get the maximum performance ratio over all problems
-    max_perf_ratio = np.max(list(perf_ratio.values()))
+    max_perf_ratio = np.max([value for value in perf_ratio.values() if value != np.inf])
     
     # Replace inf with 10 * max_perf_ratio
     # perf_ratio = {key: 10 * max_perf_ratio if value == np.inf else value for key, value in perf_ratio.items()}
