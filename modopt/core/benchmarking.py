@@ -41,7 +41,7 @@ def generate_performance_profiles(data):
     for problem in problems:
         min_times[problem] = np.min([data[(problem, solver)]['time'] for solver in solvers])
 
-    # Compute the performance profile
+    # Compute the performance ratio - time
     perf_ratio = {}
     for solver in solvers:
         for problem in problems:
@@ -59,6 +59,21 @@ def generate_performance_profiles(data):
         if value == np.inf:
             perf_ratio[key] = 10 * max_perf_ratio
 
+    # Compute the performance ratio - number of evaluations
+    if 'nev' in data[(problems[0], solvers[0])]:
+        perf_ratio_n = {}
+        for solver in solvers:
+            for problem in problems:
+                if data[(problem, solver)]['success']:
+                    perf_ratio_n[(problem, solver)] = data[(problem, solver)]['time'] / min_times[problem]
+                else:
+                    perf_ratio_n[(problem, solver)] = np.inf
+
+        max_perf_ratio_n = np.max([value for value in perf_ratio.values() if value != np.inf])
+        for key, value in perf_ratio_n.items():
+            if value == np.inf:
+                perf_ratio_n[key] = 10 * max_perf_ratio_n
+
     def performance_function(Tau):
         performance_profiles = {}
         for solver in solvers:
@@ -72,6 +87,13 @@ def generate_performance_profiles(data):
     
     Tau = np.linspace(0, np.log2(max_perf_ratio*10), 100)
     performance_profiles = performance_function(Tau)
+
+
+    if 'nev' in data[(problems[0], solvers[0])]:
+        Tau_n = np.linspace(0, np.log2(max_perf_ratio_n*10), 100)
+        performance_profiles_n = performance_function(Tau_n)
+
+        return Tau, performance_profiles, Tau_n, performance_profiles_n
 
     return Tau, performance_profiles
     
@@ -99,7 +121,11 @@ def plot_performance_profiles(data, save_figname='performance.pdf'):
     ax.set_xlabel('Performance Ratio')
     ax.set_ylabel('Proportion of Problems')
 
-    Tau, performance_profiles = generate_performance_profiles(data)
+    if 'nev' not in data[(list(data.keys())[0][0], list(data.keys())[0][1])]:
+        Tau, performance_profiles = generate_performance_profiles(data)
+    
+    else:
+        Tau, performance_profiles, Tau_n, performance_profiles_n = generate_performance_profiles(data)
 
     for solver, profile in performance_profiles.items():
         ax.plot(Tau, profile, label=solver)
@@ -108,6 +134,20 @@ def plot_performance_profiles(data, save_figname='performance.pdf'):
     fig.set_size_inches(10, 6)
     plt.savefig(save_figname)
     plt.show()
+
+    if 'nev' in data[(list(data.keys())[0][0], list(data.keys())[0][1])]:
+        fig, ax = plt.subplots()
+        ax.set_title('Performance Profile - Number of Evaluations')
+        ax.set_xlabel('Performance Ratio')
+        ax.set_ylabel('Proportion of Problems')
+
+        for solver, profile in performance_profiles_n.items():
+            ax.plot(Tau_n, profile, label=solver)
+
+        ax.legend()
+        fig.set_size_inches(10, 6)
+        plt.savefig(save_figname.replace('.pdf', '_nev.pdf'))
+        plt.show()
 
 if __name__ == "__main__":
     import doctest
