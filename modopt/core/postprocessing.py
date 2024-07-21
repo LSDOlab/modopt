@@ -59,7 +59,7 @@ def print_record_contents(filepath, suppress_print=False):
        'solver_options-ftol', 'solver_options-maxiter', 'timestamp', 'visualize', 'x0', 'x_lower', 'x_scaler', 'x_upper']
      - Recorded optimizer variables  : ['x']
      - Recorded callback variables   : ['con', 'grad', 'jac', 'obj', 'x']
-     - Results of optimization       : ['fun', 'jac', 'message', 'nfev', 'nit', 'njev', 'status', 'success', 'total_callbacks', 'x']
+     - Results of optimization       : ['fun', 'jac', 'message', 'nfev', 'nit', 'njev', 'out_dir', 'status', 'success', 'total_callbacks', 'x']
     ([...], [...], [...])
     '''
     file = import_h5py_file(filepath)
@@ -129,7 +129,7 @@ def load_results(filepath):
     >>> from modopt.postprocessing import load_results
     >>> load_results(optimizer.out_dir+'/record.hdf5')  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
     {'fun': 1.0000000209233804, 'jac': array([ 2.00000002e+00, -2.09231530e-08]), 
-    'message': 'Optimization terminated successfully', 'nfev': 2, 'nit': 2, 'njev': 2, 
+    'message': 'Optimization terminated successfully', 'nfev': 2, 'nit': 2, 'njev': 2, 'out_dir': '...',
     'status': 0, 'success': True, 'total_callbacks': 9, 'x': array([ 1.0000..., -1.0...e-08])}
 
     '''
@@ -137,7 +137,7 @@ def load_results(filepath):
     result_dict = {}
     for key in file['results'].keys():
         result_dict[key] = file['results'][key][()]
-        if key in ['message']:
+        if key in ['message', 'out_dir']:
             result_dict[key] = result_dict[key].decode('utf-8')
     file.close()
     return result_dict

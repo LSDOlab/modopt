@@ -229,10 +229,12 @@ class Optimizer(object):
         if self.options['turn_off_outputs']:
             return
         
+        self.results['out_dir'] = self.out_dir
         with open(f"{self.out_dir}/modopt_results.out", 'w') as f:
             with contextlib.redirect_stdout(f):
                 self.print_results(all=True)
         if self.options['recording']:
+            self.results['total_callbacks'] = self.problem._callback_count
             group = self.record.create_group('results')
             for key, value in self.results.items():
                 if self.solver_name.startswith('convex_qpsolvers') and key in ['problem', 'extras']:
@@ -242,7 +244,6 @@ class Optimizer(object):
                         group[f"{key}-{k}"] = v
                 else:
                     group[key] = value
-            group['total_callbacks'] = self.problem._callback_count
         
         if self.options['visualize'] != []:
             self.visualizer.close_plot()

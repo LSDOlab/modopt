@@ -15,7 +15,7 @@ import pytest
 def test_postprocessing():
     import postprocessing
     failures, _ = doctest.testmod(postprocessing)
-    assert failures == 0, 'One or more doctests failed in main.py'
+    assert failures == 0, 'One or more doctests failed in "postprocessing.py"'
 
 
 @pytest.mark.slsqp
@@ -25,7 +25,7 @@ def test_postprocessing():
 def test_visualization():
     import visualization
     failures, _ = doctest.testmod(visualization)
-    assert failures == 0, 'One or more doctests failed in visualize.py'
+    assert failures == 0, 'One or more doctests failed in "visualization.py"'
 
 
 if __name__ == '__main__':

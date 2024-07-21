@@ -1,4 +1,4 @@
-'''Benchmark optimization algorithms on four simple problems'''
+'''Benchmark instructional algorithms on three simple problems'''
 
 import numpy as np
 from modopt import ProblemLite
@@ -30,7 +30,7 @@ obj  = lambda x: (1-x[0])**2 + (1-x[1])**2 + 0.5*(2*x[1] - x[0]**2)**2
 grad = lambda x: np.array([-2*(1-x[0]) - 2*x[0]*(2*x[1] - x[0]**2), -2*(1-x[1]) + 2*(2*x[1] - x[0]**2)])
 obj_hess = lambda x: np.array([[2 + 4*x[0]**2 - 2*(2*x[1] - x[0]**2), -4*x[0]], [-4*x[0], 2 + 4]])
 prob3 = ProblemLite(name=name, x0=x0, obj=obj, grad=grad, obj_hess=obj_hess)
-sol3  = np.array([0.5, 0.5])
+sol3  = np.array([1.21314, 0.82414])
 
 # Benchmarking optimization algorithms
 from modopt import SteepestDescent, Newton, QuasiNewton
