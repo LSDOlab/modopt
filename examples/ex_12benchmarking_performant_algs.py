@@ -76,7 +76,7 @@ for prob, sol in zip(probs, sols):
     for optimizer in algs:
         y_data = history[prob.problem_name, optimizer]
         plt.semilogy(y_data, label=f"{optimizer} ({len(y_data)})")
-    plt.xlabel('Iterations')
+    plt.xlabel('Evaluations')
     plt.ylabel('Objective')
     plt.title(f'{prob.problem_name} minimization')
     plt.legend()

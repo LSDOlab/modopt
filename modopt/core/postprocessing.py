@@ -193,7 +193,7 @@ def load_attributes(filepath):
 def load_variables(filepath, vars):
     '''
     Load specified scalar variable iterates from the record file.
-    Returns a dictionary with the variable names as keys and list of variable iterates as values.
+    Returns a dictionary with the variable names as keys and array of variable iterates as values.
     Note that the keys for callback variables will be prefixed with 'callback_'
     as opposed to optimizer variables that will have same key as the specified variable name.
 
@@ -207,7 +207,7 @@ def load_variables(filepath, vars):
     Returns
     -------
     out_data : dict
-        Dictionary with variable names as keys and list of variable iterates as values.
+        Dictionary with variable names as keys and array of variable iterates as values.
         Keys for callback variables will be prefixed with 'callback_'.
 
     Examples
@@ -227,10 +227,10 @@ def load_variables(filepath, vars):
     >>> results   = optimizer.solve()
     >>> from modopt.postprocessing import load_variables
     >>> load_variables(optimizer.out_dir+'/record.hdf5', ['x[0]', 'obj', 'con[1]', 'grad[0]', 'jac[0,1]']) # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
-    {'x[0]': [500.0, 1.0000000..., 1.00000...], 
-    'callback_x[0]': [500.0, 500.0, 500.0, 500.0, 500.0, 1.00000..., 1.000000..., 1.00000..., 1.000000...], 
-    'callback_obj': [252500.0, 1.000000...], 'callback_con[1]': [450.0, 450.0, 1.000000...], 
-    'callback_grad[0]': [1000.0, 2.0000000...], 'callback_jac[0,1]': [1.0, 1.0]}
+    {'x[0]': array([500. , 1.00000001, 1.00000001]), 
+    'callback_x[0]': array([500. , 500. , 500. , 500. , 500. , 1.00000..., 1.00000..., 1.00000..., 1.00000...]), 
+    'callback_obj': array([2.52500000e+05, 1.00000...e+00]), 'callback_con[1]': array([450. , 450. , 1.00000...]), 
+    'callback_grad[0]': array([1000. , 2.00000...]), 'callback_jac[0,1]': array([1., 1.])}
 
     '''
     if not isinstance(filepath, str):
@@ -294,6 +294,8 @@ def load_variables(filepath, vars):
                 out_data[f'callback_{s_var}'].append(file[f'callback_{i}'][group_key][var][idx1, idx2])
     
     file.close()
+
+    out_data = {key: np.array(value) for key, value in out_data.items()}
 
     return out_data
 
