@@ -61,11 +61,14 @@ def generate_performance_profiles(data):
 
     # Compute the performance ratio - number of evaluations
     if 'nev' in data[(problems[0], solvers[0])]:
+        min_nevs = {}
+        for problem in problems:
+            min_nevs[problem] = np.min([data[(problem, solver)]['nev'] for solver in solvers])
         perf_ratio_n = {}
         for solver in solvers:
             for problem in problems:
                 if data[(problem, solver)]['success']:
-                    perf_ratio_n[(problem, solver)] = data[(problem, solver)]['time'] / min_times[problem]
+                    perf_ratio_n[(problem, solver)] = data[(problem, solver)]['nev'] / min_nevs[problem]
                 else:
                     perf_ratio_n[(problem, solver)] = np.inf
 
@@ -74,7 +77,7 @@ def generate_performance_profiles(data):
             if value == np.inf:
                 perf_ratio_n[key] = 10 * max_perf_ratio_n
 
-    def performance_function(Tau):
+    def performance_function(Tau, perf_ratio):
         performance_profiles = {}
         for solver in solvers:
             performance_profiles[solver] = []
@@ -86,12 +89,12 @@ def generate_performance_profiles(data):
         return performance_profiles
     
     Tau = np.linspace(0, np.log2(max_perf_ratio*10), 100)
-    performance_profiles = performance_function(Tau)
+    performance_profiles = performance_function(Tau, perf_ratio)
 
 
     if 'nev' in data[(problems[0], solvers[0])]:
         Tau_n = np.linspace(0, np.log2(max_perf_ratio_n*10), 100)
-        performance_profiles_n = performance_function(Tau_n)
+        performance_profiles_n = performance_function(Tau_n, perf_ratio_n)
 
         return Tau, performance_profiles, Tau_n, performance_profiles_n
 
