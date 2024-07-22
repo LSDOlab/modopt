@@ -49,7 +49,6 @@ for prob, sol in zip(probs, sols):
     print('\nProblem:', prob.problem_name)
     print('='*50)
     for optimizer in algs:
-        # Steepest-descent without line search
         print(f'\t{optimizer} \n\t-----')
         start_time = time.time()
         for i in range(time_loop-1):

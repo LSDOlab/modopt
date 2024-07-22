@@ -158,8 +158,6 @@ class PySLSQP(Optimizer):
 
         self.run_post_processing()
 
-        print(self.results)
-        
         return self.results
     
     def print_results(self,

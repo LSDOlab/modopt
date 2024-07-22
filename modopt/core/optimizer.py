@@ -136,21 +136,21 @@ class Optimizer(object):
                 solver_opts = self.solver_options.get_pure_dict()
                 for key, value in solver_opts.items():
                     value = 'None' if value is None else value
-                    if isinstance(value, (int, float, bool, str, np.ndarray)):
+                    if isinstance(value, (int, float, bool, str)):
                         rec.attrs[f'solver_options-{key}'] = value
             elif self.solver_name == 'ipopt': # ipopt-specific
                 for key, value in self.nlp_options['ipopt'].items():
-                    if isinstance(value, (int, float, bool, str, np.ndarray)):
+                    if isinstance(value, (int, float, bool, str)):
                         rec.attrs[f'solver_options-{key}'] = value
             elif self.solver_name.startswith('convex_qpsolvers'): # convex_qpsolvers-specific
                 for key, value in self.options['solver_options'].items():
-                    if isinstance(value, (int, float, bool, str, np.ndarray)):
+                    if isinstance(value, (int, float, bool, str)):
                         rec.attrs[f'solver_options-{key}'] = value
             else: # for inbuilt solvers
                 opts = self.options.get_pure_dict()
                 for key, value in opts.items():
                     value = 'None' if value is None else value
-                    if isinstance(value, (int, float, bool, str, np.ndarray)):
+                    if isinstance(value, (int, float, bool, str)):
                         rec.attrs[f'options-{key}'] = value
             rec.attrs['readable_outputs'] = d_outs
             rec.attrs['recording'] = str(self.options['recording'])
