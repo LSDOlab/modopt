@@ -97,13 +97,12 @@ Some of the most commonly applicable options are given below:
   - *str* (`"no"`)
   - Set `"yes"` to print information for all derivatives tested. \
     Default is `"no"` which prints information only for derivatives with \
-    `relative error > derivative_test_tolerance`.
+    `relative error > derivative_test_tol`.
 * - `derivative_test_perturbation`
   - *float* (`1e-8`)
   - Relative size of the finite difference perturbation in derivative test.
-* - `derivative_test_tolerance`
+* - `derivative_test_tol`
   - *float* (`1e-4`)
-  - Indicate derivatives as wrong if: \
-    `relative error > derivative_test_tolerance`.
+  - Indicate derivatives as wrong if: `relative error > derivative_test_tol`.
 
 ```

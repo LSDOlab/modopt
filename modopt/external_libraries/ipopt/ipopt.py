@@ -33,7 +33,7 @@ class IPOPT(Optimizer):
             'derivative_test'               : 'none',
             'derivative_test_print_all'     : 'no',
             'derivative_test_perturbation'  : 1e-8,
-            'derivative_test_tolerance'     : 1e-4,
+            'derivative_test_tol'           : 1e-4,
         }
 
         # Declare outputs
