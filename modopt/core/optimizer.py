@@ -368,7 +368,7 @@ class Optimizer(object):
             output += "\n" + "=" * line_length
             print(output)
 
-    def print_call_counts(self):
+    def print_callback_counts(self):
         print('\n')
         print(f"{'Problem':20}: {self.problem_name}")
         print('-'*100)

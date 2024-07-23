@@ -63,32 +63,38 @@ def run_benchmarking():
         
         # SLSQP
         print('\tSLSQP \n\t-----')
-        optimizer = SLSQP(prob, solver_options={'maxiter': 100, 'ftol': 1e-8})
+        optimizer  = SLSQP(prob, solver_options={'maxiter': 100, 'ftol': 1e-8})
         start_time = time.time()
-        optimizer.solve()
-        opt_time = time.time() - start_time
-        success = optimizer.results['success']
+        results    = optimizer.solve()
+        
+        opt_time   = time.time() - start_time
+        nev        = results['total_callbacks']
+        success    = results['success']
         print('\tTime:', opt_time)
+        print('\tEvaluations:', nev)
         print('\tSuccess:', success)
-        print('\tOptimized vars:', optimizer.results['x'])
-        print('\tOptimized obj:', optimizer.results['fun'])
+        print('\tOptimized vars:', results['x'])
+        print('\tOptimized obj:',  results['fun'])
         performance[prob.problem_name, 'SLSQP'] = {'time': opt_time,
-                                                'success': success}
+                                                   'nev': nev,
+                                                   'success': success}
 
         # IPOPT
         print('\tIPOPT \n\t-----')
-        optimizer = IPOPT(prob, solver_options={'max_iter': 100, 'tol': 1e-12, 'print_level': 0})
+        optimizer  = IPOPT(prob, solver_options={'max_iter': 100, 'tol': 1e-12, 'print_level': 0})
         start_time = time.time()
-        optimizer.solve()
-        opt_time = time.time() - start_time
-        success = np.allclose(optimizer.results['x'], sol[i], atol=1e-2)
+        results    = optimizer.solve()
+
+        opt_time   = time.time() - start_time
+        nev        = results['total_callbacks']
+        success    = np.allclose(results['x'], sol[i], atol=1e-2)
         print('\tTime:', opt_time)
         print('\tSuccess:', success)
-        print('\tOptimized vars:', optimizer.results['x'])
-        print('\tOptimized obj:', optimizer.results['f'])
+        print('\tOptimized vars:', results['x'])
+        print('\tOptimized obj:',  results['f'])
         performance[prob.problem_name, 'IPOPT'] = {'time': opt_time,
-                                                'success': success}
-        
+                                                   'nev': nev,
+                                                   'success': success} 
 
     # Print performance
     print('\nPerformance')
