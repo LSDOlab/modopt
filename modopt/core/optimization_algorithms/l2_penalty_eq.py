@@ -11,7 +11,7 @@ from modopt.core.approximate_hessians.bfgs_function import bfgs_update
 
 class L2PenaltyEq(Optimizer):
     def initialize(self):
-        self.solver_name = 'penalty_l2_eq'
+        self.solver_name = 'l2_penalty_eq'
 
         self.obj = self.problem._compute_objective
         self.grad = self.problem._compute_objective_gradient

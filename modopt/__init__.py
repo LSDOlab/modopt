@@ -34,7 +34,7 @@ from modopt.core.optimization_algorithms.quasi_newton import QuasiNewton
 
 # equality-constrained
 from modopt.core.optimization_algorithms.newton_lagrange import NewtonLagrange
-from modopt.core.optimization_algorithms.quadratic_penalty_eq import L2PenaltyEq
+from modopt.core.optimization_algorithms.l2_penalty_eq import L2PenaltyEq
 # from modopt.core.optimization_algorithms.aug_lag import AugLagEq
 
 # general inequality-constrained
