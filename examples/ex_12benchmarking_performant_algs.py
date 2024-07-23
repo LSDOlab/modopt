@@ -35,8 +35,10 @@ obj_hess = lambda x: np.array([[2 + 4*x[0]**2 - 2*(2*x[1] - x[0]**2), -4*x[0]], 
 prob3 = ProblemLite(name=name, x0=x0, obj=obj, grad=grad, obj_hess=obj_hess)
 sol3  = np.array([1.21314, 0.82414])
 
-# Benchmarking optimization algorithms
-algs = ['SNOPT', 'IPOPT', 'PySLSQP', 'BFGS', 'LBFGSB', 'COBYLA', 'COBYQA', 'NelderMead', 'TrustConstr']
+# Benchmarking optimization algorithms 
+# NOTE: TrustConstr will use obj_hess by default while IPOPT will not
+algs = ['SNOPT', 'IPOPT', 'IPOPT-2', 'PySLSQP', 'BFGS', 'LBFGSB', 
+        'COBYLA', 'COBYQA', 'NelderMead', 'TrustConstr', 'TrustConstr-2']
 
 performance = {}
 history = {}
@@ -45,37 +47,55 @@ time_loop = 20
 probs = [prob1, prob2, prob3]
 sols  = [sol1, sol2, sol3]
 
-for prob, sol in zip(probs, sols): 
+for prob, sol in zip(probs, sols):
     print('\nProblem:', prob.problem_name)
     print('='*50)
-    for optimizer in algs:
-        print(f'\t{optimizer} \n\t-----')
+
+    for alg in algs:
+        solver = alg
+        options = {}
+        if alg=='IPOPT-2':
+            solver = 'IPOPT'
+            options = {'hessian_approximation': 'exact'}
+        elif alg=='TrustConstr-2':
+            solver = 'TrustConstr'
+        elif alg == 'TrustConstr':
+            options = {'ignore_exact_hessian': True}
+    
+        print(f'\t{alg} \n\t------------------------')
         start_time = time.time()
         for i in range(time_loop-1):
             with contextlib.redirect_stdout(io.StringIO()):
-                results = optimize(prob, solver=optimizer, recording=False, turn_off_outputs=True)
-        results = optimize(prob, solver=optimizer, recording=True)
+                results = optimize(prob, solver=solver, solver_options=options,  recording=False, turn_off_outputs=True)
+        results  = optimize(prob, solver=solver, solver_options=options,  recording=True)
         opt_time = (time.time() - start_time) / time_loop
         success  = np.allclose(results['x'], sol, atol=1e-3)
-        nev      = prob._callback_count
-        obj      = prob._compute_objective(results['x'])
+
+        nev       = prob._callback_count
+        o_evals   = prob._obj_count
+        g_evals   = prob._grad_count
+        h_evals   = prob._hess_count
+        objective = prob._compute_objective(results['x'])
         print('\tTime:', opt_time)
         print('\tSuccess:', success)
         print('\tEvaluations:', nev)
+        print('\tObj evals:', o_evals)
+        print('\tGrad evals:', g_evals)
+        print('\tHess evals:', h_evals)
         print('\tOptimized vars:', results['x'])
 
         obj_hist = load_variables(f"{results['out_dir']}/record.hdf5", 'obj')['callback_obj']
-        history[prob.problem_name, optimizer] = obj_hist
+        history[prob.problem_name, alg] = obj_hist
 
-        performance[prob.problem_name, optimizer] = {'time': opt_time,
-                                                    'success': success,
-                                                    'nev': nev,
-                                                    'objective': obj}
+        performance[prob.problem_name, alg] = {'time': opt_time,
+                                               'success': success,
+                                               'nev': nev,
+                                               'objective': objective}
         
     plt.figure()
-    for optimizer in algs:
-        y_data = history[prob.problem_name, optimizer]
-        plt.semilogy(y_data, label=f"{optimizer} ({len(y_data)})")
+    for alg in algs:
+        y_data = history[prob.problem_name, alg]
+        plt.semilogy(y_data, label=f"{alg} ({len(y_data)})")
     plt.xlabel('Evaluations')
     plt.ylabel('Objective')
     plt.title(f'{prob.problem_name} minimization')
