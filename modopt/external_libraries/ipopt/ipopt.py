@@ -87,8 +87,8 @@ class IPOPT(Optimizer):
     def solve(self):
         # Define the initial guess and bounds
         x0 = self.x0
-        lbx = self.problem.x_lower
-        ubx = self.problem.x_upper
+        bounds = {'lbx': self.problem.x_lower, 
+                  'ubx': self.problem.x_upper}
         options = self.nlp_options
 
         # Create an optimization variable
@@ -103,6 +103,9 @@ class IPOPT(Optimizer):
         f = self.generate_objective_callback()
         # Define the objective expression using the callbacks (Includes objective, gradient and Hessian)
         objective_expr = f(x)
+
+        # Create an NLP problem
+        nlp = {'x': x, 'f': objective_expr}
 
         # Prevent the creation of the ‘nlp_grad’ function, which looks for the gradients(/Hessians if 'exact')
         # of the nlp 'f' and 'g' functions. 
@@ -123,12 +126,15 @@ class IPOPT(Optimizer):
         options['hess_lag'] = Function("H",[x, p, lam_f, lam_g], [triu(hess_lag(x, p, lam_f, lam_g))])
 
         if self.problem.constrained:
-            lbg = self.problem.c_lower
-            ubg = self.problem.c_upper
+            bounds.update({'lbg': self.problem.c_lower,
+                           'ubg': self.problem.c_upper})
             # Wrap the external constraint function
             c = self.generate_constraint_callback()
             # Define the constraint expression using the callbacks (includes constraints and Jacobian)
             constraint_expr = c(x)
+
+            # Update the NLP problem
+            nlp['g'] = constraint_expr
 
             jac_g = self.generate_jac_g_callback()
             options['jac_g'] = Function("J",[x, p],[0, jac_g(x, p)])
@@ -136,29 +142,13 @@ class IPOPT(Optimizer):
             # everytime the jacobian is computed. Hence, we are using the above method.
             # options['jac_g'] = Function("J",[x, p],[constraint_expr, jac_g(x, p)[0]])
 
-            # Create an NLP problem
-            nlp = {'x': x, 'f': objective_expr, 'g': constraint_expr}
 
-            # Create an NLP solver
-            solver = nlpsol('solver', 'ipopt', nlp, options)
+        # Create an NLP solver
+        solver = nlpsol('solver', 'ipopt', nlp, options)
 
-            start_time = time.time()
-
-            # Solve the problem
-            results = solver(x0=x0, lbg=lbg, ubg=ubg, lbx=lbx, ubx=ubx)
-
-        else:
-            # Create an NLP problem
-            nlp = {'x': x, 'f': objective_expr}
-
-            # Create an NLP solver
-            solver = nlpsol('solver', 'ipopt', nlp, options)
-
-            start_time = time.time()
-
-            # Solve the problem
-            results = solver(x0=x0, lbx=lbx, ubx=ubx)
-
+        # Solve the problem
+        start_time = time.time()
+        results = solver(x0=x0, **bounds)
         self.total_time = time.time() - start_time
 
         self.results = {
