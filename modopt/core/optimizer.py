@@ -61,6 +61,11 @@ class Optimizer(object):
         # since there might be callbacks in the setup() function
         self.record  = self.problem._record = None      # Reset if using the same problem object again
         self.problem._callback_count        = 0         # Reset if using the same problem object again
+        self.problem._obj_count             = 0         # Reset if using the same problem object again
+        self.problem._grad_count            = 0         # Reset if using the same problem object again
+        self.problem._hess_count            = 0         # Reset if using the same problem object again
+        self.problem._con_count             = 0         # Reset if using the same problem object again
+        self.problem._jac_count             = 0         # Reset if using the same problem object again
         self.problem._reused_callback_count = 0         # Reset if using the same problem object again
         self.problem._hot_start_mode        = False     # Reset if using the same problem object again
         self.problem._hot_start_record      = None      # Reset if using the same problem object again

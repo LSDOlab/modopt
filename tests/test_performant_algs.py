@@ -502,9 +502,13 @@ def test_ipopt_exact_hess():
     prob = SecondOrderScaling()
     solver_options = {
         'print_level': 5, 
+        'file_print_level': 5, 
         'print_frequency_iter': 1, 
         'print_frequency_time': 0, 
         'print_timing_statistics': 'yes',
+        'derivative_test': 'second-order',
+        'derivative_test_print_all': 'yes',
+        'derivative_test_perturbation': 1e-6,
         'hessian_approximation': 'exact',
     }
     optimizer = IPOPT(prob, solver_options=solver_options)

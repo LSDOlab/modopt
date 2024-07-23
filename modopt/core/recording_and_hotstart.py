@@ -70,6 +70,11 @@ def record(in_names, out_names):
                 self._visualizer.update_plot(callback_var_dict)
 
             self._callback_count += 1
+            self._obj_count  += 'obj' in out_names
+            self._grad_count += 'grad' in out_names
+            self._con_count  += 'con' in out_names
+            self._jac_count  += 'jac' in out_names
+            self._hess_count += ('obj_hess' in out_names or 'lag_hess' in out_names)
             return results
         return wrapper
     return decorator

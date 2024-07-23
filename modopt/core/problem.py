@@ -154,6 +154,11 @@ class Problem(object):
         # private attributes for recording, hot-starting, and visualization
         self._record                = None
         self._callback_count        = 0
+        self._obj_count             = 0
+        self._grad_count            = 0
+        self._hess_count            = 0
+        self._con_count             = 0
+        self._jac_count             = 0
         self._hot_start_mode        = False
         self._hot_start_record      = None
         self._num_callbacks_found   = 0
