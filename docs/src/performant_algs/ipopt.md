@@ -33,7 +33,7 @@ Some of the most commonly applicable options are given below:
   - Type (default value)
   - Description
 * - `max_iter`
-  - *int* (`3000`)
+  - *int* (`1000`)
   - Maximum number of iterations.
 * - `max_wall_time`
   - *float* (`1e+20`)
@@ -50,10 +50,11 @@ Some of the most commonly applicable options are given below:
     Valid range is between `0` and `12`. \
     The output becomes more detailed as this value increases.
 * - `output_file`
-  - *str* (`"ipopt_output.txt"`)
+  - *str* \
+    (`"ipopt_output.txt"`)
   - Output filename.
 * - `file_print_level`
-  - *int* (`12`)
+  - *int* (`5`)
   - Controls the verbosity level for the output file. \
     Valid range is between `0` and `12`. \
     The file output becomes more detailed as this value increases.
@@ -75,9 +76,34 @@ Some of the most commonly applicable options are given below:
     Valid values are "ma27",  "ma57",  "ma77",  "ma86",  "ma97",  \
     "pardiso", "pardisomkl", "spral", "wsmp", "mumps", or "custom".
 * - `hessian_approximation`
-  - *str* (`"limited-memory"`)
+  - *str* \
+    (`"limited-memory"`)
   - Set `"exact"` to force IPOPT to use user-defined second derivatives \
     (objective/Lagrangian Hessian for unconstrained/constrained problems). \
     Default is "limited-memory" which uses a limited-memory quasi-Newton \
     Hessian approximation.
+* - `print_timing_statistics`
+  - *str* (`"no"`)
+  - Set `"yes"` to measure and print time spent on selected tasks.
+* - `derivative_test`
+  - *str* (`"none"`)
+  - To perform a derivative check at the at the initial guess `x0` \
+    before the optimization. Possible values are:
+    * `"none"`              : turn off derivative test
+    * `"first-order"`       : check first derivatives 
+    * `"second-order"`      : check both first and second derivatives
+    * `"only-second-order"` : check only second derivatives
+* - `derivative_test_print_all`
+  - *str* (`"no"`)
+  - Set `"yes"` to print information for all derivatives tested. \
+    Default is `"no"` which prints information only for derivatives with \
+    `relative error > derivative_test_tolerance`.
+* - `derivative_test_perturbation`
+  - *float* (`1e-8`)
+  - Relative size of the finite difference perturbation in derivative test.
+* - `derivative_test_tolerance`
+  - *float* (`1e-4`)
+  - Indicate derivatives as wrong if: \
+    `relative error > derivative_test_tolerance`.
+
 ```

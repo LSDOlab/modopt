@@ -18,11 +18,23 @@ class IPOPT(Optimizer):
     '''
     def initialize(self, ):
         self.solver_name = 'ipopt'
-        self.available_options = {'print_level': 5, 'linear_solver': 'ma57', 'tol': 1e-8, 'max_iter': 1000}
-        # Options to be passed to IPOPT solver in CasADi, 
-        # e.g., {'print_level': 5, 'linear_solver': 'ma57', 'tol': 1e-8, 'max_iter': 1000, file_print_level: 5,
-        # 'hessian_approximation': 'limited-memory'}
         self.options.declare('solver_options', default={}, types=dict)
+        self.modopt_default_options = {
+            'sb'                        : 'yes',
+            'output_file'               : 'ipopt_output.txt',
+            'hessian_approximation'     : 'limited-memory',
+            'print_level'               : 5,
+            'file_print_level'          : 5,
+            'max_iter'                  : 1000,
+            'tol'                       : 1e-8,
+            'linear_solver'             : 'mumps',
+            'print_timing_statistics'   : 'no',
+
+            'derivative_test'               : 'none',
+            'derivative_test_print_all'     : 'no',
+            'derivative_test_perturbation'  : 1e-8,
+            'derivative_test_tolerance'     : 1e-4,
+        }
 
         # Declare outputs
         self.available_outputs = {}
@@ -46,15 +58,7 @@ class IPOPT(Optimizer):
         self.nx = self.problem.nx * 1
         self.nc = self.problem.nc * 1
 
-        # By default, switch to first-order information only
-        # [for using exact obj/lag Hessian, user has to set 'hessian_approximation': 'exact' in solver_options]
-        ipopt_options = {
-            'sb' : 'yes',
-            'output_file': 'ipopt_output.txt',
-            'hessian_approximation': 'limited-memory',
-            'print_level': 5,
-            'file_print_level': 12,
-        }
+        ipopt_options = self.modopt_default_options
         ipopt_options.update(self.options['solver_options'])
         if hasattr(self, 'out_dir'):
             ipopt_options['output_file'] = self.out_dir + '/' + ipopt_options['output_file']
