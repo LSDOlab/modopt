@@ -51,7 +51,7 @@ def print_record_contents(filepath, suppress_print=False):
     >>> optimizer = mo.SLSQP(problem, recording=True)
     >>> results   = optimizer.solve()
     >>> from modopt.postprocessing import print_record_contents
-    >>> print_record_contents(optimizer.out_dir+'/record.hdf5')  # doctest: +NORMALIZE_WHITESPACE, +ELLIPSIS
+    >>> print_record_contents(results['out_dir']+'/record.hdf5')  # doctest: +NORMALIZE_WHITESPACE, +ELLIPSIS
     Available data in the record:
     -----------------------------
      - Attributes of optimization    : ['c_lower', 'c_scaler', 'c_upper', 'constrained', 'hot_start_from', 'modopt_output_files', 'nc', 
@@ -59,7 +59,8 @@ def print_record_contents(filepath, suppress_print=False):
        'solver_options-ftol', 'solver_options-maxiter', 'timestamp', 'visualize', 'x0', 'x_lower', 'x_scaler', 'x_upper']
      - Recorded optimizer variables  : ['x']
      - Recorded callback variables   : ['con', 'grad', 'jac', 'obj', 'x']
-     - Results of optimization       : ['fun', 'jac', 'message', 'nfev', 'nit', 'njev', 'out_dir', 'status', 'success', 'total_callbacks', 'x']
+     - Results of optimization       : ['con_evals', 'fun', 'grad_evals', 'hess_evals', 'jac', 'jac_evals', 'message', 'nfev', 'nit', 
+       'njev', 'obj_evals', 'out_dir', 'reused_callbacks', 'status', 'success', 'total_callbacks', 'x']
     ([...], [...], [...])
     '''
     file = import_h5py_file(filepath)
@@ -127,10 +128,10 @@ def load_results(filepath):
     >>> optimizer = mo.SLSQP(problem, recording=True)
     >>> results   = optimizer.solve()
     >>> from modopt.postprocessing import load_results
-    >>> load_results(optimizer.out_dir+'/record.hdf5')  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
-    {'fun': 1.0000000209233804, 'jac': array([ 2.00000002e+00, -2.09231530e-08]), 
-    'message': 'Optimization terminated successfully', 'nfev': 2, 'nit': 2, 'njev': 2, 'out_dir': '...',
-    'status': 0, 'success': True, 'total_callbacks': 9, 'x': array([ 1.0000..., -1.0...e-08])}
+    >>> load_results(results['out_dir']+'/record.hdf5')  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+    {'con_evals': 3, 'fun': 1.0000000209233804, 'grad_evals': 2, 'hess_evals': 0, 'jac': array([ 2.0...e+00, -2.0...e-08]), 
+    'jac_evals': 2, 'message': 'Optimization terminated successfully', 'nfev': 2, 'nit': 2, 'njev': 2, 'obj_evals': 2, 
+    'out_dir': '...', 'reused_callbacks': 0, 'status': 0, 'success': True, 'total_callbacks': 9, 'x': array([ 1.0..., -1.0...e-08])}
 
     '''
     file = import_h5py_file(filepath)
@@ -172,7 +173,7 @@ def load_attributes(filepath):
     >>> optimizer = mo.SLSQP(problem, recording=True)
     >>> results   = optimizer.solve()
     >>> from modopt.postprocessing import load_attributes
-    >>> load_attributes(optimizer.out_dir+'/record.hdf5')  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+    >>> load_attributes(results['out_dir']+'/record.hdf5')  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
     {'c_lower': array([1., 1.]), 'c_scaler': array([1., 1.]), 'c_upper': array([ 1., inf]), 'constrained': True, 
     'hot_start_from': 'None', 'modopt_output_files': ['directory: ...', 'modopt_results.out', 'record.hdf5'], 
     'nc': 2, 'nx': 2, 'o_scaler': array([1.]), 'problem_name': 'unnamed_problem', 'readable_outputs': [], 
@@ -226,7 +227,7 @@ def load_variables(filepath, vars):
     >>> optimizer = mo.SLSQP(problem, recording=True)
     >>> results   = optimizer.solve()
     >>> from modopt.postprocessing import load_variables
-    >>> load_variables(optimizer.out_dir+'/record.hdf5', ['x[0]', 'obj', 'con[1]', 'grad[0]', 'jac[0,1]']) # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+    >>> load_variables(results['out_dir']+'/record.hdf5', ['x[0]', 'obj', 'con[1]', 'grad[0]', 'jac[0,1]']) # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
     {'x[0]': array([500. , 1.00000001, 1.00000001]), 
     'callback_x[0]': array([500. , 500. , 500. , 500. , 500. , 1.00000..., 1.00000..., 1.00000..., 1.00000...]), 
     'callback_obj': array([2.52500000e+05, 1.00000...e+00]), 'callback_con[1]': array([450. , 450. , 1.00000...]), 

@@ -23,4 +23,5 @@ _temp/examples/ex_7modularity_NewtonLagrange
 _temp/examples/ex_8bean_function
 _temp/examples/ex_9traveling_salesman
 _temp/examples/ex_10benchmarking
+_temp/examples/ex_11benchmarking_instructional_algs
 ```

@@ -45,177 +45,56 @@ for i, prob in enumerate([prob1, prob2, prob3]):
     print('\nProblem:', prob.problem_name)
     print('='*50)
     
-    # Steepest-descent without line search
-    print('\tSteepestDescentNoLS \n\t-----')
-    start_time = time.time()
-    for i in range(time_loop):
-        outs = ['opt', 'obj'] if i == (time_loop-1) else []
-        turn_off = False if i == (time_loop-1) else True
-        optimizer = SteepestDescentNoLS(prob, **{'maxiter': 200, 'opt_tol': 1e-6}, readable_outputs=outs, turn_off_outputs=turn_off)
-        optimizer.solve()
-    opt_time = (time.time() - start_time) / time_loop
-    success = optimizer.results['converged']
-    print('\tTime:', opt_time)
-    print('\tSuccess:', success)
-    print('\tIterations:', optimizer.results['niter'])
-    print('\tEvaluations', optimizer.results['niter']*2 + 2)
-    print('\tOptimized vars:', optimizer.results['x'])
-    print('\tOptimized obj:', optimizer.results['objective'])
-    print('\tOptimality:', optimizer.results['optimality'])
-
-    history[prob.problem_name, 'SteepestDescent'] = {'obj_hist': np.loadtxt(f"{optimizer.out_dir}/obj.out"),
-                                                         'opt_hist': np.loadtxt(f"{optimizer.out_dir}/opt.out")}
-
-    performance[prob.problem_name, 'SteepestDescent'] = {'time': opt_time,
-                                                        'success': success,
-                                                        'niter': optimizer.results['niter'],
-                                                        'nev': optimizer.results['niter']*2,
-                                                        'objective': optimizer.results['objective'],
-                                                        'optimality': optimizer.results['optimality']}
-
-    # Newton without line search
-    print('\tNewtontNoLS \n\t-----')
-    start_time = time.time()
-    for i in range(time_loop):
-        outs = ['opt', 'obj'] if i == (time_loop-1) else []
-        turn_off = False if i == (time_loop-1) else True
-        optimizer = NewtonNoLS(prob, **{'maxiter': 200, 'opt_tol': 1e-6}, readable_outputs=outs, turn_off_outputs=turn_off)
-        optimizer.solve()
-    opt_time = (time.time() - start_time) / time_loop
-    success = optimizer.results['converged']
-    print('\tTime:', opt_time)
-    print('\tSuccess:', success)
-    print('\tIterations:', optimizer.results['niter'])
-    print('\tEvaluations', optimizer.results['niter']*3 + 3)
-    print('\tOptimized vars:', optimizer.results['x'])
-    print('\tOptimized obj:', optimizer.results['objective'])
-    print('\tOptimality:', optimizer.results['optimality'])
-
-    history[prob.problem_name, 'Newton'] = {'obj_hist': np.loadtxt(f"{optimizer.out_dir}/obj.out"),
-                                                'opt_hist': np.loadtxt(f"{optimizer.out_dir}/opt.out")}
-
-    performance[prob.problem_name, 'Newton'] = {'time': opt_time,
-                                                'success': success,
-                                                'niter': optimizer.results['niter'],
-                                                'nev': optimizer.results['niter']*3,
-                                                'objective': optimizer.results['objective'],
-                                                'optimality': optimizer.results['optimality']}
-
-    # QuasiNewton without line search
-    print('\tQuasiNewtonNoLS \n\t-----')
-    start_time = time.time()
-    for i in range(time_loop):
-        outs = ['opt', 'obj'] if i == (time_loop-1) else []
-        turn_off = False if i == (time_loop-1) else True
-        optimizer = QuasiNewtonNoLS(prob, **{'maxiter': 200, 'opt_tol': 1e-6}, readable_outputs=outs, turn_off_outputs=turn_off)
-        optimizer.solve()
-    opt_time = (time.time() - start_time) / time_loop
-    success = optimizer.results['converged']
-    print('\tTime:', opt_time)
-    print('\tSuccess:', success)
-    print('\tIterations:', optimizer.results['niter'])
-    print('\tEvaluations', optimizer.results['niter']*2 + 2)
-    print('\tOptimized vars:', optimizer.results['x'])
-    print('\tOptimized obj:', optimizer.results['objective'])
-    print('\tOptimality:', optimizer.results['optimality'])
-
-    history[prob.problem_name, 'QuasiNewton'] = {'obj_hist': np.loadtxt(f"{optimizer.out_dir}/obj.out"),
-                                                     'opt_hist': np.loadtxt(f"{optimizer.out_dir}/opt.out")}
-
-    performance[prob.problem_name, 'QuasiNewton'] = {'time': opt_time,
-                                                    'success': success,
-                                                    'niter': optimizer.results['niter'],
-                                                    'nev': optimizer.results['niter']*2,
-                                                    'objective': optimizer.results['objective'],
-                                                    'optimality': optimizer.results['optimality']}
+    for Solver in [SteepestDescentNoLS, NewtonNoLS, QuasiNewtonNoLS, SteepestDescent, Newton, QuasiNewton]:
+        if Solver.__name__.endswith('NoLS'):
+            alg = Solver.__name__[:-4]
+        else:
+            alg = Solver.__name__ + '-LS'
     
-    # Steepest-descent with line search
-    print('\tSteepestDescent \n\t-----')
-    start_time = time.time()
-    for i in range(time_loop):
-        outs = ['opt', 'obj'] if i == (time_loop-1) else []
-        turn_off = False if i == (time_loop-1) else True
-        optimizer = SteepestDescent(prob, **{'maxiter': 200, 'opt_tol': 1e-6}, readable_outputs=outs, turn_off_outputs=turn_off)
-        optimizer.solve()
-    opt_time = (time.time() - start_time) / time_loop
-    success = optimizer.results['converged']
-    print('\tTime:', opt_time)
-    print('\tSuccess:', success)
-    print('\tIterations:', optimizer.results['niter'])
-    print('\tEvaluations', sum(optimizer.results[key] for key in ['nfev', 'ngev']))
-    print('\tOptimized vars:', optimizer.results['x'])
-    print('\tOptimized obj:', optimizer.results['objective'])
-    print('\tOptimality:', optimizer.results['optimality'])
+        print(f'\t{Solver.__name__} \n\t------------------------')
+        start_time = time.time()
+        for i in range(time_loop):
+            outs = ['opt', 'obj'] if i == (time_loop-1) else []
+            turn_off = False if i == (time_loop-1) else True
+            optimizer = Solver(prob, **{'maxiter': 200, 'opt_tol': 1e-6}, readable_outputs=outs, turn_off_outputs=turn_off)
+            results   = optimizer.solve()
+        opt_time = (time.time() - start_time) / time_loop
+        success = results['converged']
 
-    history[prob.problem_name, 'SteepestDescent-LS'] = {'obj_hist': np.loadtxt(f"{optimizer.out_dir}/obj.out"),
-                                                     'opt_hist': np.loadtxt(f"{optimizer.out_dir}/opt.out")}
+        niter    = results['niter']
+        nev      = results['total_callbacks']
+        o_evals  = results['obj_evals']
+        g_evals  = results['grad_evals']
+        h_evals  = results['hess_evals']
 
-    performance[prob.problem_name, 'SteepestDescent-LS'] = {'time': opt_time,
-                                                         'success': success,
-                                                         'niter': optimizer.results['niter'],
-                                                         'nev': sum(optimizer.results[key] for key in ['nfev', 'ngev']),
-                                                         'objective': optimizer.results['objective'],
-                                                         'optimality': optimizer.results['optimality']}
-    
-    # Newton with line search
-    print('\tNewton \n\t-----')
-    start_time = time.time()
-    for i in range(time_loop):
-        outs = ['opt', 'obj'] if i == (time_loop-1) else []
-        turn_off = False if i == (time_loop-1) else True
-        optimizer = Newton(prob, **{'maxiter': 200, 'opt_tol': 1e-6}, readable_outputs=outs, turn_off_outputs=turn_off)
-        optimizer.solve()
-    opt_time = (time.time() - start_time) / time_loop
-    success = optimizer.results['converged']
-    print('\tTime:', opt_time)
-    print('\tSuccess:', success)
-    print('\tIterations:', optimizer.results['niter'])
-    print('\tEvaluations', sum(optimizer.results[key] for key in ['nfev', 'ngev', 'nhev']))
-    print('\tOptimized vars:', optimizer.results['x'])
-    print('\tOptimized obj:', optimizer.results['objective'])
-    print('\tOptimality:', optimizer.results['optimality'])
+        objective  = results['objective']
+        optimality = results['optimality']
+        x_opt      = results['x']
 
-    history[prob.problem_name, 'Newton-LS'] = {'obj_hist': np.loadtxt(f"{optimizer.out_dir}/obj.out"),
-                                               'opt_hist': np.loadtxt(f"{optimizer.out_dir}/opt.out")}
+        print('\tTime:',            opt_time)
+        print('\tSuccess:',         success)
+        print('\tIterations:',      niter)
+        print('\tEvaluations:',     nev)
+        print('\tObj evals:',       o_evals)
+        print('\tGrad evals:',      g_evals)
+        print('\tHess evals:',      h_evals)
+        print('\tOptimized vars:',  x_opt)
+        print('\tOptimized obj:',   objective)
+        print('\tOptimality:',      optimality)
 
-    performance[prob.problem_name, 'Newton-LS'] = {'time': opt_time,
-                                                'success': success,
-                                                'niter': optimizer.results['niter'],
-                                                'nev': sum(optimizer.results[key] for key in ['nfev', 'ngev', 'nhev']),
-                                                'objective': optimizer.results['objective'],
-                                                'optimality': optimizer.results['optimality']}
-    
-    # QuasiNewton with line search
-    print('\tQuasiNewton \n\t-----')
-    start_time = time.time()
-    for i in range(time_loop):
-        outs = ['opt', 'obj'] if i == (time_loop-1) else []
-        turn_off = False if i == (time_loop-1) else True
-        optimizer = QuasiNewton(prob, **{'maxiter': 200, 'opt_tol': 1e-6}, readable_outputs=outs, turn_off_outputs=turn_off)
-        optimizer.solve()
-    opt_time = (time.time() - start_time) / time_loop
-    success = optimizer.results['converged']
-    print('\tTime:', opt_time)
-    print('\tSuccess:', success)
-    print('\tIterations:', optimizer.results['niter'])
-    print('\tEvaluations', sum(optimizer.results[key] for key in ['nfev', 'ngev']))
-    print('\tOptimized vars:', optimizer.results['x'])
-    print('\tOptimized obj:', optimizer.results['objective'])
-    print('\tOptimality:', optimizer.results['optimality'])
+        history[prob.problem_name, alg] = {'obj_hist': np.loadtxt(f"{results['out_dir']}/obj.out"),
+                                           'opt_hist': np.loadtxt(f"{results['out_dir']}/opt.out")}
 
-    history[prob.problem_name, 'QuasiNewton-LS'] = {'obj_hist': np.loadtxt(f"{optimizer.out_dir}/obj.out"),
-                                                 'opt_hist': np.loadtxt(f"{optimizer.out_dir}/opt.out")}
-
-    performance[prob.problem_name, 'QuasiNewton-LS'] = {'time': opt_time,
-                                                        'success': success,
-                                                        'niter': optimizer.results['niter'],
-                                                        'nev': sum(optimizer.results[key] for key in ['nfev', 'ngev']),
-                                                        'objective': optimizer.results['objective'],
-                                                        'optimality': optimizer.results['optimality']}
+        performance[prob.problem_name, alg] = {'time': opt_time,
+                                               'success': success,
+                                               'niter': niter,
+                                               'nev': nev,
+                                               'objective': objective,
+                                               'optimality': optimality}
 
     plt.figure()
-    for optimizer in ['Newton', 'QuasiNewton', 'SteepestDescent-LS', 'Newton-LS', 'QuasiNewton-LS']:
-        plt.semilogy(history[prob.problem_name, optimizer]['obj_hist'], label=optimizer)
+    for alg in ['Newton', 'QuasiNewton', 'SteepestDescent-LS', 'Newton-LS', 'QuasiNewton-LS']:
+        plt.semilogy(history[prob.problem_name, alg]['obj_hist'], label=alg)
     plt.xlabel('Iterations')
     plt.ylabel('Objective')
     plt.title(f'{prob.problem_name} minimization')
@@ -225,8 +104,8 @@ for i, prob in enumerate([prob1, prob2, prob3]):
     plt.close()
 
     plt.figure()
-    for optimizer in ['Newton', 'QuasiNewton', 'SteepestDescent-LS', 'Newton-LS', 'QuasiNewton-LS']:
-        plt.semilogy(history[prob.problem_name, optimizer]['opt_hist'], label=optimizer)
+    for alg in ['Newton', 'QuasiNewton', 'SteepestDescent-LS', 'Newton-LS', 'QuasiNewton-LS']:
+        plt.semilogy(history[prob.problem_name, alg]['opt_hist'], label=alg)
     plt.xlabel('Iterations')
     plt.ylabel('Optimality')
     plt.title(f'{prob.problem_name} minimization')

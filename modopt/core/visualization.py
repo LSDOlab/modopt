@@ -195,7 +195,7 @@ def visualize(filepath, vars, save_figname=None):
     >>> optimizer = mo.SLSQP(problem, recording=True)
     >>> results   = optimizer.solve()
     >>> from modopt.postprocessing import visualize
-    >>> visualize(optimizer.out_dir+'/record.hdf5', ['x[0]', 'obj', 'con[1]', 'grad[0]', 'jac[0,1]']) # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+    >>> visualize(results['out_dir']+'/record.hdf5', ['x[0]', 'obj', 'con[1]', 'grad[0]', 'jac[0,1]']) # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
     '''
 
     v_start = time.time()

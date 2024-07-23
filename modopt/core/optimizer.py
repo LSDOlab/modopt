@@ -231,15 +231,29 @@ class Optimizer(object):
         2. Write self.results to the record file
         3. Save and close the visualization plot
         '''
+
+        self.results['total_callbacks']     = self.problem._callback_count
+        self.results['obj_evals']           = self.problem._obj_count
+        self.results['grad_evals']          = self.problem._grad_count
+        self.results['hess_evals']          = self.problem._hess_count
+        self.results['con_evals']           = self.problem._con_count
+        self.results['jac_evals']           = self.problem._jac_count
+        self.results['reused_callbacks']    = self.problem._reused_callback_count
+
         if self.options['turn_off_outputs']:
             return
         
-        self.results['out_dir'] = self.out_dir
+        if self.options['visualize'] != []:
+            self.visualizer.close_plot()
+            self.vis_time = self.visualizer.vis_time
+            self.results['vis_time']    = self.vis_time
+
+        self.results['out_dir']     = self.out_dir
         with open(f"{self.out_dir}/modopt_results.out", 'w') as f:
             with contextlib.redirect_stdout(f):
                 self.print_results(all=True)
+
         if self.options['recording']:
-            self.results['total_callbacks'] = self.problem._callback_count
             group = self.record.create_group('results')
             for key, value in self.results.items():
                 if self.solver_name.startswith('convex_qpsolvers') and key in ['problem', 'extras']:
@@ -249,10 +263,6 @@ class Optimizer(object):
                         group[f"{key}-{k}"] = v
                 else:
                     group[key] = value
-        
-        if self.options['visualize'] != []:
-            self.visualizer.close_plot()
-            self.vis_time = self.visualizer.vis_time  
 
     def update_outputs(self, **kwargs):
         '''
@@ -358,6 +368,18 @@ class Optimizer(object):
             output += "\n" + "=" * line_length
             print(output)
 
+    def print_call_counts(self):
+        print('\n')
+        print(f"{'Problem':20}: {self.problem_name}")
+        print('-'*100)
+        print(f"{'total_callbacks':20}: {self.problem._callback_count}")
+        print(f"{'reused_callbacks':20}: {self.problem._reused_callback_count}")
+
+        for key in ['obj', 'grad', 'hess', 'con', 'jac']:
+            count = getattr(self.problem, f"_{key}_count")
+            name  = f"{key}_evals"
+            print(f"{name:20}: {count}")
+        print('-'*100)
 
     def check_first_derivatives(self, x=None, step=1e-6, formulation='rs'):
         obj = self.obj

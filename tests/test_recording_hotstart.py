@@ -29,7 +29,7 @@ def test_recording():
         assert prob._callback_count == 79
         assert prob._reused_callback_count == 0
 
-        file        = h5py.File(f'{optimizer.out_dir}/record.hdf5', 'r')
+        file        = h5py.File(results['out_dir']+'/record.hdf5', 'r')
         groups      = list(file.keys())
         callbacks   = [key for key in groups if key.startswith('callback_')]
         iterations  = [key for key in groups if key.startswith('iteration_')]
@@ -55,7 +55,7 @@ def test_csdl_recording():
         assert prob._callback_count == 25
         assert prob._reused_callback_count == 0
 
-        file        = h5py.File(f'{optimizer.out_dir}/record.hdf5', 'r')
+        file        = h5py.File(results['out_dir']+'/record.hdf5', 'r')
         groups      = list(file.keys())
         callbacks   = [key for key in groups if key.startswith('callback_')]
         iterations  = [key for key in groups if key.startswith('iteration_')]
@@ -79,7 +79,7 @@ def test_openmdao_recording():
     assert prob._callback_count == 25
     assert prob._reused_callback_count == 0
 
-    file        = h5py.File(f'{optimizer.out_dir}/record.hdf5', 'r')
+    file        = h5py.File(results['out_dir']+'/record.hdf5', 'r')
     groups      = list(file.keys())
     callbacks   = [key for key in groups if key.startswith('callback_')]
     iterations  = [key for key in groups if key.startswith('iteration_')]
@@ -105,7 +105,7 @@ def test_compute_all_recording():
         assert prob._callback_count == 6
         assert prob._reused_callback_count == 0
 
-        file        = h5py.File(f'{optimizer.out_dir}/record.hdf5', 'r')
+        file        = h5py.File(results['out_dir']+'/record.hdf5', 'r')
         groups      = list(file.keys())
         callbacks   = [key for key in groups if key.startswith('callback_')]
         iterations  = [key for key in groups if key.startswith('iteration_')]
@@ -133,7 +133,7 @@ def test_all_solvers_recording(): # except SNOPT and SLSQP (already tested above
     results = optimizer.solve()
     print(results)
 
-    file        = h5py.File(f'{optimizer.out_dir}/record.hdf5', 'r')
+    file        = h5py.File(results['out_dir']+'/record.hdf5', 'r')
     groups      = list(file.keys())
     callbacks   = [key for key in groups if key.startswith('callback_')]
     iterations  = [key for key in groups if key.startswith('iteration_')]
@@ -145,7 +145,7 @@ def test_all_solvers_recording(): # except SNOPT and SLSQP (already tested above
         results = optimizer.solve()
         print(results)
 
-        file        = h5py.File(f'{optimizer.out_dir}/record.hdf5', 'r')
+        file        = h5py.File(results['out_dir']+'/record.hdf5', 'r')
         groups      = list(file.keys())
         callbacks   = [key for key in groups if key.startswith('callback_')]
         iterations  = [key for key in groups if key.startswith('iteration_')]
@@ -154,7 +154,7 @@ def test_all_solvers_recording(): # except SNOPT and SLSQP (already tested above
     results = optimizer.solve()
     print(results)
 
-    file        = h5py.File(f'{optimizer.out_dir}/record.hdf5', 'r')
+    file        = h5py.File(results['out_dir']+'/record.hdf5', 'r')
     groups      = list(file.keys())
     callbacks   = [key for key in groups if key.startswith('callback_')]
     iterations  = [key for key in groups if key.startswith('iteration_')]
@@ -166,7 +166,7 @@ def test_all_solvers_recording(): # except SNOPT and SLSQP (already tested above
         results = optimizer.solve()
         print(results)
 
-        file        = h5py.File(f'{optimizer.out_dir}/record.hdf5', 'r')
+        file        = h5py.File(results['out_dir']+'/record.hdf5', 'r')
         groups      = list(file.keys())
         callbacks   = [key for key in groups if key.startswith('callback_')]
         iterations  = [key for key in groups if key.startswith('iteration_')]
@@ -175,7 +175,7 @@ def test_all_solvers_recording(): # except SNOPT and SLSQP (already tested above
     results = optimizer.solve()
     print(results)
 
-    file        = h5py.File(f'{optimizer.out_dir}/record.hdf5', 'r')
+    file        = h5py.File(results['out_dir']+'/record.hdf5', 'r')
     groups      = list(file.keys())
     callbacks   = [key for key in groups if key.startswith('callback_')]
     iterations  = [key for key in groups if key.startswith('iteration_')]
@@ -186,7 +186,7 @@ def test_all_solvers_recording(): # except SNOPT and SLSQP (already tested above
     results = optimizer.solve()
     print(results)
 
-    file        = h5py.File(f'{optimizer.out_dir}/record.hdf5', 'r')
+    file        = h5py.File(results['out_dir']+'/record.hdf5', 'r')
     groups      = list(file.keys())
     callbacks   = [key for key in groups if key.startswith('callback_')]
     iterations  = [key for key in groups if key.startswith('iteration_')]
@@ -210,7 +210,7 @@ def test_hot_start():
         assert prob._callback_count == 79
         assert prob._reused_callback_count == 0
 
-        filename    = f'{optimizer.out_dir}/record.hdf5'
+        filename    = results['out_dir']+'/record.hdf5'
         file        = h5py.File(filename, 'r')
         groups      = list(file.keys())
         callbacks   = [key for key in groups if key.startswith('callback_')]
@@ -244,7 +244,7 @@ def test_hot_start():
         assert prob._callback_count == 79
         assert prob._reused_callback_count == 79
 
-        filename    = f'{optimizer.out_dir}/record.hdf5'
+        filename    = results['out_dir']+'/record.hdf5'
         file        = h5py.File(filename, 'r')
         groups      = list(file.keys())
         callbacks   = [key for key in groups if key.startswith('callback_')]
@@ -270,7 +270,7 @@ def test_csdl_hot_start():
         assert prob._callback_count == 25
         assert prob._reused_callback_count == 0
 
-        filename    = f'{optimizer.out_dir}/record.hdf5'
+        filename    = results['out_dir']+'/record.hdf5'
         file        = h5py.File(filename, 'r')
         groups      = list(file.keys())
         callbacks   = [key for key in groups if key.startswith('callback_')]
@@ -298,7 +298,7 @@ def test_csdl_hot_start():
         assert prob._callback_count == 25
         assert prob._reused_callback_count == 25
 
-        filename    = f'{optimizer.out_dir}/record.hdf5'
+        filename    = results['out_dir']+'/record.hdf5'
         file        = h5py.File(filename, 'r')
         groups      = list(file.keys())
         callbacks   = [key for key in groups if key.startswith('callback_')]
@@ -322,7 +322,7 @@ def test_openmdao_hot_start():
     assert prob._callback_count == 25
     assert prob._reused_callback_count == 0
 
-    filename    = f'{optimizer.out_dir}/record.hdf5'
+    filename    = results['out_dir']+'/record.hdf5'
     file        = h5py.File(filename, 'r')
     groups      = list(file.keys())
     callbacks   = [key for key in groups if key.startswith('callback_')]
@@ -350,7 +350,7 @@ def test_openmdao_hot_start():
     assert prob._callback_count == 25
     assert prob._reused_callback_count == 25
 
-    filename    = f'{optimizer.out_dir}/record.hdf5'
+    filename    = results['out_dir']+'/record.hdf5'
     file        = h5py.File(filename, 'r')
     groups      = list(file.keys())
     callbacks   = [key for key in groups if key.startswith('callback_')]
@@ -376,7 +376,7 @@ def test_compute_all_hot_start():
         assert prob._callback_count == 6
         assert prob._reused_callback_count == 0
         
-        filename    = f'{optimizer.out_dir}/record.hdf5'
+        filename    = results['out_dir']+'/record.hdf5'
         file        = h5py.File(filename, 'r')
         groups      = list(file.keys())
         callbacks   = [key for key in groups if key.startswith('callback_')]
@@ -398,7 +398,7 @@ def test_compute_all_hot_start():
         assert prob._callback_count == 6
         assert prob._reused_callback_count == 6
 
-        filename    = f'{optimizer.out_dir}/record.hdf5'
+        filename    = results['out_dir']+'/record.hdf5'
         file        = h5py.File(filename, 'r')
         groups      = list(file.keys())
         callbacks   = [key for key in groups if key.startswith('callback_')]
