@@ -104,6 +104,19 @@ class IPOPT(Optimizer):
         # Define the objective expression using the callbacks (Includes objective, gradient and Hessian)
         objective_expr = f(x)
 
+        # Prevent the creation of the ‘nlp_grad’ function, which looks for the gradients(/Hessians if 'exact')
+        # of the nlp 'f' and 'g' functions. 
+        options['no_nlp_grad'] = True
+        # This is required since we are providing the grad_f, jac_g and hess_lag functions explicitly
+        # to avoid CasADi redundantly calling the obj/con functions when computing the grad/jac
+        # and obj+grad/con+jac functions when computing the obj/lag Hessians.
+        
+        grad_f = self.generate_grad_f_callback()
+        options['grad_f'] = Function("G",[x, p],[0, grad_f(x, p)])
+        # Proper way in CasADi is shown below but this redundantly calls the objective function 
+        # everytime the gradient is computed. Hence, we are using the above method.
+        # options['grad_f'] = Function("G",[x, p],[objective_expr, grad_f(x, p)[0]])
+
         # Wrap the external Lagrangian Hessian function
         hess_lag = self.generate_hess_lag_callback()
         # Define the Lagrangian Hessian as a function in the options dictionary
@@ -116,6 +129,12 @@ class IPOPT(Optimizer):
             c = self.generate_constraint_callback()
             # Define the constraint expression using the callbacks (includes constraints and Jacobian)
             constraint_expr = c(x)
+
+            jac_g = self.generate_jac_g_callback()
+            options['jac_g'] = Function("J",[x, p],[0, jac_g(x, p)])
+            # Proper way in CasADi is shown below but this redundantly calls the constraint function 
+            # everytime the jacobian is computed. Hence, we are using the above method.
+            # options['jac_g'] = Function("J",[x, p],[constraint_expr, jac_g(x, p)[0]])
 
             # Create an NLP problem
             nlp = {'x': x, 'f': objective_expr, 'g': constraint_expr}
@@ -208,64 +227,64 @@ class IPOPT(Optimizer):
                 # print(x.shape)
                 return [obj(x)]
 
-            def has_jacobian(self): return True
-            def get_jacobian(self,name,inames,onames,opts):
-                class GradFun(Callback):
-                    def __init__(self, opts={}):
-                        Callback.__init__(self)
-                        self.construct(name, opts)
+            # def has_jacobian(self): return True
+            # def get_jacobian(self,name,inames,onames,opts):
+            #     class GradFun(Callback):
+            #         def __init__(self, opts={}):
+            #             Callback.__init__(self)
+            #             self.construct(name, opts)
 
-                    def get_n_in(self): return 2
-                    def get_n_out(self): return 1
+            #         def get_n_in(self): return 2
+            #         def get_n_out(self): return 1
 
-                    def get_sparsity_in(self,i):
-                        if i==0: # nominal input        (here, x)
-                            return Sparsity.dense(nx,1)
-                        elif i==1: # nominal output     (here, obj)
-                            return Sparsity.dense(1,1)
-                            # return Sparsity(1,1)
+            #         def get_sparsity_in(self,i):
+            #             if i==0: # nominal input        (here, x)
+            #                 return Sparsity.dense(nx,1)
+            #             elif i==1: # nominal output     (here, obj)
+            #                 return Sparsity.dense(1,1)
+            #                 # return Sparsity(1,1)
 
-                    def get_sparsity_out(self,i):      # obj wrt x
-                        return Sparsity.dense(1,nx)
-                        # return sparsify(DM([[0,0,1,1],[1,0,1,0],[0,1,1,0]])).sparsity()
+            #         def get_sparsity_out(self,i):      # obj wrt x
+            #             return Sparsity.dense(1,nx)
+            #             # return sparsify(DM([[0,0,1,1],[1,0,1,0],[0,1,1,0]])).sparsity()
 
-                    # Evaluate numerically
-                    def eval(self, arg):
-                        # print('arg', arg)
-                        # print('arg[0]', arg[0])
-                        x = np.array(arg[0]).reshape((nx,))    # arg[0] is the input
-                        # print('x_shape', x.shape)
-                        return [grad(x).reshape((1,nx))]
+            #         # Evaluate numerically
+            #         def eval(self, arg):
+            #             # print('arg', arg)
+            #             # print('arg[0]', arg[0])
+            #             x = np.array(arg[0]).reshape((nx,))    # arg[0] is the input
+            #             # print('x_shape', x.shape)
+            #             return [grad(x).reshape((1,nx))]
                     
-                    # def has_jacobian(self): return True
-                    # def get_jacobian(self,name,inames,onames,opts):
-                    #     class HessFun(Callback):
-                    #         def __init__(self, opts={}):
-                    #             Callback.__init__(self)
-                    #             self.construct(name, opts)
+            #         def has_jacobian(self): return True
+            #         def get_jacobian(self,name,inames,onames,opts):
+            #             class HessFun(Callback):
+            #                 def __init__(self, opts={}):
+            #                     Callback.__init__(self)
+            #                     self.construct(name, opts)
 
-                    #         def get_n_in(self): return 3
-                    #         def get_n_out(self): return 2
+            #                 def get_n_in(self): return 3
+            #                 def get_n_out(self): return 2
 
-                    #         def get_sparsity_in(self,i):
-                    #             if   i==0: return Sparsity.dense(nx,1)  # x
-                    #             elif i==1: return Sparsity.dense(1,1)   # obj
-                    #             elif i==2: return Sparsity.dense(nx,1)  # grad
+            #                 def get_sparsity_in(self,i):
+            #                     if   i==0: return Sparsity.dense(nx,1)  # x
+            #                     elif i==1: return Sparsity.dense(1,1)   # obj
+            #                     elif i==2: return Sparsity.dense(nx,1)  # grad
                                 
-                    #         def get_sparsity_out(self,i):
-                    #             if i==0: return Sparsity.dense(nx,nx)   # grad wrt x
-                    #             if i==1: return Sparsity.dense(nx,1)    # grad wrt obj = 0
+            #                 def get_sparsity_out(self,i):
+            #                     if i==0: return Sparsity.dense(nx,nx)   # grad wrt x
+            #                     if i==1: return Sparsity.dense(nx,1)    # grad wrt obj = 0
                             
-                    #         def eval(self, arg):
-                    #             x = np.array(arg[0]).reshape((nx,))
-                    #             return [hess(x), np.zeros((nx,1))]
+            #                 def eval(self, arg):
+            #                     x = np.array(arg[0]).reshape((nx,))
+            #                     return [hess(x), np.zeros((nx,1))]
                             
-                    #     self.hess_callback = HessFun()
-                    #     return self.hess_callback
+            #             self.hess_callback = HessFun()
+            #             return self.hess_callback
 
-                # You are required to keep a reference alive to the returned Callback object
-                self.grad_callback = GradFun()
-                return self.grad_callback
+            #     # You are required to keep a reference alive to the returned Callback object
+            #     self.grad_callback = GradFun()
+            #     return self.grad_callback
             
         return Objective('f')
     
@@ -296,40 +315,40 @@ class IPOPT(Optimizer):
                 # print(x.shape)
                 return [con(x)]
 
-            def has_jacobian(self): return True
-            def get_jacobian(self,name,inames,onames,opts):
-                class JacFun(Callback):
-                    def __init__(self, opts={}):
-                        Callback.__init__(self)
-                        self.construct(name, opts)
+            # def has_jacobian(self): return True
+            # def get_jacobian(self,name,inames,onames,opts):
+            #     class JacFun(Callback):
+            #         def __init__(self, opts={}):
+            #             Callback.__init__(self)
+            #             self.construct(name, opts)
 
-                    def get_n_in(self): return 2
-                    def get_n_out(self): return 1
+            #         def get_n_in(self): return 2
+            #         def get_n_out(self): return 1
 
-                    def get_sparsity_in(self,i):
-                        if i==0: # nominal input
-                            return Sparsity.dense(nx,1)
-                        elif i==1: # nominal output
-                            return Sparsity.dense(nc,1)
-                            # return Sparsity(1,1)
+            #         def get_sparsity_in(self,i):
+            #             if i==0: # nominal input
+            #                 return Sparsity.dense(nx,1)
+            #             elif i==1: # nominal output
+            #                 return Sparsity.dense(nc,1)
+            #                 # return Sparsity(1,1)
 
-                    def get_sparsity_out(self,i):
-                        return Sparsity.dense(nc,nx)
-                        # return sparsify(DM([[0,0,1,1],[1,0,1,0],[0,1,1,0]])).sparsity()
+            #         def get_sparsity_out(self,i):
+            #             return Sparsity.dense(nc,nx)
+            #             # return sparsify(DM([[0,0,1,1],[1,0,1,0],[0,1,1,0]])).sparsity()
 
-                    # Evaluate numerically
-                    def eval(self, arg):
-                        # print('arg', arg)
-                        # print('arg[0]', arg[0])
-                        x = np.array(arg[0]).reshape((nx,))    # arg[0] is the input
-                        # print('x', x)
-                        # print('x[0]', x[0])
-                        # print(np.array([[1, 1], [2*x[0], -1]]))
-                        return [jac(x)]
+            #         # Evaluate numerically
+            #         def eval(self, arg):
+            #             # print('arg', arg)
+            #             # print('arg[0]', arg[0])
+            #             x = np.array(arg[0]).reshape((nx,))    # arg[0] is the input
+            #             # print('x', x)
+            #             # print('x[0]', x[0])
+            #             # print(np.array([[1, 1], [2*x[0], -1]]))
+            #             return [jac(x)]
 
-                # You are required to keep a reference alive to the returned Callback object
-                self.jac_callback = JacFun()
-                return self.jac_callback
+            #     # You are required to keep a reference alive to the returned Callback object
+            #     self.jac_callback = JacFun()
+            #     return self.jac_callback
             
         return Constraints('c')
 
@@ -376,3 +395,58 @@ class IPOPT(Optimizer):
                 return [hess_lag]
             
         return LagrangianHessian('HessLag')
+    
+    def generate_grad_f_callback(self,):
+        nx = self.nx
+        grad = self.problem._compute_objective_gradient
+        class ObjectiveGradient(Callback):
+            def __init__(self, name, opts={}):
+                Callback.__init__(self)
+                self.construct(name, opts)
+
+            def get_n_in(self): return 2
+            def get_n_out(self): return 1
+
+            def get_sparsity_in(self,i): # args = [x, p(parameters)]
+                if i==0:
+                    return Sparsity.dense(nx,1)
+                elif i==1:
+                    return Sparsity.dense(0,0)
+
+            def get_sparsity_out(self,i):
+                return Sparsity.dense(1,nx)
+
+            # Evaluate numerically
+            def eval(self, arg):
+                x = np.array(arg[0]).reshape((nx,))     # arg[0] is the decision variable
+                return [grad(x).reshape((1,nx))]
+            
+        return ObjectiveGradient('GradF')
+    
+    def generate_jac_g_callback(self,):
+        nx = self.nx
+        nc = self.nc
+        jac = self.problem._compute_constraint_jacobian
+        class ConstraintJacobian(Callback):
+            def __init__(self, name, opts={}):
+                Callback.__init__(self)
+                self.construct(name, opts)
+
+            def get_n_in(self): return 2
+            def get_n_out(self): return 1
+
+            def get_sparsity_in(self,i): # args = [x, p(parameters)]
+                if i==0:
+                    return Sparsity.dense(nx,1)
+                elif i==1:
+                    return Sparsity.dense(0,0)
+
+            def get_sparsity_out(self,i):
+                return Sparsity.dense(nc,nx)
+
+            # Evaluate numerically
+            def eval(self, arg):
+                x = np.array(arg[0]).reshape((nx,))     # arg[0] is the decision variable
+                return [jac(x)]
+            
+        return ConstraintJacobian('JacG')
