@@ -93,10 +93,21 @@ class IPOPT(Optimizer):
 
         # Create an optimization variable
         x = MX.sym("x", self.nx)
+        # Create an empty parameter variable
+        p = MX.sym("p", 0, 1)
+        # Create a 1x1 Lagrange multiplier variable for the objective
+        lam_f = MX.sym("lf")
+        # Create a ncx1 Lagrange multiplier variable for the constraints
+        lam_g = MX.sym("lg", self.nc, 1)
         # Wrap the external objective function
         f = self.generate_objective_callback()
         # Define the objective expression using the callbacks (Includes objective, gradient and Hessian)
         objective_expr = f(x)
+
+        # Wrap the external Lagrangian Hessian function
+        hess_lag = self.generate_hess_lag_callback()
+        # Define the Lagrangian Hessian as a function in the options dictionary
+        options['hess_lag'] = Function("H",[x, p, lam_f, lam_g], [triu(hess_lag(x, p, lam_f, lam_g))])
 
         if self.problem.constrained:
             lbg = self.problem.c_lower
@@ -108,17 +119,6 @@ class IPOPT(Optimizer):
 
             # Create an NLP problem
             nlp = {'x': x, 'f': objective_expr, 'g': constraint_expr}
-
-            # Create an empty parameter variable
-            p = MX.sym("p", 0, 1)
-            # Create a 1x1 Lagrange multiplier variable for the objective
-            lam_f = MX.sym("lf")
-            # Create a 1x1 Lagrange multiplier variable for the objective
-            lam_g = MX.sym("lg", self.nc, 1)
-            # Wrap the external Lagrangian Hessian function
-            hess_lag = self.generate_hess_lag_callback()
-            # Define the Lagrangian Hessian as a function in the options dictionary
-            options['hess_lag'] = Function("H",[x, p, lam_f, lam_g],[hess_lag(x, p, lam_f, lam_g)[0]])
 
             # Create an NLP solver
             solver = nlpsol('solver', 'ipopt', nlp, options)
@@ -237,31 +237,31 @@ class IPOPT(Optimizer):
                         # print('x_shape', x.shape)
                         return [grad(x).reshape((1,nx))]
                     
-                    def has_jacobian(self): return True
-                    def get_jacobian(self,name,inames,onames,opts):
-                        class HessFun(Callback):
-                            def __init__(self, opts={}):
-                                Callback.__init__(self)
-                                self.construct(name, opts)
+                    # def has_jacobian(self): return True
+                    # def get_jacobian(self,name,inames,onames,opts):
+                    #     class HessFun(Callback):
+                    #         def __init__(self, opts={}):
+                    #             Callback.__init__(self)
+                    #             self.construct(name, opts)
 
-                            def get_n_in(self): return 3
-                            def get_n_out(self): return 2
+                    #         def get_n_in(self): return 3
+                    #         def get_n_out(self): return 2
 
-                            def get_sparsity_in(self,i):
-                                if   i==0: return Sparsity.dense(nx,1)  # x
-                                elif i==1: return Sparsity.dense(1,1)   # obj
-                                elif i==2: return Sparsity.dense(nx,1)  # grad
+                    #         def get_sparsity_in(self,i):
+                    #             if   i==0: return Sparsity.dense(nx,1)  # x
+                    #             elif i==1: return Sparsity.dense(1,1)   # obj
+                    #             elif i==2: return Sparsity.dense(nx,1)  # grad
                                 
-                            def get_sparsity_out(self,i):
-                                if i==0: return Sparsity.dense(nx,nx)   # grad wrt x
-                                if i==1: return Sparsity.dense(nx,1)    # grad wrt obj = 0
+                    #         def get_sparsity_out(self,i):
+                    #             if i==0: return Sparsity.dense(nx,nx)   # grad wrt x
+                    #             if i==1: return Sparsity.dense(nx,1)    # grad wrt obj = 0
                             
-                            def eval(self, arg):
-                                x = np.array(arg[0]).reshape((nx,))
-                                return [hess(x), np.zeros((nx,1))]
+                    #         def eval(self, arg):
+                    #             x = np.array(arg[0]).reshape((nx,))
+                    #             return [hess(x), np.zeros((nx,1))]
                             
-                        self.hess_callback = HessFun()
-                        return self.hess_callback
+                    #     self.hess_callback = HessFun()
+                    #     return self.hess_callback
 
                 # You are required to keep a reference alive to the returned Callback object
                 self.grad_callback = GradFun()
@@ -337,7 +337,7 @@ class IPOPT(Optimizer):
         nx = self.nx
         nc = self.nc
         lag_hess = self.problem._compute_lagrangian_hessian
-        # obj_hess = self.problem._compute_objective_hessian
+        obj_hess = self.problem._compute_objective_hessian
         class LagrangianHessian(Callback):
             def __init__(self, name, opts={}):
                 Callback.__init__(self)
@@ -363,13 +363,15 @@ class IPOPT(Optimizer):
             def eval(self, arg):
                 x = np.array(arg[0]).reshape((nx,))     # arg[0] is the decision variable
                 lam_f = np.array(arg[2]).reshape((1,))  # arg[2] is the lagrange multiplier for the objective
-                # if nc == 0:
-                #     # hess_lag = (lag_hess(x, np.array([]))) * lam_f
-                #     hess_lag = (obj_hess(x)) * lam_f
-                # else:
-                lam_g = np.array(arg[3]).reshape((nc,)) # arg[3] is the lagrange multiplier for the constraints
-                z = lam_g / lam_f
-                hess_lag = (lag_hess(x, z)) * lam_f
+                if nc == 0:
+                    hess_lag = obj_hess(x) * lam_f
+                else:
+                    lam_g = np.array(arg[3]).reshape((nc,)) # arg[3] is the lagrange multiplier for the constraints
+                    if lam_f != 0:
+                        z = lam_g / lam_f
+                        hess_lag = (lag_hess(x, z)) * lam_f
+                    else:
+                        hess_lag = lag_hess(x, lam_g) - lag_hess(x, np.zeros((nc,)))
 
                 return [hess_lag]
             
