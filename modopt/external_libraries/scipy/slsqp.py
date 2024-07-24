@@ -192,6 +192,8 @@ class SLSQP(Optimizer):
         output += f"\n\t{'Total gradient evals':25}: {self.results['njev']}"
         if 'nit' in self.results:
             output += f"\n\t{'Major iterations':25}: {self.results['nit']}"
+        output += self.get_callback_counts_string(25)
+
         if optimal_variables or all:
             output += f"\n\t{'Optimal variables':25}: {self.results['x']}"
         if (optimal_gradient or all) and 'jac' in self.results:

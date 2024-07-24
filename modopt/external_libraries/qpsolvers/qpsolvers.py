@@ -265,6 +265,7 @@ class ConvexQPSolvers(Optimizer):
         output += f"\n\t{'Primal residual':40}: {self.results['primal_residual']}"
         output += f"\n\t{'Duality gap':40}: {self.results['duality_gap']}"
         output += f"\n\t{'Total time':40}: {self.results['time']}"
+        output += self.get_callback_counts_string(40)
 
         if optimal_variables or all:
             output += f"\n\t{'Optimal variables':40}: {self.results['x']}"

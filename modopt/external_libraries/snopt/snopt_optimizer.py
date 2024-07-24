@@ -196,6 +196,7 @@ class SNOPTOptimizer(Optimizer):
         output += f"\n\t{'Major iterations':35}: {self.results['n_majiter']}"
         output += f"\n\t{'Total iterations':35}: {self.results['niter']}"
         output += f"\n\t{'Total time':35}: {self.total_time}"
+        output += self.get_callback_counts_string(35)
 
         if optimal_variables or all:
             output += f"\n\t{'Optimal variables':35}: {self.results['x']}"

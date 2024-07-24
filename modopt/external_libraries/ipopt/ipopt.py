@@ -178,6 +178,7 @@ class IPOPT(Optimizer):
         output += f"\n\t{'Solver':35}: {self.solver_name}"
         output += f"\n\t{'Objective':35}: {self.results['f']}"
         output += f"\n\t{'Total time':35}: {self.results['time']}"
+        output += self.get_callback_counts_string(35)
         
         if optimal_variables or all:
             output += f"\n\t{'Optimal variables':35}: {self.results['x']}"

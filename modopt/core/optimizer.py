@@ -377,9 +377,20 @@ class Optimizer(object):
 
         for key in ['obj', 'grad', 'hess', 'con', 'jac']:
             count = getattr(self.problem, f"_{key}_count")
-            name  = f"{key}_evals"
+            name  = f"{key}_callbacks"
             print(f"{name:20}: {count}")
         print('-'*100)
+
+    def get_callback_counts_string(self, length):
+        output  = f"\n\t{'Total callbacks':{length}}: {self.problem._callback_count}"
+        output += f"\n\t{'Reused callbacks':{length}}: {self.problem._reused_callback_count}"
+
+        for key in ['obj', 'grad', 'hess', 'con', 'jac']:
+            count   = getattr(self.problem, f"_{key}_count")
+            name    = f"{key} callbacks"
+            output += f"\n\t{name:{length}}: {count}"
+        
+        return output
 
     def check_first_derivatives(self, x=None, step=1e-6, formulation='rs'):
         obj = self.obj

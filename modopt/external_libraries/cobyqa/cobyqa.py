@@ -161,6 +161,8 @@ class COBYQA(Optimizer):
         output += f"\n\t{'Max. constraint violation':25}: {self.results['maxcv']}"
         output += f"\n\t{'Total function evals':25}: {self.results['nfev']}"
         output += f"\n\t{'Total iterations':25}: {self.results['nit']}"
+        output += self.get_callback_counts_string(25)
+
         if optimal_variables or all:
             output += f"\n\t{'Optimal variables':25}: {self.results['x']}"
         if (obj_history or all) and self.solver_options['store_history']:

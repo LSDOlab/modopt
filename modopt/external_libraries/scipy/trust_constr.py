@@ -281,6 +281,8 @@ class TrustConstr(Optimizer):
         output += f"\n\t{'Total constr. Hessian evals':30}: {nchev}"
         output += f"\n\t{'Total iterations':30}: {self.results['nit']}"
         output += f"\n\t{'CG iterations':30}: {self.results['cg_niter']}"
+        output += f"\n\t{'CG stop condition':30}: {self.results['cg_stop_cond']}"
+        output += self.get_callback_counts_string(30)
 
         if optimal_variables or all:
             output += f"\n\t{'Optimal variables':30}: {self.results['x']}"

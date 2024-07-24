@@ -308,6 +308,7 @@ class CVXOPT(Optimizer):
         output += f"\n\t{'Status':40}: {self.results['status']}"
         output += f"\n\t{'Objective':40}: {self.results['objective']}"
         output += f"\n\t{'Total time':40}: {self.results['time']}"
+        output += self.get_callback_counts_string(40)
         
         if optimal_variables or all:
             output += f"\n\t{'Optimal variables':40}: {self.results['x']}"

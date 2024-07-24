@@ -198,6 +198,7 @@ class PySLSQP(Optimizer):
             output += f"\n\t{'Fun. evals reused (hotstart)':30}: {self.solver_options['nfev_reused_in_hotstart']}"
         if 'ngev_reused_in_hotstart' in self.results.keys():
             output += f"\n\t{'Der. evals reused (hotstart)':30}: {self.solver_options['ngev_reused_in_hotstart']}"
+        output += self.get_callback_counts_string(30)
 
         if optimal_variables or all:
             output += f"\n\t{'Optimal variables':30}: {self.results['x']}"

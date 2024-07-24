@@ -128,6 +128,8 @@ class NelderMead(Optimizer):
         output += f"\n\t{'Objective':25}: {self.results['fun']}"
         output += f"\n\t{'Total function evals':25}: {self.results['nfev']}"
         output += f"\n\t{'Total iterations':25}: {self.results['nit']}"
+        output += self.get_callback_counts_string(25)
+
         if optimal_variables or all:
             output += f"\n\t{'Optimal variables':25}: {self.results['x']}"
         if final_simplex or all:
