@@ -13,8 +13,8 @@ class QuasiNewtonNoLS(Optimizer):
         self.obj = self.problem._compute_objective
         self.grad = self.problem._compute_objective_gradient
 
-        self.options.declare('maxiter', default=1000, types=int)
-        self.options.declare('opt_tol', types=float)
+        self.options.declare('maxiter', default=500, types=int)
+        self.options.declare('opt_tol', types=float, default=1e-6)
         self.options.declare('readable_outputs', types=list, default=[])
 
         self.available_outputs = {

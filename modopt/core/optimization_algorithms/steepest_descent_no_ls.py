@@ -9,7 +9,7 @@ class SteepestDescentNoLS(Optimizer):
         self.obj = self.problem._compute_objective
         self.grad = self.problem._compute_objective_gradient
 
-        self.options.declare('maxiter', types=int, default=1000)
+        self.options.declare('maxiter', types=int, default=500)
         self.options.declare('opt_tol', types=float, default=1e-5)
         self.options.declare('readable_outputs', types=list, default=[])
 

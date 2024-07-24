@@ -10,8 +10,8 @@ class NewtonNoLS(Optimizer):
         self.grad = self.problem._compute_objective_gradient
         self.hess = self.problem._compute_objective_hessian
 
-        self.options.declare('maxiter', default=1000, types=int)
-        self.options.declare('opt_tol', default=1e-7, types=float)
+        self.options.declare('maxiter', default=500, types=int)
+        self.options.declare('opt_tol', default=1e-6, types=float)
         self.options.declare('readable_outputs', types=list, default=[])
 
         self.available_outputs = {
