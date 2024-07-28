@@ -31,6 +31,23 @@ def obj_hess(x):
             [[2 + 800*x[i]**2 - 400*(x[i + 1] - x[i]**2), -400*x[i]], [-400*x[i], 200]])
     return hess
 
+# from modopt import IPOPT
+# for nx in [2, 4, 8, 16, 32, 64, 128, 256, 512]:
+#     x0   = np.array([-1.2, 1.] * int(nx/2))
+#     name = f'rosenbrock(c)_{nx}d'
+
+#     prob = ProblemLite(x0, name=name, obj=obj, grad=grad, obj_hess=obj_hess)
+#     print('\nProblem:', prob.problem_name)
+#     print('='*50)
+
+#     optimizer = IPOPT(prob, solver_options={
+#         'hessian_approximation': 'exact',
+#         'derivative_test_print_all': 'no',
+#         'derivative_test': 'second-order'})
+#     results = optimizer.solve()
+
+# exit()
+
 # Benchmarking optimization algorithms
 algs = ['SNOPT', 'IPOPT', 'IPOPT-2', 'PySLSQP', 'BFGS', 'LBFGSB', 
         'COBYLA', 'COBYQA', 'NelderMead', 'TrustConstr', 'TrustConstr-2']

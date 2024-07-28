@@ -127,7 +127,10 @@ pyslsqp = [
     "pyslsqp",
 ]
 ipopt = [
-    "casadi", # Modopt uses the IPOPT solvefr from CasADi
+    "casadi", # Modopt uses the IPOPT solver from CasADi
+]
+casadi = [
+    "casadi", # Modopt uses the IPOPT solver from CasADi
 ]
 interfaces = [
     "csdl @ git+https://github.com/LSDOlab/csdl.git", # csdl is deprecated with dependencies fixed in the main package
@@ -154,6 +157,7 @@ markers = [
     "recording: marks tests as recording (deselect with '-m \"not recording\"')",
     "visualization: marks tests as visualization (deselect with '-m \"not visualization\"')",
     "benchmarking: marks tests as benchmarking (deselect with '-m \"not benchmarking\"')",
+    "casadi: marks tests as casadi (deselect with '-m \"not casadi\"')",
     "csdl: marks tests as csdl (deselect with '-m \"not csdl\"')",
     "csdl_alpha: marks tests as csdl_alpha (deselect with '-m \"not csdl_alpha\"')",
     "openmdao: marks tests as openmdao (deselect with '-m \"not openmdao\"')",
