@@ -226,10 +226,10 @@ class CSDLAlphaProblem(OptProblem):
     @hot_start(['x'], ['obj'])
     def _compute_objective(self, x, guess_dict=None, tol_dict=None, 
                            force_rerun=False, check_failure=False):
-        print('Computing objective >>>>>>>>>>')
+        # print('Computing objective >>>>>>>>>>')
         self.check_if_warm_and_run_model(x, guess_dict, tol_dict, 
                                          force_rerun, check_failure)
-        print('---------Computed objective---------')
+        # print('---------Computed objective---------')
         return self._get_objective()
         # return failure_flag, sim.objective()
 
@@ -237,39 +237,39 @@ class CSDLAlphaProblem(OptProblem):
     @hot_start(['x'], ['grad'])
     def _compute_objective_gradient(self, x, guess_dict=None, tol_dict=None, 
                                     force_rerun=False, check_failure=False):
-        print('Computing gradient >>>>>>>>>>')
+        # print('Computing gradient >>>>>>>>>>')
         self.check_if_warm_and_compute_derivatives(x, guess_dict, tol_dict, 
                                                    force_rerun, check_failure)
-        print('---------Computed gradient---------')
+        # print('---------Computed gradient---------')
         return self._get_objective_gradient()
 
     @record(['x'], ['con'])
     @hot_start(['x'], ['con'])
     def _compute_constraints(self, x, guess_dict=None, tol_dict=None, 
                              force_rerun=False, check_failure=False):
-        print('Computing constraints >>>>>>>>>>')
+        # print('Computing constraints >>>>>>>>>>')
         self.check_if_warm_and_run_model(x, guess_dict, tol_dict, 
                                          force_rerun, check_failure)
-        print('---------Computed constraints---------')
+        # print('---------Computed constraints---------')
         return self._get_constraints()
 
     @record(['x'], ['jac'])
     @hot_start(['x'], ['jac'])
     def _compute_constraint_jacobian(self, x, guess_dict=None, tol_dict=None, 
                                      force_rerun=False, check_failure=False):
-        print('Computing Jacobian >>>>>>>>>>')
+        # print('Computing Jacobian >>>>>>>>>>')
         self.check_if_warm_and_compute_derivatives(x, guess_dict, tol_dict, 
                                                    force_rerun, check_failure)
-        print('---------Computed Jacobian---------')
+        # print('---------Computed Jacobian---------')
         return self._get_constraint_jacobian()
 
     @record(['x'], ['failure', 'obj', 'con', 'grad', 'jac'])
     @hot_start(['x'], ['failure', 'obj', 'con', 'grad', 'jac'])
     def _compute_all(self, x, force_rerun=False, check_failure=False):                              # only for SNOPTC, (NOT meant for SURF)
-        print('Computing all at once >>>>>>>>>>')
+        # print('Computing all at once >>>>>>>>>>')
         # self.check_if_warm_and_run_model(x, force_rerun=force_rerun, check_failure=check_failure)                 # This is rqd, o/w warm derivs skip model evals --> not sure since the warm_x and warm_x_deriv are always equal for compute_all
         self.check_if_warm_and_compute_derivatives(x, force_rerun=force_rerun, check_failure=check_failure)
-        print('---------Computed all at once---------')
+        # print('---------Computed all at once---------')
         return self.fail2, self.f_s, self.c_s, self.g_s, self.j_s
     
 

@@ -213,10 +213,10 @@ class OpenMDAOProblem(Problem):
     def _compute_objective(self, x, guess_dict=None, tol_dict=None, 
                            force_rerun=False, check_failure=False):
         om_prob = self.options['om_problem']
-        print('Computing objective >>>>>>>>>>')
+        # print('Computing objective >>>>>>>>>>')
         self.check_if_warm_and_run_model(x, guess_dict, tol_dict, 
                                          force_rerun, check_failure)
-        print('---------Computed objective---------')
+        # print('---------Computed objective---------')
         obj_values = list(om_prob.driver.get_objective_values().values())
         return obj_values[0][0]
         # return failure_flag, sim.objective()
@@ -226,10 +226,10 @@ class OpenMDAOProblem(Problem):
     def _compute_objective_gradient(self, x, guess_dict=None, tol_dict=None, 
                                     force_rerun=False, check_failure=False):
         om_prob = self.options['om_problem']
-        print('Computing gradient >>>>>>>>>>')
+        # print('Computing gradient >>>>>>>>>>')
         self.check_if_warm_and_compute_derivatives(x, guess_dict, tol_dict, 
                                                    force_rerun, check_failure)
-        print('---------Computed gradient---------')
+        # print('---------Computed gradient---------')
         # totals_dict contains objective gradients as matrices
         # return np.concatenate([self.totals_dict[self.obj_name, dv_name][0] for dv_name in self.dv_names])
         return self.totals[0]
@@ -239,10 +239,10 @@ class OpenMDAOProblem(Problem):
     def _compute_constraints(self, x, guess_dict=None, tol_dict=None, 
                              force_rerun=False, check_failure=False):
         om_prob = self.options['om_problem']
-        print('Computing constraints >>>>>>>>>>')
+        # print('Computing constraints >>>>>>>>>>')
         self.check_if_warm_and_run_model(x, guess_dict, tol_dict, 
                                          force_rerun, check_failure)
-        print('---------Computed constraints---------')
+        # print('---------Computed constraints---------')
 
         con_values = list(om_prob.driver.get_constraint_values().values())
         # c = np.concatenate([value.flatten() for value in con_values])
@@ -253,10 +253,10 @@ class OpenMDAOProblem(Problem):
     def _compute_constraint_jacobian(self, x, guess_dict=None, tol_dict=None, 
                                      force_rerun=False, check_failure=False):
         om_prob = self.options['om_problem']
-        print('Computing Jacobian >>>>>>>>>>')
+        # print('Computing Jacobian >>>>>>>>>>')
         self.check_if_warm_and_compute_derivatives(x, guess_dict, tol_dict, 
                                                    force_rerun, check_failure)
-        print('---------Computed Jacobian---------')
+        # print('---------Computed Jacobian---------')
         
         # return np.concatenate([np.concatenate([self.totals_dict[con_name, dv_name] for con_name in self.con_names]) for dv_name in self.dv_names], axis=1)
         return self.totals[1:]
@@ -265,10 +265,10 @@ class OpenMDAOProblem(Problem):
     @hot_start(['x'], ['failure', 'obj', 'con', 'grad', 'jac'])
     def _compute_all(self, x, force_rerun=False, check_failure=False):                              # only for SNOPTC, (NOT meant for SURF)
         om_prob = self.options['om_problem']
-        print('Computing all at once >>>>>>>>>>')
+        # print('Computing all at once >>>>>>>>>>')
         self.check_if_warm_and_run_model(x, force_rerun=force_rerun, check_failure=check_failure)                 # This is rqd, ow warm derivs skip model evals
         self.check_if_warm_and_compute_derivatives(x, force_rerun=force_rerun, check_failure=check_failure)
-        print('---------Computed all at once---------')
+        # print('---------Computed all at once---------')
 
         obj_values = list(om_prob.driver.get_objective_values().values())
         obj = obj_values[0][0]
