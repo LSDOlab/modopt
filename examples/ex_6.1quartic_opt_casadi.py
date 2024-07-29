@@ -6,14 +6,21 @@ import casadi as ca
 
 # minimize x^4 + y^4 subject to x>=0, x+y=1, x-y>=1.
 
-# METHOD 1: Using CasADi functions directly within mo.CasadiProblem (Auto computes lagrangian and hessians)
+# METHOD 1: Use CasADi expressions directly in mo.CasadiProblem.
+#           ModOpt will auto-generate the gradient, Jacobian, and objective Hessian.
+#           ModOpt will also auto-generate the Lagrangian, its gradient, and Hessian.
+#           No need to manually generate functions or their derivatives and then wrap them.
+
 obj = lambda x: ca.sum1(x**4)
 con = lambda x: ca.vertcat(x[0] + x[1], x[0] - x[1])
 
 prob = mo.CasadiProblem(x0=np.array([500., 5.]), ca_obj=obj, ca_con=con, 
-                        cl=np.array([1., 1.]), cu=np.array([1., np.inf]), name='quartic_casadi')
+                        cl=np.array([1., 1.]), cu=np.array([1., np.inf]), 
+                        xl=np.array([0., -np.inf]), xu=np.array([np.inf, np.inf]),
+                        name='quartic_casadi')
 
-# # METHOD 2: Creating CasADi functions and wrapping manually before passing to ProblemLite
+# # METHOD 2: Create CasADi functions and derivatives, 
+# #           and wrap them manually before passing to Problem/ProblemLite.
 
 # # Create scalar/matrix symbols
 # x = ca.MX.sym('x', 2)
@@ -46,6 +53,7 @@ prob = mo.CasadiProblem(x0=np.array([500., 5.]), ca_obj=obj, ca_con=con,
 # prob = mo.ProblemLite(x0=np.array([500., 5.]), 
 #                       obj=obj, grad=grad, con=con, jac=jac,
 #                       cl=np.array([1., 1.]), cu=np.array([1., np.inf]),
+#                       xl=np.array([0., -np.inf]), xu=np.array([np.inf, np.inf]),
 #                       name = 'quartic_casadi')
 
 if __name__ == "__main__":

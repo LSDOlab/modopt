@@ -1,5 +1,7 @@
 '''Cantilever beam optimization with OpenMDAO'''
 
+# Adapted from: https://openmdao.org/newdocs/versions/latest/examples/beam_optimization_example.html
+
 import numpy as np
 import scipy.sparse as sp
 import time

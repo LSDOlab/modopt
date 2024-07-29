@@ -7,8 +7,10 @@ import casadi as ca
 
 E0, L0, b0, vol0, F0 = 1., 1., 0.1, 0.01, -1.
 
-# METHOD 1 - Use CasADi functions directly in CasadiProblem wrapper
-#            ModOpt will auto-compute lagrangian and hessians
+# METHOD 1: Use CasADi expressions directly in mo.CasadiProblem.
+#           ModOpt will auto-generate the gradient, Jacobian, and objective Hessian.
+#           ModOpt will also auto-generate the Lagrangian, its gradient, and Hessian.
+#           No need to manually generate functions or their derivatives and then wrap them.
 
 def get_problem(n_el): # 16 lines excluding comments, and returns.
 
@@ -77,8 +79,8 @@ assert np.allclose(optimizer.results['x'],
                     0.05808044,  0.05407658,  0.04975295,  0.0450185,   0.03972912,  0.03363155,
                     0.02620192,  0.01610863], rtol=0, atol=1e-5)
 
-# METHOD 2 - Use CasADi to define all functions and derivatives
-#            Wrap them manually with ProblemLite
+# # METHOD 2: Create CasADi functions and derivatives, 
+# #           and wrap them manually before passing to Problem/ProblemLite.
 # from modopt import ProblemLite
 # def get_problem(n_el):
 #     x = ca.MX.sym('x', n_el)

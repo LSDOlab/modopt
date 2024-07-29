@@ -11,12 +11,16 @@ from numpy.testing import assert_array_equal, assert_array_almost_equal, assert_
 @pytest.mark.interfaces
 @pytest.mark.casadi
 def test_casadi_problem():
-    # METHOD 1: Using CasADi functions directly within mo.CasadiProblem (Auto computes lagrangian and hessians)
+    # METHOD 1: Use CasADi expressions directly in mo.CasadiProblem.
+    #           ModOpt will auto-generate the gradient, Jacobian, and objective Hessian.
+    #           ModOpt will also auto-generate the Lagrangian, its gradient, and Hessian.
+    #           No need to manually generate functions or their derivatives and then wrap them.
 
     obj = lambda x: ca.sum1(x**4)
     con = lambda x: ca.vertcat(x[0] + x[1], x[0] - x[1])
 
     prob = mo.CasadiProblem(x0=np.array([1., 2.]), ca_obj=obj, ca_con=con, 
+                            xl=np.array([0., -np.inf]), xu=np.array([np.inf, np.inf]),
                             cl=np.array([1., 1.]), cu=np.array([1., np.inf]), name='quartic_casadi',
                             x_scaler=np.array([100., 0.2]), c_scaler=np.array([20., 5.]), o_scaler=3.)
     
@@ -34,7 +38,8 @@ def test_casadi_problem():
 @pytest.mark.interfaces
 @pytest.mark.casadi
 def test_casadi():
-    # METHOD 2: Creating CasADi functions and wrapping manually before passing to ProblemLite
+    # METHOD 2: Create CasADi functions and derivatives, 
+    #           and wrap them manually before passing to Problem/ProblemLite.
 
     # Create scalar/matrix symbols
     x = ca.MX.sym('x', 2)
@@ -65,6 +70,7 @@ def test_casadi():
 
    # Create a ProblemLite object using the wrapped functions
     prob = mo.ProblemLite(x0=np.array([1., 2.]), obj=obj, grad=grad, con=con, jac=jac,
+                          xl=np.array([0., -np.inf]), xu=np.array([np.inf, np.inf]),
                           cl=np.array([1., 1.]), cu=np.array([1., np.inf]),
                           name = 'quartic_casadi',
                           x_scaler=np.array([100., 0.2]), c_scaler=np.array([20., 5.]), o_scaler=3.)

@@ -1,15 +1,12 @@
 import numpy as np
 import warnings
-import time
 from modopt import ProblemLite
-from modopt.utils.options_dictionary import OptionsDictionary
 
 try:
     import casadi as ca
 except:
     ca = None
-    warnings.warn("'casadi' could not be imported. Install 'casadi' using `pip install casadi` for using CasADi Problems.")
-
+    warnings.warn("'casadi' could not be imported. Install 'casadi' using `pip install casadi` for using CasadiProblem.")
 
 class CasadiProblem(ProblemLite):
     '''
@@ -57,7 +54,7 @@ class CasadiProblem(ProblemLite):
             raise ValueError(f"Initial guess 'x0' must be a numpy 1d-array.")
 
         if ca is None:
-            raise ImportError("'casadi' could not be imported. Install 'casadi' using `pip install casadi` for using CasADi Problems.")
+            raise ImportError("'casadi' could not be imported. Install 'casadi' using `pip install casadi` for using CasadiProblem.")
         
         x = ca.MX.sym('x', nx)
 
@@ -87,16 +84,16 @@ class CasadiProblem(ProblemLite):
         if ca_con is not None:
             con_expr = ca_con(x)
             _con = ca.Function('c', [x], [con_expr])
-            nc = con_expr.size1() # number of rows in the constraint expression
             con  = lambda x: np.array(_con(x)).flatten()
             if not grad_free:
                 jac_expr = ca.jacobian(con_expr, x)
                 _jac     = ca.Function('j', [x], [jac_expr])
                 jac      = lambda x: np.array(_jac(x))
 
-        if ca_con is not None:
+            # Lagrangian functions
+            nc = con_expr.size1() # number of rows in the constraint expression
             lam = ca.MX.sym('lam', nc)
-            if obj_expr is not None:
+            if ca_obj is not None:
                 lag_expr = obj_expr + ca.dot(lam, con_expr)
             else:
                 lag_expr = ca.dot(lam, con_expr)
@@ -106,10 +103,10 @@ class CasadiProblem(ProblemLite):
             if not grad_free:
                 # lag_grad_expr = ca.gradient(lag_expr, x)
                 lag_hess_expr, lag_grad_expr = ca.hessian(lag_expr, x)
-                _lag_grad     = ca.Function('lag', [x, lam], [lag_grad_expr])
+                _lag_grad     = ca.Function('lg', [x, lam], [lag_grad_expr])
                 lag_grad      = lambda x, lam: np.array(_lag_grad(x, lam)).flatten()
 
-                _lag_hess     = ca.Function('lag', [x, lam], [lag_hess_expr])
+                _lag_hess     = ca.Function('lh', [x, lam], [lag_hess_expr])
                 lag_hess      = lambda x, lam: np.array(_lag_hess(x, lam))
             
         super().__init__(x0, name=name, obj=obj, grad=grad, obj_hess=obj_hess, con=con, jac=jac,
