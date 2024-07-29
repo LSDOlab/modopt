@@ -37,7 +37,7 @@ def test_casadi_problem():
 
 @pytest.mark.interfaces
 @pytest.mark.casadi
-def test_casadi():
+def test_problem_lite_casadi():
     # METHOD 2: Create CasADi functions and derivatives, 
     #           and wrap them manually before passing to Problem/ProblemLite.
 
@@ -87,5 +87,5 @@ def test_casadi():
 
 if __name__ == '__main__':
     test_casadi_problem()
-    test_casadi()
+    test_problem_lite_casadi()
     print("All tests passed!")

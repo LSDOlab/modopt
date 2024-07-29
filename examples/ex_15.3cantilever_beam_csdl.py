@@ -8,7 +8,7 @@ import csdl_alpha as csdl
 
 E0, L0, b0, vol0, F0 = 1., 1., 0.1, 0.01, -1.
 
-def get_problem(n_el): # 23 lines excluding comments, returns, name assignment, 
+def get_problem(n_el): # 23 statements excluding comments, returns, name assignment, 
                        # and an extra line for concatenating u with [0., 0.].
     rec = csdl.Recorder()
     rec.start()

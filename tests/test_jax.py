@@ -5,6 +5,11 @@ import pytest
 @pytest.mark.interfaces
 @pytest.mark.jax
 def test_jax_problem():
+    # METHOD 1: Use Jax functions directly in mo.JaxProblem. 
+    #           ModOpt will auto-generate gradient, Jacobian, and objective Hessian.
+    #           ModOpt will also auto-generate the Lagrangian, its gradient, and Hessian.
+    #           No need to manually generate or jit functions or their derivatives and then wrap them.
+
     import numpy as np
     from numpy.testing import assert_array_equal, assert_array_almost_equal, assert_almost_equal
     from modopt import JaxProblem
@@ -53,7 +58,9 @@ def test_jax_problem():
 
 @pytest.mark.interfaces
 @pytest.mark.jax
-def test_problem():
+def test_problem_jax():
+    # METHOD 2: Create jitted Jax functions and derivatives, and
+    #           wrap them manually before passing to Problem.
     import numpy as np
     from numpy.testing import assert_array_equal, assert_array_almost_equal, assert_almost_equal
     from modopt import Problem
@@ -157,7 +164,9 @@ def test_problem():
 
 @pytest.mark.interfaces
 @pytest.mark.jax
-def test_problem_lite():
+def test_problem_lite_jax():
+    # METHOD 2: Create jitted Jax functions and derivatives, and
+    #           wrap them manually before passing to ProblemLite.
     import numpy as np
     from numpy.testing import assert_array_equal, assert_array_almost_equal, assert_almost_equal
     from modopt import ProblemLite
@@ -225,6 +234,6 @@ def test_problem_lite():
 
 if __name__ == '__main__':
     test_jax_problem()
-    test_problem()
-    test_problem_lite()
+    test_problem_jax()
+    test_problem_lite_jax()
     print("All tests passed!")

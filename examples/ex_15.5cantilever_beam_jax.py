@@ -1,16 +1,19 @@
-'''Cantilever beam optimization with CasADi'''
+'''Cantilever beam optimization with Jax'''
 
 import numpy as np
-from modopt import CasadiProblem, SLSQP
+from modopt import JaxProblem, SLSQP
 import time
-import casadi as ca
+
+import jax
+import jax.numpy as jnp 
+jax.config.update("jax_enable_x64", True)
 
 E0, L0, b0, vol0, F0 = 1., 1., 0.1, 0.01, -1.
 
-# METHOD 1: Use CasADi expressions directly in mo.CasadiProblem.
+# METHOD 1: Use Jax functions directly in mo.JaxProblem. 
 #           ModOpt will auto-generate the gradient, Jacobian, and objective Hessian.
 #           ModOpt will also auto-generate the Lagrangian, its gradient, and Hessian.
-#           No need to manually generate functions or their derivatives and then wrap them.
+#           No need to manually generate or jit functions or their derivatives and then wrap them.
 
 def get_problem(n_el): # 16 statements excluding comments, and returns.
 
@@ -18,7 +21,7 @@ def get_problem(n_el): # 16 statements excluding comments, and returns.
     L_el = L / n_el
     n_nodes = n_el + 1
 
-    def ca_obj(x):
+    def jax_obj(x):
         # Moment of inertia
         I = b * x**3 / 12
 
@@ -28,30 +31,29 @@ def get_problem(n_el): # 16 statements excluding comments, and returns.
 
         # Stiffness matrix
         c_el = E / L_el**3 * np.array([[12, 6*L_el, -12, 6*L_el],
-                                    [6*L_el, 4*L_el**2, -6*L_el, 2*L_el**2],
-                                    [-12, -6*L_el, 12, -6*L_el],
-                                    [6*L_el, 2*L_el**2, -6*L_el, 4*L_el**2]])
-        K = ca.MX.zeros((n_nodes*2, n_nodes*2))
+                                       [6*L_el, 4*L_el**2, -6*L_el, 2*L_el**2],
+                                       [-12, -6*L_el, 12, -6*L_el],
+                                       [6*L_el, 2*L_el**2, -6*L_el, 4*L_el**2]])
+        K = jnp.zeros((n_nodes*2, n_nodes*2))
         for i in range(n_el):
-            K[2*i:2*i+4, 2*i:2*i+4] += c_el * I[i]
+            K = K.at[2*i:2*i+4, 2*i:2*i+4].add(c_el * I[i])
+            # K[2*i:2*i+4, 2*i:2*i+4] += c_el * I[i]
 
         # Displacement vector - solve for u in Ku = F
         # Apply boundary conditions: u[0] = u[1] = 0,
         # F[0:1] are unknown reaction forces at the left end. F[0:1] = K[0:1,2:].dot(u[2:])
-        u = ca.vertcat(0., 0., ca.solve(K[2:,2:], F[2:]))
-        # Expression for Compliance
-        obj_expr = ca.dot(F, u)
+        u = jnp.concatenate((np.array([0., 0.]), jnp.linalg.solve(K[2:,2:], F[2:])))
+        # Compliance
+        c = jnp.dot(F, u)
 
-        return obj_expr
+        return c
 
-    def ca_con(x):
-        # Create an expression for the constraints
-        con_expr = ca.vertcat(L_el * b * ca.sum1(x) - vol)
-        return con_expr
+    def jax_con(x):
+        return jnp.array([L_el * b * jnp.sum(x) - vol])
 
-    return CasadiProblem(x0=np.ones(n_el), ca_obj=ca_obj, ca_con=ca_con,
-                         name=f'Cantilever beam {n_el} elements CasADi',
-                         xl=1e-2, cl=0., cu=0.)
+    return JaxProblem(x0=np.ones(n_el), nc=1, jax_obj=jax_obj, jax_con=jax_con,
+                      name=f'Cantilever beam {n_el} elements Jax',
+                      xl=1e-2, cl=0., cu=0.)
 
 # # Test to see if the problem is correctly defined
 # prob = get_problem(50)
@@ -84,62 +86,58 @@ assert np.allclose(optimizer.results['x'],
                     0.05808044,  0.05407658,  0.04975295,  0.0450185,   0.03972912,  0.03363155,
                     0.02620192,  0.01610863], rtol=0, atol=1e-5)
 
-# # METHOD 2: Create CasADi functions and derivatives, 
-# #           and wrap them manually before passing to Problem/ProblemLite.
-# from modopt import ProblemLite
-# def get_problem(n_el):
-#     x = ca.MX.sym('x', n_el)
+# # METHOD 2: Create jitted Jax functions and derivatives, and
+# #           wrap them manually before passing to ProblemLite.
+# from modopt import JaxProblem, SLSQP
+# def get_problem(n_el): # 16 lines excluding comments, and returns.
 
-#     E, L, b = E0, L0, b0
+#     E, L, b, vol = E0, L0, b0, vol0
 #     L_el = L / n_el
 #     n_nodes = n_el + 1
 
-#     # Moment of inertia
-#     I = b * x**3 / 12
+#     def jax_obj(x):
+#         # Moment of inertia
+#         I = b * x**3 / 12
 
-#     # Force vector
-#     F = np.zeros((n_nodes*2,))
-#     F[-2] = F0
+#         # Force vector
+#         F = np.zeros((n_nodes*2,))
+#         F[-2] = F0
 
-#     # Stiffness matrix
-#     c_el = E / L_el**3 * np.array([[12, 6*L_el, -12, 6*L_el],
-#                                    [6*L_el, 4*L_el**2, -6*L_el, 2*L_el**2],
-#                                    [-12, -6*L_el, 12, -6*L_el],
-#                                    [6*L_el, 2*L_el**2, -6*L_el, 4*L_el**2]])
-#     K = ca.MX.zeros((n_nodes*2, n_nodes*2))
-#     for i in range(n_el):
-#         K[2*i:2*i+4, 2*i:2*i+4] += c_el * I[i]
+#         # Stiffness matrix
+#         c_el = E / L_el**3 * np.array([[12, 6*L_el, -12, 6*L_el],
+#                                     [6*L_el, 4*L_el**2, -6*L_el, 2*L_el**2],
+#                                     [-12, -6*L_el, 12, -6*L_el],
+#                                     [6*L_el, 2*L_el**2, -6*L_el, 4*L_el**2]])
+#         K = jnp.zeros((n_nodes*2, n_nodes*2))
+#         for i in range(n_el):
+#             K = K.at[2*i:2*i+4, 2*i:2*i+4].add(c_el * I[i])
+#             # K[2*i:2*i+4, 2*i:2*i+4] += c_el * I[i]
 
-#     # Displacement vector - solve for u in Ku = F
-#     # Apply boundary conditions: u[0] = u[1] = 0,
-#     # F[0:1] are unknown reaction forces at the left end. F[0:1] = K[0:1,2:].dot(u[2:])
-#     u = ca.vertcat(0., 0., ca.solve(K[2:,2:], F[2:]))
-#     # Compliance
-#     obj_expr = ca.dot(F, u)
+#         # Displacement vector - solve for u in Ku = F
+#         # Apply boundary conditions: u[0] = u[1] = 0,
+#         # F[0:1] are unknown reaction forces at the left end. F[0:1] = K[0:1,2:].dot(u[2:])
+#         u = jnp.concatenate((np.array([0., 0.]), jnp.linalg.solve(K[2:,2:], F[2:])))
+#         # Compliance
+#         c = jnp.dot(F, u)
 
-#     # Sensitivity of expression -> new expression
-#     grad_expr = ca.gradient(obj_expr,x)
+#         return c
 
-#     # Create a Function to evaluate expression
-#     _obj  = ca.Function('o',[x],[obj_expr])
-#     _grad = ca.Function('g',[x],[grad_expr])
+#     def jax_con(x):
+#         return jnp.array([L_el * b * jnp.sum(x) - vol])
+
+#     _obj = jax.jit(jax_obj)
+#     _con = jax.jit(jax_con)
+
+#     _grad = jax.jit(jax.grad(jax_obj))
+#     _jac = jax.jit(jax.jacfwd(jax_con))
 
 #     obj  = lambda x: np.float64(_obj(x))
-#     grad = lambda x: np.array(_grad(x)).flatten()
-
-#     # Create an expression for the constraints and jacobian
-#     con_expr = ca.vertcat(L_el * b * ca.sum1(x) - vol0)
-#     jac_expr = ca.jacobian(con_expr, x)
-
-#     # Create a Function to evaluate expression
-#     _con = ca.Function('c', [x], [con_expr])
-#     _jac = ca.Function('j', [x], [jac_expr])
-
-#     con  = lambda x: np.array(_con(x)).flatten()
+#     grad = lambda x: np.array(_grad(x))
+#     con  = lambda x: np.array(_con(x))
 #     jac  = lambda x: np.array(_jac(x))
 
 #     return ProblemLite(x0=np.ones(n_el), obj=obj, grad=grad, con=con, jac=jac,
-#                        name=f'Cantilever beam {n_el} elements CasADi',
+#                        name=f'Cantilever beam {n_el} elements Jax',
 #                        xl=1e-2, cl=0., cu=0.)
 
 # # SLSQP

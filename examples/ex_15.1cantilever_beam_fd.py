@@ -6,7 +6,7 @@ import time
 
 E0, L0, b0, vol0, F0 = 1., 1., 0.1, 0.01, -1.
 
-def get_problem(n_el): # 16 lines excluding comments, returns, and jac function.
+def get_problem(n_el): # 16 statements excluding comments, returns, and jac function.
 
     E, L, b, vol = E0, L0, b0, vol0
     L_el = L / n_el

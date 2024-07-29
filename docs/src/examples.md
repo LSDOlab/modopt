@@ -32,4 +32,5 @@ _temp/examples/ex_15.1cantilever_beam_fd
 _temp/examples/ex_15.2cantilever_beam_casadi
 _temp/examples/ex_15.3cantilever_beam_csdl
 _temp/examples/ex_15.4cantilever_beam_openmdao
+_temp/examples/ex_15.5cantilever_beam_jax
 ```
