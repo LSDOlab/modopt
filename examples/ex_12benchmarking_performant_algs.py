@@ -1,4 +1,4 @@
-'''Benchmark performant algorithms on three simple problems'''
+'''Benchmark performant algorithms on three analytical problems'''
 
 import numpy as np
 from modopt import ProblemLite, optimize

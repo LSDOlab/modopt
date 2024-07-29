@@ -1,4 +1,4 @@
-'''Benchmark optimization algorithms on uncoupled Rosenbrock problem'''
+'''Benchmark algorithms using the uncoupled Rosenbrock problem'''
 
 import numpy as np
 from modopt import ProblemLite, optimize

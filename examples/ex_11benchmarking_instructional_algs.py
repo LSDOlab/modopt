@@ -1,4 +1,4 @@
-'''Benchmark instructional algorithms on three simple problems'''
+'''Benchmark instructional algorithms on three analytical problems'''
 
 import numpy as np
 from modopt import ProblemLite

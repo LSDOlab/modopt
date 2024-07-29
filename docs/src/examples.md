@@ -25,4 +25,11 @@ _temp/examples/ex_8bean_function
 _temp/examples/ex_9traveling_salesman
 _temp/examples/ex_10benchmarking
 _temp/examples/ex_11benchmarking_instructional_algs
+_temp/examples/ex_12benchmarking_performant_algs
+_temp/examples/ex_13rosenbrock_uncoupled
+_temp/examples/ex_14rosenbrock_coupled
+_temp/examples/ex_15.1cantilever_beam_fd
+_temp/examples/ex_15.2cantilever_beam_casadi
+_temp/examples/ex_15.3cantilever_beam_csdl
+_temp/examples/ex_15.4cantilever_beam_openmdao
 ```

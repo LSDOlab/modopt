@@ -1,4 +1,4 @@
-'''Benchmark optimization algorithms on coupled Rosenbrock problem'''
+'''Benchmark algorithms using the coupled Rosenbrock problem'''
 
 import numpy as np
 from modopt import ProblemLite, optimize
