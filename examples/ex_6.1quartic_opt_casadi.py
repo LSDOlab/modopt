@@ -11,10 +11,10 @@ import casadi as ca
 #           ModOpt will also auto-generate the Lagrangian, its gradient, and Hessian.
 #           No need to manually generate functions or their derivatives and then wrap them.
 
-obj = lambda x: ca.sum1(x**4)
-con = lambda x: ca.vertcat(x[0] + x[1], x[0] - x[1])
+ca_obj = lambda x: ca.sum1(x**4)
+ca_con = lambda x: ca.vertcat(x[0] + x[1], x[0] - x[1])
 
-prob = mo.CasadiProblem(x0=np.array([500., 5.]), ca_obj=obj, ca_con=con, 
+prob = mo.CasadiProblem(x0=np.array([500., 5.]), ca_obj=ca_obj, ca_con=ca_con, 
                         cl=np.array([1., 1.]), cu=np.array([1., np.inf]), 
                         xl=np.array([0., -np.inf]), xu=np.array([np.inf, np.inf]),
                         name='quartic_casadi')

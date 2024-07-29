@@ -1,4 +1,4 @@
-# Test openMDAO interface
+# Test Jax interface
 
 import pytest
 
@@ -7,26 +7,74 @@ import pytest
 def test_jax_problem():
     import numpy as np
     from numpy.testing import assert_array_equal, assert_array_almost_equal, assert_almost_equal
-    from modopt import Problem, Problem
+    from modopt import JaxProblem
     import jax
     import jax.numpy as jnp 
     jax.config.update("jax_enable_x64", True)
 
     # minimize x^4 + y^4 subject to x>=0, x+y=1, x-y>=1.
 
+    jax_obj = lambda x: jnp.sum(x ** 4)
+    jax_con = lambda x: jnp.array([x[0] + x[1], x[0] - x[1]])
+
+    x0 = np.array([1., 2.])
+    xl = np.array([0., -np.inf])
+    xu = np.array([np.inf, np.inf])
+    cl = np.array([1., 1.])
+    cu = np.array([1., np.inf])
+    x_sc = np.array([100., 0.2])
+    o_sc = 3.
+    c_sc = np.array([20., 5.])
+    prob = JaxProblem(x0, name='quartic', jax_obj=jax_obj, jax_con=jax_con,
+                      xl=xl, xu=xu, cl=cl, cu=cu, x_scaler=x_sc, o_scaler=o_sc, c_scaler=c_sc)
+
+    assert prob.problem_name == 'quartic'
+    assert prob.constrained == True
+    assert_array_equal(prob.o_scaler, 3.)
+    assert_array_equal(prob.x_scaler, [100., 0.2])
+    assert_array_equal(prob.c_scaler, [20., 5.])
+    assert_array_equal(prob.x0, np.array([100., 0.4]))
+    assert_array_equal(prob.x_lower, np.array([0, -np.inf]))
+    assert_array_equal(prob.x_upper, np.array([np.inf, np.inf]))
+    assert_array_equal(prob.c_lower, [20., 5.])
+    assert_array_equal(prob.c_upper, [20., np.inf])
+
+    from modopt import SLSQP
+    optimizer = SLSQP(prob, solver_options={'ftol': 1e-6, 'maxiter': 20, 'disp': True})
+
+    optimizer.check_first_derivatives(prob.x0)
+    optimizer.solve()
+    optimizer.print_results()
+
+    assert optimizer.results['success'] == True
+    assert optimizer.results['message'] == 'Optimization terminated successfully'
+    assert_array_almost_equal(optimizer.results['x'], [100., 0.], decimal=11)
+    assert_almost_equal(optimizer.results['fun'], 3., decimal=11)
+
+@pytest.mark.interfaces
+@pytest.mark.jax
+def test_problem():
     import numpy as np
+    from numpy.testing import assert_array_equal, assert_array_almost_equal, assert_almost_equal
+    from modopt import Problem
+    import jax
+    import jax.numpy as jnp 
+    jax.config.update("jax_enable_x64", True)
 
-    def objective(x):
-        return jnp.sum(x ** 4)
+    # minimize x^4 + y^4 subject to x>=0, x+y=1, x-y>=1.
 
-    def constraints(x):
-        return jnp.array([x[0] + x[1], x[0] - x[1]])
+    jax_obj = lambda x: jnp.sum(x ** 4)
+    jax_con = lambda x: jnp.array([x[0] + x[1], x[0] - x[1]])
 
-    obj_func = jax.jit(objective)
-    grad_func = jax.jit(jax.grad(objective))
+    _obj  = jax.jit(jax_obj)
+    _grad = jax.jit(jax.grad(jax_obj))
+    _con  = jax.jit(jax_con)
+    _jac  = jax.jit(jax.jacfwd(jax_con))
 
-    con_func = jax.jit(constraints)
-    jac_func = jax.jit(jax.jacfwd(constraints))
+    obj  = lambda x: np.float64(_obj(x))
+    grad = lambda x: np.array(_grad(x))
+    con  = lambda x: np.array(_con(x))
+    jac  = lambda x: np.array(_jac(x))
 
     class Quartic(Problem):
         def initialize(self, ):
@@ -50,27 +98,27 @@ def test_jax_problem():
 
         def setup_derivatives(self):
             self.declare_objective_gradient(wrt='x', vals=None)
-            jac_0 = np.array(jac_func(self.x0 / self.x_scaler)) # Note that self.x0 is scaled
+            jac_0 = jac(self.x0 / self.x_scaler) # Note that self.x0 is scaled
             self.declare_constraint_jacobian(of='c',
                                             wrt='x',
                                             vals=jac_0)
 
-        def compute_objective(self, dvs, obj):
+        def compute_objective(self, dvs, o):
             x = dvs['x']
-            obj['f'] = np.float_(obj_func(x))
+            o['f'] = obj(x)
 
-        def compute_objective_gradient(self, dvs, grad):
+        def compute_objective_gradient(self, dvs, g):
             x = dvs['x']
-            grad['x'] = np.array(grad_func(x))
+            g['x'] = grad(x)
 
-        def compute_constraints(self, dvs, cons):
+        def compute_constraints(self, dvs, c):
             x = dvs['x']
-            cons['c'] = np.array(con_func(x))
+            c['c'] = con(x)
 
-        def compute_constraint_jacobian(self, dvs, jac):
+        def compute_constraint_jacobian(self, dvs, j):
             pass
             # x = dvs['x']
-            # jac['c', 'x'] = np.array(jac_func(x))
+            # j['c', 'x'] = jac(x)
 
     prob = Quartic(jac_format='dense')
 
@@ -109,7 +157,7 @@ def test_jax_problem():
 
 @pytest.mark.interfaces
 @pytest.mark.jax
-def test_jax_problem_lite():
+def test_problem_lite():
     import numpy as np
     from numpy.testing import assert_array_equal, assert_array_almost_equal, assert_almost_equal
     from modopt import ProblemLite
@@ -119,24 +167,18 @@ def test_jax_problem_lite():
 
     # minimize x^4 + y^4 subject to x>=0, x+y=1, x-y>=1.
 
-    import numpy as np
+    jax_obj = lambda x: jnp.sum(x ** 4)
+    jax_con = lambda x: jnp.array([x[0] + x[1], x[0] - x[1]])
 
-    def objective(x):
-        return jnp.sum(x ** 4)
+    _obj  = jax.jit(jax_obj)
+    _grad = jax.jit(jax.grad(jax_obj))
+    _con  = jax.jit(jax_con)
+    _jac  = jax.jit(jax.jacfwd(jax_con))
 
-    def constraints(x):
-        return jnp.array([x[0] + x[1], x[0] - x[1]])
-
-    obj_func = jax.jit(objective)
-    grad_func = jax.jit(jax.grad(objective))
-
-    con_func = jax.jit(constraints)
-    jac_func = jax.jit(jax.jacfwd(constraints))
-
-    obj = lambda x: np.float_(obj_func(x))
-    grad = lambda x: np.array(grad_func(x))
-    con = lambda x: np.array(con_func(x))
-    jac = lambda x: np.array(jac_func(x))
+    obj  = lambda x: np.float64(_obj(x))
+    grad = lambda x: np.array(_grad(x))
+    con  = lambda x: np.array(_con(x))
+    jac  = lambda x: np.array(_jac(x))
 
     x0 = np.array([1., 2.])
     xl = np.array([0., -np.inf])
@@ -183,5 +225,6 @@ def test_jax_problem_lite():
 
 if __name__ == '__main__':
     test_jax_problem()
-    test_jax_problem_lite()
+    test_problem()
+    test_problem_lite()
     print("All tests passed!")

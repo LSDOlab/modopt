@@ -108,7 +108,7 @@ class ProblemLite(object):
             Gradient of the Lagrangian function.
             Signature: lag_grad(x: np.ndarray, mu: np.ndarray) -> np.ndarray
         grad_free : bool, default=False
-            If True, the optimizer will not use the gradient information.
+            If True, ProblemLite will not use/generate any derivative information.
         '''
         self.check_types(x0, name, obj, con, grad, jac, obj_hess, lag_hess, fd_step, vp_fd_step, 
                          xl, xu, cl, cu, x_scaler, o_scaler, c_scaler, lag, lag_grad, grad_free)

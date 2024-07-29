@@ -10,14 +10,17 @@ except:
 
 class CasadiProblem(ProblemLite):
     '''
-    Class that interfaces with CasADi expressions for objectives and constraints.
+    Class that wraps CasADi **expressions** for objective and constraints.
+    This class will automatically generate the expressions for the objective gradient, 
+    constraint Jacobian, objective Hessian, Lagrangian, Lagrangian gradient, and Lagrangian Hessian.
+    All expressions will be turned into functions and then wrapped for use with Optimizer subclasses.
+    Vector products (HVP, JVP, VJP) are not supported.
     '''
     def __init__(self, x0, name='unnamed_problem', ca_obj=None, ca_con=None, 
                  xl=None, xu=None, cl=None, cu=None, x_scaler=1., o_scaler=1., c_scaler=1., grad_free=False):
         '''
-        Initialize the optimization problem with the given design variables, objective, constraints, and their derivatives.
-        Derivatives are automatically computed using CasADi.
-        Vector products are not supported.
+        Initialize the optimization problem with the given design variables, objective, and constraints.
+        Derivatives are automatically generated using CasADi.
 
         Attributes
         ----------
@@ -29,7 +32,7 @@ class CasadiProblem(ProblemLite):
             A Python function that returns the objective function expression in CasADi.
             Signature: ca_obj(x: ca.MX) -> ca.MX
         ca_con : callable
-            A Python function that returns the constraints function expression in CasADi.
+            A Python function that returns the constraint function expression in CasADi.
             Signature: ca_con(x: ca.MX) -> ca.MX
         xl : float or np.ndarray
             Lower bounds on design variables.
@@ -47,7 +50,7 @@ class CasadiProblem(ProblemLite):
             Scaling factor for constraints.
         grad_free : bool, default=False
             Flag to indicate if the problem is gradient-free.
-            If True, the optimizer will not use the gradient information.
+            If True, CasadiProblem will not generate any derivatives.
         '''
         nx = x0.size
         if x0.shape != (nx,):
@@ -63,9 +66,9 @@ class CasadiProblem(ProblemLite):
         obj_hess = None
 
         if ca_obj is not None:
-            obj_expr = ca_obj(x)
-            _obj = ca.Function('o', [x], [obj_expr])
-            obj  = lambda x: np.float64(_obj(x))
+            obj_expr = ca_obj(x)                        # expression
+            _obj = ca.Function('o', [x], [obj_expr])    # function
+            obj  = lambda x: np.float64(_obj(x))        # wrapped function
             if not grad_free:
                 # grad_expr = ca.gradient(obj_expr, x)
                 obj_hess_expr, grad_expr = ca.hessian(obj_expr, x)

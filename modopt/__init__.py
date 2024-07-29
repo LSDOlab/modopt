@@ -14,6 +14,7 @@ from modopt.core.trust_region import TrustRegion
 from modopt.external_libraries.csdl import (CSDLProblem, CSDLAlphaProblem)
 from modopt.external_libraries.openmdao import (OpenMDAOProblem, )
 from modopt.external_libraries.casadi import (CasadiProblem, )
+from modopt.external_libraries.jax import (JaxProblem, )
 
 # import test-suite interfaces
 # from modopt.external_libraries.pycutest import (CUTEstProblem, )
