@@ -193,8 +193,8 @@ def load_attributes(filepath):
 
 def load_variables(filepath, vars):
     '''
-    Load specified scalar variable iterates from the record file.
-    Returns a dictionary with the variable names as keys and array of variable iterates as values.
+    Load specified variable iterates from the record file.
+    Returns a dictionary with the variable names as keys and lists of variable iterates as values.
     Note that the keys for callback variables will be prefixed with 'callback_'
     as opposed to optimizer variables that will have same key as the specified variable name.
 
@@ -204,11 +204,14 @@ def load_variables(filepath, vars):
         Path to the record file.
     vars : str or list
         Variable names to load from the record file.
+        If only specific scalar variables are needed from an array, use the format 'var_name[idx]'.
+        For example, 'x[0]' will load the iterates for the first element of the array 'x', and
+        'jac[i,j]' will load the iterates for the (i,j)-th element of the array 'jac'.
 
     Returns
     -------
     out_data : dict
-        Dictionary with variable names as keys and array of variable iterates as values.
+        Dictionary with variable names as keys and lists of variable iterates as values.
         Keys for callback variables will be prefixed with 'callback_'.
 
     Examples
@@ -227,11 +230,11 @@ def load_variables(filepath, vars):
     >>> optimizer = mo.SLSQP(problem, recording=True)
     >>> results   = optimizer.solve()
     >>> from modopt.postprocessing import load_variables
-    >>> load_variables(results['out_dir']+'/record.hdf5', ['x[0]', 'obj', 'con[1]', 'grad[0]', 'jac[0,1]']) # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
-    {'x[0]': array([500. , 1.00000001, 1.00000001]), 
-    'callback_x[0]': array([500. , 500. , 500. , 500. , 500. , 1.00000..., 1.00000..., 1.00000..., 1.00000...]), 
-    'callback_obj': array([2.52500000e+05, 1.00000...e+00]), 'callback_con[1]': array([450. , 450. , 1.00000...]), 
-    'callback_grad[0]': array([1000. , 2.00000...]), 'callback_jac[0,1]': array([1., 1.])}
+    >>> load_variables(results['out_dir']+'/record.hdf5', ['x[0]', 'obj', 'con[1]', 'grad', 'jac[0,1]']) # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+    {'x[0]': [500.0, 1.0000000..., 1.00000...], 
+    'callback_x[0]': [500.0, 500.0, 500.0, 500.0, 500.0, 1.00000..., 1.000000..., 1.00000..., 1.000000...], 
+    'callback_obj': [252500.0, 1.000000...], 'callback_con[1]': [450.0, 450.0, 1.000000...], 
+    'callback_grad': [array([1000.,  100.]), array([ 2.00000...e+00, -2.0...e-08])], 'callback_jac[0,1]': [1.0, 1.0]}
 
     '''
     if not isinstance(filepath, str):
@@ -250,32 +253,32 @@ def load_variables(filepath, vars):
     n_cb   = len([key for key in file.keys() if key.startswith('callback_')])
 
     out_data = {}
-    for s_var in vars:
-        var = s_var.split('[')[0]
+    for in_var in vars:
+        var = in_var.split('[')[0]
         if var not in opt_vars+callback_vars:
             raise ValueError(f"Variable {var} not found in any of the callbacks or optimizer output data in the record.")
         if var in opt_vars:
-            out_data[s_var] = []
+            out_data[in_var] = []
         if var in callback_vars:
-            out_data[f'callback_{s_var}'] = []
+            out_data[f'callback_{in_var}'] = []
 
     for i in range(n_iter):
-        for s_var in vars:
-            var = s_var.split('[')[0]
+        for in_var in vars:
+            var = in_var.split('[')[0]
             if var not in opt_vars:
                 continue
-            if '[' not in s_var:
-                out_data[s_var].append(file[f'iteration_{i}'][var][()])
-            elif ',' not in s_var:
-                idx = int(s_var.split('[')[1].split(']')[0])
-                out_data[s_var].append(file[f'iteration_{i}'][var][idx])
+            if '[' not in in_var:
+                out_data[in_var].append(file[f'iteration_{i}'][var][()])
+            elif ',' not in in_var:
+                idx = int(in_var.split('[')[1].split(']')[0])
+                out_data[in_var].append(file[f'iteration_{i}'][var][idx])
             else:
-                idx1, idx2 = map(int, s_var.split('[')[1].split(']')[0].split(','))
-                out_data[s_var].append(file[f'iteration_{i}'][var][idx1, idx2])
+                idx1, idx2 = map(int, in_var.split('[')[1].split(']')[0].split(','))
+                out_data[in_var].append(file[f'iteration_{i}'][var][idx1, idx2])
 
     for i in range(n_cb):
-        for s_var in vars:
-            var = s_var.split('[')[0]
+        for in_var in vars:
+            var = in_var.split('[')[0]
 
             if var not in callback_vars:
                 continue
@@ -285,18 +288,16 @@ def load_variables(filepath, vars):
                 continue
             
             group_key = 'outputs' if var in list(file[f'callback_{i}']['outputs'].keys()) else 'inputs'
-            if '[' not in s_var:
-                out_data[f'callback_{s_var}'].append(file[f'callback_{i}'][group_key][var][()])
-            elif ',' not in s_var:
-                idx = int(s_var.split('[')[1].split(']')[0])
-                out_data[f'callback_{s_var}'].append(file[f'callback_{i}'][group_key][var][idx])
+            if '[' not in in_var:
+                out_data[f'callback_{in_var}'].append(file[f'callback_{i}'][group_key][var][()])
+            elif ',' not in in_var:
+                idx = int(in_var.split('[')[1].split(']')[0])
+                out_data[f'callback_{in_var}'].append(file[f'callback_{i}'][group_key][var][idx])
             else:
-                idx1, idx2 = map(int, s_var.split('[')[1].split(']')[0].split(','))
-                out_data[f'callback_{s_var}'].append(file[f'callback_{i}'][group_key][var][idx1, idx2])
+                idx1, idx2 = map(int, in_var.split('[')[1].split(']')[0].split(','))
+                out_data[f'callback_{in_var}'].append(file[f'callback_{i}'][group_key][var][idx1, idx2])
     
     file.close()
-
-    out_data = {key: np.array(value) for key, value in out_data.items()}
 
     return out_data
 
