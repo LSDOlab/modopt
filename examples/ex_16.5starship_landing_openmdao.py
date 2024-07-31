@@ -257,6 +257,7 @@ def get_problem(nt):
     om_prob.setup()
     prob = OpenMDAOProblem(problem_name=f'Starship {nt} timesteps OpenMDAO', om_problem=om_prob)
     prob.x0 = np.ones(nt*8)
+    
     return prob
 
 # SLSQP

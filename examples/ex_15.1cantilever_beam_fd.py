@@ -88,7 +88,8 @@ def get_problem(n_el): # 16 statements excluding comments, returns, and jac func
 
 # SLSQP
 print('\tSLSQP \n\t-----')
-optimizer = SLSQP(get_problem(50), solver_options={'maxiter': 1000, 'ftol': 1e-9})
+n_el = 50
+optimizer = SLSQP(get_problem(n_el), solver_options={'maxiter': 1000, 'ftol': 1e-9})
 start_time = time.time()
 optimizer.solve()
 opt_time = time.time() - start_time
@@ -100,6 +101,14 @@ print('\tOptimized vars:', optimizer.results['x'])
 print('\tOptimized obj:', optimizer.results['fun'])
 
 optimizer.print_results()
+
+import matplotlib.pyplot as plt
+
+plt.figure()
+plt.plot(optimizer.results['x'])
+plt.xlabel('Lengthwise location')
+plt.ylabel('Optimized thickness')
+plt.show()
 
 assert np.allclose(optimizer.results['x'],
                     [0.14915754,  0.14764328,  0.14611321,  0.14456715,  0.14300421,  0.14142417,
