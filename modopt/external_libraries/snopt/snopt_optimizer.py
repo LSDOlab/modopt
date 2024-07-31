@@ -1,10 +1,5 @@
 import numpy as np
 import warnings
-try:
-    from optimize import SNOPT_options
-except:
-    warnings.warn("SNOPT_options from 'optimize' could not be imported")
-
 from array_manager.api import DenseMatrix
 
 from modopt import Optimizer
@@ -150,6 +145,12 @@ class SNOPTOptimizer(Optimizer):
         pass
 
     def update_SNOPT_options_object(self):
+        try:
+            from optimize import SNOPT_options
+        except ImportError:
+            raise ImportError("'SNOPT_options' from 'optimize' could not be imported. " \
+                              "Make sure 'snopt-python' wrapper is correctly installed.")
+
         # Check if user-provided solver_options have valid keys and value-types
         self.solver_options.update(self.options['solver_options'])
 

@@ -1,13 +1,5 @@
 import numpy as np
 import warnings
-try:
-    from optimize import snoptc
-except:
-    warnings.warn("snoptc from 'optimize' could not be imported")
-try:
-    from optimize.solvers import snopt7_python as fsnopt
-except:
-    warnings.warn("snopt7_python from 'optimize.solvers' could not be imported")
 import time
 
 from .snopt_optimizer import SNOPTOptimizer
@@ -28,6 +20,17 @@ class SNOPTc(SNOPTOptimizer):
                 warnings.warn("Hot-starting might fail with 'Verify level' >= 0.")
 
     def solve(self):
+        try:
+            from optimize import snoptc
+        except ImportError:
+            raise ImportError("'snoptc' from 'optimize' could not be imported. " \
+                              "Make sure 'snopt-python' wrapper is correctly installed.")
+        try:
+            from optimize.solvers import snopt7_python as fsnopt
+        except:
+            raise ImportError("'snopt7_python' from 'optimize.solvers' could not be imported. " \
+                              "Make sure 'snopt-python' wrapper is correctly installed.")
+
         append = self.solver_options['append2file']
         check_failure = self.solver_options['continue_on_failure']
         # Assign shorter names to variables and methods

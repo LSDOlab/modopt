@@ -1,5 +1,4 @@
 import numpy as np
-from optimize import snopta
 import time
 
 from .snopt_optimizer import SNOPTOptimizer
@@ -17,6 +16,12 @@ class SNOPTa(SNOPTOptimizer):
     #     pass
 
     def solve(self):
+        try:
+            from optimize import snopta
+        except ImportError:
+            raise ImportError("'snopta' from 'optimize' could not be imported. " \
+                              "Make sure 'snopt-python' wrapper is correctly installed.")
+
         # Assign shorter names to variables and methods
         x0 = self.x0
 

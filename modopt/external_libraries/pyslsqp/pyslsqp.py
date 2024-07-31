@@ -4,11 +4,6 @@ import warnings
 import time
 from modopt.utils.options_dictionary import OptionsDictionary
 
-try:
-    from pyslsqp import optimize
-except:
-    warnings.warn("'pyslsqp' could not be imported. Install pyslsqp using 'pip install pyslsqp'.")
-
 class PySLSQP(Optimizer):
     '''
     Class that interfaces modOpt with the PySLSQP package which is
@@ -128,6 +123,11 @@ class PySLSQP(Optimizer):
         return j
 
     def solve(self):
+        try:
+            from pyslsqp import optimize
+        except ImportError:
+            raise ImportError("PySLSQP could not be imported or is not installed. Install it with 'pip install pyslsqp'.")
+
         # Set up the problem
         x0 = self.x0
         obj = self.obj
