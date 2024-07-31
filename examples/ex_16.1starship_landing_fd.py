@@ -2,14 +2,14 @@
 
 # Adapted from: https://thomas-godden.medium.com/how-spacex-lands-starship-sort-of-ee96cdde650b
 # Note: Original code uses positive angles for clockwise rotations, which is non-standard. 
-#       This affects theta, thetadot, thetadotdot thrust_angle, and the torque.
+#       This affects theta, thetadot, thetadotdot, thrust_angle, and torque.
 #       This code follows the standard convention of positive angles for counter-clockwise rotations.
 
 import numpy as np
 from modopt import ProblemLite, SLSQP
 import time
 
-def get_problem(nt): # 42 statements excluding comments, returns, and grad function.
+def get_problem(nt): # 44 statements excluding comments, returns, and grad function.
     
     g = 9.80665 # gravity (m/s^2)
     m = 100000  # mass (kg)
@@ -20,13 +20,16 @@ def get_problem(nt): # 42 statements excluding comments, returns, and grad funct
     min_gimbal = -20 * np.pi / 180  # (rad)
     max_gimbal =  20 * np.pi / 180  # (rad)
 
-    min_thrust =  880 * 1000   # (N)
+    min_thrust =  884 * 1000   # (N) 40 percent of max_thrust (880 kN in the original code)
     max_thrust = 2210 * 1000   # (N)
 
     dt = 16 / nt # timestep (s)
 
+    x_init  = np.array([0, 0, 1000, -80, np.pi/2, 0])   # -np.pi/2 in the original code (sign convention)
+    x_final = np.array([0., 0., 0., 0., 0., 0.])
+
     # x[0] = x position (m)
-    # x[1] = x velocity (m/)
+    # x[1] = x velocity (m/s)
     # x[2] = y position (m)
     # x[3] = y velocity (m/s)
     # x[4] = angle (rad)
@@ -90,22 +93,20 @@ def get_problem(nt): # 42 statements excluding comments, returns, and grad funct
 
         return c.flatten()
         
-    
     # Compute the variable bounds
     vl = np.full((8, nt), -np.inf)
     vu = np.full((8, nt),  np.inf)
 
     # Initial condition
-    vl[:6,  0] = [0, 0, 1000, -80, np.pi/2, 0]      # -np.pi/2 used in the original code (sign convention)
-    vu[:6,  0] = [0, 0, 1000, -80, np.pi/2, 0]
+    vl[:6,  0] = x_init  
+    vu[:6,  0] = x_init
     # Final condition
-    vl[:6, -1] = [0., 0., 0., 0., 0., 0.]
-    vu[:6, -1] = [0., 0., 0., 0., 0., 0.]
+    vl[:6, -1] = x_final
+    vu[:6, -1] = x_final
 
     # Thrust limits
-    vl[6, :] = 0.4
+    vl[6, :] = min_thrust / max_thrust
     vu[6, :] = 1.0
-
     # TVC gimbal angle limits
     vl[7, :] = min_gimbal
     vu[7, :] = max_gimbal
@@ -113,7 +114,7 @@ def get_problem(nt): # 42 statements excluding comments, returns, and grad funct
     vl = vl.flatten()
     vu = vu.flatten()
 
-    nc = 6 * (nt - 1)  # dynamics constraints
+    nc = 6 * (nt - 1)  # num. dynamics constraints
 
     return ProblemLite(x0=np.ones(nt*8), obj=obj, grad=grad, con=con,
                        name=f'Starship {nt} timesteps FD',

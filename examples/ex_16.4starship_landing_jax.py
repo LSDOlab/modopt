@@ -8,7 +8,7 @@ import jax
 import jax.numpy as jnp 
 jax.config.update("jax_enable_x64", True)
 
-def get_problem(nt): # 42 statements excluding comments, returns, grad, and nc computation.
+def get_problem(nt): # 44 statements excluding comments, returns, grad, and nc computation.
     
     g = 9.80665 # gravity (m/s^2)
     m = 100000  # mass (kg)
@@ -19,13 +19,16 @@ def get_problem(nt): # 42 statements excluding comments, returns, grad, and nc c
     min_gimbal = -20 * np.pi / 180  # (rad)
     max_gimbal =  20 * np.pi / 180  # (rad)
 
-    min_thrust =  880 * 1000   # (N)
+    min_thrust =  884 * 1000   # (N)
     max_thrust = 2210 * 1000   # (N)
 
     dt = 16 / nt # timestep (s)
 
+    x_init  = np.array([0, 0, 1000, -80, np.pi/2, 0])
+    x_final = np.array([0., 0., 0., 0., 0., 0.])
+
     # x[0] = x position (m)
-    # x[1] = x velocity (m/)
+    # x[1] = x velocity (m/s)
     # x[2] = y position (m)
     # x[3] = y velocity (m/s)
     # x[4] = angle (rad)
@@ -72,17 +75,16 @@ def get_problem(nt): # 42 statements excluding comments, returns, grad, and nc c
     vl = np.full((8, nt), -np.inf)
     vu = np.full((8, nt),  np.inf)
 
-    # Initial conditions
-    vl[:6,  0] = [0, 0, 1000, -80, np.pi/2, 0]
-    vu[:6,  0] = [0, 0, 1000, -80, np.pi/2, 0]
+    # Initial condition
+    vl[:6,  0] = x_init
+    vu[:6,  0] = x_init
     # Final condition
-    vl[:6, -1] = [0., 0., 0., 0., 0., 0.]
-    vu[:6, -1] = [0., 0., 0., 0., 0., 0.]
+    vl[:6, -1] = x_final
+    vu[:6, -1] = x_final
 
     # Thrust limits
-    vl[6, :] = 0.4
+    vl[6, :] = min_thrust / max_thrust
     vu[6, :] = 1.0
-
     # TVC gimbal angle limits
     vl[7, :] = min_gimbal
     vu[7, :] = max_gimbal

@@ -5,7 +5,7 @@ from modopt import CSDLAlphaProblem, SLSQP
 import time
 import csdl_alpha as csdl
 
-def get_problem(nt): # 45 statements excluding comments, naming, and returns.
+def get_problem(nt): # 47 statements excluding comments, naming, and returns.
     
     g = 9.80665 # gravity (m/s^2)
     m = 100000  # mass (kg)
@@ -16,13 +16,16 @@ def get_problem(nt): # 45 statements excluding comments, naming, and returns.
     min_gimbal = -20 * np.pi / 180  # (rad)
     max_gimbal =  20 * np.pi / 180  # (rad)
 
-    min_thrust =  880 * 1000   # (N)
+    min_thrust =  884 * 1000   # (N)
     max_thrust = 2210 * 1000   # (N)
 
     dt = 16 / nt # timestep (s)
 
+    x_init  = np.array([0, 0, 1000, -80, np.pi/2, 0])
+    x_final = np.array([0., 0., 0., 0., 0., 0.])
+
     # x[0] = x position (m)
-    # x[1] = x velocity (m/)
+    # x[1] = x velocity (m/s)
     # x[2] = y position (m)
     # x[3] = y velocity (m/s)
     # x[4] = angle (rad)
@@ -38,18 +41,18 @@ def get_problem(nt): # 45 statements excluding comments, naming, and returns.
     xu = np.full((6, nt),  np.inf)
 
     # Initial condition
-    xl[:, 0] = [0, 0, 1000, -80, np.pi/2, 0]
-    xu[:, 0] = [0, 0, 1000, -80, np.pi/2, 0]
+    xl[:, 0] = x_init
+    xu[:, 0] = x_init
     # Final condition
-    xl[:, -1] = [0., 0., 0., 0., 0., 0.]
-    xu[:, -1] = [0., 0., 0., 0., 0., 0.]
+    xl[:, -1] = x_final
+    xu[:, -1] = x_final
 
     # Control variable bounds
     ul = np.full((2, nt), -np.inf)
     uu = np.full((2, nt),  np.inf)
 
     # Thrust limits
-    ul[0, :] = 0.4
+    ul[0, :] = min_thrust / max_thrust
     uu[0, :] = 1.0
     # TVC gimbal angle limits
     ul[1, :] = min_gimbal
