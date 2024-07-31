@@ -31,6 +31,11 @@ _temp/examples/ex_14rosenbrock_coupled
 _temp/examples/ex_15.1cantilever_beam_fd
 _temp/examples/ex_15.2cantilever_beam_casadi
 _temp/examples/ex_15.3cantilever_beam_csdl
-_temp/examples/ex_15.4cantilever_beam_openmdao
-_temp/examples/ex_15.5cantilever_beam_jax
+_temp/examples/ex_15.4cantilever_beam_jax
+_temp/examples/ex_15.5cantilever_beam_openmdao
+_temp/examples/ex_16.1starship_landing_fd
+_temp/examples/ex_16.2starship_landing_casadi
+_temp/examples/ex_16.3starship_landing_csdl
+_temp/examples/ex_16.4starship_landing_jax
+_temp/examples/ex_16.5starship_landing_openmdao
 ```
