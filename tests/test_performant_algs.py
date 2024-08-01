@@ -261,7 +261,7 @@ def test_trust_constr():
     # assert optimizer.results['message'] == '`gtol` termination condition is satisfied.'
     assert optimizer.results['message'] == '`xtol` termination condition is satisfied.'
     assert_array_almost_equal(optimizer.results['x'], [2., 0.], decimal=11)
-    assert_almost_equal(optimizer.results['fun'], 20., decimal=11)
+    assert_almost_equal(optimizer.results['obj'], 20., decimal=11)
 
     prob = scaling_lite()
 
@@ -275,7 +275,7 @@ def test_trust_constr():
     assert optimizer.results['success'] == True
     assert optimizer.results['message'] == '`xtol` termination condition is satisfied.'
     assert_array_almost_equal(optimizer.results['x'], [2., 0.], decimal=11)
-    assert_almost_equal(optimizer.results['fun'], 20., decimal=11)
+    assert_almost_equal(optimizer.results['obj'], 20., decimal=11)
     
 @pytest.mark.pyslsqp
 @pytest.mark.interfaces
@@ -422,7 +422,7 @@ def test_trust_constr_exact_hess():
     assert optimizer.results['success'] == True
     assert optimizer.results['message'] == '`xtol` termination condition is satisfied.'
     assert_array_almost_equal(optimizer.results['x'], [2., 0.], decimal=11)
-    assert_almost_equal(optimizer.results['fun'], 20., decimal=11)
+    assert_almost_equal(optimizer.results['obj'], 20., decimal=11)
 
     prob = second_order_scaling_lite()
 
@@ -436,7 +436,7 @@ def test_trust_constr_exact_hess():
     assert optimizer.results['success'] == True
     assert optimizer.results['message'] == '`xtol` termination condition is satisfied.'
     assert_array_almost_equal(optimizer.results['x'], [2., 0.], decimal=11)
-    assert_almost_equal(optimizer.results['fun'], 20., decimal=3)
+    assert_almost_equal(optimizer.results['obj'], 20., decimal=3)
     
     # test bound constrained problem
     prob = SecondOrderBoundConstrained()

@@ -165,7 +165,7 @@ class TrustConstr(Optimizer):
         bounded     = bool(self.bounds)
         tr_ip = self.tr_interior_point
         def callback(intermediate_result):   # 23(=26-3) in total niter/nit are the same, method/status same until termination
-            # print("Intermediate result: ") # total 27 keys in final_results including extra 'message' key and duplicate 'nit'/'niter' keys
+            # print("Intermediate result: ") # total 28 keys in final_results including extra 'message'/'success' keys and duplicate 'nit'/'niter' keys
             # print(intermediate_result)
             con     = intermediate_result['constr'][0] if constrained else []
             jac     = intermediate_result['jac'][0]    if constrained else []
@@ -208,7 +208,7 @@ class TrustConstr(Optimizer):
 
         # Call the trust-constr algorithm from scipy (options are specific to trust-constr)
         start_time = time.time()
-        self.results = minimize(
+        final_result = minimize(
             self.obj,
             self.x0,
             args=(),
@@ -223,6 +223,13 @@ class TrustConstr(Optimizer):
             options=self.options_to_pass
             )
         self.total_time = time.time() - start_time
+
+        # Replace the scipy results with modOpt's results dictionary
+        self.results = self.out_dict
+        self.results['success'] = final_result.success
+        self.results['message'] = final_result.message
+        self.results['status']  = final_result.status
+        self.results['method']  = final_result.method
 
         self.run_post_processing()
 
@@ -243,14 +250,14 @@ class TrustConstr(Optimizer):
         bounded     = bool(self.bounds)
         tr_ip       = self.tr_interior_point
 
-        con     = self.results['constr'][0] if constrained else []
-        jac     = self.results['jac'][0]    if constrained else []
-        lmult_c = self.results['v'][0]      if constrained else []
-        lmult_x = self.results['v'][-1]     if bounded     else []
+        # con     = self.results['constr'][0] if constrained else []
+        # jac     = self.results['jac'][0]    if constrained else []
+        # lmult_c = self.results['v'][0]      if constrained else []
+        # lmult_x = self.results['v'][-1]     if bounded     else []
 
-        ncev  = self.results['constr_nfev'][0] if constrained else []
-        ncgev = self.results['constr_njev'][0] if constrained else []
-        nchev = self.results['constr_nhev'][0] if constrained else []
+        # ncev  = self.results['constr_nfev'][0] if constrained else []
+        # ncgev = self.results['constr_njev'][0] if constrained else []
+        # nchev = self.results['constr_nhev'][0] if constrained else []
 
         barrier_parameter = self.results['barrier_parameter'] if tr_ip else 'None (since using equality_constrained_sqp)'
         barrier_tolerance = self.results['barrier_tolerance'] if tr_ip else 'None (since using equality_constrained_sqp)'
@@ -265,21 +272,21 @@ class TrustConstr(Optimizer):
         output += f"\n\t{'Message':30}: {self.results['message']}"
         output += f"\n\t{'Status':30}: {self.results['status']}"
         output += f"\n\t{'Total time':30}: {self.total_time}"
-        output += f"\n\t{'Objective':30}: {self.results['fun']}"
+        output += f"\n\t{'Objective':30}: {self.results['obj']}"
         output += f"\n\t{'Gradient norm':30}: {np.linalg.norm(self.results['grad'])}" # extra info not in keys of results
-        output += f"\n\t{'Optimality':30}: {np.linalg.norm(self.results['optimality'])}"
-        output += f"\n\t{'Max. constr. violation':30}: {np.linalg.norm(self.results['constr_violation'])}"
+        output += f"\n\t{'Optimality':30}: {np.linalg.norm(self.results['opt'])}"
+        output += f"\n\t{'Max. constr. violation':30}: {np.linalg.norm(self.results['feas'])}"
         output += f"\n\t{'Trust region radius':30}: {self.results['tr_radius']}"
         output += f"\n\t{'Constraint penalty':30}: {self.results['constr_penalty']}"
         output += f"\n\t{'Barrier parameter':30}: {barrier_parameter}"
         output += f"\n\t{'Barrier tolerance':30}: {barrier_tolerance}"
         output += f"\n\t{'Total function evals':30}: {self.results['nfev']}"
-        output += f"\n\t{'Total gradient evals':30}: {self.results['njev']}"
-        output += f"\n\t{'Total Hessian evals':30}: {self.results['nhev']}"
-        output += f"\n\t{'Total constraint evals':30}: {ncev}"
-        output += f"\n\t{'Total constr. Jacobian evals':30}: {ncgev}"
-        output += f"\n\t{'Total constr. Hessian evals':30}: {nchev}"
-        output += f"\n\t{'Total iterations':30}: {self.results['nit']}"
+        output += f"\n\t{'Total gradient evals':30}: {self.results['nfgev']}"
+        output += f"\n\t{'Total Hessian evals':30}: {self.results['nfhev']}"
+        output += f"\n\t{'Total constraint evals':30}: {self.results['ncev']}"
+        output += f"\n\t{'Total constr. Jacobian evals':30}: {self.results['ncgev']}"
+        output += f"\n\t{'Total constr. Hessian evals':30}: {self.results['nchev']}"
+        output += f"\n\t{'Total iterations':30}: {self.results['iter']}"
         output += f"\n\t{'CG iterations':30}: {self.results['cg_niter']}"
         output += f"\n\t{'CG stop condition':30}: {self.results['cg_stop_cond']}"
         output += self.get_callback_counts_string(30)
@@ -289,14 +296,14 @@ class TrustConstr(Optimizer):
         if optimal_gradient or all:
             output += f"\n\t{'Optimal obj. gradient':30}: {self.results['grad']}"
         if optimal_constraints or all:
-            output += f"\n\t{'Optimal constraints':30}: {con}"
+            output += f"\n\t{'Optimal constraints':30}: {self.results['con']}"
         if optimal_constraints_jacobian or all:
-            output += f"\n\t{'Optimal con. Jacobian':30}: {jac}"
+            output += f"\n\t{'Optimal con. Jacobian':30}: {self.results['jac']}"
         if optimal_lagrange_multipliers or all:
-            output += f"\n\t{'Optimal Lag. mult. (bounds)':30}: {lmult_x}"
-            output += f"\n\t{'Optimal Lag. mult. (constr.)':30}: {lmult_c}"
+            output += f"\n\t{'Optimal Lag. mult. (bounds)':30}: {self.results['lmult_x']}"
+            output += f"\n\t{'Optimal Lag. mult. (constr.)':30}: {self.results['lmult_c']}"
         if optimal_lagrangian_gradient or all:
-            output += f"\n\t{'Optimal Lag. gradient':30}: {self.results['lagrangian_grad']}"
+            output += f"\n\t{'Optimal Lag. gradient':30}: {self.results['lgrad']}"
 
         output += '\n\t' + '-'*100
         print(output)

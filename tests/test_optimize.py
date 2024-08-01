@@ -165,7 +165,7 @@ def test_trust_constr():
     assert results['success'] == True
     assert results['message'] == '`xtol` termination condition is satisfied.'
     assert_array_almost_equal(results['x'], [2., 0.], decimal=11)
-    assert_almost_equal(results['fun'], 20., decimal=11)
+    assert_almost_equal(results['obj'], 20., decimal=11)
     
     prob = scaling_lite()
 
@@ -174,7 +174,7 @@ def test_trust_constr():
     assert results['success'] == True
     assert results['message'] == '`xtol` termination condition is satisfied.'
     assert_array_almost_equal(results['x'], [2., 0.], decimal=11)
-    assert_almost_equal(results['fun'], 20., decimal=11)
+    assert_almost_equal(results['obj'], 20., decimal=11)
 
 @pytest.mark.pyslsqp
 @pytest.mark.interfaces
