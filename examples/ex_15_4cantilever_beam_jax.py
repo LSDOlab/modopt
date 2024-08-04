@@ -15,7 +15,7 @@ E0, L0, b0, vol0, F0 = 1., 1., 0.1, 0.01, -1.
 #           ModOpt will also auto-generate the Lagrangian, its gradient, and Hessian.
 #           No need to manually generate or jit functions or their derivatives and then wrap them.
 
-def get_problem(n_el): # 16 statements excluding comments, and returns.
+def get_problem(n_el, order=1): # 16 statements excluding comments, and returns.
 
     E, L, b, vol = E0, L0, b0, vol0
     L_el = L / n_el
@@ -52,7 +52,7 @@ def get_problem(n_el): # 16 statements excluding comments, and returns.
         return jnp.array([L_el * b * jnp.sum(x) - vol])
 
     return JaxProblem(x0=np.ones(n_el), nc=1, jax_obj=jax_obj, jax_con=jax_con,
-                      name=f'cantilever_{n_el}_jax',
+                      name=f'cantilever_{n_el}_jax', order=order,
                       xl=1e-2, cl=0., cu=0.)
 
 if __name__ == '__main__':

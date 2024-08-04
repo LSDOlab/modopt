@@ -12,7 +12,7 @@ E0, L0, b0, vol0, F0 = 1., 1., 0.1, 0.01, -1.
 #           ModOpt will also auto-generate the Lagrangian, its gradient, and Hessian.
 #           No need to manually generate functions or their derivatives and then wrap them.
 
-def get_problem(n_el): # 16 statements excluding comments, and returns.
+def get_problem(n_el, order=1): # 16 statements excluding comments, and returns.
 
     E, L, b, vol = E0, L0, b0, vol0
     L_el = L / n_el
@@ -38,7 +38,7 @@ def get_problem(n_el): # 16 statements excluding comments, and returns.
         # Displacement vector - solve for u in Ku = F
         # Apply boundary conditions: u[0] = u[1] = 0,
         # F[0:1] are unknown reaction forces at the left end. F[0:1] = K[0:1,2:].dot(u[2:])
-        u = ca.vertcat(0., 0., ca.solve(K[2:,2:], F[2:], 'ldl')) # "qr" is the default solver and fails during optimization
+        u = ca.vertcat(0., 0., ca.solve(K[2:,2:], F[2:], 'mumps')) # "qr" is the default solver and fails during optimization
         # Expression for Compliance
         obj_expr = ca.dot(F, u)
 
@@ -50,7 +50,7 @@ def get_problem(n_el): # 16 statements excluding comments, and returns.
         return con_expr
 
     return CasadiProblem(x0=np.ones(n_el), ca_obj=ca_obj, ca_con=ca_con,
-                         name=f'cantilever_{n_el}_casadi',
+                         name=f'cantilever_{n_el}_casadi', order=order,
                          xl=1e-2, cl=0., cu=0.)
 
 if __name__ == '__main__':

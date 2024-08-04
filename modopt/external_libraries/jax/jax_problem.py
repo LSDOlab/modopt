@@ -15,13 +15,13 @@ if jax is not None:
 class JaxProblem(ProblemLite):
     '''
     Class that wraps **jittable** Jax functions for objective and constraints.
-    This class will automatically generate the functions for the objective gradient,
+    Depending on the ``order`` specified, this class will automatically generate the functions for the objective gradient,
     constraint Jacobian, objective Hessian, Lagrangian, Lagrangian gradient, and Lagrangian Hessian.
     All functions will be turned into jitted functions and then wrapped for use with Optimizer subclasses.
     Vector products (HVP, JVP, VJP) are not supported.
     '''
-    def __init__(self, x0, nc=None, name='unnamed_problem', jax_obj=None, jax_con=None, 
-                 xl=None, xu=None, cl=None, cu=None, x_scaler=1., o_scaler=1., c_scaler=1., grad_free=False):
+    def __init__(self, x0, nc=None, name='unnamed_problem', jax_obj=None, jax_con=None, xl=None, xu=None, 
+                 cl=None, cu=None, x_scaler=1., o_scaler=1., c_scaler=1., grad_free=False, order=1):
         '''
         Initialize the optimization problem with the given design variables, objective, and constraints.
         Derivatives are automatically generated using Jax.
@@ -59,6 +59,9 @@ class JaxProblem(ProblemLite):
         grad_free : bool, default=False
             Flag to indicate if the problem is gradient-free.
             If True, JaxProblem will not generate any derivatives.
+        order : {1, 2}, default=1
+            Order of the problem if ``grad_free=False``.
+            Used for determining up to which order of derivatives need to be generated.
         '''
         nx = x0.size
         if x0.shape != (nx,):
@@ -83,10 +86,16 @@ class JaxProblem(ProblemLite):
             _obj = jax.jit(jax_obj)
             obj  = lambda x: np.float64(_obj(x))
             if not grad_free:
-                _grad     = jax.jit(jax.grad(jax_obj))
-                grad      = lambda x: np.array(_grad(x))
-                _obj_hess = jax.jit(jax.hessian(jax_obj))
-                obj_hess  = lambda x: np.array(_obj_hess(x))
+                if order == 1:
+                    _grad = jax.jit(jax.grad(jax_obj))
+                    grad  = lambda x: np.array(_grad(x))
+                elif order == 2:
+                    _grad     = jax.jit(jax.grad(jax_obj))
+                    grad      = lambda x: np.array(_grad(x))
+                    _obj_hess = jax.jit(jax.hessian(jax_obj))
+                    obj_hess  = lambda x: np.array(_obj_hess(x))
+                else:
+                    raise ValueError(f"Higher order derivatives are not supported. 'order' must be 1 or 2.")
 
         con = None
         jac = None
@@ -114,10 +123,16 @@ class JaxProblem(ProblemLite):
             lag  = lambda x, lam: np.float64(_lag(x, lam))
 
             if not grad_free:
-                _lag_grad = jax.jit(jax.grad(jax_lag))
-                lag_grad  = lambda x, lam: np.array(_lag_grad(x, lam))
-                _lag_hess = jax.jit(jax.hessian(jax_lag))
-                lag_hess  = lambda x, lam: np.array(_lag_hess(x, lam))
+                if order==1:
+                    _lag_grad = jax.jit(jax.grad(jax_lag))
+                    lag_grad  = lambda x, lam: np.array(_lag_grad(x, lam))
+                elif order==2:
+                    _lag_grad = jax.jit(jax.grad(jax_lag))
+                    lag_grad  = lambda x, lam: np.array(_lag_grad(x, lam))
+                    _lag_hess = jax.jit(jax.hessian(jax_lag))
+                    lag_hess  = lambda x, lam: np.array(_lag_hess(x, lam))
+                else:
+                    raise ValueError(f"Higher order derivatives are not supported. 'order' must be 1 or 2.")
 
         super().__init__(x0, name=name, obj=obj, grad=grad, obj_hess=obj_hess, con=con, jac=jac,
                          lag=lag, lag_grad=lag_grad, lag_hess=lag_hess, xl=xl, xu=xu, cl=cl, cu=cu,

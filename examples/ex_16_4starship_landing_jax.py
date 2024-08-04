@@ -8,7 +8,7 @@ import jax
 import jax.numpy as jnp 
 jax.config.update("jax_enable_x64", True)
 
-def get_problem(nt): # 44 statements excluding comments, returns, grad, and nc computation.
+def get_problem(nt, order=1): # 44 statements excluding comments, returns, grad, and nc computation.
     
     g = 9.80665 # gravity (m/s^2)
     m = 100000  # mass (kg)
@@ -95,7 +95,7 @@ def get_problem(nt): # 44 statements excluding comments, returns, grad, and nc c
     nc = 6 * (nt - 1)  # dynamics constraints
 
     return JaxProblem(x0=np.ones(nt*8), nc=nc, jax_obj=jax_obj, jax_con=jax_con,
-                      name=f'starship_{nt}_jax',
+                      name=f'starship_{nt}_jax', order=order,
                       xl=vl, xu=vu, cl=0., cu=0.)
 
 if __name__ == '__main__':

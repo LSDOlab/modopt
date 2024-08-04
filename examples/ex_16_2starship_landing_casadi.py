@@ -5,7 +5,7 @@ from modopt import CasadiProblem, SLSQP
 import time
 import casadi as ca
 
-def get_problem(nt): # 44 statements excluding comments, and returns.
+def get_problem(nt, order=1): # 44 statements excluding comments, and returns.
     
     g = 9.80665 # gravity (m/s^2)
     m = 100000  # mass (kg)
@@ -90,7 +90,7 @@ def get_problem(nt): # 44 statements excluding comments, and returns.
     vu = vu.flatten()
 
     return CasadiProblem(x0=np.ones(nt*8), ca_obj=ca_obj, ca_con=ca_con,
-                         name=f'starship_{nt}_casadi',
+                         name=f'starship_{nt}_casadi', order=order,
                          xl=vl, xu=vu, cl=0., cu=0.)
 
 if __name__ == '__main__':
