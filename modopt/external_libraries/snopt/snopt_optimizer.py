@@ -1,5 +1,4 @@
 import numpy as np
-import warnings
 from array_manager.api import DenseMatrix
 
 from modopt import Optimizer
