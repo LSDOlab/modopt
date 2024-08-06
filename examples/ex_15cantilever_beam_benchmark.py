@@ -29,7 +29,9 @@ elif benchmark_problem == 'starship':
     from examples.ex_16_4starship_landing_jax import get_problem as get_jax_prob
     from examples.ex_16_5starship_landing_openmdao import get_problem as get_om_prob
     # num_elements = [10, 20] # number of timesteps actually
-    num_elements = [10, 20, 50, 100] # number of timesteps actually
+    num_elements = [20, 50, 100] # number of timesteps actually
+    sols = [16.804, 38.36, 74.87]
+    obj_error = 0.20 # 1.0 percent of sols[0]
 
 get_probs = [get_fd_prob, get_ca_prob, get_csdl_prob, get_jax_prob, get_om_prob]
 methods   = ['FD', 'CasADi', 'CSDL', 'Jax', 'OpenMDAO']
@@ -186,7 +188,9 @@ if __name__ == '__main__':
             print_stats_and_save_performance(prob, alg, results, results['x'], results['f'], i,
                                              compile_time, compile_mem, opt_time, opt_mem, performance, history)
 
-            if benchmark_problem == 'cantilever' and ((method == 'CasADi' and n_el <=300) or (method=='Jax' and n_el <= 500)):
+            second_order_cantilever = (benchmark_problem == 'cantilever') and ((method == 'CasADi' and n_el <=300) or (method=='Jax' and n_el <= 500))
+            second_order_starship   = (benchmark_problem == 'starship') and (method in ['CasADi', 'Jax'])
+            if second_order_cantilever or second_order_starship:
                 interval = 1e-4
                 # interval = 1e-4 if n_el <=200 else 1e-2
                 _compile_prob = profiler(interval=interval)(lambda n: get_prob(n, order=2))
@@ -196,9 +200,10 @@ if __name__ == '__main__':
                 print('='*50)
 
                 # TrustConstr-2
+                maxiter = 100 if benchmark_problem == 'cantilever' else 300
                 alg = 'TrustConstr-2'
                 print(f'\t{alg} \n\t------------------------')
-                optimizer = TrustConstr(prob, solver_options={'maxiter': 100, 'gtol':1e-3, 'xtol':1e-6}, 
+                optimizer = TrustConstr(prob, solver_options={'maxiter': maxiter, 'gtol':1e-3, 'xtol':1e-6}, 
                                         recording=True)
 
                 _solve = profiler(interval=interval)(lambda: optimizer.solve())

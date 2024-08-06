@@ -196,6 +196,8 @@ class StarshipGroup(om.Group):
         min_thrust = self.options['min_thrust']
         max_thrust = self.options['max_thrust']
 
+        nt = self.options['nt']
+
         xl = np.full((6, nt), -np.inf)
         xu = np.full((6, nt),  np.inf)
 
