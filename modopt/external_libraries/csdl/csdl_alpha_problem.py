@@ -71,7 +71,9 @@ class CSDLAlphaProblem(OptProblem):
         
         # Run checks for the first model evaluation
         sim.update_design_variables(self.x0/self.x_scaler)
-        f_us, c_us = sim.run_forward()
+        fun_dict = sim.compute_optimization_functions()
+        f_us = fun_dict['f']
+        c_us = fun_dict['c']
         
         if f_us is not None:
             if self.o_scaler is None:
@@ -101,8 +103,9 @@ class CSDLAlphaProblem(OptProblem):
         self.warm_x[:] = self.x0
             
         # Run checks for the first derivative evaluation
-        sim.compute_optimization_derivatives()
-        g_us, j_us = sim.compute_optimization_derivatives()
+        deriv_dict = sim.compute_optimization_derivatives()
+        g_us = deriv_dict['df']
+        j_us = deriv_dict['dc']
 
         if g_us is not None:
             if self.o_scaler is None:
@@ -150,7 +153,9 @@ class CSDLAlphaProblem(OptProblem):
             if (not np.array_equal(self.warm_x, x)) or force_rerun:
                 sim.update_design_variables(x/self.x_scaler)
                 try:
-                    f_us, c_us = sim.run_forward()
+                    fun_dict = sim.compute_optimization_functions()
+                    f_us = fun_dict['f']
+                    c_us = fun_dict['c']
                     self.fail1 = False
                     if f_us is not None:
                         self.f_s = f_us * self.o_scaler
@@ -177,28 +182,42 @@ class CSDLAlphaProblem(OptProblem):
         sim = self.options['simulator']
         if not self.SURF_mode:      # for pure RS/FS                     
             if not np.array_equal(self.warm_x_deriv, x) or force_rerun:
-                self.check_if_warm_and_run_model(x, force_rerun=force_rerun, check_failure=check_failure)
-                if not self.fail1:
-                    try:
-                        g_us, j_us = sim.compute_optimization_derivatives()
-                        self.fail2 = False
-                        if g_us is not None:
-                            self.g_s = g_us[0] * self.o_scaler / self.x_scaler # g_us is a 2d matrix of gradients for each objective
-                            if np.isnan(np.sum(g_us)) or np.isinf(np.sum(g_us)):
-                                raise Exception('Objective gradient contains NAN/INF. Please check the model.')
+                sim.update_design_variables(x/self.x_scaler)
+                try:
+                    deriv_dict = sim.compute_optimization_derivatives()
+                    f_us = deriv_dict['f']
+                    c_us = deriv_dict['c']
+                    g_us = deriv_dict['df']
+                    j_us = deriv_dict['dc']
+                    self.fail2 = False
+
+                    if f_us is not None:
+                        self.f_s = f_us * self.o_scaler
+                        if np.isnan(np.sum(f_us)) or np.isinf(np.sum(f_us)):
+                            raise Exception('Objective returned NAN/INF. Please check the model.')
                         
-                        if j_us is not None:
-                            self.j_s = j_us * np.outer(self.c_scaler, 1./self.x_scaler)
-                            if np.isnan(np.sum(j_us)) or np.isinf(np.sum(j_us)):
-                                raise Exception('Constraint Jacobian contains NAN/INF. Please check the model.')
-                            
-                    except:
-                        self.fail2 = True
-                        if not check_failure:
-                            raise Exception('Derivative evaluation failed. Please check the model.')
-                else:
+                    if c_us is not None:
+                        self.c_s = c_us * self.c_scaler
+                        if np.isnan(np.sum(c_us)) or np.isinf(np.sum(c_us)):
+                            raise Exception('Constraints contain NAN/INF. Please check the model.')
+
+                    if g_us is not None:
+                        self.g_s = g_us[0] * self.o_scaler / self.x_scaler # g_us is a 2d matrix of gradients for each objective
+                        if np.isnan(np.sum(g_us)) or np.isinf(np.sum(g_us)):
+                            raise Exception('Objective gradient contains NAN/INF. Please check the model.')
+                    
+                    if j_us is not None:
+                        self.j_s = j_us * np.outer(self.c_scaler, 1./self.x_scaler)
+                        if np.isnan(np.sum(j_us)) or np.isinf(np.sum(j_us)):
+                            raise Exception('Constraint Jacobian contains NAN/INF. Please check the model.')
+                        
+                except:
                     self.fail2 = True
+                    if not check_failure:
+                        raise Exception('Derivative evaluation failed. Please check the model.')
                         
+                self.model_evals += 1
+                self.warm_x[:] = x
                 self.deriv_evals += 1
                 self.warm_x_deriv[:] = x
                 
@@ -267,7 +286,6 @@ class CSDLAlphaProblem(OptProblem):
     @hot_start(['x'], ['failure', 'obj', 'con', 'grad', 'jac'])
     def _compute_all(self, x, force_rerun=False, check_failure=False):                              # only for SNOPTC, (NOT meant for SURF)
         # print('Computing all at once >>>>>>>>>>')
-        # self.check_if_warm_and_run_model(x, force_rerun=force_rerun, check_failure=check_failure)                 # This is rqd, o/w warm derivs skip model evals --> not sure since the warm_x and warm_x_deriv are always equal for compute_all
         self.check_if_warm_and_compute_derivatives(x, force_rerun=force_rerun, check_failure=check_failure)
         # print('---------Computed all at once---------')
         return self.fail2, self.f_s, self.c_s, self.g_s, self.j_s
