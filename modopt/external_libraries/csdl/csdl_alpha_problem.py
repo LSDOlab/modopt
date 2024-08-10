@@ -98,6 +98,7 @@ class CSDLAlphaProblem(OptProblem):
         else:
             if self.c_scaler is not None:
                 raise ValueError('Constraint scaler is not None, but constraint function returned None. Please check the model setup.')
+            self.c_s = None
             
         self.model_evals += 1
         self.warm_x[:] = self.x0
@@ -130,6 +131,7 @@ class CSDLAlphaProblem(OptProblem):
         else:
             if self.c_scaler is not None:
                 raise ValueError('Constraint scaler is not None, but constraint Jacobian returned None. Please check the model setup.')
+            self.j_s = None
 
         self.deriv_evals += 1
         self.warm_x_deriv[:] = self.x0
