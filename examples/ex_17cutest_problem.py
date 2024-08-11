@@ -1,4 +1,4 @@
-'''Import and solve a CUTEst problem using modopt'''
+'''Import and solve a CUTEst problem using modOpt'''
 
 import pycutest as pc
 
@@ -22,7 +22,7 @@ if __name__ == "__main__":
     print('Solve the second-order unconstrained problem: ROSENBR')
     print('-'*60)
 
-    # Wrap the PyCUTEst problem for modOpt use with the CUTEstProblem class
+    # Wrap the PyCUTEst problem with modOpt's CUTEstProblem class
     prob = CUTEstProblem(cutest_problem=pc.import_problem('ROSENBR'))
 
     # Solve the problem using the SLSQP optimizer

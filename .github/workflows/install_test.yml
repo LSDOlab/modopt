@@ -56,7 +56,6 @@ jobs:
         cd $SIFDECODE/src ; make -f $SIFDECODE/makefiles/$MYARCH test # test the SIFDecode library
         cd $CUTEST/src ; make -f $CUTEST/makefiles/$MYARCH test       # test the CUTEst library
         pip install pycutest
-        mkdir pycutest_cache
 
       # Run the package tests and generate the coverage report
     - name: Test with pytest
@@ -68,6 +67,7 @@ jobs:
         MYARCH: "pc64.lnx.gfo"
         PYCUTEST_CACHE: ${{github.workspace}}/pycutest_cache
       run: |
+        mkdir pycutest_cache
         pytest -m "not snopt and not visualization" tests/ --cov=modopt --cov-report lcov
 
       # Upload the coverage report to coveralls
