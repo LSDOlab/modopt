@@ -54,7 +54,7 @@ def get_problem(n_el): # 23 statements excluding comments, returns, name assignm
 
     # Create a Simulator object from the Recorder object
     # sim = csdl.experimental.PySimulator(rec)
-    sim = csdl.experimental.JaxSimulator(rec)
+    sim = csdl.experimental.JaxSimulator(rec, gpu=False)
 
     # Instantiate your problem using the csdl Simulator object and name your problem
     prob = CSDLAlphaProblem(problem_name=f'cantilever_{n_el}_csdl', simulator=sim)

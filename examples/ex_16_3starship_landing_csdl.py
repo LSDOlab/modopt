@@ -95,7 +95,7 @@ def get_problem(nt): # 47 statements excluding comments, naming, and returns.
     rec.stop()
 
     # Create a Simulator object from the Recorder object
-    sim = csdl.experimental.JaxSimulator(rec)
+    sim = csdl.experimental.JaxSimulator(rec, gpu=False)
 
     return CSDLAlphaProblem(problem_name=f'starship_{nt}_csdl', simulator=sim)
 

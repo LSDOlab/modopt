@@ -1,6 +1,19 @@
 from memory_profiler import memory_usage
 import time
 
+def time_profiler():
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+
+            start_time = time.perf_counter()
+            results = func(*args, **kwargs)
+            exec_time = time.perf_counter() - start_time
+            print(f"Execution time: {exec_time} seconds")
+            
+            return results, exec_time
+        return wrapper
+    return decorator
+
 # Using memory_profiler to look at memory usage at specific intervals during while the function is running.
 # This will consider other memory allocations (e.g.,) that are not directly related to the function.
 
@@ -15,13 +28,16 @@ def profiler(interval=1e-4):
             
             end_time = time.perf_counter()
             
-            # Calculate memory usage and execution time
-            mem_used = max(mem_usage) - min(mem_usage)
-            exec_time = end_time - start_time
-            print(f"Memory usage: {mem_used} MB")
-            print(f"Execution time: {exec_time} seconds")
+            mem_extrema  = (min(mem_usage), max(mem_usage))
+            time_extrema = (start_time, end_time)
             
-            return outputs['results'], mem_used, exec_time
+            # Calculate memory usage and execution time
+            mem_used = mem_extrema[1] - mem_extrema[0]
+            exec_time = end_time - start_time
+            # print(f"Memory usage: {mem_used} MB")
+            # print(f"Execution time: {exec_time} seconds")
+            
+            return outputs['results'], (mem_used, mem_extrema), (exec_time, time_extrema)
         return wrapper
     return decorator
 
