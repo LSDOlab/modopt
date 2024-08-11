@@ -17,7 +17,7 @@ from modopt.external_libraries.casadi import (CasadiProblem, )
 from modopt.external_libraries.jax import (JaxProblem, )
 
 # import test-suite interfaces
-# from modopt.external_libraries.pycutest import (CUTEstProblem, )
+from modopt.external_libraries.pycutest import (CUTEstProblem, )
 
 # import external optimizer library interfaces
 from modopt.external_libraries.scipy import (SLSQP, COBYLA, BFGS, LBFGSB, TrustConstr, NelderMead)

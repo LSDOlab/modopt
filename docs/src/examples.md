@@ -38,4 +38,5 @@ _temp/examples/ex_16_2starship_landing_casadi
 _temp/examples/ex_16_3starship_landing_csdl
 _temp/examples/ex_16_4starship_landing_jax
 _temp/examples/ex_16_5starship_landing_openmdao
+_temp/examples/ex_17cutest_problem
 ```
