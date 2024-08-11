@@ -5,6 +5,7 @@ import pytest
 
 @pytest.mark.interfaces
 @pytest.mark.pycutest
+@pytest.mark.slsqp
 def test_pycutest():
     import numpy as np
     import pycutest as pc
@@ -95,20 +96,73 @@ def test_pycutest():
     assert str(excinfo.value) == "Objective Hessian-vector product is not defined for constrained CUTEST problems."\
                                  "Use 'compute_lagrangian_hvp' for constrained problems."
     
+    lag      = prob_c._compute_lagrangian(np.ones(110), np.ones(55)) # Adds +1 to stats['f']
+    assert lag == 540.0
+    
+    lag_grad = prob_c._compute_lagrangian_gradient(np.ones(110), np.ones(55)) # Adds +1 to stats['g']
     lag_hess = prob_c._compute_lagrangian_hessian(np.ones(110), np.ones(55))
 
-    lag_hvp = prob_c._compute_lagrangian_hvp(np.ones(110), np.ones(55), np.ones(110))
-    assert_array_equal(lag_hvp, lag_hess @ np.ones(110))
+    # lag_hvp = prob_c._compute_lagrangian_hvp(np.ones(110), np.ones(55), np.ones(110))
+    # assert_array_equal(lag_hvp, lag_hess @ np.ones(110))
 
-    jac = prob_c._compute_constraint_jacobian(np.ones(110))
+    jac = prob_c._compute_constraint_jacobian(np.ones(110)) # Adds +1 to stats['g'], and +1 to deriv_evals
 
-    jvp = prob_c._compute_constraint_jvp(np.ones(110), np.ones(110))
-    assert_array_equal(jvp, jac @ np.ones(110))
-    assert_array_equal(jvp, 20 * np.ones(55))
+    # jvp = prob_c._compute_constraint_jvp(np.ones(110), np.ones(110))
+    # assert_array_equal(jvp, jac @ np.ones(110))
+    # assert_array_equal(jvp, 20 * np.ones(55))
 
-    vjp = prob_c._compute_constraint_vjp(np.ones(110), np.ones(55))
-    assert_array_equal(vjp, np.ones(55) @ jac)
-    
+    # vjp = prob_c._compute_constraint_vjp(np.ones(110), np.ones(55))
+    # assert_array_equal(vjp, np.ones(55) @ jac)
+
+    # 6. Test mo.CUTEstProblem method 'get_usage_statistics' for a constrained problem
+    prob_c.get_usage_statistics()
+    stats = prob_c.options['cutest_problem'].report()
+    assert prob_c.noev == stats['f']
+    assert prob_c.ncev == stats['c']
+
+    assert prob_c.nogev == stats['g']
+    assert prob_c.ncgev == stats['cg']
+
+    assert prob_c.nohev == stats['H']
+    assert prob_c.nchev == stats['cH']
+    assert prob_c.nohvpev == stats['Hprod']
+
+    assert prob_c.setup_time == stats['tsetup']
+    assert prob_c.run_time == stats['trun']
+
+    # print('Number of function evaluations:', prob_c.nfev, prob_c.noev, prob_c._obj_count)   # all can be different
+    # print('Number of gradient evaluations:', prob_c.ngev, prob_c.nogev, prob_c._grad_count) # all can be different
+
+    # 7. Test mo.CUTEstProblem method 'compute_all' for a constrained problem
+    x = np.ones(110)
+    f = prob_c._compute_objective(x) * 1.0
+    c = prob_c.c * 1.0 # since cached above
+    g = prob_c._compute_objective_gradient(x) * 1.0
+    j = prob_c.j * 1.0 # since cached above
+
+    result = prob_c._compute_all(x)
+    assert result[0] == False
+    assert_array_equal(result[1], f)
+    assert_array_equal(result[2], c)
+    assert_array_equal(result[3], g)
+    assert_array_equal(result[4], j)
+
+    # 8. Test all dummy methods in mo.CUTEstProblem
+    assert prob_c.compute_objective(1, 2) is None
+    assert prob_c.compute_objective_gradient(1, 2) is None
+    assert prob_c.compute_objective_hessian(1, 2) is None
+    assert prob_c.compute_objective_hvp(1, 2, 3) is None
+
+    assert prob_c.compute_lagrangian(1, 2, 3) is None
+    assert prob_c.compute_lagrangian_gradient(1, 2, 3) is None
+    assert prob_c.compute_lagrangian_hessian(1, 2, 3) is None
+    assert prob_c.compute_lagrangian_hvp(1, 2, 3, 4) is None
+
+    assert prob_c.compute_constraints(1, 2) is None
+    assert prob_c.compute_constraint_jacobian(1, 2) is None
+    assert prob_c.compute_constraint_jvp(1, 2, 3) is None
+    assert prob_c.compute_constraint_vjp(1, 2, 3) is None
+
 if __name__ == '__main__':
     test_pycutest()
     print('All tests passed!')

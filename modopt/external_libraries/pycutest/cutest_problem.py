@@ -156,6 +156,7 @@ class CUTEstProblem(Problem):
             # for unconstrained problems, objcons() returns (f, None)
             self.f, self.c = prob.objcons(x)
             self.warm_x = x * 1.
+            self.model_evals += 1
         return self.f
         # return failure_flag, sim.objective()
 
@@ -169,6 +170,7 @@ class CUTEstProblem(Problem):
         if not np.array_equal(self.warm_x_deriv, x):
             self.g, self.j = prob.lagjac(x)
             self.warm_x_deriv = x * 1.
+            self.deriv_evals += 1
         return self.g
 
     @record(['x'], ['con'])
@@ -181,6 +183,7 @@ class CUTEstProblem(Problem):
         if not np.array_equal(self.warm_x, x):
             self.f, self.c = prob.objcons(x)
             self.warm_x = x * 1.
+            self.model_evals += 1
         return self.c
 
     @record(['x'], ['jac'])
@@ -194,6 +197,7 @@ class CUTEstProblem(Problem):
             # for unconstrained problems, lagjac() returns (g, None)
             self.g, self.j = prob.lagjac(x)
             self.warm_x_deriv = x * 1.
+            self.deriv_evals += 1
         return self.j
 
     @record(['x'], ['failure', 'obj', 'con', 'grad', 'jac'])
@@ -224,6 +228,9 @@ class CUTEstProblem(Problem):
             self.f, self.c = prob.objcons(x)
             self.g, self.j = prob.lagjac(x)
             self.warm_x = x * 1.
+            self.warm_x_deriv = x * 1.
+            self.model_evals += 1
+            self.deriv_evals += 1
         return False, self.f, self.c, self.g, self.j
     
     @record(['x'], ['obj_hess'])
