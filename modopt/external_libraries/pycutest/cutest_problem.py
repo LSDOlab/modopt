@@ -62,6 +62,8 @@ class CUTEstProblem(Problem):
         self.n_full = prob.n_full               # total number of variables in CUTEst problem (n_free + n_fixed)
         self.n_free = prob.n_free               # number of free variables in CUTEst problem
         self.n_fixed = prob.n_fixed             # number of fixed variables in CUTEst problem
+        self.o_scaler = self.x_scaler = 1.0
+        self.c_scaler = None
 
         if self.constrained:
             self.eq_cons_first = prob.eq_cons_first         # flag if all equality constraints are listed before inequality constraints
@@ -84,6 +86,7 @@ class CUTEstProblem(Problem):
                     if not self.constrained:
                         self.user_defined_callbacks += ['obj_hvp']
         if self.constrained:
+            self.c_scaler = 1.0
             self.user_defined_callbacks += ['con']
             self.user_defined_callbacks += ['lag']
             if self.problem_properties['degree'] > 0:
@@ -96,6 +99,9 @@ class CUTEstProblem(Problem):
                     self.user_defined_callbacks += ['lag_hvp']
 
         self.declared_variables = ['dv'] + self.user_defined_callbacks
+
+    def _setup_scalers(self, ):
+        pass
 
     def _setup_bounds(self):
         '''

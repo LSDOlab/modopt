@@ -56,7 +56,11 @@ def record(in_names, out_names):
                 if len(out_names) > 1:
                     for out_name, result in zip(out_names, results):
                         # print(f"Recording output {out_name}: {result}")
-                        outputs[out_name] = result
+                        # For compute_all used for unconstrained optimization
+                        if result is None:
+                            outputs[out_name] = 'None'
+                        else:
+                            outputs[out_name] = result
                 else:
                     # print(f"Recording output {out_name[0]}: {results}")
                     outputs[out_names[0]] = results
