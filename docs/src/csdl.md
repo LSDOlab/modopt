@@ -1,4 +1,4 @@
-# Solving csdl problems
+# Solving csdl problems (deprecated)
 
 ## Define a problem in csdl
 

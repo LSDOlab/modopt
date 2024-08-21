@@ -1,5 +1,6 @@
 import numpy as np
 import scipy as sp
+from typing import Union
 import os, shutil, copy
 from datetime import datetime
 import contextlib
@@ -19,7 +20,7 @@ except ImportError:
 
 class Optimizer(object):
     def __init__(self, 
-                 problem, 
+                 problem:Union[Problem, ProblemLite], 
                  recording:bool = False,
                  hot_start_from:str = None,
                  hot_start_atol:float = 0.,

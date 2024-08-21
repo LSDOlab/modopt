@@ -78,6 +78,7 @@ _**Modopt as a development environment**_
 src/getting_started
 src/tutorials
 src/csdl
+src/csdl_alpha
 src/instructional_algs
 src/performant_algs
 src/examples
