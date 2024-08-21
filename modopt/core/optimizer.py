@@ -18,7 +18,15 @@ except ImportError:
     warnings.warn("h5py not found, recording disabled")
 
 class Optimizer(object):
-    def __init__(self, problem, **kwargs):
+    def __init__(self, 
+                 problem, 
+                 recording:bool = False,
+                 hot_start_from:str = None,
+                 hot_start_atol:float = 0.,
+                 hot_start_rtol:float = 0.,
+                 visualize:list = [],
+                 turn_off_outputs:bool = False,
+                 **kwargs):
 
         now = datetime.now()
         self.timestamp = now.strftime("%Y-%m-%d_%H.%M.%S.%f")
@@ -32,12 +40,18 @@ class Optimizer(object):
         self.options.declare('hot_start_atol', default=0., types=float)
         self.options.declare('hot_start_rtol', default=0., types=float)
         self.options.declare('visualize', default=[], types=list)
-        self.options.declare('turn_off_outputs', False, types=bool)
+        self.options.declare('turn_off_outputs', default=False, types=bool)
         self.update_outputs_count = 0
 
         self.options.declare('formulation', default='rs', types=str)
 
         self.initialize()
+        self.options.update({'recording': recording,
+                             'hot_start_from': hot_start_from,
+                             'hot_start_atol': hot_start_atol,
+                             'hot_start_rtol': hot_start_rtol,
+                             'visualize': visualize,
+                             'turn_off_outputs': turn_off_outputs})
         self.options.update(kwargs)
 
         # compute the scalar outputs from the optimizer after initialization

@@ -101,22 +101,22 @@ for i, prob_name in enumerate(prob_list):
         options = {}
         if alg=='IPOPT-2':
             solver = 'IPOPT'
-            options = {'hessian_approximation': 'exact', 'max_iter':300, 'print_level': 0}
+            options = {'hessian_approximation': 'exact', 'max_iter':500, 'print_level': 0}
         elif alg=='IPOPT':
-            options = {'hessian_approximation': 'limited-memory', 'max_iter':300, 'print_level': 0}
+            options = {'hessian_approximation': 'limited-memory', 'max_iter':500, 'print_level': 0}
         elif alg=='TrustConstr-2':
             solver = 'TrustConstr'
-            options = {'maxiter': 300}
+            options = {'maxiter': 500}
         elif alg == 'TrustConstr':
-            options = {'ignore_exact_hessian': True, 'maxiter': 300}
+            options = {'ignore_exact_hessian': True, 'maxiter': 500}
         elif alg == 'SNOPT':
-            options = {'Verbose': False, 'Major optimality': 1e-6, 'Major iterations': 300}
+            options = {'Verbose': False, 'Major optimality': 1e-6, 'Major iterations': 500}
         elif alg == 'PySLSQP':
-            options = {'maxiter': 300, 'iprint': 0}
+            options = {'maxiter': 500, 'iprint': 0}
         elif alg == 'BFGS':
-            options = {'maxiter': 300}
+            options = {'maxiter': 500}
         elif alg in ['LBFGSB']:
-            options = {'maxiter': 300, 'maxfun':1000}
+            options = {'maxiter': 500, 'maxfun':1500}
             
         # if (alg in ['COBYLA', 'COBYQA', 'NelderMead'] and nx >= 16) or (alg in ['IPOPT'] and nx >= 256):
         #     performance[prob.problem_name, alg] = {'time': 1e6,
@@ -162,26 +162,16 @@ for i, prob_name in enumerate(prob_list):
                                                'success': success,
                                                'nev': nev,
                                                'objective': objective}
-        
-    # plt.figure()
-    # for alg in algs:
-    #     # if (alg in ['COBYLA', 'COBYQA', 'NelderMead'] and nx >= 16) or (alg in ['IPOPT'] and nx >= 256):
-    #     #     continue
-    #     y_data = history[prob.problem_name, alg]
-    #     plt.semilogy(y_data, label=f"{alg} ({len(y_data)})")
-    # plt.xlabel('Evaluations')
-    # plt.ylabel('Objective')
-    # plt.title(f'{prob.problem_name} minimization')
-    # plt.legend()
-    # plt.grid()
-    # plt.savefig(f"{prob.problem_name}-objective-cb.pdf")
-    # plt.close()
 
 # Print performance
 print('\nPerformance')
 print('='*50)
 for key, value in performance.items():
     print(f"{str(key):45}:", value)
+
+import pickle
+with open('performance.pkl', 'wb') as f:
+    pickle.dump(performance, f)
 
 from modopt.benchmarking import plot_performance_profiles
 plot_performance_profiles(performance, save_figname='performance.pdf')

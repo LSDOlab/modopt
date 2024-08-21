@@ -1,4 +1,4 @@
-'''Scaling study on optimizers and AMLS (Starship)'''
+'''Scaling study on optimizers and AMLs (Cantilever)'''
 
 import numpy as np
 import matplotlib.pyplot as plt
