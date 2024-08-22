@@ -1,13 +1,7 @@
 import numpy as np
 import scipy as sp
-import warnings
 from modopt import Problem as Problem
 from modopt.core.recording_and_hotstart import hot_start, record
-
-try:
-    import pycutest
-except:
-    warnings.warn("'pycutest' could not be imported")
 
 # Note: modopt.CUTEstProblem is different from pycutest.CUTEstProblem
 class CUTEstProblem(Problem):
@@ -25,12 +19,19 @@ class CUTEstProblem(Problem):
         '''
         Initialize the Problem() instance for a CUTEstProblem.
         '''
+        try:
+            import pycutest
+        except ImportError:
+            raise ImportError("'pycutest' could not be imported")
+        
         self.options.declare('cutest_problem', types=pycutest.CUTEstProblem)
 
     def setup(self, ):
         '''
         Setup the problem name, initial guess, and problem dimensions.
         '''
+        import pycutest
+
         prob = self.options['cutest_problem']
         # Set problem_name
         # (Since it is not constructed explicitly using the Problem() class)
@@ -404,7 +405,7 @@ def find_problems(objective=None, constraints=None, regular=None, degree=None, o
     # Choose unconstrained, variable-dimension problems
     >>> probs = modopt.cutest.find_problems(constraints='unconstrained', userN=True)
     '''
-
+    import pycutest
     return pycutest.find_problems(objective=objective, constraints=constraints, regular=regular, degree=degree, 
                                   origin=origin, internal=internal, n=n, userN=userN, m=m, userM=userM)
 
@@ -442,6 +443,7 @@ def problem_properties(problem_name):
     # Properties of problem ROSENBR
     >>> probs = modopt.cutest.problem_properties('ROSENBR')
     '''
+    import pycutest
     return pycutest.problem_properties(problem_name)
 
 def print_available_sif_params(problem_name):
@@ -461,6 +463,7 @@ def print_available_sif_params(problem_name):
     # Print optional sif parameters for problem ARGLALE
     >>> probs = modopt.cutest.print_available_sif_params('ARGLALE')
     '''
+    import pycutest
     pycutest.print_available_sif_params(problem_name)
 
 def import_problem(problemName, destination=None, sifParams=None, sifOptions=None, efirst=False, lfirst=False, nvfirst=False, quiet=True, drop_fixed_variables=True):
@@ -502,6 +505,7 @@ def import_problem(problemName, destination=None, sifParams=None, sifOptions=Non
     >>> problem = modopt.cutest.import_problem('ARGLALE', sifParams={'N':100, 'M':200})
     >>> print(problem)
     '''
+    import pycutest
     try: 
         return pycutest.import_problem(problemName, destination=destination, sifParams=sifParams, sifOptions=sifOptions, 
                                        efirst=efirst, lfirst=lfirst, nvfirst=nvfirst, quiet=quiet, 

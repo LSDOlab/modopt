@@ -1,13 +1,7 @@
 import numpy as np
-import warnings
 import time
 from modopt import Optimizer
 from modopt.utils.options_dictionary import OptionsDictionary
-
-try:
-    import cvxopt as co
-except:
-    warnings.warn("'cvxopt' could not be imported. Install 'cvxopt' using `pip install cvxopt` for using CVXOPT optimizer.")
 
 class CVXOPT(Optimizer):
     '''
@@ -83,6 +77,12 @@ class CVXOPT(Optimizer):
         In modOpt, we combine all the inequality constraints (linear and nonlinear) 
         and variable bounds into f_k(x) <= 0.
         '''
+
+        try:
+            import cvxopt as co
+        except ImportError:
+            raise ImportError("'cvxopt' could not be imported. Install 'cvxopt' using `pip install cvxopt` for using CVXOPT optimizer.")
+        
         xl = self.problem.x_lower
         xu = self.problem.x_upper
 
@@ -209,6 +209,8 @@ class CVXOPT(Optimizer):
             If F is called with two arguments, it can be assumed that x is in the domain of f.
 
         '''
+        import cvxopt as co
+
         if x is None: return self.nc_i, co.matrix(self.x0)
         x_np = np.asarray(x).flatten()
         if self.nc_i > 0:   # If bounds or inequality constraints are present
@@ -234,6 +236,8 @@ class CVXOPT(Optimizer):
         '''
         Solve the nonlinear convex problem by calling cvxopt.solvers.cp with given options.
         '''
+        import cvxopt as co
+        
         co.solvers.options.update(self.solver_options.get_pure_dict())
 
         start_time = time.time()

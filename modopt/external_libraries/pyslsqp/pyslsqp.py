@@ -1,6 +1,5 @@
 import numpy as np
 from modopt import Optimizer
-import warnings
 import time
 from modopt.utils.options_dictionary import OptionsDictionary
 

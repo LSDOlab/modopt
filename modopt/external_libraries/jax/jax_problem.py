@@ -1,16 +1,5 @@
 import numpy as np
-import warnings
 from modopt import ProblemLite
-
-try:
-    import jax
-except: 
-    jax = None
-    warnings.warn("'jax' could not be imported. Install 'jax' using `pip install jax[cpu]` for using JaxProblem.")
-
-if jax is not None:
-    import jax.numpy as jnp
-    jax.config.update("jax_enable_x64", True)
 
 class JaxProblem(ProblemLite):
     '''
@@ -66,10 +55,15 @@ class JaxProblem(ProblemLite):
         nx = x0.size
         if x0.shape != (nx,):
             raise ValueError(f"Initial guess 'x0' must be a numpy 1d-array.")
-
-        if jax is None:
+    
+        try:
+            import jax
+        except ImportError: 
             raise ImportError("'jax' could not be imported. Install 'jax' using `pip install jax[cpu]` for using JaxProblem.")
-        
+
+        import jax.numpy as jnp
+        jax.config.update("jax_enable_x64", True)
+
         # Determine if jacrev or jacfwd should be used
         jacrev = True
         if nc is not None:

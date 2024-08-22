@@ -4,19 +4,13 @@ import warnings
 from modopt import Problem as OptProblem
 from modopt.core.recording_and_hotstart import hot_start, record
 
-try:
-    from python_csdl_backend import Simulator
-except:
-    warnings.warn("Simulator() from 'python_csdl_backend' could not be imported")
-
-try:
-    from csdl import Model
-except:
-    warnings.warn("Model() from 'csdl' could not be imported")
-
-
 class CSDLProblem(OptProblem):
     def initialize(self, ):
+        try:
+            from python_csdl_backend import Simulator
+        except ImportError:
+            raise ImportError("Simulator() from 'python_csdl_backend' could not be imported")
+
         self.options.declare('problem_name', default='unnamed_problem', types=str)
         self.options.declare('simulator', types=Simulator)
 

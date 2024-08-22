@@ -27,7 +27,7 @@ class SNOPTc(SNOPTOptimizer):
                               "Make sure 'snopt-python' wrapper is correctly installed.")
         try:
             from optimize.solvers import snopt7_python as fsnopt
-        except:
+        except ImportError:
             raise ImportError("'snopt7_python' from 'optimize.solvers' could not be imported. " \
                               "Make sure 'snopt-python' wrapper is correctly installed.")
 

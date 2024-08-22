@@ -1,12 +1,5 @@
 import numpy as np
-import warnings
 from modopt import ProblemLite
-
-try:
-    import casadi as ca
-except:
-    ca = None
-    warnings.warn("'casadi' could not be imported. Install 'casadi' using `pip install casadi` for using CasadiProblem.")
 
 class CasadiProblem(ProblemLite):
     '''
@@ -58,10 +51,12 @@ class CasadiProblem(ProblemLite):
         nx = x0.size
         if x0.shape != (nx,):
             raise ValueError(f"Initial guess 'x0' must be a numpy 1d-array.")
-
-        if ca is None:
-            raise ImportError("'casadi' could not be imported. Install 'casadi' using `pip install casadi` for using CasadiProblem.")
         
+        try:
+            import casadi as ca
+        except ImportError:
+            raise ImportError("'casadi' could not be imported. Install 'casadi' using `pip install casadi` for using CasadiProblem.")
+
         x = ca.MX.sym('x', nx)
 
         obj = None

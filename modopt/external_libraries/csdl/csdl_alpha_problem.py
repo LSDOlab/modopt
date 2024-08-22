@@ -1,21 +1,17 @@
 import numpy as np
 import scipy as sp
-import warnings
 from modopt import Problem as OptProblem
 from modopt.core.recording_and_hotstart import hot_start, record
 
-try:
-    # from csdl_alpha.experimental import PySimulator
-    from csdl_alpha.backends.simulator import SimulatorBase
-except:
-    warnings.warn("SimulatorBase() from 'csdl_alpha' could not be imported")
-    # warnings.warn("PySimulator() from 'csdl_alpha' could not be imported")
-
 class CSDLAlphaProblem(OptProblem):
     def initialize(self, ):
+        try:
+            from csdl_alpha.backends.simulator import SimulatorBase
+        except ImportError:
+            raise ImportError("SimulatorBase() from 'csdl_alpha' could not be imported")
+
         self.options.declare('problem_name', default='unnamed_problem', types=str)
         self.options.declare('simulator', types=SimulatorBase)
-        # self.options.declare('simulator', types=PySimulator)
 
     def setup(self, ):
 

@@ -1,11 +1,6 @@
 import numpy as np
 from modopt import Optimizer, CSDLProblem, CSDLAlphaProblem, OpenMDAOProblem
-import warnings
 import time
-try:
-    from casadi import *
-except:
-    warnings.warn("'casadi' could not be imported. Install casadi using 'pip install casadi' for using IPOPT optimizer.")
 
 class IPOPT(Optimizer):
     '''
@@ -85,6 +80,11 @@ class IPOPT(Optimizer):
         pass
 
     def solve(self):
+        try:
+            from casadi import MX, nlpsol, Function, triu
+        except ImportError:
+            raise ImportError("'casadi' could not be imported. Install casadi using 'pip install casadi' for using IPOPT optimizer.")
+        
         # Define the initial guess and bounds
         x0 = self.x0
         bounds = {'lbx': self.problem.x_lower, 
@@ -192,6 +192,8 @@ class IPOPT(Optimizer):
         print(output)
         
     def generate_objective_callback(self,):
+        from casadi import Callback, Sparsity
+
         nx   = self.nx
         obj  = self.obj
         grad = self.grad
@@ -280,6 +282,8 @@ class IPOPT(Optimizer):
         return Objective('f')
     
     def generate_constraint_callback(self,):
+        from casadi import Callback, Sparsity
+
         nx = self.nx
         nc = self.nc
         con = self.con
@@ -344,6 +348,8 @@ class IPOPT(Optimizer):
         return Constraints('c')
 
     def generate_hess_lag_callback(self,):
+        from casadi import Callback, Sparsity
+
         nx = self.nx
         nc = self.nc
         lag_hess = self.problem._compute_lagrangian_hessian
@@ -388,6 +394,8 @@ class IPOPT(Optimizer):
         return LagrangianHessian('HessLag')
     
     def generate_grad_f_callback(self,):
+        from casadi import Callback, Sparsity
+
         nx = self.nx
         grad = self.problem._compute_objective_gradient
         class ObjectiveGradient(Callback):
@@ -415,6 +423,8 @@ class IPOPT(Optimizer):
         return ObjectiveGradient('GradF')
     
     def generate_jac_g_callback(self,):
+        from casadi import Callback, Sparsity
+
         nx = self.nx
         nc = self.nc
         jac = self.problem._compute_constraint_jacobian

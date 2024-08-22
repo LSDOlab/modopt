@@ -1,14 +1,6 @@
 import numpy as np
-import warnings
 import time
-from modopt import Optimizer, Problem, ProblemLite
-
-try:
-    import qpsolvers
-except:
-    warnings.warn("'qpsolvers' could not be imported."\
-                  "Install 'qpsolvers' using `pip install qpsolvers[wheels_only] quadprog osqp` "\
-                  "to install open-source QP solvers with pre-compiled binaries.")
+from modopt import Optimizer
 
 class ConvexQPSolvers(Optimizer):
     '''
@@ -78,6 +70,13 @@ class ConvexQPSolvers(Optimizer):
         '''
         Initialize the Optimizer() instance for QPSolvers.
         '''
+        try:
+            import qpsolvers
+        except ImportError:
+            raise ImportError("'qpsolvers' could not be imported."\
+                              "Install 'qpsolvers' using `pip install qpsolvers[wheels_only] quadprog osqp` "\
+                              "to install open-source QP solvers with pre-compiled binaries.")
+        
         self.solver_name = 'convex_qpsolvers-'
         self.available_solvers = qpsolvers.available_solvers
         self.supported_solvers = ['clarabel', 'cvxopt', 'daqp', 'ecos', 
@@ -189,6 +188,7 @@ class ConvexQPSolvers(Optimizer):
         '''
         Solve the QP problem by calling qpsolvers with the requested solver and its options.
         '''
+        import qpsolvers
         solver_options = self.options['solver_options']
         # x = qpsolvers.solve_qp(self.P, self.q, 
         #                        self.G, self.h, 

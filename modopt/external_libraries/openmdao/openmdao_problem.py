@@ -3,13 +3,14 @@ import scipy as sp
 import warnings
 from modopt import Problem
 from modopt.core.recording_and_hotstart import hot_start, record
-try:
-    from openmdao.api import Problem as OMProblem
-except:
-    warnings.warn("Problem() from 'openmdao' could not be imported")
 
 class OpenMDAOProblem(Problem):
     def initialize(self, ):
+        try:
+            from openmdao.api import Problem as OMProblem
+        except ImportError:
+            raise ImportError("Problem() from 'openmdao' could not be imported")
+
         self.options.declare('problem_name', default='unnamed_problem', types=str)
         self.options.declare('om_problem', types=OMProblem)
 
