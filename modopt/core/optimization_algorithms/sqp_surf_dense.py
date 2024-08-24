@@ -1,11 +1,6 @@
 import numpy as np
 from scipy.sparse.csc import csc_matrix
 from modopt.core.merit_functions.modified_lagrangian_ineq import ModifiedLagrangianIneq
-import warnings
-try:
-    import osqp
-except:
-    warnings.warn("OSQP cannot be imported for the SQP solver.")
 import scipy.sparse as sp
 import time
 
@@ -382,6 +377,12 @@ class SQP_SURF(Optimizer):
         return feas_satisfied, feas
 
     def solve(self):
+        try:
+            import osqp
+        except ImportError:
+            raise ImportError("OSQP cannot be imported for the SQP solver. "\
+                              "Install it with 'pip install osqp'.")
+
         # Assign shorter names to variables and methods
         nx = self.nx
         ny = self.ny

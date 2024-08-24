@@ -374,7 +374,8 @@ class SQP(Optimizer):
         try:
             import osqp
         except ImportError:
-            raise ImportError("OSQP cannot be imported for the SQP solver. Install it with 'pip install osqp'.")
+            raise ImportError("OSQP cannot be imported for the SQP solver. "\
+                              "Install it with 'pip install osqp'.")
         
         # Assign shorter names to variables and methods
         nx = self.nx

@@ -188,15 +188,15 @@ class PySLSQP(Optimizer):
         output += f"\n\t{'Optimizer time':30}: {self.results['optimizer_time']}"
         output += f"\n\t{'Processing time':30}: {self.results['processing_time']}"
         output += f"\n\t{'Visualization time':30}: {self.results['visualization_time']}"
-        output += f"\n\t{'Summary saved in':30}: {self.solver_options['summary_filename']}"
+        output += f"\n\t{'Summary saved in':30}: {self.results['summary_filename']}"
         if 'save_filename' in self.results.keys():
-            output += f"\n\t{'Iteration data saved in':30}: {self.solver_options['save_filename']}"
+            output += f"\n\t{'Iteration data saved in':30}: {self.results['save_filename']}"
         if 'plot_filename' in self.results.keys():
-            output += f"\n\t{'Plot saved in':30}: {self.solver_options['plot_filename']}"
+            output += f"\n\t{'Plot saved in':30}: {self.results['plot_filename']}"
         if 'nfev_reused_in_hotstart' in self.results.keys():
-            output += f"\n\t{'Fun. evals reused (hotstart)':30}: {self.solver_options['nfev_reused_in_hotstart']}"
+            output += f"\n\t{'Fun. evals reused (hotstart)':30}: {self.results['nfev_reused_in_hotstart']}"
         if 'ngev_reused_in_hotstart' in self.results.keys():
-            output += f"\n\t{'Der. evals reused (hotstart)':30}: {self.solver_options['ngev_reused_in_hotstart']}"
+            output += f"\n\t{'Der. evals reused (hotstart)':30}: {self.results['ngev_reused_in_hotstart']}"
         output += self.get_callback_counts_string(30)
 
         if optimal_variables or all:
