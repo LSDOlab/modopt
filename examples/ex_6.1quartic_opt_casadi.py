@@ -17,7 +17,7 @@ ca_con = lambda x: ca.vertcat(x[0] + x[1], x[0] - x[1])
 prob = mo.CasadiProblem(x0=np.array([500., 5.]), ca_obj=ca_obj, ca_con=ca_con, 
                         cl=np.array([1., 1.]), cu=np.array([1., np.inf]), 
                         xl=np.array([0., -np.inf]), xu=np.array([np.inf, np.inf]),
-                        name='quartic_casadi')
+                        name='quartic_casadi', order=1)
 
 # # METHOD 2: Create CasADi functions and derivatives, 
 # #           and wrap them manually before passing to Problem/ProblemLite.

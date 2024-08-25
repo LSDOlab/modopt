@@ -19,7 +19,8 @@ jax_con = lambda x: jnp.array([x[0] + x[1], x[0] - x[1]])
 
 prob = mo.JaxProblem(x0=np.array([500., 5.]), nc=2, jax_obj=jax_obj, jax_con=jax_con,
                      xl=np.array([0., -np.inf]), xu=np.array([np.inf, np.inf]),
-                     cl=np.array([1., 1.]), cu=np.array([1., np.inf]), name='quartic')
+                     cl=np.array([1., 1.]), cu=np.array([1., np.inf]), 
+                     name='quartic', order=1)
 
 # # METHOD 2: Create jitted Jax functions and derivatives, and
 # #           wrap them manually before passing to Problem/ProblemLite.
