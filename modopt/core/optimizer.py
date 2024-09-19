@@ -287,10 +287,11 @@ class Optimizer(object):
             2. Readable outputs: Contains the declared readable outputs
             3. Recorder outputs: Contains all the outputs of the optimization problem, if recording is enabled
         '''
+        self.out_dict = out_dict = copy.deepcopy(kwargs)
+        
         if self.options['turn_off_outputs']:
             return
         
-        self.out_dict = out_dict = copy.deepcopy(kwargs)
         if self.options['visualize'] != []:
             self.visualizer.update_plot(out_dict)
 

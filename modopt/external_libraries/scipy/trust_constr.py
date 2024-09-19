@@ -107,6 +107,7 @@ class TrustConstr(Optimizer):
         # self.con_hess = None
         # NOTE: Fix to use BFGS as the constraint Hessian since Scipy does not take `None` as said in their docs
         #       Scipy default for constraint Hessian is BFGS() but for obj Hessian 'hess' and 'hessp' is None
+        # NOTE: This was fixed in Scipy with a commit on 18 July 2024
         self.con_hess = BFGS()
 
         if not self.solver_options['ignore_exact_hessian']:
