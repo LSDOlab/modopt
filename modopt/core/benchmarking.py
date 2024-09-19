@@ -10,6 +10,11 @@ except ImportError:
     warnings.warn("matplotlib not found, plotting disabled.")
     plt = None
 
+# import seaborn as sns
+# import matplotlib.pyplot as plt
+# sns.set_theme(rc={'text.usetex': True})
+# sns.set_style("ticks")
+
 def generate_performance_profiles(data):
     '''
     Generate the performance profiles for the given data.
@@ -88,12 +93,12 @@ def generate_performance_profiles(data):
         
         return performance_profiles
     
-    Tau = np.linspace(0, np.log2(max_perf_ratio*10), 100)
+    Tau = np.linspace(0, np.log2(max_perf_ratio*10), 100)[:-1]
     performance_profiles = performance_function(Tau, perf_ratio)
 
 
     if 'nev' in data[(problems[0], solvers[0])]:
-        Tau_n = np.linspace(0, np.log2(max_perf_ratio_n*10), 100)
+        Tau_n = np.linspace(0, np.log2(max_perf_ratio_n*10), 100)[:-1]
         performance_profiles_n = performance_function(Tau_n, perf_ratio_n)
 
         return Tau, performance_profiles, Tau_n, performance_profiles_n
@@ -119,10 +124,13 @@ def plot_performance_profiles(data, save_figname='performance.pdf'):
     if plt is None:
         raise ImportError("matplotlib not found, cannot plot performance profile.")
     
+    plt.rcParams['xtick.labelsize']=20
+    plt.rcParams['ytick.labelsize']=20
+    
     fig, ax = plt.subplots()
-    ax.set_title('Performance Profile')
-    ax.set_xlabel('Performance Ratio')
-    ax.set_ylabel('Proportion of Problems')
+    ax.set_title('Performance Profile (time)', fontsize=24)
+    ax.set_xlabel('Logarithmic performance ratio, $log_2(\\tau)$', fontsize=24)
+    ax.set_ylabel('Proportion of problems solved', fontsize=24)
 
     if 'nev' not in data[(list(data.keys())[0][0], list(data.keys())[0][1])]:
         Tau, performance_profiles = generate_performance_profiles(data)
@@ -131,25 +139,31 @@ def plot_performance_profiles(data, save_figname='performance.pdf'):
         Tau, performance_profiles, Tau_n, performance_profiles_n = generate_performance_profiles(data)
 
     for solver, profile in performance_profiles.items():
-        ax.plot(Tau, profile, label=solver)
+        ax.plot(Tau, profile, label=solver, linewidth = 2.0)
 
-    ax.legend()
-    fig.set_size_inches(10, 6)
-    plt.savefig(save_figname)
+    ax.legend(fontsize=18)
+    ax.set_xlim([0., Tau[-1]])
+    ax.set_ylim([0., 1.])
+    plt.minorticks_off()
+    fig.set_size_inches(8, 6)
+    plt.savefig(save_figname, bbox_inches='tight')
     plt.show()
 
     if 'nev' in data[(list(data.keys())[0][0], list(data.keys())[0][1])]:
         fig, ax = plt.subplots()
-        ax.set_title('Performance Profile - Number of Evaluations')
-        ax.set_xlabel('Performance Ratio')
-        ax.set_ylabel('Proportion of Problems')
+        ax.set_title('Data Profile (function evaluations)', fontsize=24)
+        ax.set_xlabel('Logarithmic performance ratio, $log_2(\\tau)$', fontsize=24)
+        ax.set_ylabel('Proportion of problems solved', fontsize=24)
 
         for solver, profile in performance_profiles_n.items():
-            ax.plot(Tau_n, profile, label=solver)
+            ax.plot(Tau_n, profile, label=solver, linewidth = 2.0)
 
-        ax.legend()
-        fig.set_size_inches(10, 6)
-        plt.savefig(save_figname.replace('.pdf', '_nev.pdf'))
+        ax.legend(fontsize=18)
+        ax.set_xlim([0., Tau_n[-1]])
+        ax.set_ylim([0., 1.])
+        plt.minorticks_off()
+        fig.set_size_inches(8, 6)
+        plt.savefig(save_figname.replace('.pdf', '_nev.pdf'), bbox_inches='tight')
         plt.show()
 
 if __name__ == "__main__":
