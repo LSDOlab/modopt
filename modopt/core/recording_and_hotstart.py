@@ -62,7 +62,7 @@ def record(in_names, out_names):
                         else:
                             outputs[out_name] = result
                 else:
-                    # print(f"Recording output {out_name[0]}: {results}")
+                    # print(f"Recording output {out_names[0]}: {results}")
                     outputs[out_names[0]] = results
 
             # Update the visualizer [TODO: can be moved out of recording decorator]
