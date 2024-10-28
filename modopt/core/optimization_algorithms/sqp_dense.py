@@ -23,8 +23,11 @@ class SQP(Optimizer):
 
         self.obj = self.problem._compute_objective
         self.grad = self.problem._compute_objective_gradient
-        self.con_in = self.problem._compute_constraints
-        self.jac_in = self.problem._compute_constraint_jacobian
+        self.active_callbacks = ['obj', 'grad']
+        if self.problem.constrained:
+            self.con_in = self.problem._compute_constraints
+            self.jac_in = self.problem._compute_constraint_jacobian
+            self.active_callbacks += ['con', 'jac']
 
         self.options.declare('maxiter', default=1000, types=int)
         self.options.declare('opt_tol', default=1e-7, types=float)
@@ -94,91 +97,76 @@ class SQP(Optimizer):
     # Adapt constraints to C(x) >= 0
     def setup_constraints(self, ):
 
-        c_lower = self.problem.c_lower
-        c_upper = self.problem.c_upper
-
-        x_lower = self.problem.x_lower
-        x_upper = self.problem.x_upper
-
-        self.nc = 0
-        self.lower_bounds = False
-        self.upper_bounds = False
-        self.lower_constraint_bounds = False
-        self.upper_constraint_bounds = False
+        xl = self.problem.x_lower
+        xu = self.problem.x_upper
 
         # Adapt bounds as ineq constraints C(x) >= 0
         # Remove bounds with -np.inf as lower bound
-        lbi = self.lower_bound_indices = np.where(x_lower != -np.inf)[0]
+        lbi = self.lower_bound_indices = np.where(xl != -np.inf)[0]
         # Remove bounds with np.inf as upper bound
-        ubi = self.upper_bound_indices = np.where(x_upper != np.inf)[0]
+        ubi = self.upper_bound_indices = np.where(xu !=  np.inf)[0]
 
-        if len(lbi) > 0:
-            self.lower_bounds = True
-            self.nc += len(lbi)
-
-        if len(ubi) > 0:
-            self.upper_bounds = True
-            self.nc += len(ubi)
-
+        self.lower_bounded = True if len(lbi) > 0 else False
+        self.upper_bounded = True if len(ubi) > 0 else False
+        
         # Adapt eq/ineq constraints as constraints >= 0
         # Remove constraints with -np.inf as lower bound
-        lci = self.lower_constraint_indices = np.where(
-            c_lower != -np.inf)[0]
-        # Remove constraints with np.inf as upper bound
-        uci = self.upper_constraint_indices = np.where(
-            c_upper != np.inf)[0]
+        if self.problem.constrained:
+            cl = self.problem.c_lower
+            cu = self.problem.c_upper
+            lci = self.lower_constraint_indices = np.where(cl != -np.inf)[0]
+            # Remove constraints with np.inf as upper bound
+            uci = self.upper_constraint_indices = np.where(cu !=  np.inf)[0]
+        else:
+            lci = np.array([])
+            uci = np.array([])
 
-        if len(lci) > 0:
-            self.lower_constraint_bounds = True
-            self.nc += len(lci)
+        self.lower_constrained = True if len(lci) > 0 else False
+        self.upper_constrained = True if len(uci) > 0 else False
 
-        if len(uci) > 0:
-            self.upper_constraint_bounds = True
-            self.nc += len(uci)
+        self.nc = len(lbi) + len(ubi) + len(lci) + len(uci)
 
     def con(self, x):
-        # Compute problem constraints
-        c_in = self.con_in(x)
-
         lbi = self.lower_bound_indices
         ubi = self.upper_bound_indices
-        lci = self.lower_constraint_indices
-        uci = self.upper_constraint_indices
+        if self.problem.constrained:
+            lci = self.lower_constraint_indices
+            uci = self.upper_constraint_indices
+            # Compute problem constraints
+            c_in = self.con_in(x)
 
         c_out = np.array([])
 
-        if self.lower_bounds:
+        if self.lower_bounded:
             c_out = np.append(c_out, x[lbi] - self.problem.x_lower[lbi])
-        if self.upper_bounds:
+        if self.upper_bounded:
             c_out = np.append(c_out, self.problem.x_upper[ubi] - x[ubi])
-        if self.lower_constraint_bounds:
-            c_out = np.append(c_out,
-                              c_in[lci] - self.problem.c_lower[lci])
-        if self.upper_constraint_bounds:
-            c_out = np.append(c_out,
-                              self.problem.c_upper[uci] - c_in[uci])
+        if self.lower_constrained:
+            c_out = np.append(c_out, c_in[lci] - self.problem.c_lower[lci])
+        if self.upper_constrained:
+            c_out = np.append(c_out, self.problem.c_upper[uci] - c_in[uci])
 
         return c_out
 
     def jac(self, x):
-        # Compute problem constraint Jacobian
-        j_in = self.jac_in(x)
-
         nx = self.nx
         lbi = self.lower_bound_indices
         ubi = self.upper_bound_indices
-        lci = self.lower_constraint_indices
-        uci = self.upper_constraint_indices
+        if self.problem.constrained:
+            lci = self.lower_constraint_indices
+            uci = self.upper_constraint_indices
+            # Compute problem constraint Jacobian
+            j_in = self.jac_in(x)
 
         j_out = np.empty((1, nx), dtype=float)
 
-        if self.lower_bounds:
+        if self.lower_bounded:
             j_out = np.append(j_out, np.identity(nx)[lbi], axis=0)
-        if self.upper_bounds:
+        if self.upper_bounded:
             j_out = np.append(j_out, -np.identity(nx)[ubi], axis=0)
-        if self.lower_constraint_bounds:
+        if self.lower_constrained:
             j_out = np.append(j_out, j_in[lci], axis=0)
-        if self.upper_constraint_bounds:
+        if self.upper_constrained:
             j_out = np.append(j_out, -j_in[uci], axis=0)
 
         return j_out[1:]
@@ -317,18 +305,23 @@ class SQP(Optimizer):
     def opt_check(self, pi, c, g, j):
         opt_tol = self.options['opt_tol']
 
-        opt_tol_factor = (1 + np.linalg.norm(pi, np.inf))
+        if self.nc == 0:
+            opt_tol_factor = 1.
+            nonneg_violation = 0.
+            compl_violation = 0.
+            stat_violation = np.linalg.norm(g, np.inf)
+
+        else:
+            opt_tol_factor = (1 + np.linalg.norm(pi, np.inf))
+            nonneg_violation = max(0., -np.min(pi))
+            # Note: compl_violation can be negative(Question: Ask Prof. Gill);
+            #       Other 2 violations are always nonnegative
+            compl_violation = np.max(c * pi)
+            stat_violation = np.linalg.norm(g - j.T @ pi, np.inf)
+
         scaled_opt_tol = opt_tol * opt_tol_factor
-
-        nonneg_violation = max(0., -np.min(pi))
         opt_check1 = (nonneg_violation <= scaled_opt_tol)
-
-        # Note: compl_violation can be negative(Question: Ask Prof. Gill);
-        #       Other 2 violations are always nonnegative
-        compl_violation = np.max(c * pi)
         opt_check2 = (compl_violation <= scaled_opt_tol)
-
-        stat_violation = np.linalg.norm(g - j.T @ pi, np.inf)
         opt_check3 = (stat_violation <= scaled_opt_tol)
 
         # opt is always nonnegative
@@ -422,7 +415,11 @@ class SQP(Optimizer):
         itr = 0
 
         opt_satisfied, opt = self.opt_check(pi_k, c_k, g_k, J_k)
-        feas_satisfied, feas = self.feas_check(x_k, c_k)
+        if self.nc == 0:
+            feas_satisfied, feas = True, 0.
+        else:
+            feas_satisfied, feas = self.feas_check(x_k, c_k)
+        
         tol_satisfied = (opt_satisfied and feas_satisfied)
 
         # Evaluate merit function value
@@ -547,10 +544,11 @@ class SQP(Optimizer):
             pTHp = p_x.T @ (B_k @ p_x)
 
             # Update penalty parameters
-            rho_k = self.update_scalar_rho(rho_k, dir_deriv_al, pTHp,
-                                           p_pi, c_k, s_k)
-            # rho_k = self.update_vector_rho(rho_k, dir_deriv_al, pTHp,
-            #                                p_pi, c_k, s_k)
+            if self.nc > 0:
+                rho_k = self.update_scalar_rho(rho_k, dir_deriv_al, pTHp,
+                                            p_pi, c_k, s_k)
+                # rho_k = self.update_vector_rho(rho_k, dir_deriv_al, pTHp,
+                #                                p_pi, c_k, s_k)
 
             MF.set_rho(rho_k)
             mf_k = MF.evaluate_function(x_k, pi_k, s_k, f_k, c_k)
@@ -674,7 +672,10 @@ class SQP(Optimizer):
             # ALGORITHM ENDS HERE
 
             opt_satisfied, opt = self.opt_check(pi_k, c_k, g_k, J_k)
-            feas_satisfied, feas = self.feas_check(x_k, c_k)
+            if self.nc == 0:
+                feas_satisfied, feas = True, 0.
+            else:
+                feas_satisfied, feas = self.feas_check(x_k, c_k)
             tol_satisfied = (opt_satisfied and feas_satisfied)
 
             # Update arrays inside outputs dict with new values from the current iteration

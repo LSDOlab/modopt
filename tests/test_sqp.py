@@ -4,6 +4,7 @@ from all_problem_types import Constrained, constrained_lite
 from numpy.testing import assert_array_almost_equal, assert_array_equal, assert_almost_equal
 import pytest
 
+@pytest.mark.sqp
 def test_sqp(): 
     import numpy as np
     from modopt import SQP
