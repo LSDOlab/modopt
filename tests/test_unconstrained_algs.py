@@ -62,8 +62,8 @@ def test_quasi_newton():
     assert_almost_equal(optimizer.results['objective'], 0., decimal=11)
     assert_almost_equal(optimizer.results['optimality'], 0., decimal=11)
     assert optimizer.results['niter'] < solver_options['maxiter']
-    assert optimizer.results['nfev'] == 106
-    assert optimizer.results['ngev'] == 78
+    assert optimizer.results['nfev'] == 76
+    assert optimizer.results['ngev'] == 76
     
     prob = unconstrained_lite()
     prob.x0 = np.array([100., 10.]) # set initial guess to something closer to the minimum [0, 0]
@@ -79,8 +79,8 @@ def test_quasi_newton():
     assert_almost_equal(optimizer.results['objective'], 0., decimal=11)
     assert_almost_equal(optimizer.results['optimality'], 0., decimal=11)
     assert optimizer.results['niter'] < solver_options['maxiter']
-    assert optimizer.results['nfev'] == 106
-    assert optimizer.results['ngev'] == 78
+    assert optimizer.results['nfev'] == 76
+    assert optimizer.results['ngev'] == 76
 
 from modopt import Problem, ProblemLite
 import numpy as np
