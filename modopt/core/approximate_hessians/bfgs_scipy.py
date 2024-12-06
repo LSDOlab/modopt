@@ -10,7 +10,7 @@ class BFGSScipy(ApproximateHessian):
         self.options.declare('store_hessian', default=True, types=bool)
         self.options.declare('store_inverse', default=False, types=bool)
         self.options.declare('exception_strategy',
-                             default='skip_update',
+                             default='damp_update',
                              values=['skip_update', 'damp_update'])
         self.options.declare('min_curvature', default=0.0, types=float)
         self.options.declare('init_scale',

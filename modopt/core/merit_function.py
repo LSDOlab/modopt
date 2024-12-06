@@ -14,11 +14,11 @@ class MeritFunction(object):
         self.options.declare('j', types=(MethodType, FunctionType))
 
         self.options.declare('nx',
-                             types=(int, np.int32, np.int64, float,
-                                    np.float64))
+                             types=(int, np.int32, np.int64, float, np.float64))
         self.options.declare('nc',
-                             types=(int, np.int32, np.int64, float,
-                                    np.float64))
+                             types=(int, np.int32, np.int64, float, np.float64))
+        self.options.declare('nc_e', default=0,
+                             types=(int, np.int32, np.int64, float, np.float64))
 
         self.initialize()
 

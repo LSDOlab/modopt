@@ -2,9 +2,9 @@ import numpy as np
 import time
 
 from modopt import Optimizer
-from modopt.line_search_algorithms import ScipyLS
+from modopt.line_search_algorithms import ScipyLS, Minpack2LS
 # from modopt.approximate_hessians import BFGS
-from modopt.approximate_hessians import BFGSM1 as BFGS
+from modopt.approximate_hessians import BFGSScipy as BFGS
 
 
 class QuasiNewton(Optimizer):
@@ -31,8 +31,10 @@ class QuasiNewton(Optimizer):
         }
 
     def setup(self):
-        self.LS = ScipyLS(f=self.obj, g=self.grad)
-        self.QN = BFGS(nx=self.problem.nx)
+        # self.LS = ScipyLS(f=self.obj, g=self.grad)
+        self.LS = Minpack2LS(f=self.obj, g=self.grad)
+        self.QN = BFGS(nx=self.problem.nx,
+                       exception_strategy='damp_update')
 
     def solve(self):
         # Assign shorter names to variables and methods
@@ -107,8 +109,9 @@ class QuasiNewton(Optimizer):
                 d_k = alpha * p_k
                 x_k += d_k
 
-                if g_new == 'Unavailable':
-                    g_new = grad(x_k)
+                if not isinstance(g_new, np.ndarray):
+                    if g_new == 'Unavailable':
+                        g_new = grad(x_k)
                 w_k = g_new - g_k
                 g_k = g_new
 

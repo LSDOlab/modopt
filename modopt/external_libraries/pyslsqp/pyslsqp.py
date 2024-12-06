@@ -70,7 +70,7 @@ class PySLSQP(Optimizer):
         cl = self.problem.c_lower
         cu = self.problem.c_upper
 
-        eqi = self.eq_constraint_indices = np.where(cl == cu)[0]
+        eqi = self.eq_constraint_indices    = np.where(cl == cu)[0]
         lci = self.lower_constraint_indices = np.where((cl != -np.inf) & (cl != cu))[0]
         uci = self.upper_constraint_indices = np.where((cu !=  np.inf) & (cl != cu))[0]
 
@@ -83,7 +83,7 @@ class PySLSQP(Optimizer):
         self.nc   = self.nc_e + self.nc_i
 
         if self.nc == 0:
-            raise ValueError('No constraints found, but problem.constrained is set as True.')
+            raise ValueError('No constraint bounds found, but problem.constrained is set as True.')
 
     def con(self, x):
         c_in = self.con_in(x)

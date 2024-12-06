@@ -21,7 +21,7 @@ class Minpack2LS(LineSearch):
                              lower=eps)
         # Maximum step length
         self.options.declare('max_step',
-                             default=50,
+                             default=1.0,
                              types=(int, float),
                              upper=(1e10),
                              lower=eps)

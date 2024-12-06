@@ -5,7 +5,7 @@ from modopt import Optimizer
 from modopt.line_search_algorithms import ScipyLS, BacktrackingArmijo
 from modopt.merit_functions import AugmentedLagrangianEq, LagrangianEq
 # from modopt.approximate_hessians import BFGS
-from modopt.approximate_hessians import BFGSM1 as BFGS
+from modopt.approximate_hessians import BFGSScipy as BFGS
 from modopt.core.approximate_hessians.bfgs_function import bfgs_update
 
 
@@ -42,7 +42,8 @@ class NewtonLagrange(Optimizer):
     def setup(self):
         nx = self.problem.nx
         nc = self.problem.nc
-        self.QN = BFGS(nx=self.problem.nx)
+        self.QN = BFGS(nx=self.problem.nx,
+                       exception_strategy='damp_update')
         self.MF = AugmentedLagrangianEq(nx=nx,
                                         nc=nc,
                                         f=self.obj,
@@ -96,10 +97,11 @@ class NewtonLagrange(Optimizer):
         pi_k = v_k[nx:]
 
         # L_k = OF.evaluate_function(x_k, pi_k, f_k, c_k)
+        # gL_k = np.concatenate((g_k - J_k.T @ pi_k, -c_k))
         gL_k = OF.evaluate_gradient(x_k, pi_k, f_k, c_k, g_k, J_k)
 
         MF.set_rho(rho)
-        mf_k = MF.evaluate_function(x_k, pi_k, f_k, c_k)
+        mf_k  = MF.evaluate_function(x_k, pi_k, f_k, c_k)
         mfg_k = MF.evaluate_gradient(x_k, pi_k, f_k, c_k, g_k, J_k)
 
         # Iteration counter
@@ -144,7 +146,6 @@ class NewtonLagrange(Optimizer):
 
             # Compute the search direction toward the next iterate
             p_k = np.linalg.solve(A, b)
-            # print((v_k + p_k)[-1])
 
             # Compute the step length along the search direction via a line search
             # alpha, mf_k, mfg_new, mf_slope_new, new_f_evals, new_g_evals, converged = LS.search(
@@ -155,9 +156,9 @@ class NewtonLagrange(Optimizer):
             nfev += new_f_evals
             ngev += new_g_evals
 
-            # A step of length 1e-4 is taken along p_k if line search does not converge
+            # A step of length 1.0 is taken along p_k if line search does not converge
             if not converged:
-                alpha = None
+                alpha = 0.99
                 d_k = p_k * 1.
 
             else:
@@ -178,8 +179,8 @@ class NewtonLagrange(Optimizer):
             ngev += 1
 
             # L_k = OF.evaluate_function(x_k, pi_k, f_k, c_k)
-            gL_k_new = OF.evaluate_gradient(x_k, pi_k, f_k, c_k, g_k,
-                                            J_k)
+            # gL_k_new = np.concatenate((g_k - J_k.T @ pi_k, -c_k))
+            gL_k_new = OF.evaluate_gradient(x_k, pi_k, f_k, c_k, g_k, J_k)
             w_k = (gL_k_new - gL_k)
             gL_k = gL_k_new
 
