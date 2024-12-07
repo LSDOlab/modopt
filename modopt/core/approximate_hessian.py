@@ -12,8 +12,6 @@ class ApproximateHessian(object):
 
         self.options.update(kwargs)
 
-        self.setup()
-
         if 'store_hessian' in self.options:
             if self.options['store_hessian']:
                 self.B_k = np.identity(self.options['nx'])
@@ -21,6 +19,8 @@ class ApproximateHessian(object):
         if 'store_inverse' in self.options:
             if self.options['store_inverse']:
                 self.M_k = np.identity(self.options['nx'])
+
+        self.setup()
 
     def setup(self,):
         pass
