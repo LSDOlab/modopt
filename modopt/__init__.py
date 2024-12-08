@@ -47,6 +47,7 @@ from modopt.core.optimization_algorithms.l2_penalty_eq import L2PenaltyEq
 
 from modopt.core.optimization_algorithms.sqp import SQP as SQPSparse
 from modopt.core.optimization_algorithms.sqp_dense import SQP
+from modopt.core.optimization_algorithms.sqp_basic import BSQP
 from modopt.core.optimization_algorithms.sqp_surf import SQP_SURF
 
 # continuous gradient-free
