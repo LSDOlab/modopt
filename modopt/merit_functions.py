@@ -7,6 +7,7 @@ from modopt.core.merit_functions.augmented_lagrangian_eq import AugmentedLagrang
 # from modopt.core.merit_functions.l1_penalty_ineq import L1Ineq
 # from modopt.core.merit_functions.l_inf_penalty_ineq import LInfIneq
 from modopt.core.merit_functions.augmented_lagrangian_ineq import AugmentedLagrangianIneq
+from modopt.core.merit_functions.augmented_lagrangian import AugmentedLagrangian
 
 from modopt.core.merit_functions.lagrangian_eq import LagrangianEq
 from modopt.core.merit_functions.modified_lagrangian_ineq import ModifiedLagrangianIneq

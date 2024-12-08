@@ -1,13 +1,9 @@
 import numpy as np
-from scipy.sparse.csc import csc_matrix
-from modopt.core.merit_functions.modified_lagrangian_ineq import ModifiedLagrangianIneq
-
-import scipy.sparse as sp
 import time
 
 from modopt import Optimizer
 from modopt.line_search_algorithms import ScipyLS, BacktrackingArmijo, Minpack2LS
-from modopt.merit_functions import AugmentedLagrangian, ModifiedLagrangianIneq
+from modopt.merit_functions import AugmentedLagrangian
 from modopt.approximate_hessians import BFGSDamped as BFGS
 
 # This optimizer takes constraints in all-inequality form, C(x) >= 0

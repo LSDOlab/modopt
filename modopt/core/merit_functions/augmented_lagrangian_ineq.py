@@ -10,16 +10,13 @@ class AugmentedLagrangianIneq(MeritFunction):
         self.rho = np.zeros(nc)
 
     def set_rho(self, rho):
-        nc = self.options['nc']
-        if type(rho) in (np.int32, np.int64, int, np.float64, float):
-            self.rho = np.ones(nc) * rho
-        else:
-            self.rho = rho * 1.
+        self.rho[:] = rho
 
     def compute_function(self, v):
         nx = self.options['nx']
         nc = self.options['nc']
         rho = self.rho
+        
         x = v[:nx]
         lag_mult = v[nx:(nx + nc)]
         slacks = v[(nx + nc):]
@@ -45,8 +42,7 @@ class AugmentedLagrangianIneq(MeritFunction):
         grad = self.options['g'](x)
         jac = self.options['j'](x)
 
-        # grad_x = grad - np.matmul(jac.T, lag_mult - (rho *
-        #                                              (con - slacks)))
+        # grad_x = grad - np.matmul(jac.T, lag_mult - (rho * (con - slacks)))
         grad_x = grad - jac.T @ (lag_mult - (rho * (con - slacks)))
         grad_lag_mult = -(con - slacks)
         grad_slacks = lag_mult - rho * (con - slacks)
