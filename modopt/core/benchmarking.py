@@ -121,6 +121,13 @@ def generate_performance_profiles(data):
     Tau = np.linspace(0, np.log2(max_perf_ratio*10), 100)[:-1] # upper bound 10*max_perf_ratio needs to be omitted
     performance_profiles = performance_function(Tau, perf_ratio)
 
+    print('Total number of problems:', len(problems), '\n')
+    for solver in solvers:
+        print('Solver:', solver)
+        print('-'*50)
+        print('Number of problems solved:', int(np.ceil(performance_profiles[solver][-2]*len(problems))))
+        print('Percentage of problems solved:', performance_profiles[solver][-2]*100)
+        print('-'*50, '\n')
 
     if 'nev' in data[(problems[0], solvers[0])]:
         Tau_n = np.linspace(0, np.log2(max_perf_ratio_n*10), 100)[:-1] # upper bound 10*max_perf_ratio_n needs to be omitted
