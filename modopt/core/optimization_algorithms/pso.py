@@ -4,6 +4,7 @@ from scipy.stats import qmc
 
 from modopt import Optimizer
 from modopt.merit_functions import AugmentedLagrangianEq, L2Eq
+import warnings
 
 
 class PSO(Optimizer):
@@ -50,6 +51,12 @@ class PSO(Optimizer):
         sample = sampler.random(n=population)
         x_min = self.problem.x_lower
         x_max = self.problem.x_upper
+
+        if any(x_min == -np.inf) or any(x_max == np.inf):
+            warnings.warn('Infinite variable bounds detected. Using default bounds of -10 and +10 for infinite bounds.')
+            x_min = np.where(x_min == -np.inf, -10, x_min)
+            x_max = np.where(x_max ==  np.inf,  10, x_max)
+        
         x0 = qmc.scale(sample, x_min, x_max)
 
         sampler = qmc.LatinHypercube(d=nx, seed=1)
@@ -61,7 +68,7 @@ class PSO(Optimizer):
 
         start_time = time.time()
 
-        # Set intial values for current iterates
+        # Set initial values for current iterates
         x_k = x0 * 1.
         v_k = v0 * 1.
         f_k = np.full((population,), np.inf)
