@@ -202,10 +202,7 @@ omit = [
     "modopt/core/optimization_algorithms/sqp_surf_dense.py",
     # omit snopt interface as it's licensed and cannot be put on cloud
     "modopt/external_libraries/snopt/*",
-    # "modopt/external_libraries/pycutest/*",
 
     # Only for local testing
-    # "modopt/core/optimization_algorithms/simulated_annealing.py",
     # "modopt/core/optimization_algorithms/interior_point.py",
-    # "modopt/external_libraries/pycutest/*",
     ]
