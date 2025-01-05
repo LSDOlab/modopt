@@ -94,7 +94,8 @@ def test_lbfgsb():
     results = optimize(prob, solver='LBFGSB', solver_options={'maxiter':200, 'iprint':-1, 'gtol':1e-8, 'ftol':1e-12})
     print(results)
     assert results['success'] == True
-    assert results['message'] == 'CONVERGENCE: NORM_OF_PROJECTED_GRADIENT_<=_PGTOL'
+    assert results['message'] in ('CONVERGENCE: NORM_OF_PROJECTED_GRADIENT_<=_PGTOL',
+                                  'CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL')
     assert_array_almost_equal(results['x'], [1.0, 0.0], decimal=3)
     assert_almost_equal(results['fun'], 1.0, decimal=11)
     
@@ -104,7 +105,8 @@ def test_lbfgsb():
     optimizer = optimize(prob, solver='LBFGSB', solver_options={'maxiter':200, 'iprint':1, 'gtol':1e-8, 'ftol':1e-12}, readable_outputs=['x', 'obj'])
     print(results)
     assert results['success'] == True
-    assert results['message'] == 'CONVERGENCE: NORM_OF_PROJECTED_GRADIENT_<=_PGTOL'
+    assert results['message'] in ('CONVERGENCE: NORM_OF_PROJECTED_GRADIENT_<=_PGTOL',
+                                  'CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL')
     assert_array_almost_equal(results['x'], [1.0, 0.0], decimal=3)
     assert_almost_equal(results['fun'], 1.0, decimal=11)
 
