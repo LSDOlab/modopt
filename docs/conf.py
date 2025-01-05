@@ -48,6 +48,10 @@ extensions = [
 # sphinxcontrib.bibtex options
 bibtex_bibfiles = ['src/references.bib']
 
+# myst_options
+myst_heading_anchors = 3 # To use heading anchors for all headings of level 3 and above
+                         # Useful for linking to specific sections within the documentation
+
 # myst_nb options
 myst_title_to_header = True
 myst_enable_extensions = ["dollarmath", "amsmath", "tasklist"]

@@ -82,7 +82,7 @@ on the terminal or command line at the project root directory.
 
 ## Documentation
 After making changes to the code and testing them successfully, 
-ensure you add any necessary documentation to guide users in using the new features.
+ensure you add the necessary documentation to guide users on the new features.
 This can be done by including docstrings and comments in your new code.
 Additionally, if you have made new additions to the API, you can create new documentation pages 
 and/or add text or code examples to existing documentation in the `./docs/src` folder.
