@@ -155,7 +155,8 @@ def test_lbfgsb():
     optimizer.print_results(optimal_variables=True, optimal_gradient=True, optimal_hessian_inverse=True)
     assert optimizer.results['success'] == True
     # assert optimizer.results['message'] == 'CONVERGENCE: REL_REDUCTION_OF_F_<=_FACTR*EPSMCH'
-    assert optimizer.results['message'] == 'CONVERGENCE: NORM_OF_PROJECTED_GRADIENT_<=_PGTOL'
+    assert optimizer.results['message'] in ('CONVERGENCE: NORM_OF_PROJECTED_GRADIENT_<=_PGTOL',
+                                            'CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL')
     assert_array_almost_equal(optimizer.results['x'], [1.0, 0.0], decimal=3)
     assert_almost_equal(optimizer.results['fun'], 1.0, decimal=11)
     
@@ -168,7 +169,8 @@ def test_lbfgsb():
     print(optimizer.results)
     optimizer.print_results(optimal_variables=True, optimal_gradient=True, optimal_hessian_inverse=True)
     assert optimizer.results['success'] == True
-    assert optimizer.results['message'] == 'CONVERGENCE: NORM_OF_PROJECTED_GRADIENT_<=_PGTOL'
+    assert optimizer.results['message'] in ('CONVERGENCE: NORM_OF_PROJECTED_GRADIENT_<=_PGTOL',
+                                            'CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL')
     assert_array_almost_equal(optimizer.results['x'], [1.0, 0.0], decimal=3)
     assert_almost_equal(optimizer.results['fun'], 1.0, decimal=11)
 
