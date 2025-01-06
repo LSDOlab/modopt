@@ -1,13 +1,12 @@
 import numpy as np
 from scipy.sparse.csc import csc_matrix
-from modopt.core.merit_functions.modified_lagrangian_ineq import ModifiedLagrangianIneq
 
 import scipy.sparse as sp
 import time
 
 from modopt import Optimizer
 from modopt.line_search_algorithms import ScipyLS, BacktrackingArmijo, Minpack2LS
-from modopt.merit_functions import AugmentedLagrangianIneq, ModifiedLagrangianIneq
+from modopt.merit_functions import AugmentedLagrangianIneq
 from modopt.approximate_hessians import BFGSScipy as BFGS
 
 # This optimizer takes constraints in all-inequality form, C(x) >= 0
@@ -72,13 +71,6 @@ class SQP(Optimizer):
                                           c=self.con,
                                           g=self.grad,
                                           j=self.jac)
-        self.ML = ModifiedLagrangianIneq(nx=nx,
-                                         nc=nc,
-                                         f=self.obj,
-                                         c=self.con,
-                                         g=self.grad,
-                                         j=self.jac)
-
         self.LSS = ScipyLS(f=self.MF.compute_function,
                            g=self.MF.compute_gradient,
                            max_step=2.0)
@@ -169,19 +161,19 @@ class SQP(Optimizer):
 
     # Minimize A.L. w.r.t. slacks s.t. s >= 0
     def reset_slacks(self, c, pi, rho):
-        rho_zero_indices = np.where(rho == 0)[0]
-        rho_nonzero_indices = np.where(rho > 0)[0]
+        rho_zero_indices    = np.where(rho == 0)[0]
+        rho_nonzero_indices = np.where(rho  > 0)[0]
         s = np.zeros((len(rho), ))
 
         if len(rho_zero_indices) > 0:
+            # s[rho_zero_indices] = 0.
             s[rho_zero_indices] = np.maximum(0, c[rho_zero_indices])
 
         if len(rho_nonzero_indices) > 0:
-            c_rnz = c[rho_nonzero_indices]
-            pi_rnz = pi[rho_nonzero_indices]
+            c_rnz   = c[rho_nonzero_indices]
+            pi_rnz  = pi[rho_nonzero_indices]
             rho_rnz = rho[rho_nonzero_indices]
-            s[rho_nonzero_indices] = np.maximum(
-                0, (c_rnz - pi_rnz / rho_rnz))
+            s[rho_nonzero_indices] = np.maximum(0, (c_rnz - pi_rnz / rho_rnz))
 
         return s
 
@@ -358,7 +350,6 @@ class SQP(Optimizer):
         LSB = self.LSB
         QN = self.QN
         MF = self.MF
-        ML = self.ML
 
         start_time = time.time()
 
@@ -380,7 +371,6 @@ class SQP(Optimizer):
         rho_k = np.full((nc, ), 0.)
 
         # Compute slacks by minimizing A.L. s.t. s_k >= 0
-        # s_k = np.full((nc, ), 1.)
         s_k = self.reset_slacks(c_k, pi_k, rho_k)
         # s_k = np.maximum(0, c_k) # Use this if rho_k = 0. at start
 
@@ -415,14 +405,6 @@ class SQP(Optimizer):
         MF.set_rho(rho_k)
         mf_k = MF.evaluate_function(x_k, pi_k, s_k, f_k, c_k)
         mfg_k = MF.evaluate_gradient(x_k, pi_k, s_k, f_k, c_k, g_k, J_k)
-
-        # TODO: Test this to see if this makes any change
-        ML.set_x_k(x_k, c_k=c_k, J_k=J_k)
-        ML.set_pi_k(pi_k)
-        mlg_k = g_k * 1.
-        # mlg_k = ML.evaluate_gradient(x_k, f_k, c_k, g_k, J_k)
-        # print('g_k:', g_k)
-        # print('mlg_k:', mlg_k)
 
         # Initializing declared outputs
         self.update_outputs(major=0,
@@ -567,6 +549,9 @@ class SQP(Optimizer):
             else:
                 d_k = alpha * p_k
 
+            g_old = g_k * 1.
+            J_old = J_k * 1.
+
             v_k += d_k
 
             f_k = obj(x_k)
@@ -574,30 +559,25 @@ class SQP(Optimizer):
             c_k = con(x_k)
             J_k = jac(x_k)
 
-            # Slack reset
+            # Slack reset for scalar rho
             # if rho_k[0] == 0:
+            #     # v_k[nx + nc:] = 0.
             #     v_k[nx + nc:] = np.maximum(0, c_k)
-            # # When rho[0] > 0
+            # # When rho_k[0] > 0
             # else:
-            #     v_k[nx + nc:] = np.maximum(
-            #         0, c_k - v_k[nx:nx + nc] / rho_k)
+            #     v_k[nx + nc:] = np.maximum(0, c_k - v_k[nx:nx + nc] / rho_k)
 
             v_k[(nx + nc):] = self.reset_slacks(c_k, pi_k, rho_k)
 
             # Note: MF changes (decreases) after slack reset
-            mf_k = MF.evaluate_function(x_k, pi_k, s_k, f_k, c_k)
+            mf_k  = MF.evaluate_function(x_k, pi_k, s_k, f_k, c_k)
             mfg_k = MF.evaluate_gradient(x_k, pi_k, s_k, f_k, c_k, g_k, J_k)
 
             # Update QP parameters
             l_k = -c_k
-            A_k = J_k
+            A_k =  J_k
 
-            # Evaluate the Mod. Lag. gradient at the updated point x_(k+1)
-            ML.set_pi_k(pi_k)
-            mlg_new = ML.evaluate_gradient(x_k, f_k, c_k, g_k, J_k)
-            w_k = mlg_new - mlg_k
-            ML.set_x_k(x_k, c_k, J_k)
-            mlg_k = g_k * 1.
+            w_k = g_k - (J_k - J_old).T @ pi_k - g_old 
 
             # if g_new == 'Unavailable':
             #     g_new = grad(x_k)
@@ -629,7 +609,6 @@ class SQP(Optimizer):
             tol_satisfied = (opt_satisfied and feas_satisfied)
 
             # Update arrays inside outputs dict with new values from the current iteration
-
             self.update_outputs(
                 major=itr,
                 x=x_k,
