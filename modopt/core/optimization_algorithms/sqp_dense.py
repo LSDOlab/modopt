@@ -8,11 +8,7 @@ import time
 from modopt import Optimizer
 from modopt.line_search_algorithms import ScipyLS, BacktrackingArmijo, Minpack2LS
 from modopt.merit_functions import AugmentedLagrangianIneq, ModifiedLagrangianIneq
-# from modopt.approximate_hessians import BFGS as BFGS
-
-# from modopt.approximate_hessians import BFGSM1 as BFGS
 from modopt.approximate_hessians import BFGSScipy as BFGS
-
 
 # This optimizer takes constraints in all-inequality form, C(x) >= 0
 class SQP(Optimizer):
@@ -189,22 +185,19 @@ class SQP(Optimizer):
 
         return s
 
-    def update_scalar_rho(self, rho_k, dir_deriv_al, pTHp, p_pi, c_k,
-                          s_k):
+    def update_scalar_rho(self, rho_k, dir_deriv_al, pTHp, p_pi, c_k, s_k):
+        # Damping for scalar rho as in SNOPT
         nc = self.nc
         delta_rho = self.delta_rho
 
-        # rho_ref = np.linalg.norm(rho_k)
         rho_ref = rho_k[0] * 1.
 
         if dir_deriv_al <= -0.5 * pTHp:
             rho_computed = rho_k[0]
         else:
             # note: scalar rho_min here
-            rho_min = 2 * np.linalg.norm(p_pi) / np.linalg.norm(c_k -
-                                                                s_k)
+            rho_min = 2 * np.linalg.norm(p_pi) / np.linalg.norm(c_k - s_k)
             rho_computed = max(rho_min, 2 * rho_k[0])
-            # rho[:] = np.max(rho_min, 2 * rho[0]) * np.ones((m,))
 
         # Damping for rho (Note: vector rho is still not updated)
         if rho_k[0] < 4 * (rho_computed + delta_rho):
@@ -213,7 +206,7 @@ class SQP(Optimizer):
             rho_damped = np.sqrt(rho_k[0] * (rho_computed + delta_rho))
 
         rho_new = max(rho_computed, rho_damped)
-        rho_k[:] = rho_new * np.ones((nc, ))
+        rho_k[:] = rho_new
 
         # Increasing rho
         if rho_k[0] > rho_ref:
@@ -233,12 +226,10 @@ class SQP(Optimizer):
 
         return rho_k
 
-    def update_vector_rho(self, rho_k, dir_deriv_al, pTHp, p_pi, c_k,
-                          s_k):
+    def update_vector_rho(self, rho_k, dir_deriv_al, pTHp, p_pi, c_k, s_k):
         delta_rho = self.delta_rho
 
         rho_ref = np.linalg.norm(rho_k)
-        # rho_ref = rho_k[0] * 1.
 
         # ck_sk =
         a = -np.power(c_k - s_k, 2)
@@ -314,7 +305,7 @@ class SQP(Optimizer):
         else:
             opt_tol_factor = (1 + np.linalg.norm(pi, np.inf))
             nonneg_violation = max(0., -np.min(pi))
-            # Note: compl_violation can be negative(Question: Ask Prof. Gill);
+            # Note: compl_violation can be negative(Question: SNOPT paper);
             #       Other 2 violations are always nonnegative
             compl_violation = np.max(c * pi)
             stat_violation = np.linalg.norm(g - j.T @ pi, np.inf)
@@ -386,13 +377,11 @@ class SQP(Optimizer):
         B_k = np.identity(nx)
 
         # Vector of penalty parameters
-        # rho_k = np.full((nc, ), 1.)
         rho_k = np.full((nc, ), 0.)
 
         # Compute slacks by minimizing A.L. s.t. s_k >= 0
         # s_k = np.full((nc, ), 1.)
         s_k = self.reset_slacks(c_k, pi_k, rho_k)
-
         # s_k = np.maximum(0, c_k) # Use this if rho_k = 0. at start
 
         # Vector of design vars., lag. mults., and slack vars.
@@ -477,8 +466,8 @@ class SQP(Optimizer):
                 l_k,
                 u_k,
                 max_iter=5000,
-                # verbose=False,
-                verbose=True,
+                verbose=False,
+                # verbose=True,
                 # warm_start=False,
                 # polish=False,
                 # polish=True,
@@ -497,7 +486,7 @@ class SQP(Optimizer):
             del dummy_A
         elif isinstance(A_k, sp.csc_matrix):
             # We assume that the sparsity structure of A_k will not
-            # change during iterartions if a csc_matrix is given as input
+            # change during iterations if a csc_matrix is given as input
             qp_prob.setup(
                 csc_Bk,
                 g_k,
@@ -522,7 +511,6 @@ class SQP(Optimizer):
 
             # Solve QP problem
             qp_sol = qp_prob.solve()
-            # print("qp_px,qp_y", qp_sol.x[0], qp_sol.y[0])
 
             # Search direction for x_k:
             # (qp_sol.x) is the direction toward the next iterate for x
@@ -531,8 +519,6 @@ class SQP(Optimizer):
             # Search direction for pi_k:
             # (-qp_sol.y) is the new estimate for pi
             # p_k[nx:(nx + nc)] = (-qp_sol.y) - pi_k
-            # print(p_k[nx:nx + nc])
-            # print(-qp_sol.y)
             p_k[nx:(nx + nc)] = (-qp_sol.y) - v_k[nx:nx + nc]
 
             # Search direction for s_k :
@@ -545,15 +531,12 @@ class SQP(Optimizer):
 
             # Update penalty parameters
             if self.nc > 0:
-                rho_k = self.update_scalar_rho(rho_k, dir_deriv_al, pTHp,
-                                            p_pi, c_k, s_k)
-                # rho_k = self.update_vector_rho(rho_k, dir_deriv_al, pTHp,
-                #                                p_pi, c_k, s_k)
+                rho_k = self.update_scalar_rho(rho_k, dir_deriv_al, pTHp, p_pi, c_k, s_k)
+                # rho_k = self.update_vector_rho(rho_k, dir_deriv_al, pTHp, p_pi, c_k, s_k)
 
             MF.set_rho(rho_k)
             mf_k = MF.evaluate_function(x_k, pi_k, s_k, f_k, c_k)
-            mfg_k = MF.evaluate_gradient(x_k, pi_k, s_k, f_k, c_k, g_k,
-                                         J_k)
+            mfg_k = MF.evaluate_gradient(x_k, pi_k, s_k, f_k, c_k, g_k, J_k)
 
             # Compute the step length along the search direction via a line search
             alpha, mf_new, mfg_new, mf_slope_new, new_f_evals, new_g_evals, converged = LSS.search(
@@ -575,45 +558,21 @@ class SQP(Optimizer):
             # A step of length 1e-4 is taken along p_k if line search does not converge
             if not converged:
                 "Compute this factor heuristically"
-                # print('not converged, px_norm=', np.linalg.norm(p_x))
-                # print('not converged, ppi_norm=', np.linalg.norm(p_pi))
-                # print('not converged, ps_norm=', np.linalg.norm(p_s))
                 alpha = 0.91
                 d_k = p_k * 0.1
-                print("###### FAILED LINE SEARCH #######")
+                print(f"###### LINE SEARCH FAILED AT MAJOR ITERATION {itr} #######")
                 nfev += 1  # Commented because of bug in Scipy line search: calls f twice with amax before failure
                 ngev += 1
 
             else:
-                # print('converged, px_norm=', np.linalg.norm(p_x))
-                # print('converged, ppi_norm=', np.linalg.norm(p_pi))
-                # print('converged, ps_norm=', np.linalg.norm(p_s))
                 d_k = alpha * p_k
 
             v_k += d_k
-            # print('d_k', d_k)
-            # print('p_x', d_k[:nx])
-            # print('p_pi', d_k[nx:(nx + nc)])
-            # print('p_s', d_k[(nx + nc):])
-
-            # print('v_k', v_k)
-            # print('v_k[:nx]', v_k[:nx])
-            # print('v_k[nx:(nx + nc)]', v_k[nx:(nx + nc)])
-            # print('v_k[(nx + nc):]', v_k[(nx + nc):])
-
-            # print('x_k', x_k)
-            # print('pi_k', pi_k)
-            # print('s_k', s_k)
 
             f_k = obj(x_k)
             g_k = grad(x_k)
             c_k = con(x_k)
             J_k = jac(x_k)
-
-            # print('after LS model evals:', self.problem.model_evals)
-            # print('after LS deriv evals:', self.problem.deriv_evals)
-            # print('after LS nfev:', nfev)
-            # print('after LS ngev:', ngev)
 
             # Slack reset
             # if rho_k[0] == 0:
@@ -627,8 +586,7 @@ class SQP(Optimizer):
 
             # Note: MF changes (decreases) after slack reset
             mf_k = MF.evaluate_function(x_k, pi_k, s_k, f_k, c_k)
-            mfg_k = MF.evaluate_gradient(x_k, pi_k, s_k, f_k, c_k, g_k,
-                                         J_k)
+            mfg_k = MF.evaluate_gradient(x_k, pi_k, s_k, f_k, c_k, g_k, J_k)
 
             # Update QP parameters
             l_k = -c_k
@@ -653,20 +611,12 @@ class SQP(Optimizer):
 
             # Update the QP problem
             if isinstance(A_k, np.ndarray):
-                # print(np.linalg.norm(g_k), np.linalg.norm(l_k),
-                #       np.linalg.norm(Bk_data), np.linalg.norm(A_k))
-                # print(g_k[0])
-                # print(l_k)
-                # print(Bk_data)
-                # print(A_k)
                 qp_prob.update(q=g_k,
                                l=l_k,
                                Px=Bk_data,
                                Ax=A_k.flatten('F'))
             else:
                 qp_prob.update(q=g_k, l=l_k, Px=Bk_data, Ax=A_k.data)
-
-            print('########### MAJOR ITERATION ENDS ############')
 
             # <<<<<<<<<<<<<<<<<<<
             # ALGORITHM ENDS HERE
@@ -680,12 +630,6 @@ class SQP(Optimizer):
 
             # Update arrays inside outputs dict with new values from the current iteration
 
-            # print(itr)
-            # print('opt', opt)
-            # print('feas', feas)
-            # print('x', x_k)
-            # print('obj', f_k)
-            # print('cons', c_k)
             self.update_outputs(
                 major=itr,
                 x=x_k,
@@ -702,15 +646,6 @@ class SQP(Optimizer):
                 step=alpha,
                 # merit=mf_new)
                 merit=mf_k)
-            # print('rho_k', rho_k[0])
-            # print('alpha_k', alpha)
-            # print('x_k', x_k[0])
-            # print('pi_k', pi_k[0])
-            # print('c_k', c_k[0])
-            # print('J_k_norm', np.linalg.norm(J_k))
-            # print('g_k_norm', np.linalg.norm(g_k))
-            # print('s_k', s_k[0])
-            # print('B_k_norm', np.linalg.norm(B_k))
 
         self.total_time = time.time() - start_time
         converged = tol_satisfied
