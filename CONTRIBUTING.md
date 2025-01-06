@@ -37,15 +37,47 @@ To contribute to modOpt:
    incorporation of your changes into the main repository.
 
 ## Pull Requests
-Before contributing to the `main` branch, ensure the following requirements are met:
+Before making a pull request to the `main` branch, ensure the following requirements are met:
 - [ ] All existing tests have passed
 - [ ] All documentation is building correctly (if new documentation was added) 
 - [ ] No local merge conflicts
 - [ ] Code is commented
 - [ ] Added tests for new features
+  
+<!-- To create the pull request, follow the steps:
 
-Once you finish making changes on your fork, create a pull request on GitHub with 
-a description of the changes.
+1. Pull from `main` branch
+```sh
+git pull # Get most up-to-update version
+```
+2. Merge with main and check for conflicts
+```sh
+git merge main # merge with main locally on your branch to check for conflicts
+```
+3. Run tests
+```sh
+pytest # standard testing
+pytest --disable-warnings # tests without displaying warnings
+pytest -rP # tests while displaying print statements
+```
+
+4. Push changes
+
+```sh
+git push
+```
+
+5. Create pull request on GitHub with descriptions for changes.
+ - Fill out pull request template
+ - Assign reviewers (repo admin(s)) -->
+
+Once you finish making changes on the new branch on your fork, 
+merge with the `main` branch locally (`git merge main`) to check for any conflicts.
+If there are no conflicts, run tests and build documentation locally 
+(see [Testing](#testing) and [Documentation](#documentation) below).
+If all tests pass and the documentation builds correctly, 
+push the changes to your fork and issue a pull request
+to the `main` branch of modOpt on GitHub with a description of the changes.
 Make sure to fill out the pull request template and assign reviewers (repo admin(s)).
 
 ### Pull Request Review
@@ -88,6 +120,19 @@ Additionally, if you have made new additions to the API, you can create new docu
 and/or add text or code examples to existing documentation in the `./docs/src` folder.
 New pages can be written using Markdown or Jupyter notebooks, according to the
 developer's preference.
+
+<!-- Start by modifying the documentation pages by editing `.md` and `.ipynb` files in the `/src` directory.
+Customize/add/remove pages in the existing docs according to the improvements/additions made to the package.
+
+Add Python files or Jupyter notebooks for examples with minimal explanations into the `/examples` directory, 
+and detailed Jupyter notebooks for tutorials into the `/tutorials` directory. 
+Filenames for examples should start with'ex_'.
+Add your new examples and tutorials into the toctrees in `examples.md` and `tutorials.md` respectively.
+
+For automatically generated API references, add docstrings to your modules, classes, functions, etc., and
+then edit the list of directories containing files with docstrings intended for automatic API generation. 
+This can be done by editing the line `autoapi_dirs = ["../../modopt/core"]` 
+in `conf.py` in the `/src` directory. -->
 
 Before building the documentation locally, ensure that you have installed all the development dependencies
 as stated in step 4 by using `pip install -e .[all]`.
