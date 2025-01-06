@@ -60,13 +60,10 @@ pytest # standard testing
 pytest --disable-warnings # tests without displaying warnings
 pytest -rP # tests while displaying print statements
 ```
-
 4. Push changes
-
 ```sh
 git push
 ```
-
 5. Create pull request on GitHub with descriptions for changes.
  - Fill out pull request template
  - Assign reviewers (repo admin(s)) -->

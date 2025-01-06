@@ -1,4 +1,4 @@
-# Welcome to modopt documentation!
+# Welcome to modOpt
 
 ModOpt is a modular development environment and library for optimization
 algorithms written fully in Python.
@@ -55,25 +55,35 @@ are also possible.
 _**Modopt as a development environment**_
 ```
 
+## Getting Started
+To install and start using modOpt, please read the [Getting Started](src/getting_started.md) page.
 
-<!-- # Cite us
-```none
-@article{lsdo2023,
-        Author = { Anugrah Jo Joshy, and John T. Hwang},
-        Journal = {Name of the journal},
-        Title = {A modular development environment and library for optimization
-        algorithms},
-        pages = {0123},
-        year = {2024},
-        issn = {0123-4567},
-        doi = {https://doi.org/}
-        }
+## Citation
+If you use modOpt in your work, please use the following reference for citation:
+
+```
+@article{joshy2024modopt,
+  title={modOpt: A modular development environment and library for optimization algorithms},
+  author={Joshy, Anugrah Jo and Hwang, John T},
+  journal={arXiv preprint arXiv:2410.12942},
+  year={2024},
+  doi={10.48550/arXiv.2410.12942}
+}
+```
+
+<!-- ## References
+
+```{bibliography} src/references.bib
 ``` -->
 
+## Contents
+
 <!-- Remove/add custom pages from/to toc as per your package's requirement -->
+<!-- src/basic -->
+<!-- src/postprocessing -->
 
 ```{toctree}
-:maxdepth: 1
+:maxdepth: 2
 
 src/getting_started
 src/tutorials
@@ -82,7 +92,8 @@ src/csdl_alpha
 src/instructional_algs
 src/performant_algs
 src/examples
+src/api
 src/contributing
 src/changelog
-src/api
+src/license
 ```
