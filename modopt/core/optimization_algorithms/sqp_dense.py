@@ -61,6 +61,7 @@ class SQP(Optimizer):
         # Damping parameters
         self.delta_rho = 1.
         self.num_rho_changes = 0
+        self.num_consecutive_ls_fails = 0
 
         self.QN = BFGS(nx=nx,
                        exception_strategy='damp_update')
@@ -72,11 +73,16 @@ class SQP(Optimizer):
                                           j=self.jac)
         self.LSS = ScipyLS(f=self.MF.compute_function,
                            g=self.MF.compute_gradient,
-                           max_step=2.0)
+                           max_step=1.,
+                           maxiter=8,
+                           eta_w=0.9)
         # self.LS = Minpack2LS(f=self.MF.compute_function,
         #                      g=self.MF.compute_gradient)
         self.LSB = BacktrackingArmijo(f=self.MF.compute_function,
-                                      g=self.MF.compute_gradient)
+                                      g=self.MF.compute_gradient,
+                                      gamma_c=0.3,
+                                      max_step=1.0,
+                                      maxiter=25)
 
     # Adapt constraints to C(x) >= 0
     def setup_constraints(self, ):
@@ -516,29 +522,30 @@ class SQP(Optimizer):
             alpha, mf_new, mfg_new, mf_slope_new, new_f_evals, new_g_evals, converged = LSS.search(
                 x=v_k, p=p_k, f0=mf_k, g0=mfg_k)
 
-            # alpha, mf_new, new_f_evals, new_g_evals, converged = LSB.search(
-            #     x=v_k, p=p_k, f0=mf_k, g0=mfg_k)
-
             nfev += new_f_evals
             ngev += new_g_evals
 
-            # if not converged:  # Fallback: Backtracking LS
-            #     alpha, mf_new, new_f_evals, new_g_evals, converged = LSB.search(
-            #         x=v_k, p=p_k, f0=mf_k, g0=mfg_k)
+            if not converged:  # Fallback: Backtracking LS
+                print(f"Wolfe line search failed at major iteration {itr}. Falling back to backtracking...")
+                alpha, mf_new, new_f_evals, new_g_evals, converged = LSB.search(
+                    x=v_k, p=p_k, f0=mf_k, g0=mfg_k)
 
-            #     nfev += new_f_evals
-            #     ngev += new_g_evals
+                nfev += new_f_evals
+                ngev += new_g_evals
 
-            # A step of length 1e-4 is taken along p_k if line search does not converge
+            # Reset Hessian if both line searches fail
             if not converged:
-                "Compute this factor heuristically"
-                alpha = 0.91
-                d_k = p_k * 0.1
-                print(f"###### LINE SEARCH FAILED AT MAJOR ITERATION {itr} #######")
-                nfev += 1  # Commented because of bug in Scipy line search: calls f twice with amax before failure
-                ngev += 1
+                self.num_consecutive_ls_fails += 1 
+                if self.num_consecutive_ls_fails >= 2:
+                    print('Both line searches failed again after resetting Hessian. Exiting...')
+                    break
+                else:
+                    print(f"Both line searches failed at major iteration {itr}. Resetting Hessian...")
+                    self.QN = BFGS(nx=nx, exception_strategy='damp_update')
+                    continue
 
             else:
+                self.num_consecutive_ls_fails = 0
                 d_k = alpha * p_k
 
             g_old = g_k * 1.

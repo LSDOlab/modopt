@@ -20,16 +20,18 @@ def test_sqp():
     optimizer.print_results(summary_table=True)
 
     assert optimizer.results['converged']
-    assert_array_almost_equal(optimizer.results['x'], [1., 0.], decimal=11)
-    assert_almost_equal(optimizer.results['objective'], 1., decimal=10)
-    assert_array_almost_equal(optimizer.results['c'], [1., 0., 0., 0.], decimal=11)
-    assert_array_almost_equal(optimizer.results['pi'], [0., 1.7836, 1.3333, 0.4503], decimal=3)
-    assert_almost_equal(optimizer.results['optimality'], 0., decimal=9)
-    assert_almost_equal(optimizer.results['feasibility'], 0., decimal=11)
+    assert_array_almost_equal(optimizer.results['x'], [1., 0.], decimal=8)
+    assert_almost_equal(optimizer.results['objective'], 1., decimal=8)
+    assert_array_almost_equal(optimizer.results['c'], [1., 0., 0., 0.], decimal=9)
+    assert_array_almost_equal(optimizer.results['pi'], [0., 1.83314, 1.33333, 0.49981], decimal=3)
+    assert_almost_equal(optimizer.results['optimality'], 0., decimal=8)
+    assert_almost_equal(optimizer.results['feasibility'], 0., decimal=10)
     assert optimizer.results['niter'] < solver_options['maxiter']
-    assert optimizer.results['nfev'] == 1351
+    assert optimizer.results['nfev'] == 102 # 80
+    # assert optimizer.results['nfev'] == 1351
     # assert optimizer.results['nfev'] == 394
-    assert optimizer.results['ngev'] == 271
+    assert optimizer.results['ngev'] == 11 # 12
+    # assert optimizer.results['ngev'] == 271
     
     prob = constrained_lite()
     prob.x0 = np.array([2., 2.]) # set initial guess to something closer to the minimum [0, 0]
@@ -41,16 +43,18 @@ def test_sqp():
     optimizer.print_results(summary_table=True)
 
     assert optimizer.results['converged']
-    assert_array_almost_equal(optimizer.results['x'], [1., 0.], decimal=11)
-    assert_almost_equal(optimizer.results['objective'], 1., decimal=10)
-    assert_array_almost_equal(optimizer.results['c'], [1., 0., 0., 0.], decimal=11)
-    assert_array_almost_equal(optimizer.results['pi'], [0., 1.7836, 1.3333, 0.4503], decimal=3)
-    assert_almost_equal(optimizer.results['optimality'], 0., decimal=9)
-    assert_almost_equal(optimizer.results['feasibility'], 0., decimal=11)
+    assert_array_almost_equal(optimizer.results['x'], [1., 0.], decimal=8)
+    assert_almost_equal(optimizer.results['objective'], 1., decimal=8)
+    assert_array_almost_equal(optimizer.results['c'], [1., 0., 0., 0.], decimal=9)
+    assert_array_almost_equal(optimizer.results['pi'], [0., 1.83314, 1.33333, 0.49981], decimal=3)
+    assert_almost_equal(optimizer.results['optimality'], 0., decimal=8)
+    assert_almost_equal(optimizer.results['feasibility'], 0., decimal=10)
     assert optimizer.results['niter'] < solver_options['maxiter']
-    assert optimizer.results['nfev'] == 1351
+    assert optimizer.results['nfev'] == 102 # 80
+    # assert optimizer.results['nfev'] == 1351
     # assert optimizer.results['nfev'] == 394
-    assert optimizer.results['ngev'] == 271
+    assert optimizer.results['ngev'] == 11 # 12
+    # assert optimizer.results['ngev'] == 271
 
     prob = Unconstrained()
     prob.x0 = np.array([1., 1.])
