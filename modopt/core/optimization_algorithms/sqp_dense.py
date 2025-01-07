@@ -452,8 +452,8 @@ class SQP(Optimizer):
                 # linsys_solver='qdldl',
                 # eps_prim_inf=1e-4,
                 # eps_dual_inf=1e-4,
-                # eps_abs=1e-6,
-                # eps_rel=1e-6,
+                eps_abs=1e-4,   # default=1e-3
+                eps_rel=1e-4,   # default=1e-3
                 # eps_abs=max(min(opt_tol, feas_tol) * 1e-2, 1e-8),
                 # eps_rel=max(min(opt_tol, feas_tol) * 1e-2, 1e-8),
             )

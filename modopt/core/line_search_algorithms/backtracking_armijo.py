@@ -73,22 +73,4 @@ class BacktrackingArmijo(LineSearch):
         if rho < eta_a:
             converged = False
 
-        # If converged with step < max_step, try for a better stepsize using
-        # arithmetic/geometric mean of (alpha, alpha/gamma_c)
-        if converged and alpha < max_step:
-            alpha_am = 0.5 * alpha * (1. + 1./gamma_c)
-            f_am     = f(x + alpha_am * p)
-            rho_am   = (f_am - f1) / (alpha_am * slope)
-            nfev += 1
-            if rho_am >= eta_a:
-                alpha, f2, rho = alpha_am, f_am, rho_am
-
-            else:
-                alpha_gm = alpha / np.sqrt(gamma_c)
-                f_gm     = f(x + alpha_gm * p)
-                rho_gm   = (f_gm - f1) / (alpha_gm * slope)
-                nfev += 1
-                if rho_gm >= eta_a:
-                    alpha, f2, rho = alpha_gm, f_gm, rho_gm
-
         return alpha, f2, nfev, ngev, converged
