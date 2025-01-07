@@ -11,11 +11,22 @@ class BacktrackingArmijo(LineSearch):
         self.options.declare('gamma_c',
                              default=0.3,
                              types=float,
-                             upper=(1.0 - eps),
-                             lower=eps)
-
+                             lower=eps,
+                             upper=(1.0 - eps))
+        
         # Maximum number of iterations allowed before convergence
-        self.options.declare('maxiter', default=25, types=int, lower=1)
+        self.options.declare('maxiter',
+                             default=25,
+                             types=int,
+                             lower=1,
+                             upper=100)
+        
+        # Maximum step length
+        self.options.declare('max_step',
+                             default=1.,
+                             types=float,
+                             lower=eps,
+                             upper=50.)
 
     def search(self, x, p, f0=None, g0=None):
 
@@ -25,7 +36,7 @@ class BacktrackingArmijo(LineSearch):
         f = self.options['f']
         g = self.options['g']
 
-        alpha = 1.
+        alpha = self.options['max_step']
         nfev = 0
         ngev = 0
 

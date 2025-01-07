@@ -62,7 +62,6 @@ class SQP(Optimizer):
         self.delta_rho = 1.
         self.num_rho_changes = 0
 
-        # self.QN = BFGS(nx=nx)
         self.QN = BFGS(nx=nx,
                        exception_strategy='damp_update')
         self.MF = AugmentedLagrangianIneq(nx=nx,
@@ -78,9 +77,6 @@ class SQP(Optimizer):
         #                      g=self.MF.compute_gradient)
         self.LSB = BacktrackingArmijo(f=self.MF.compute_function,
                                       g=self.MF.compute_gradient)
-
-        # For u_k of QP solver
-        self.u_k = np.full((nc, ), np.inf)
 
     # Adapt constraints to C(x) >= 0
     def setup_constraints(self, ):
@@ -179,10 +175,8 @@ class SQP(Optimizer):
 
     def update_scalar_rho(self, rho_k, dir_deriv_al, pTHp, p_pi, c_k, s_k):
         # Damping for scalar rho as in SNOPT
-        nc = self.nc
         delta_rho = self.delta_rho
-
-        rho_ref = rho_k[0] * 1.
+        rho_ref   = rho_k[0] * 1.
 
         if dir_deriv_al <= -0.5 * pTHp:
             rho_computed = rho_k[0]
@@ -254,8 +248,7 @@ class SQP(Optimizer):
                 rho_computed = rho_k * 1.
             else:
                 # note: scalar rho_min here
-                rho_min = 2 * np.linalg.norm(p_pi) / np.linalg.norm(
-                    c_k - s_k)
+                rho_min = 2 * np.linalg.norm(p_pi) / np.linalg.norm(c_k - s_k)
                 rho_computed = np.maximum(2 * rho_k, rho_min)
 
         # Damping for rho (Note: vector rho is still not updated)
@@ -332,7 +325,7 @@ class SQP(Optimizer):
         try:
             import osqp
         except ImportError:
-            raise ImportError("OSQP cannot be imported for the SQP solver.  Install it with 'pip install osqp'.")
+            raise ImportError("OSQP cannot be imported for the SQP solver. Install it with 'pip install osqp'.")
         
         # Assign shorter names to variables and methods
         nx = self.nx
@@ -341,10 +334,10 @@ class SQP(Optimizer):
         x0 = self.problem.x0
         maxiter = self.options['maxiter']
 
-        obj = self.obj
+        obj  = self.obj
         grad = self.grad
-        con = self.con
-        jac = self.jac
+        con  = self.con
+        jac  = self.jac
 
         LSS = self.LSS
         LSB = self.LSB
@@ -353,9 +346,9 @@ class SQP(Optimizer):
 
         start_time = time.time()
 
-        # Set intial values for current iterates
-        x_k = x0 * 1.
-        pi_k = np.full((nc, ), 1.)
+        # Set initial values for current iterates
+        x_k  = x0 * 1.              # Initial optimization variables
+        pi_k = np.full((nc, ), 1.)  # Initial Lagrange multipliers
 
         f_k = obj(x_k)
         g_k = grad(x_k)
@@ -365,10 +358,8 @@ class SQP(Optimizer):
         nfev = 1
         ngev = 1
 
-        B_k = np.identity(nx)
-
-        # Vector of penalty parameters
-        rho_k = np.full((nc, ), 0.)
+        B_k   = np.identity(nx)     # Initial Hessian approximation
+        rho_k = np.full((nc, ), 0.) # Initial penalty parameter vector
 
         # Compute slacks by minimizing A.L. s.t. s_k >= 0
         s_k = self.reset_slacks(c_k, pi_k, rho_k)
@@ -387,7 +378,7 @@ class SQP(Optimizer):
 
         # QP parameters
         l_k = -c_k
-        u_k = self.u_k
+        u_k = np.full((nc, ), np.inf)
         A_k = J_k
 
         # Iteration counter
@@ -423,16 +414,14 @@ class SQP(Optimizer):
                             merit=mf_k)
 
         # Create scipy csc_matrix for Hk
-        Bk_rows = np.triu(
-            np.outer(np.arange(1, nx + 1),
-                     np.ones(nx, dtype='int'))).flatten('f')
+        Bk_rows = np.triu(np.outer(np.arange(1, nx + 1),
+                                   np.ones(nx, dtype='int'))).flatten('f')
         Bk_rows = Bk_rows[Bk_rows != 0] - 1
         Bk_cols = np.repeat(np.arange(nx), np.arange(1, nx + 1))
         Bk_ind_ptr = np.insert(np.cumsum(np.arange(1, nx + 1)), 0, 0)
         Bk_data = B_k[Bk_rows, Bk_cols]
 
-        csc_Bk = sp.csc_matrix((Bk_data, Bk_rows, Bk_ind_ptr),
-                               shape=(nx, nx))
+        csc_Bk = sp.csc_matrix((Bk_data, Bk_rows, Bk_ind_ptr), shape=(nx, nx))
 
         # QP problem setup
         qp_prob = osqp.OSQP()
@@ -508,17 +497,20 @@ class SQP(Optimizer):
             # p_k[(nx + nc):] = c_k + J_k @ p_x - s_k
             p_k[(nx + nc):] = c_k + J_k @ p_x - v_k[nx + nc:]
 
-            dir_deriv_al = np.dot(mfg_k, p_k)
-            pTHp = p_x.T @ (B_k @ p_x)
-
             # Update penalty parameters
             if self.nc > 0:
+                dir_deriv_al = np.dot(mfg_k, p_k)
+                pTHp = p_x.T @ (B_k @ p_x)
                 rho_k = self.update_scalar_rho(rho_k, dir_deriv_al, pTHp, p_pi, c_k, s_k)
                 # rho_k = self.update_vector_rho(rho_k, dir_deriv_al, pTHp, p_pi, c_k, s_k)
 
-            MF.set_rho(rho_k)
-            mf_k = MF.evaluate_function(x_k, pi_k, s_k, f_k, c_k)
-            mfg_k = MF.evaluate_gradient(x_k, pi_k, s_k, f_k, c_k, g_k, J_k)
+                MF.set_rho(rho_k)
+                mf_k  = MF.evaluate_function(x_k, pi_k, s_k, f_k, c_k)
+                mfg_k = MF.evaluate_gradient(x_k, pi_k, s_k, f_k, c_k, g_k, J_k)
+
+            else:
+                mf_k  = f_k
+                mfg_k = g_k
 
             # Compute the step length along the search direction via a line search
             alpha, mf_new, mfg_new, mf_slope_new, new_f_evals, new_g_evals, converged = LSS.search(
@@ -530,7 +522,7 @@ class SQP(Optimizer):
             nfev += new_f_evals
             ngev += new_g_evals
 
-            # if not converged:  # Backup: Backtracking LS
+            # if not converged:  # Fallback: Backtracking LS
             #     alpha, mf_new, new_f_evals, new_g_evals, converged = LSB.search(
             #         x=v_k, p=p_k, f0=mf_k, g0=mfg_k)
 
