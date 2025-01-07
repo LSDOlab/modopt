@@ -15,11 +15,11 @@ class BacktrackingArmijo(LineSearch):
                              lower=eps)
 
         # Maximum number of iterations allowed before convergence
-        self.options.declare('maxiter', default=100, types=int, lower=0)
+        self.options.declare('maxiter', default=25, types=int, lower=1)
 
     def search(self, x, p, f0=None, g0=None):
 
-        eta_a = self.options['eta_a']
+        eta_a   = self.options['eta_a']
         gamma_c = self.options['gamma_c']
         maxiter = self.options['maxiter']
         f = self.options['f']
@@ -60,5 +60,23 @@ class BacktrackingArmijo(LineSearch):
         converged = True
         if rho < eta_a:
             converged = False
+
+        # If converged, try for a better stepsize using
+        # arithmetic/geometric mean of (alpha, alpha/gamma_c)
+        if converged:
+            alpha_am = 0.5 * alpha * (1. + 1./gamma_c)
+            f_am     = f(x + alpha_am * p)
+            rho_am   = (f_am - f1) / (alpha_am * slope)
+            nfev += 1
+            if rho_am >= eta_a:
+                alpha, f2, rho = alpha_am, f_am, rho_am
+
+            else:
+                alpha_gm = alpha / np.sqrt(gamma_c)
+                f_gm     = f(x + alpha_gm * p)
+                rho_gm   = (f_gm - f1) / (alpha_gm * slope)
+                nfev += 1
+                if rho_gm >= eta_a:
+                    alpha, f2, rho = alpha_gm, f_gm, rho_gm
 
         return alpha, f2, nfev, ngev, converged
