@@ -27,6 +27,7 @@ class SQP(Optimizer):
         self.options.declare('maxiter', default=1000, types=int)
         self.options.declare('opt_tol', default=1e-7, types=float)
         self.options.declare('feas_tol', default=1e-7, types=float)
+        self.options.declare('qp_tol', default=1e-4, types=float)
         self.options.declare('readable_outputs', types=list, default=[])
 
         self.available_outputs = {
@@ -71,13 +72,20 @@ class SQP(Optimizer):
                                           c=self.con,
                                           g=self.grad,
                                           j=self.jac)
-        self.LSS = ScipyLS(f=self.MF.compute_function,
-                           g=self.MF.compute_gradient,
-                           max_step=1.,
-                           maxiter=8,
-                           eta_w=0.9)
-        # self.LS = Minpack2LS(f=self.MF.compute_function,
-        #                      g=self.MF.compute_gradient)
+        # self.LSS = ScipyLS(f=self.MF.compute_function,
+        #                    g=self.MF.compute_gradient,
+        #                    max_step=1.,
+        #                    maxiter=8,
+        #                    eta_w=0.9)
+        
+        self.LSS = Minpack2LS(f=self.MF.compute_function,
+                              g=self.MF.compute_gradient,
+                              min_step=1e-14,
+                              max_step=1.,
+                              maxiter=10,
+                              alpha_tol=1e-14,
+                              eta_w=0.9)
+        
         self.LSB = BacktrackingArmijo(f=self.MF.compute_function,
                                       g=self.MF.compute_gradient,
                                       gamma_c=0.3,
@@ -339,6 +347,7 @@ class SQP(Optimizer):
 
         x0 = self.problem.x0
         maxiter = self.options['maxiter']
+        qp_tol  = self.options['qp_tol']
 
         obj  = self.obj
         grad = self.grad
@@ -452,8 +461,8 @@ class SQP(Optimizer):
                 # linsys_solver='qdldl',
                 # eps_prim_inf=1e-4,
                 # eps_dual_inf=1e-4,
-                eps_abs=1e-4,   # default=1e-3
-                eps_rel=1e-4,   # default=1e-3
+                eps_abs=qp_tol,   # default=1e-3
+                eps_rel=qp_tol,   # default=1e-3
                 # eps_abs=max(min(opt_tol, feas_tol) * 1e-2, 1e-8),
                 # eps_rel=max(min(opt_tol, feas_tol) * 1e-2, 1e-8),
             )

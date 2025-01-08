@@ -12,7 +12,7 @@ def test_sqp():
     prob = Constrained()
     prob.x0 = np.array([2., 2.]) # set initial guess to something closer to the minimum [0, 0]
 
-    solver_options = {'maxiter': 100, 'opt_tol': 1e-8, 'feas_tol': 1e-8}
+    solver_options = {'maxiter': 100, 'opt_tol': 1e-8, 'feas_tol': 1e-8, 'qp_tol':1e-8}
     optimizer = SQP(prob, **solver_options)
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
@@ -27,8 +27,8 @@ def test_sqp():
     assert_almost_equal(optimizer.results['optimality'], 0., decimal=8)
     assert_almost_equal(optimizer.results['feasibility'], 0., decimal=8)
     assert optimizer.results['niter'] < solver_options['maxiter']
-    # assert optimizer.results['nfev'] == 73, 140
-    # assert optimizer.results['ngev'] == 8, 10
+    assert optimizer.results['nfev'] == 9
+    assert optimizer.results['ngev'] == 6
     
     prob = constrained_lite()
     prob.x0 = np.array([2., 2.]) # set initial guess to something closer to the minimum [0, 0]
@@ -47,8 +47,8 @@ def test_sqp():
     assert_almost_equal(optimizer.results['optimality'], 0., decimal=8)
     assert_almost_equal(optimizer.results['feasibility'], 0., decimal=8)
     assert optimizer.results['niter'] < solver_options['maxiter']
-    # assert optimizer.results['nfev'] == 73, 140
-    # assert optimizer.results['ngev'] == 8, 10
+    assert optimizer.results['nfev'] == 9
+    assert optimizer.results['ngev'] == 6
 
     prob = Unconstrained()
     prob.x0 = np.array([1., 1.])
@@ -64,8 +64,8 @@ def test_sqp():
     assert_almost_equal(optimizer.results['objective'], 0., decimal=6)
     assert_almost_equal(optimizer.results['optimality'], 0., decimal=4)
     assert optimizer.results['niter'] < solver_options['maxiter']
-    assert optimizer.results['nfev'] == 23
-    assert optimizer.results['ngev'] == 21
+    assert optimizer.results['nfev'] == 21
+    assert optimizer.results['ngev'] == 20
 
     prob = unconstrained_lite()
     prob.x0 = np.array([1., 1.])
@@ -81,8 +81,8 @@ def test_sqp():
     assert_almost_equal(optimizer.results['objective'], 0., decimal=6)
     assert_almost_equal(optimizer.results['optimality'], 0., decimal=4)
     assert optimizer.results['niter'] < solver_options['maxiter']
-    assert optimizer.results['nfev'] == 23
-    assert optimizer.results['ngev'] == 21
+    assert optimizer.results['nfev'] == 21
+    assert optimizer.results['ngev'] == 20
 
 if __name__ == '__main__':
     test_sqp()

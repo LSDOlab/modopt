@@ -5,6 +5,11 @@ eps = np.finfo(np.float64).resolution  # 1e-15
 from modopt import LineSearch
 from scipy.optimize import line_search
 
+# This line search from SciPy is buggy.
+# To see the bug, run `test_sqp.py` for the Constrained or constrained_lite problems.
+# _zoom function evaluates the objective function at the same point 10+ times
+# whenever it fails and then prints a warning message saying failed to converge.
+
 # def line_search_wolfe2(f, myfprime, xk, pk, gfk=None, old_fval=None,
 #                       old_old_fval=None, args=(), c1=1e-4, c2=0.9, amax=None,
 #                       extra_condition=None, maxiter=10):
