@@ -192,6 +192,18 @@ class SQP(Optimizer):
         delta_rho = self.delta_rho
         rho_ref   = rho_k[0] * 1.
 
+        # a = (c_k - s_k) ** 2
+        # b = 0.5 * pTHp + dir_deriv_al + np.inner(a, rho_k)
+
+        # if b > 0:
+        #     a_norm = np.linalg.norm(a)
+        #     if a_norm > 0: # Just to be extra cautious (elastic iterations)
+        #         rho_computed = 2 * np.linalg.norm(p_pi) / np.linalg.norm(c_k - s_k)
+        #     else:
+        #         rho_computed = 0.
+        # else:
+        #     rho_computed = 0.
+
         if dir_deriv_al <= -0.5 * pTHp:
             rho_computed = rho_k[0]
         else:
@@ -362,8 +374,10 @@ class SQP(Optimizer):
         start_time = time.time()
 
         # Set initial values for current iterates
+        # x_k  = np.clip(x0, self.problem.x_lower, self.problem.x_upper)
         x_k  = x0 * 1.              # Initial optimization variables
         pi_k = np.full((nc, ), 1.)  # Initial Lagrange multipliers
+        # pi_k = np.full((nc, ), 0.)  # Initial Lagrange multipliers
 
         MF.update_functions_in_cache(['f', 'c', 'g', 'j'], x_k)
         f_k = MF.cache['f'][1]
@@ -458,9 +472,7 @@ class SQP(Optimizer):
                 u_k,
                 max_iter=5000,
                 verbose=False,
-                # verbose=True,
                 # warm_start=False,
-                # polish=False,
                 # polish=True,
                 # polish_refine_iter=3,
                 # linsys_solver='qdldl',
@@ -484,7 +496,7 @@ class SQP(Optimizer):
                 A_k,
                 l_k,
                 u_k,
-                #   warm_start=True,
+                # warm_start=False,
                 verbose=False,
                 polish=True)
         else:
@@ -521,12 +533,17 @@ class SQP(Optimizer):
             if self.nc > 0:
                 dir_deriv_al = np.dot(mfg_k, p_k)
                 pTHp = p_x.T @ (B_k @ p_x)
+                # print('rho_k[0] BEFORE', rho_k[0])
+                # print('dir_deriv_al BEFORE', dir_deriv_al)
+                # print('0.5 pTHp', 0.5 * pTHp)
                 rho_k = self.update_scalar_rho(rho_k, dir_deriv_al, pTHp, p_pi, c_k, s_k)
                 # rho_k = self.update_vector_rho(rho_k, dir_deriv_al, pTHp, p_pi, c_k, s_k)
 
                 MF.set_rho(rho_k)
                 mf_k  = MF.evaluate_function(x_k, pi_k, s_k, f_k, c_k)
                 mfg_k = MF.evaluate_gradient(x_k, pi_k, s_k, f_k, c_k, g_k, J_k)
+                # print('rho_k[0] AFTER', rho_k[0])
+                # print('dir_deriv_al AFTER', dir_deriv_al)
 
             else:
                 mf_k  = f_k
