@@ -20,8 +20,12 @@ class AugmentedLagrangianIneq(MeritFunction):
         x = v[:nx]
         lag_mult = v[nx:(nx + nc)]
         slacks = v[(nx + nc):]
-        obj = self.options['f'](x)
-        con = self.options['c'](x)
+        
+        self.update_functions_in_cache(['f', 'c'], x)
+        obj = self.cache['f'][1]
+        con = self.cache['c'][1]
+        # obj = self.options['f'](x)
+        # con = self.options['c'](x)
 
         return obj - np.dot(lag_mult, (con - slacks)) + 0.5 * np.inner(rho, (con - slacks)**2)
 
@@ -38,9 +42,14 @@ class AugmentedLagrangianIneq(MeritFunction):
         x = v[:nx]
         lag_mult = v[nx:(nx + nc)]
         slacks = v[(nx + nc):]
-        con = self.options['c'](x)
-        grad = self.options['g'](x)
-        jac = self.options['j'](x)
+
+        self.update_functions_in_cache(['c', 'g', 'j'], x)
+        con  = self.cache['c'][1]
+        grad = self.cache['g'][1]
+        jac  = self.cache['j'][1]
+        # con  = self.options['c'](x)
+        # grad = self.options['g'](x)
+        # jac  = self.options['j'](x)
 
         # grad_x = grad - np.matmul(jac.T, lag_mult - (rho * (con - slacks)))
         grad_x = grad - jac.T @ (lag_mult - (rho * (con - slacks)))

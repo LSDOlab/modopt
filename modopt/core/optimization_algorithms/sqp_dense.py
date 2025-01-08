@@ -365,10 +365,15 @@ class SQP(Optimizer):
         x_k  = x0 * 1.              # Initial optimization variables
         pi_k = np.full((nc, ), 1.)  # Initial Lagrange multipliers
 
-        f_k = obj(x_k)
-        g_k = grad(x_k)
-        c_k = con(x_k)
-        J_k = jac(x_k)
+        MF.update_functions_in_cache(['f', 'c', 'g', 'j'], x_k)
+        f_k = MF.cache['f'][1]
+        c_k = MF.cache['c'][1]
+        g_k = MF.cache['g'][1]
+        J_k = MF.cache['j'][1]
+        # f_k = obj(x_k)
+        # g_k = grad(x_k)
+        # c_k = con(x_k)
+        # J_k = jac(x_k)
 
         nfev = 1
         ngev = 1
@@ -539,8 +544,13 @@ class SQP(Optimizer):
                 alpha, mf_new, new_f_evals, new_g_evals, converged = LSB.search(
                     x=v_k, p=p_k, f0=mf_k, g0=mfg_k)
 
-                nfev += new_f_evals
-                ngev += new_g_evals
+                # Considering the cached values for the fun/grad evaluation at max_step from 
+                # the failed line search, the actual new_f/g_evals might be 1 less than 
+                # what is returned by the fallback line search
+                nfev = MF.eval_count['f']
+                ngev = MF.eval_count['g']
+                # nfev += new_f_evals
+                # ngev += new_g_evals
 
             # Reset Hessian if both line searches fail
             if not converged:
@@ -562,10 +572,16 @@ class SQP(Optimizer):
 
             v_k += d_k
 
-            f_k = obj(x_k)
-            g_k = grad(x_k)
-            c_k = con(x_k)
-            J_k = jac(x_k)
+            # Note that no copies are made here, only references are updated
+            MF.update_functions_in_cache(['f', 'c', 'g', 'j'], x_k)
+            f_k = MF.cache['f'][1]
+            c_k = MF.cache['c'][1]
+            g_k = MF.cache['g'][1]
+            J_k = MF.cache['j'][1]
+            # f_k = obj(x_k)
+            # g_k = grad(x_k)
+            # c_k = con(x_k)
+            # J_k = jac(x_k)
 
             # Slack reset for scalar rho
             # if rho_k[0] == 0:
