@@ -61,7 +61,7 @@ To install and start using modOpt, please read the [Getting Started](src/getting
 ## Citation
 If you use modOpt in your work, please use the following reference for citation:
 
-```
+```bibtex
 @article{joshy2024modopt,
   title={modOpt: A modular development environment and library for optimization algorithms},
   author={Joshy, Anugrah Jo and Hwang, John T},
@@ -76,24 +76,61 @@ If you use modOpt in your work, please use the following reference for citation:
 ```{bibliography} src/references.bib
 ``` -->
 
-## Contents
-
 <!-- Remove/add custom pages from/to toc as per your package's requirement -->
 <!-- src/basic -->
-<!-- src/postprocessing -->
 
 ```{toctree}
 :maxdepth: 2
+:caption: Contents
 
 src/getting_started
+src/modeling
+src/optimizers
+src/benchmarking
+src/postprocessing
 src/tutorials
-src/csdl
-src/csdl_alpha
-src/instructional_algs
-src/performant_algs
 src/examples
 src/api
 src/contributing
 src/changelog
 src/license
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: Performant algorithms
+:hidden:
+
+src/performant_algs/slsqp
+src/performant_algs/pyslsqp
+src/performant_algs/cobyla
+src/performant_algs/bfgs
+src/performant_algs/lbfgsb
+src/performant_algs/nelder_mead
+src/performant_algs/cobyqa
+src/performant_algs/trust_constr
+src/performant_algs/sqp
+src/performant_algs/snopt
+src/performant_algs/ipopt
+src/performant_algs/qpsolvers
+src/performant_algs/cvxopt
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: Educational algorithms
+:hidden:
+
+src/educational_algs/steepest_descent
+src/educational_algs/newton
+src/educational_algs/quasi_newton
+
+src/educational_algs/newton_lagrange
+src/educational_algs/l2_penalty_eq
+
+src/educational_algs/nelder_mead_simplex
+src/educational_algs/pso
+src/educational_algs/simulated_annealing
+
+src/educational_algs/std_algs
 ```
