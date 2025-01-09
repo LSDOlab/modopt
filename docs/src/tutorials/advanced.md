@@ -11,7 +11,10 @@ It is recommeded that the tutorials also include mathematical equations and outp
 from running the script for better understanding for the users.
 
 ```{toctree}
+:caption: List of advanced tutorials
+:titlesonly:
+:numbered:
 :maxdepth: 1
 
-_temp/tutorials/simple_example
+../_temp/tutorials/simple_example
 ```

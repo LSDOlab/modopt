@@ -7,11 +7,10 @@ However, outputs/visualization from running the script is excluded.
 
 
 ```{toctree}
-:maxdepth: 2
 :caption: List of examples
 :titlesonly:
-:numbered:
 :includehidden:
+:maxdepth: 2
 
 examples/basic
 examples/advanced

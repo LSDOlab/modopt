@@ -13,8 +13,8 @@ from running the script for better understanding for the users.
 ```{toctree}
 :caption: List of tutorials
 :titlesonly:
-:numbered: 1
 :includehidden:
+:maxdepth: 2
 
 tutorials/basic
 tutorials/advanced
