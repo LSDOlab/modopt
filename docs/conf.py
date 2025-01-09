@@ -10,17 +10,28 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
-# import os
+import os
 # import sys
 # sys.path.insert(0, os.path.abspath('../modopt/core'))     # for autodoc
 
+def get_version_string(rel_path):
+    here = os.path.abspath(os.path.dirname(__file__))
+    with open(os.path.join(here, rel_path), 'r') as fp:
+        for line in fp:
+            if line.startswith('__version__'):
+                delim = '"' if '"' in line else "'"
+                return line.split(delim)[1]
+    raise RuntimeError("Unable to find version string.")
+
+__version__ = get_version_string('../modopt/__init__.py')
+
 # -- Project information -----------------------------------------------------
 
-project = 'modopt'
+project = 'modOpt'
 copyright = '2023, Anugrah'
 author = 'Anugrah'
-version = '0.1.0'
-# release = 0.1.0rtc
+version = __version__
+release = __version__
 
 
 # -- General configuration ---------------------------------------------------
