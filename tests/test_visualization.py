@@ -15,7 +15,6 @@ import h5py
 @pytest.mark.slsqp
 @pytest.mark.visualization
 @pytest.mark.slow
-@pytest.mark.interfaces
 def test_visualization():
     for prob in [Scaling(), scaling_lite()]:
         optimizer = SLSQP(prob, solver_options={'maxiter':50}, visualize=['x[0]', 'obj', 'grad[1]', 'jac[1,0]', 'con[1]'])
@@ -33,7 +32,6 @@ def test_visualization():
 @pytest.mark.slow
 @pytest.mark.slsqp
 @pytest.mark.recording
-@pytest.mark.interfaces
 def test_visualization_recording_hot_start():
     for prob in [Scaling(), scaling_lite()]:
         optimizer = SLSQP(prob, solver_options={'maxiter':50}, recording=True, visualize=['x[0]', 'obj', 'grad[1]', 'jac[1,0]', 'con[1]'])
@@ -92,7 +90,6 @@ def test_visualization_recording_hot_start():
 
 
 @pytest.mark.slsqp
-@pytest.mark.interfaces
 def test_errors():
     prob    = Scaling()
     with pytest.raises(ValueError) as exc_info:

@@ -14,7 +14,6 @@ import h5py
 
 @pytest.mark.slsqp
 @pytest.mark.recording
-@pytest.mark.interfaces
 def test_recording():
     
     for prob in [Scaling(), scaling_lite()]:
@@ -195,7 +194,6 @@ def test_all_solvers_recording(): # except SNOPT and SLSQP (already tested above
 
 @pytest.mark.slsqp
 @pytest.mark.recording
-@pytest.mark.interfaces
 def test_hot_start():
     for prob in [Scaling(), scaling_lite()]:
         optimizer = SLSQP(prob, solver_options={'maxiter':50}, recording=True)
@@ -408,7 +406,6 @@ def test_compute_all_hot_start():
 
 @pytest.mark.slsqp
 @pytest.mark.recording
-@pytest.mark.interfaces
 def test_errors():
     prob    = Scaling()
     with pytest.raises(ValueError) as exc_info:

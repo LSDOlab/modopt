@@ -51,7 +51,6 @@ def test_turn_off_outputs_snopt():
         assert os.path.exists('SNOPT_summary.out')
         assert os.path.exists('SNOPT_print.out')
 
-@pytest.mark.interfaces
 @pytest.mark.slsqp
 def test_callback_counts():
     for prob in [Scaling(), scaling_lite()]:

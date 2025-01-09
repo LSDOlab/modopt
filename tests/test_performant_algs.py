@@ -6,7 +6,6 @@ from numpy.testing import assert_array_almost_equal, assert_array_equal, assert_
 import pytest
 
 @pytest.mark.slsqp
-@pytest.mark.interfaces
 def test_slsqp():
     import numpy as np
     from modopt import SLSQP
@@ -41,7 +40,6 @@ def test_slsqp():
     # assert_almost_equal(optimizer.results['objective'], 20., decimal=6)
 
 @pytest.mark.cobyla
-@pytest.mark.interfaces
 def test_cobyla():
     import numpy as np
     from modopt import COBYLA
@@ -83,7 +81,6 @@ def test_cobyla():
                                   'Use a different solver (PySLSQP, IPOPT, etc.) or remove the equality constraints.'
 
 @pytest.mark.bfgs
-@pytest.mark.interfaces
 def test_bfgs():
     from modopt import BFGS
     from all_problem_types import BoundConstrained, EqConstrained, IneqConstrained
@@ -131,7 +128,6 @@ def test_bfgs():
     assert_almost_equal(optimizer.results['fun'], 0.0, decimal=11)
 
 @pytest.mark.lbfgsb
-@pytest.mark.interfaces
 def test_lbfgsb():
     import numpy as np
     from modopt import LBFGSB
@@ -175,7 +171,6 @@ def test_lbfgsb():
     assert_almost_equal(optimizer.results['fun'], 1.0, decimal=11)
 
 @pytest.mark.nelder_mead
-@pytest.mark.interfaces
 def test_nelder_mead():
     import numpy as np
     from modopt import NelderMead
@@ -245,7 +240,6 @@ def test_cobyqa():
     assert_almost_equal(optimizer.results['fun'], 20., decimal=7)
 
 @pytest.mark.trust_constr
-@pytest.mark.interfaces
 def test_trust_constr():
     import numpy as np
     from modopt import TrustConstr
@@ -402,7 +396,6 @@ def test_ipopt():
     assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=1)
 
 @pytest.mark.trust_constr
-@pytest.mark.interfaces
 def test_trust_constr_exact_hess():
     from all_problem_types import (SecondOrderScaling, second_order_scaling_lite, 
                                    SecondOrderBoundConstrained, second_order_bound_constrained_lite,

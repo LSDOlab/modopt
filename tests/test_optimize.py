@@ -8,7 +8,6 @@ import pytest
 from modopt import optimize
 
 @pytest.mark.slsqp
-@pytest.mark.interfaces
 def test_slsqp():
 
     prob = Scaling()
@@ -35,7 +34,6 @@ def test_slsqp():
     # assert_almost_equal(results['objective'], 20., decimal=6)
 
 @pytest.mark.cobyla
-@pytest.mark.interfaces
 def test_cobyla():
     import numpy as np
     from modopt import COBYLA
@@ -61,7 +59,6 @@ def test_cobyla():
     assert_almost_equal(results['fun'], 0.125, decimal=6)
 
 @pytest.mark.bfgs
-@pytest.mark.interfaces
 def test_bfgs():
     from all_problem_types import Unconstrained, unconstrained_lite
 
@@ -84,7 +81,6 @@ def test_bfgs():
     assert_almost_equal(results['fun'], 0.0, decimal=11)
 
 @pytest.mark.lbfgsb
-@pytest.mark.interfaces
 def test_lbfgsb():
     import numpy as np
     from all_problem_types import BoundConstrained, bound_constrained_lite
@@ -111,7 +107,6 @@ def test_lbfgsb():
     assert_almost_equal(results['fun'], 1.0, decimal=11)
 
 @pytest.mark.nelder_mead
-@pytest.mark.interfaces
 def test_nelder_mead():
     from all_problem_types import BoundConstrained, bound_constrained_lite
 
@@ -155,7 +150,6 @@ def test_cobyqa():
     assert_almost_equal(results['fun'], 20., decimal=7)
 
 @pytest.mark.trust_constr
-@pytest.mark.interfaces
 def test_trust_constr():
     import numpy as np
     from modopt import TrustConstr

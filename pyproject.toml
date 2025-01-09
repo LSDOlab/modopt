@@ -151,6 +151,7 @@ visualization = [
 
 [tool.pytest.ini_options]
 markers = [
+    "basic: marks basic tests as those that are not marked as interfaces or visualization",
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "interfaces: marks tests as interfaces (deselect with '-m \"not interfaces\"')",
     "recording: marks tests as recording (deselect with '-m \"not recording\"')",

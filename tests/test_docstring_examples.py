@@ -10,7 +10,6 @@ import doctest
 import pytest
 
 @pytest.mark.slsqp
-@pytest.mark.interfaces
 @pytest.mark.recording
 def test_postprocessing():
     import postprocessing
@@ -19,7 +18,6 @@ def test_postprocessing():
 
 
 @pytest.mark.slsqp
-@pytest.mark.interfaces
 @pytest.mark.recording
 @pytest.mark.visualization
 def test_visualization():
