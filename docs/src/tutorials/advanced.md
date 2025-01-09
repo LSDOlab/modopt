@@ -1,4 +1,4 @@
-# Tutorials
+# Advanced tutorials
 
 These tutorials are generated from Jupyter notebooks (.ipynb) and
 walks the reader through example scripts providing detailed
@@ -11,11 +11,7 @@ It is recommeded that the tutorials also include mathematical equations and outp
 from running the script for better understanding for the users.
 
 ```{toctree}
-:caption: List of tutorials
-:titlesonly:
-:numbered: 1
-:includehidden:
+:maxdepth: 1
 
-tutorials/basic
-tutorials/advanced
+_temp/tutorials/simple_example
 ```
