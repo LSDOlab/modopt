@@ -21,22 +21,21 @@ To install the latest commit from the main branch, run the following command in 
 pip install git+https://github.com/lsdolab/modopt.git@main
 ```
 
-### Uninstalling
 To uninstall modOpt, run
 ```sh
 pip uninstall modopt
 ```
 
-### Upgrading
-To upgrade to the latest commit, first uninstall modopt and then reinstall using
+To upgrade to the latest commit, first uninstall modOpt and then reinstall with
 ```sh
 pip uninstall modopt
 pip install git+https://github.com/lsdolab/modopt.git@main
 ```
 
-### Installing and upgrading in development mode
+## Installation in development mode
 
-To install `modopt` in development mode, first clone the repository and then install using
+To install modOpt in development mode, first clone the repository
+and then install with
 ```sh
 git clone https://github.com/lsdolab/modopt.git
 pip install -e ./modopt
@@ -51,7 +50,7 @@ git pull
 ```
 
 ## Testing
-To verify that the package works correctly, install `pytest` using
+To verify that the installed package works correctly, install `pytest` using
 ```sh
 pip install pytest
 ```
@@ -59,13 +58,17 @@ and run the following command from the project's root directory:
 ```sh
 pytest -m basic
 ```
-The -m basic flag runs only the basic test cases, excluding 
-visualization tests and tests for interfaces with optional dependencies 
-such as Jax, CasADi, and others.
+The `-m basic` flag runs only the basic test cases, excluding 
+visualization tests and tests for interfaces with 
+optional dependencies such as Jax, CSDL, OpenMDAO, and others.
 
 ## Usage 
 
-Here is a simple example that minimizes `x^2 + y^2` subject to `x + y = 1`.
+The example below is provided to help users get started with modOpt.
+For information on more advanced features of modOpt, see the 
+[documentation](https://modopt.readthedocs.io/).
+The following example minimizes `x^2 + y^2` subject to
+the constraint `x + y = 1`.
 
 ```python
 import numpy as np
@@ -99,14 +102,11 @@ Note that we did not provide functions for computing the objective gradient
 or the constraint Jacobian.
 In the absence of user-provided derivatives, `ProblemLite` estimates them
 using first-order finite differences.
-However, it is more efficient if the user provides the functions with exact derivatives.
-For more complex examples with user-defined derivatives,
-please see the [Examples](https://modopt.readthedocs.io/en/latest/src/examples.html)
-in the documentation.
-
-This example is provided only to help users to get started with modOpt.
-See the [documentation](https://modopt.readthedocs.io/) for more advanced features
-of modOpt.
+However, it is more efficient if the user provides the functions for the exact derivatives.
+For more complex examples on building models in various modeling languages, using different optimizers,
+or developing new optimizers in modOpt with built-in modules,
+see the [Examples](https://modopt.readthedocs.io/en/latest/src/examples.html)
+section of the documentation.
 
 ## Documentation
 For API reference and more details on installation and usage, visit the [documentation](https://modopt.readthedocs.io/).
@@ -125,7 +125,8 @@ If you use modOpt in your work, please use the following reference for citation:
 ```
 
 ## Bugs, feature requests, questions
-Please use the [GitHub issue tracker](https://github.com/LSDOlab/modopt/issues) for reporting bugs, requesting new features, or any other questions.
+Please use the [GitHub issue tracker](https://github.com/LSDOlab/modopt/issues) 
+for reporting bugs, requesting new features, or any other questions.
 
 ## Contributing
 We always welcome contributions to modOpt. 
