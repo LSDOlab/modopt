@@ -18,7 +18,7 @@ $$
 $$
 
 We know the solution of this problem is $x_1=1$, and $x_2=0$.
-However, we start from an intial guess of $x_1=0$, and $x_2=0.0$ for the purposes of this tutorial.
+However, we start from an initial guess of $x_1=0$, and $x_2=0.0$ for the purposes of this tutorial.
 
 The problem model is written in csdl as follows:
 

@@ -1,8 +1,7 @@
 # Modeling
 
 modOpt offers great flexibility in modeling the optimization functions
-(objective and constraint functions), and their derivatives.
-<!-- There are mainly six different ways in which models can be built. -->
+(objective and constraint functions) and their derivatives.
 Models can primarily be built using one of six classes: 
 `ProblemLite`, `Problem`, `CSDLAlphaProblem`, `OpenMDAOProblem`, 
 `JaxProblem`, or `CasADiProblem`.
@@ -27,9 +26,6 @@ object-oriented programming required with the `Problem` class.
 in Python, then `Problem` and `ProblemLite` are good options.
 Both can handle sparsity in the derivative matrices, but `Problem` offers
 more advanced array management techniques.
-<!-- and the problem size (number of variables and constraints) is not too large 
-to benefit from sparse matrix formats -->
-<!-- However, if the problem can benefit from sparsity in the  -->
 
 3. If your problem functions consist of a long sequence of explicit equations
 (potentially involving linear solvers), hand-deriving derivatives 
@@ -48,7 +44,7 @@ in the model, whereas CSDL fully automates derivative computation.
 However, CSDL tends to be less memory-efficient for large models involving *for loops*.
 
 ```{note}
-For all six modeling options, if the problem functions are not 
+For all modeling options mentioned above, if the problem functions are not 
 expensive to evaluate and the problem size is small,
 numerical approximation of the derivatives using finite-difference 
 or complex step methods may work well.
@@ -69,9 +65,9 @@ of the six modeling options discussed above.
 
 modeling/problem_lite
 modeling/problem
-modeling/csdl
 modeling/csdl_alpha
 modeling/openmdao
 modeling/jax
 modeling/casadi
+modeling/csdl
 ```
