@@ -126,10 +126,10 @@ pyslsqp = [
     "pyslsqp",
 ]
 ipopt = [
-    "casadi", # Modopt uses the IPOPT solver from CasADi
+    "casadi", # modOpt uses the IPOPT solver from CasADi
 ]
 casadi = [
-    "casadi", # Modopt uses the IPOPT solver from CasADi
+    "casadi", # modOpt uses the IPOPT solver from CasADi
 ]
 interfaces = [
     "csdl @ git+https://github.com/LSDOlab/csdl.git", # csdl is deprecated with dependencies fixed in the main package

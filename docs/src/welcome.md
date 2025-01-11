@@ -11,9 +11,9 @@ of existing algorithms by replacing or modifying these components.
 It also enables students to perform comparative studies of their versions with a 
 standard algorithm.
 
-## Modopt as a library of optimization algorithms
+## modOpt as a library of optimization algorithms
 
-Modopt allows optimization practitioners to define the computational models that provide
+modOpt allows optimization practitioners to define the computational models that provide
 the objective, constraints, and the derivatives for their optimization problems 
 using one of the following three options:
 1. the built-in `Problem()` class,
@@ -24,16 +24,16 @@ Once the model is defined, it needs to be optimized.
 The users can pick an optimizer of their choice from the
 library of optimization algorithms available in modOpt.
 
-<!-- ![modopt_lib](/src/images/modopt_lib.png "Modopt as a library") -->
+<!-- ![modopt_lib](/src/images/modopt_lib.png "modOpt as a library") -->
 ```{figure} /src/images/modopt_lib.png
 :figwidth: 80 %
 :align: center
 :alt: modopt_lib
 
-_**Modopt as a library**_
+_**modOpt as a library**_
 ```
 
-## Modopt as a development environment for optimization algorithms
+## modOpt as a development environment for optimization algorithms
 
 There are a number of transparent modules available within the package
 which users can leverage to develop new or modified optimization algorithms.
@@ -42,8 +42,8 @@ using the `Optimizer()` class in modOpt.
 Benchmarking against built-in standard algorithms or interfaced external optimizers
 are also possible.
 
-<!-- ![modopt_env](/src/images/modopt_env.png "Modopt as a development environment") -->
-<!-- <img src="/images/modopt_env.png" alt='modopt_env' title="Modopt as a development environment" width="150" height="100"/> -->
+<!-- ![modopt_env](/src/images/modopt_env.png "modOpt as a development environment") -->
+<!-- <img src="/images/modopt_env.png" alt='modopt_env' title="modOpt as a development environment" width="150" height="100"/> -->
 <!-- <p align="center"> -->
 <!-- <img src="images/modopt_env.png" alt='modopt_env'> -->
 <!-- </p> -->
@@ -52,7 +52,7 @@ are also possible.
 :align: center
 :alt: modopt_lib
 
-_**Modopt as a development environment**_
+_**modOpt as a development environment**_
 ```
 
 ## Getting Started

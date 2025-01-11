@@ -7,8 +7,8 @@ import casadi as ca
 # minimize x^4 + y^4 subject to x>=0, x+y=1, x-y>=1.
 
 # METHOD 1: Use CasADi expressions directly in mo.CasadiProblem.
-#           ModOpt will auto-generate the gradient, Jacobian, and objective Hessian.
-#           ModOpt will also auto-generate the Lagrangian, its gradient, and Hessian.
+#           modOpt will auto-generate the gradient, Jacobian, and objective Hessian.
+#           modOpt will also auto-generate the Lagrangian, its gradient, and Hessian.
 #           No need to manually generate functions or their derivatives and then wrap them.
 
 ca_obj = lambda x: ca.sum1(x**4)

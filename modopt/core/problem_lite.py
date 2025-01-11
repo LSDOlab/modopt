@@ -18,7 +18,7 @@ class ProblemLite(object):
     Major differences from ``Problem()`` class:
         - No ``array_manager`` objects are used so no setup of matrices, vectors, etc.
         - No declarations of design variables, objectives, constraints, etc.
-        - No ``setup()`` or `setup_derivatives()` method is called.
+        - No ``setup()`` or ``setup_derivatives()`` method is called.
         - Functions and derivatives are directly called from the user-provided functions (thin wrapper).
         - Only single objective problems are supported.
         - Only a single design variable vector and single constraint vector function are supported.

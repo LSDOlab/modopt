@@ -13,8 +13,8 @@ jax_obj = lambda x: jnp.sum(x ** 4)
 jax_con = lambda x: jnp.array([x[0] + x[1], x[0] - x[1]])
 
 # METHOD 1: Use Jax functions directly in mo.JaxProblem. 
-#           ModOpt will auto-generate gradient, Jacobian, and objective Hessian.
-#           ModOpt will also auto-generate the Lagrangian, its gradient, and Hessian.
+#           modOpt will auto-generate gradient, Jacobian, and objective Hessian.
+#           modOpt will also auto-generate the Lagrangian, its gradient, and Hessian.
 #           No need to manually generate or jit functions or their derivatives and then wrap them.
 
 prob = mo.JaxProblem(x0=np.array([500., 5.]), nc=2, jax_obj=jax_obj, jax_con=jax_con,
