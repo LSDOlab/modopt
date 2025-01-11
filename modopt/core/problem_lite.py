@@ -9,30 +9,30 @@ import time
 class ProblemLite(object):
     '''
     Lightweight base class for defining optimization problems in modOpt.
-    Performs basic setup for optimization problems, without using array_manager.
+    Performs basic setup for optimization problems, without using ``array_manager``.
     This class is useful for defining simple optimization problems
     with initial design variables, objective, constraints and their derivative functions.
-    The ProblemLite() object can be used when the user wants to call the optimizer directly with
+    The ``ProblemLite()`` object can be used when the user wants to call the optimizer directly with
     x0, obj, con, grad, jac, obj_hess, etc. functions.
 
-    Major differences from Problem() class:
-        - No array_manager objects are used so no setup of matrices, vectors, etc.
+    Major differences from ``Problem()`` class:
+        - No ``array_manager`` objects are used so no setup of matrices, vectors, etc.
         - No declarations of design variables, objectives, constraints, etc.
-        - No setup() or setup_derivatives() method is called.
+        - No ``setup()`` or `setup_derivatives()` method is called.
         - Functions and derivatives are directly called from the user-provided functions (thin wrapper).
         - Only single objective problems are supported.
         - Only a single design variable vector and single constraint vector function are supported.
         - Every STORED VARIABLE in this class is SCALED by the user-provided scaling factors.
-        - Objective and constraint functions are always called together in _funcs(x) method.
-        - Gradient and Jacobian functions are always called together in _derivs(x) method.
-        - Caches the function and first derivative values for the same input x to avoid redundant, consecutive evaluations.
+        - Objective and constraint functions are always called together in ``_funcs(x)`` method.
+        - Gradient and Jacobian functions are always called together in ``_derivs(x)`` method.
+        - Caches the function and first derivative values for the same input ``x`` to avoid redundant, consecutive evaluations.
         - Keeps track of the number of function and gradient evaluations and time taken for each.
 
     Still supports:
         - Feasibility problems and unconstrained optimization problems.
         - Finite differencing by default for unavailable derivatives.
         - Matrix-vector products vjp, jvp, obj_hvp, lag_hvp.
-        - Caching of function and derivative values (although scaled) for the same input x.
+        - Caching of function and derivative values (although scaled) for the same input ``x``.
         - Scaling of design variables, objectives, and constraints.
         - Bounds on design variables and constraints.
         - Lagrangian functions and derivatives for constrained problems.
@@ -108,7 +108,7 @@ class ProblemLite(object):
             Gradient of the Lagrangian function.
             Signature: lag_grad(x: np.ndarray, mu: np.ndarray) -> np.ndarray
         grad_free : bool, default=False
-            If True, ProblemLite will not use/generate any derivative information.
+            If ``True``, ProblemLite will not use/generate any derivative information.
         '''
         self.check_types(x0, name, obj, con, grad, jac, obj_hess, lag_hess, fd_step, vp_fd_step, 
                          xl, xu, cl, cu, x_scaler, o_scaler, c_scaler, lag, lag_grad, grad_free)

@@ -6,7 +6,7 @@ class CasadiProblem(ProblemLite):
     Class that wraps CasADi **expressions** for objective and constraints.
     Depending on the ``order`` specified, this class will automatically generate the expressions for the objective gradient, 
     constraint Jacobian, objective Hessian, Lagrangian, Lagrangian gradient, and Lagrangian Hessian.
-    All expressions will be turned into functions and then wrapped for use with Optimizer subclasses.
+    All expressions will be turned into functions and then wrapped for use with ``Optimizer`` subclasses.
     Vector products (HVP, JVP, VJP) are not supported.
     '''
     def __init__(self, x0, name='unnamed_problem', ca_obj=None, ca_con=None, xl=None, xu=None, 
