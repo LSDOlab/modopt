@@ -1,9 +1,9 @@
 # CSDL (deprecated)
 
-## Define a problem in csdl
+## Define a problem in `CSDL`
 
-This example does not intend to cover the features of csdl.
-For more details and tutorials on csdl, please refer to **[csdl documentation](https://lsdolab.github.io/csdl/)**.
+This example does not intend to cover the features of CSDL.
+For more details and tutorials on CSDL, please refer to **[CSDL documentation](https://lsdolab.github.io/csdl/)**.
 In this example, we solve a constrained problem given by
 
 $$
@@ -20,7 +20,7 @@ $$
 We know the solution of this problem is $x_1=1$, and $x_2=0$.
 However, we start from an initial guess of $x_1=0$, and $x_2=0.0$ for the purposes of this tutorial.
 
-The problem model is written in csdl as follows:
+The problem model is written in CSDL as follows:
 
 ```py
 from csdl import Model
@@ -54,7 +54,7 @@ class QuadraticFunc(Model):
         self.add_constraint('constraint_2', lower=1.)
 ```
 
-Once your model is setup in csdl, create a `Simulator` object in csdl and 
+Once your model is setup in CSDL, create a `Simulator` object in CSDL and 
 translate the `Simulator` object to a `CSDLProblem` object in modOpt.
 
 ```py
@@ -71,6 +71,7 @@ prob = CSDLProblem(
     simulator=sim,
 )
 ```
+## Solve your problem using an optimizer
 
 Once your problem is translated to modOpt, import your preferred optimizer from
 the respective library in modOpt and solve it, following the standard procedure.
@@ -94,7 +95,7 @@ optimizer.print_results()
 ```
 
 
-## Recommended optimizers for csdl problems
+## Recommended optimizers for CSDL problems
 
 ### 1 . SLSQP
 
