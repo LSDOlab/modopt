@@ -17,16 +17,39 @@ except ImportError:
 
 def generate_performance_profiles(data):
     '''
-    Generate the performance profiles for the given data.
+    Compute performance profiles and return them along 
+    with their corresponding performance ratio (`Tau`) values.
+
+    Depending on the input data, the function returns either two or four outputs:
+    
+    - If `'nev'` exists in `list(data.values())[0]`:
+
+      - `Tau` (np.ndarray): Array of `Tau` values for the primary (time) performance profiles.
+
+      - `performance_profiles` (np.ndarray): Performance profiles corresponding to `Tau`.
+
+      - `Tau_n` (np.ndarray): Array of `Tau` values for secondary (nev) performance profiles.
+
+      - `performance_profiles_n` (np.ndarray): Performance profiles corresponding to `Tau_n`.
+
+    - Otherwise:
+
+      - `Tau` (np.ndarray): Array of `Tau` values for the primary (time) performance profiles.
+
+      - `performance_profiles` (np.ndarray): Performance profiles corresponding to `Tau`.
 
     Parameters
     ----------
     data : dict
         Dictionary containing the performance data for each solver.
-        The keys are the (problem_name, solver_name) and the values are 
-        dictionaries containing 'time' and `success` as keys with corresponding
-        values denoting the time (float) taken for 'solver_name' to solve 'problem_name' 
-        and the success (bool) of the solver.
+        The keys are the (problem_name: str, solver_name: str) and the values are 
+        dictionaries containing `'time'` and `'success'` as keys with corresponding
+        values denoting the time (`float`) taken for `solver_name` to solve `problem_name`
+        and the success (`bool`) of the solver.
+        Additionally, if the number of evaluations is available, 
+        the dictionary can also contain `'nev'` as a key with 
+        the corresponding `int` value denoting the number of evaluations.
+
     Returns
     -------
     Tau : numpy.ndarray
@@ -35,6 +58,14 @@ def generate_performance_profiles(data):
         Dictionary containing the performance profiles for each solver.
         The keys are the solver names and the values are the proportion of problems
         solved under the performance ratio corresponding to entries in Tau.
+    Tau_n : numpy.ndarray
+        Array of log-scaled performance ratios for the number of evaluations.
+        Only returned if the number of evaluations `'nev'` is available in the data.
+    performance_profiles_n : dict
+        Dictionary containing the performance profiles for the number of evaluations.
+        The keys are the solver names and the values are the proportion of problems
+        solved under the performance ratio corresponding to entries in Tau_n.
+        Only returned if the number of evaluations `'nev'` is available in the data.
     '''
     
     # Get the unique solvers and problems
@@ -139,18 +170,24 @@ def generate_performance_profiles(data):
     
 def plot_performance_profiles(data, save_figname='performance.pdf'):
     '''
-    Plot the performance profile for the given data.
+    Plot the performance profiles for the given data.
 
     Parameters
     ----------
     data : dict
         Dictionary containing the performance data for each solver.
-        The keys are the (problem_name, solver_name) and the values are 
-        dictionaries containing 'time' and `success` as keys with corresponding
-        values denoting the time (float) taken for 'solver_name' to solve 'problem_name' 
-        and the success (bool) of the solver.
-    save_figname : str, optional
-        Path to save the performance profile plot. Default is 'performance.pdf'.
+        The keys are the (problem_name: str, solver_name: str) and the values are 
+        dictionaries containing `'time'` and `'success'` as keys with corresponding
+        values denoting the time (`float`) taken for `solver_name` to solve `problem_name`
+        and the success (`bool`) of the solver.
+        Additionally, if the number of evaluations is available, 
+        the dictionary can also contain `'nev'` as a key with 
+        the corresponding `int` value denoting the number of evaluations.
+    save_figname : str, default='performance.pdf'
+        Path to save the plot with the performance profiles.
+        If the number of evaluations is available in `data`, 
+        the performance profiles for the number of evaluations is also plotted
+        and saved to the path with `save_figname` appended with `_nev` before the extension.
     '''
     
     if plt is None:
