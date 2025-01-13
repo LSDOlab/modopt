@@ -6,7 +6,7 @@ This section contains auto-generated API reference for the package.
 
 autoapi/modopt/core/optimizer/index
 autoapi/modopt/core/problem/index
-<!-- api/optimizer -->
+api/optimizer
 api/optimize
 <!-- api/problem -->
 api/problem_lite
