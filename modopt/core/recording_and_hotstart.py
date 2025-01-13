@@ -2,9 +2,11 @@
 
 import numpy as np
 import warnings
+import functools
 
 def hot_start(in_names, out_names):
     def decorator(func):
+        @functools.wraps(func)
         def wrapper(self, *args, **kwargs):
             if self._hot_start_mode:
                 if self._callback_count < self._num_callbacks_found:
@@ -38,11 +40,18 @@ def hot_start(in_names, out_names):
                     return func(self, *args, **kwargs)
             else:
                 return func(self, *args, **kwargs)
+        
+        # # Manually copying metadata when not using functools.wraps
+        # # This is important as Sphinx needs to get the correct metadata for autodoc
+        # wrapper.__name__ = func.__name__
+        # wrapper.__doc__ = func.__doc__
+        # wrapper.__module__ = func.__module__
         return wrapper
     return decorator
 
 def record(in_names, out_names):
     def decorator(func):
+        @functools.wraps(func)
         def wrapper(self, *args, **kwargs):
             results = func(self, *args, **kwargs)
             if self._record:
@@ -80,5 +89,11 @@ def record(in_names, out_names):
             self._jac_count  += 'jac' in out_names
             self._hess_count += ('obj_hess' in out_names or 'lag_hess' in out_names)
             return results
+        
+        # # Manually copying metadata when not using functools.wraps
+        # # This is important as Sphinx needs to get the correct metadata for autodoc
+        # wrapper.__name__ = func.__name__
+        # wrapper.__doc__ = func.__doc__
+        # wrapper.__module__ = func.__module__
         return wrapper
     return decorator
