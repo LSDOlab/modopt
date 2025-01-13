@@ -19,6 +19,9 @@ class TravelingSalesman(Problem):
 
         self.get_neighbor = lambda x: self.generate_random_neighbor(x)
 
+    def setup_derivatives(self):
+        pass
+
     def compute_objective(self, dvs, obj):
         ordered_city_locations = self.locations[dvs['x'].astype(int)]
         coordinate_differences = np.roll(ordered_city_locations, -1 , axis=0) - ordered_city_locations

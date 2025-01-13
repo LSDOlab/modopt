@@ -15,17 +15,27 @@ def test_callback_list():
     assert set(prob.user_defined_callbacks) == {'obj', 'con', 'grad', 'jac'}
 
 def test_errors():
+    class TestProblem0(Problem):
+        def initialize(self):
+            self.problem_name = 'test0'
+        def setup(self):
+            pass
+        def setup_derivatives(self):
+            pass
+
     with pytest.raises(Exception) as excinfo:
-        prob = Problem()
+        prob = TestProblem0()
+    print(str(excinfo.value))
     assert excinfo.type is Exception
     assert str(excinfo.value) == 'No design variables are declared.'
 
     class TestProblem1(Problem):
         def initialize(self):
             self.problem_name = 'test1'
-        
         def setup(self):
             self.add_design_variables('x', shape=(2,), vals=np.array([1., 2.]))
+        def setup_derivatives(self):
+            pass
 
     with pytest.raises(Exception) as excinfo:
         prob = TestProblem1()
@@ -35,11 +45,12 @@ def test_errors():
     class TestProblem2(Problem):
         def initialize(self):
             self.problem_name = 'test2'
-        
         def setup(self):
             self.add_design_variables('x', shape=(2,), vals=np.array([1., 2.]))
             self.add_objective('f', scaler=2.)
-
+        def setup_derivatives(self):
+            pass
+        
     with pytest.raises(Exception) as excinfo:
         prob = TestProblem2()
     assert excinfo.type is Exception
@@ -48,10 +59,11 @@ def test_errors():
     class TestProblem3(Problem):
         def initialize(self):
             self.problem_name = 'test3'
-        
         def setup(self):
             self.add_design_variables('x', shape=(2,), vals=np.array([1., 2.]))
             self.add_constraints('c', shape=(2,), lower=1.)
+        def setup_derivatives(self):
+            pass
 
     with pytest.raises(Exception) as excinfo:
         prob = TestProblem3()
@@ -61,14 +73,11 @@ def test_errors():
     class TestProblem4(Problem):
         def initialize(self):
             self.problem_name = 'test4'
-        
         def setup(self):
             self.add_design_variables('x', shape=(2,), vals=np.array([1., 2.]))
             self.add_objective('f', scaler=2.)
-
         def setup_derivatives(self):
             self.declare_objective_gradient(wrt='x')
-        
         def compute_objective(self, dvs, obj):
             obj['f'] = np.sum(dvs['x']**2)
 
@@ -124,11 +133,11 @@ def test_all_dummy_methods():
     class TestProblem1(Problem):
         def initialize(self):
             self.problem_name = 'test1'
-
         def setup(self):
             self.add_design_variables('x', shape=(2,), vals=np.array([1., 2.]), lower=-1e99, upper=1e99)
             self.add_objective('f', scaler=2.)
-        
+        def setup_derivatives(self):
+            pass
         def compute_objective(self, dvs, obj):
             obj['f'] = np.sum(dvs['x']**2)
 
@@ -152,11 +161,11 @@ def test_all_dummy_methods():
     class TestProblem2(Problem):
         def initialize(self):
             self.problem_name = 'test2'
-
         def setup(self):
             self.add_design_variables('x', shape=(2,), vals=np.array([1., 2.]), lower=-1e99, upper=1e99)
             self.add_constraints('c', shape=(2,), lower=1.)
-        
+        def setup_derivatives(self):
+            pass
         def compute_constraints(self, dvs, con):
             con['c'] = dvs['x']**2 - 1.
     

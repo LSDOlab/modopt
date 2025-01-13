@@ -116,6 +116,9 @@ class CUTEstProblem(Problem):
 
         self.declared_variables = ['dv'] + self.user_defined_callbacks
 
+    def setup_derivatives(self):
+        pass
+
     def _setup_scalers(self, ):
         pass
 

@@ -571,6 +571,8 @@ def test_errors():
     import numpy as np
     from modopt import Problem, ProblemLite, BFGS, LBFGSB
     class QPNoGrad(Problem):
+        def initialize(self):
+            pass
         def setup(self):
             self.add_design_variables('x', shape=(2,))
             self.add_objective('f')
@@ -618,6 +620,8 @@ def test_errors():
         assert str(excinfo.value) == "Exact Hessians are not available with 'OpenMDAOProblem', 'CSDLProblem' or 'CSDLAlphaProblem'."
 
     class QPNoHess(Problem):
+        def initialize(self):
+            pass
         def setup(self):
             self.add_design_variables('x', shape=(2,))
             self.add_objective('f')

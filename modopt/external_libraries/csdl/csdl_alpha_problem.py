@@ -132,6 +132,9 @@ class CSDLAlphaProblem(OptProblem):
         self.deriv_evals += 1
         self.warm_x_deriv[:] = self.x0
 
+    def setup_derivatives(self, ):
+        pass
+
     def raise_issues_with_user_setup(self, ):
         pass
     

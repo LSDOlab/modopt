@@ -91,6 +91,8 @@ class OpenMDAOProblem(Problem):
 #                 return True
 #         return False
 
+    def setup_derivatives(self):
+        pass
 
     def _setup_scalers(self, ):
         pass

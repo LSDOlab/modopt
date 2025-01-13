@@ -15,6 +15,9 @@ class BeanFunction(Problem):
                                   upper=10*np.ones(2,))
         self.add_objective('f')
 
+    def setup_derivatives(self):
+        pass
+
     def compute_objective(self, dvs, obj):
         x1 = dvs['x'][0]
         x2 = dvs['x'][1]

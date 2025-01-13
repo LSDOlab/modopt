@@ -342,27 +342,30 @@ class Problem(ABC):
             
         return output
 
+    @abstractmethod
     def initialize(self):
         '''
-        User-defined method.
         Set problem name and any problem-specific options.
         '''
+        # raise NotImplementedError("Subclasses must implement this method.")
         pass
 
+    @abstractmethod
     def setup(self):
         '''
-        User-defined method.
         Call add_design_variables(), add_objective(), add_constraints() and declare_lagrangian().
         '''
+        # raise NotImplementedError("Subclasses must implement this method.")
         pass
 
-    def setup_derivatives(self, ):
+    @abstractmethod
+    def setup_derivatives(self):
         '''
-        User-defined method.
         Call declare_objective_gradient(), declare_objective_hessian(), declare_objective_hvp(),
         declare_constraint_jacobian(), declare_constraint_jvp(), declare_constraint_vjp(), 
         declare_lagrangian_gradient(), declare_lagrangian_hessian(), and declare_lagrangian_hvp().
         '''
+        # raise NotImplementedError("Subclasses must implement this method even if the optimizer is gradient-free.")
         pass
 
     def _setup_scalers(self):
@@ -1213,6 +1216,12 @@ class Problem(ABC):
 
     # USER-DEFINED COMPUTE METHODS BELOW:
     # ===================================
+    # User must implement these methods, if needed, in the derived class
+    # to define the problem functions and its derivatives.
+    # NOTE: 1. These are "optional" abstract methods that are 
+    #          not always necessary to be implemented.
+    #       2. These methods are never called directly by the user.
+    #          They are called by the Problem class methods.
 
     def compute_objective(self, dvs, obj):
         """

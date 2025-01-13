@@ -387,6 +387,8 @@ def test_errors():
         in str(excinfo.value)
 
     class QPNoHess(Problem):
+        def initialize(self):
+            pass
         def setup(self):
             self.add_design_variables('x', shape=(2,))
             self.add_constraints('c', shape=(1,))
@@ -437,6 +439,8 @@ def test_errors():
     assert_array_almost_equal(optimizer.results['x'], [1., 0.], decimal=7)
 
     class QPNoJac(Problem):
+        def initialize(self):
+            pass
         def setup(self):
             self.add_design_variables('x', shape=(2,))
             self.add_constraints('c', shape=(1,))

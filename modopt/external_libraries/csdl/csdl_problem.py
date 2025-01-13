@@ -64,6 +64,9 @@ class CSDLProblem(OptProblem):
             self.declared_variables += ['con', 'jac']
             self.c_scaler = 1.0
 
+    def setup_derivatives(self):
+        pass
+
     def _setup_scalers(self, ):
         pass
 
