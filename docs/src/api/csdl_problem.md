@@ -6,7 +6,7 @@
     
     Problem class for CSDL problems.
 
-    .. py:method:: __init__(problem_name='unnamed_problem', simulator=simulator)
+    .. py:method:: __init__(problem_name='unnamed_problem', simulator=None)
 
         Initialize the `CSDLProblem` object.
 

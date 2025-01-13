@@ -6,7 +6,7 @@
     
     Problem class for OpenMDAO problems.
 
-    .. py:method:: __init__(problem_name='unnamed_problem', om_problem=om_problem)
+    .. py:method:: __init__(problem_name='unnamed_problem', om_problem=None)
 
         Initialize the `OpenMDAOProblem` object.
 

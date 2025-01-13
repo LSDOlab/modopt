@@ -15,7 +15,7 @@ class JaxProblem(ProblemLite):
         Initialize the optimization problem with the given design variables, objective, and constraints.
         Derivatives are automatically generated using Jax.
 
-        Attributes
+        Parameters
         ----------
         name : str, default='unnamed_problem'
             Problem name assigned by the user.
