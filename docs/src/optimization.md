@@ -1,4 +1,4 @@
-# Optimizers
+# Problem Optimization
 
 Unlike the educational algorithms, users have an easy, alternate way to optimize using
 the performant algorithms.

@@ -1,4 +1,4 @@
-# Modeling
+# Problem Modeling
 
 modOpt offers great flexibility in modeling the optimization functions
 (objective and constraint functions) and their derivatives.

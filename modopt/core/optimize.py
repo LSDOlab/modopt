@@ -8,23 +8,24 @@ from modopt.external_libraries.qpsolvers import ConvexQPSolvers
 
 def optimize(prob, solver='SLSQP', **kwargs):
     """
-    Optimize a given problem using a specified solver.
+    Optimize given problem with the specified solver.
 
     Only performant algorithms can be used with this function
     and is made available for users who are only interested in
     solving their optimization problems with solvers in the modOpt library.
     Developers of instructional algorithms are recommended to use
-    `Optimizer` subclasses such as SLSQP, Newton, SQP, etc. directly.
+    ``Optimizer`` subclasses such as ``SLSQP``, ``Newton``, ``SQP``, etc. directly.
 
     Parameters
     ----------
     prob : Problem or ProblemLite
         The problem to be solved.
-    solver : str, optional
-        The solver to be used. Default is 'SLSQP'.
-        Available solvers are 'SLSQP', 'PySLSQP', 'COBYLA', 'BFGS',
-        'LBFGSB', 'NelderMead', 'COBYQA', TrustConstr',
-        'SNOPT', 'IPOPT', 'CVXOPT', and 'ConvexQPSolvers'.
+        Needs to be an instance of ``Problem`` or ``ProblemLite``.
+    solver : str, default=``'SLSQP'``
+        The solver to be used.
+        Available solvers are ``'SLSQP'``, ``'PySLSQP'``, ``'COBYLA'``, ``'BFGS'``,
+        ``'LBFGSB'``, ``'NelderMead'``, ``'COBYQA'``, ``'TrustConstr'``,
+        ``'SNOPT'``, ``'IPOPT'``, ``'CVXOPT'``, and ``'ConvexQPSolvers'``.
     **kwargs
         Additional keyword arguments to be passed to the solver.
 

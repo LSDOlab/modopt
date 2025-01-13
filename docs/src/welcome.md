@@ -1,4 +1,4 @@
-# Welcome to modOpt
+# Welcome to modOpt's documentation
 
 ModOpt is a modular development environment and library for optimization
 algorithms written fully in Python.
@@ -85,9 +85,10 @@ If you use modOpt in your work, please use the following reference for citation:
 
 src/getting_started
 src/modeling
-src/optimizers
-src/benchmarking
+src/optimization
 src/postprocessing
+src/optimizer_development
+src/benchmarking
 src/tutorials
 src/examples
 src/api

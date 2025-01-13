@@ -9,7 +9,7 @@ __pycache__
 *.pdf
 *_hw*
 *_junk*
-*_dev*
+*_dev.py
 
 # modOpt outputs directory
 *_outputs/
