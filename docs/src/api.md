@@ -13,5 +13,6 @@ api/problem_lite
 api/jax_problem
 api/casadi_problem
 api/postprocessing
+api/cutest_problem
 api/benchmarking
 ```

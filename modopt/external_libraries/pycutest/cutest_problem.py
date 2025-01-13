@@ -8,11 +8,26 @@ class CUTEstProblem(Problem):
     '''
     Class that wraps pyCUTEst problems for modOpt.
 
-    General functionality:
-    find_problems(): Find problems that satisfy given criteria as per CUTEst classification scheme.
-    problem_properties(): Get properties of a given problem.
-    print_available_sif_params(): Print available optional input parameters for a given problem.
-    import_problem(): Import a given problem with optional parameters. Returns a pycutest.CUTEstProblem object.
+    General functionality pyCUTEst provides:
+
+    - `find_problems()`: Find problems that satisfy given criteria as per CUTEst classification scheme.
+    - `problem_properties()`: Get properties of a given problem.
+    - `print_available_sif_params()`: Print available optional input parameters for a given problem.
+    - `import_problem()`: Import a given problem with optional parameters. Returns a ``pycutest.CUTEstProblem`` object.
+
+    Examples
+    --------
+
+    Import a CUTEst problem named `'ROSENBR'` and solve it using modOpt
+
+    >>> import pycutest
+    >>> cutest_problem = pycutest.import_problem('ROSENBR')
+    >>> import modopt as mo
+    >>> problem = mo.CUTEstProblem(cutest_problem=cutest_problem)
+    >>> optimizer = mo.SLSQP(problem, solver_options={'maxiter':100})
+    >>> optimizer.solve()
+
+    **Methods**
 
     '''
     def initialize(self, ):
@@ -156,7 +171,7 @@ class CUTEstProblem(Problem):
     @hot_start(['x'], ['obj'])
     def _compute_objective(self, x, force_rerun=False, check_failure=False):
         '''
-        Compute the objective 'f' for the given design variable vector 'x'.
+        Compute and return the objective 'f' for the given design variable vector 'x'.
         '''
         prob = self.options['cutest_problem']
         if not np.array_equal(self.warm_x, x):
@@ -171,7 +186,7 @@ class CUTEstProblem(Problem):
     @hot_start(['x'], ['grad'])
     def _compute_objective_gradient(self, x, force_rerun=False, check_failure=False):
         '''
-        Compute the objective gradient 'g' for the given design variable vector 'x'.
+        Compute and return the objective gradient 'g' for the given design variable vector 'x'.
         '''
         prob = self.options['cutest_problem']
         if not np.array_equal(self.warm_x_deriv, x):
@@ -184,7 +199,7 @@ class CUTEstProblem(Problem):
     @hot_start(['x'], ['con'])
     def _compute_constraints(self, x, force_rerun=False, check_failure=False):
         '''
-        Compute the constraints 'c' for the given design variable vector 'x'.
+        Compute and return the constraints 'c' for the given design variable vector 'x'.
         '''
         prob = self.options['cutest_problem']
         if not np.array_equal(self.warm_x, x):
@@ -197,7 +212,7 @@ class CUTEstProblem(Problem):
     @hot_start(['x'], ['jac'])
     def _compute_constraint_jacobian(self, x, force_rerun=False, check_failure=False):
         '''
-        Compute the constraint Jacobian 'j' for the given design variable vector 'x'.
+        Compute and return the constraint Jacobian 'j' for the given design variable vector 'x'.
         '''
         prob = self.options['cutest_problem']
         if not np.array_equal(self.warm_x_deriv, x):
@@ -211,7 +226,7 @@ class CUTEstProblem(Problem):
     @hot_start(['x'], ['failure', 'obj', 'con', 'grad', 'jac'])
     def _compute_all(self, x, force_rerun=False, check_failure=False):
         '''
-        Compute the objective, constraints, objective gradient,
+        Compute and return the objective, constraints, objective gradient,
         and constraint Jacobian for the given design variable vector.
 
         Parameters
@@ -244,7 +259,7 @@ class CUTEstProblem(Problem):
     @hot_start(['x'], ['obj_hess'])
     def _compute_objective_hessian(self, x):
         '''
-        Compute the objective Hessian 'h' for the given design variable vector 'x'.
+        Compute and return the objective Hessian 'h' for the given design variable vector 'x'.
         '''
         prob = self.options['cutest_problem']
         self.h = prob.ihess(x)
@@ -254,7 +269,7 @@ class CUTEstProblem(Problem):
     @hot_start(['x', 'mu'], ['lag_hess'])
     def _compute_lagrangian_hessian(self, x, mu):
         '''
-        Compute the Lagrangian Hessian 'lh' for the given design variable vector 'x' and Lagrange multipliers 'mu'.
+        Compute and return the Lagrangian Hessian 'lh' for the given design variable vector 'x' and Lagrange multipliers 'mu'.
         '''
         prob = self.options['cutest_problem']
         self.lh = prob.hess(x, mu)
@@ -264,7 +279,7 @@ class CUTEstProblem(Problem):
     @hot_start(['x', 'mu'], ['lag'])
     def _compute_lagrangian(self, x, mu):
         '''
-        Compute the Lagrangian 'l' for the given design variable vector 'x' and Lagrange multipliers 'mu'.
+        Compute and return the Lagrangian 'l' for the given design variable vector 'x' and Lagrange multipliers 'mu'.
         '''
         prob = self.options['cutest_problem']
         self.l = prob.lag(x, mu)
@@ -274,7 +289,7 @@ class CUTEstProblem(Problem):
     @hot_start(['x', 'mu'], ['lag_grad'])
     def _compute_lagrangian_gradient(self, x, mu):
         '''
-        Compute the Lagrangian gradient 'lg' for the given design variable vector 'x' and Lagrange multipliers 'mu'.
+        Compute and return the Lagrangian gradient 'lg' for the given design variable vector 'x' and Lagrange multipliers 'mu'.
         '''
         prob = self.options['cutest_problem']
         g, self.lg = prob.lagjac(x, mu)
@@ -284,7 +299,7 @@ class CUTEstProblem(Problem):
     @hot_start(['x', 'v'], ['jvp'])
     def _compute_constraint_jvp(self, x, v):
         '''
-        Compute the Jacobian-vector product 'jvp' for the given design variable vector 'x' and vector 'v'.
+        Compute and return the Jacobian-vector product 'jvp' for the given design variable vector 'x' and vector 'v'.
         '''
         prob = self.options['cutest_problem']
         self.jvp = prob.jprod(v, x=x)
@@ -294,7 +309,7 @@ class CUTEstProblem(Problem):
     @hot_start(['x', 'v'], ['vjp'])
     def _compute_constraint_vjp(self, x, v):
         '''
-        Compute the vector-Jacobian product 'vjp' for the given design variable vector 'x' and vector 'v'.
+        Compute and return the vector-Jacobian product 'vjp' for the given design variable vector 'x' and vector 'v'.
         '''
         prob = self.options['cutest_problem']
         self.vjp = prob.jprod(v, x=x, transpose=True)
@@ -304,7 +319,7 @@ class CUTEstProblem(Problem):
     @hot_start(['x', 'v'], ['obj_hvp'])
     def _compute_objective_hvp(self, x, v):
         '''
-        Compute the objective Hessian-vector product 'hvp' for the given design variable vector 'x' and vector 'v'.
+        Compute and return the objective Hessian-vector product 'hvp' for the given design variable vector 'x' and vector 'v'.
         Only works for UNCONSTRAINED problems. (v must be None for unconstrained problems)
         '''
         if self.constrained:
@@ -318,7 +333,7 @@ class CUTEstProblem(Problem):
     @hot_start(['x', 'mu', 'v'], ['lag_hvp'])
     def _compute_lagrangian_hvp(self, x, mu, v):
         '''
-        Compute the Lagrangian Hessian-vector product 'lhvp' for the given design variable vector 'x', Lagrange multipliers 'mu', and vector 'v'.
+        Compute and return the Lagrangian Hessian-vector product 'lhvp' for the given design variable vector 'x', Lagrange multipliers 'mu', and vector 'v'.
         Only works for CONSTRAINED problems. (v=mu must be specified for constrained problems)
         '''
         if not self.constrained:
