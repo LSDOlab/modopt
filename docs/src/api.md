@@ -12,6 +12,9 @@ api/problem
 api/problem_lite
 api/jax_problem
 api/casadi_problem
+api/csdl_alpha_problem
+api/openmdao_problem
+api/csdl_problem
 api/postprocessing
 api/cutest_problem
 api/benchmarking
