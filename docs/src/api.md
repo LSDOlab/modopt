@@ -1,5 +1,5 @@
 # API Reference
-This section contains auto-generated API reference for the package.
+This section contains the public API reference for modOpt.
 
 ```{toctree}
 :maxdepth: 2

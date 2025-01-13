@@ -89,6 +89,7 @@ src/optimization
 src/postprocessing
 src/optimizer_development
 src/benchmarking
+src/developer_docs
 src/tutorials
 src/examples
 src/api
