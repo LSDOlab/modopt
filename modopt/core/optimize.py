@@ -21,7 +21,7 @@ def optimize(prob, solver='SLSQP', **kwargs):
     prob : Problem or ProblemLite
         The problem to be solved.
         Needs to be an instance of ``Problem`` or ``ProblemLite``.
-    solver : str, default=``'SLSQP'``
+    solver : str, default='SLSQP'
         The solver to be used.
         Available solvers are ``'SLSQP'``, ``'PySLSQP'``, ``'COBYLA'``, ``'BFGS'``,
         ``'LBFGSB'``, ``'NelderMead'``, ``'COBYQA'``, ``'TrustConstr'``,

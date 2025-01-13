@@ -10,7 +10,9 @@ import warnings
 
 from copy import deepcopy
 
-class Problem(object):
+from abc import ABC, abstractmethod
+
+class Problem(ABC):
     '''
     Base class for defining optimization problems in modOpt.
 
@@ -128,8 +130,10 @@ class Problem(object):
         '''
         Initialize the Problem() object.
         Calls user-specified initialize() method, 
-        and _setup() method.
+        and the _setup() method.
         '''
+        # if type(self) is Problem:
+        #     raise TypeError("Problem cannot be instantiated directly.")
 
         self.options = OptionsDictionary()
 
@@ -348,7 +352,7 @@ class Problem(object):
     def setup(self):
         '''
         User-defined method.
-        Call add_design_variables(), add_objective(), and add_constraints() inside.
+        Call add_design_variables(), add_objective(), add_constraints() and declare_lagrangian().
         '''
         pass
 
@@ -357,8 +361,7 @@ class Problem(object):
         User-defined method.
         Call declare_objective_gradient(), declare_objective_hessian(), declare_objective_hvp(),
         declare_constraint_jacobian(), declare_constraint_jvp(), declare_constraint_vjp(), 
-        declare_lagrangian_gradient(), declare_lagrangian_hessian(), and declare_lagrangian_hvp() 
-        inside.
+        declare_lagrangian_gradient(), declare_lagrangian_hessian(), and declare_lagrangian_hvp().
         '''
         pass
 
@@ -1504,8 +1507,8 @@ class Problem(object):
         ----------
         derivative : str
             Derivative to approximate.
-            Valid options: 'objective_gradient', 'objective_hessian', 'constraint_jacobian',
-            'objective_hvp', 'constraint_jvp'.
+            Available derivatives are `'objective_gradient'`, `'objective_hessian'`, `'constraint_jacobian'`,
+            `'objective_hvp'`, `'constraint_jvp'`.
         step : float or np.ndarray, default=1e-6
             Finite difference step size.
         '''

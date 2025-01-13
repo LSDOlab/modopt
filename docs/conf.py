@@ -41,7 +41,7 @@ release = __version__
 # ones.
 extensions = [
     "sphinx_rtd_theme",
-    "autoapi.extension",
+    # "autoapi.extension",
     "numpydoc",                 
     "sphinx_copybutton",            # allows copying code embedded in the docs rendered from .md or .ipynb files
     "myst_nb",                      # renders .md, .myst, .ipynb files
@@ -49,6 +49,10 @@ extensions = [
     "sphinxcontrib.collections",    # adds files from outside src and executes functions before Sphinx builds
     "sphinxcontrib.bibtex",         # for references and citations
 ]
+
+# Autodoc options
+autodoc_typehints = 'none'
+# autosummary_generate = True
 
 # import sphinx as aa
 # print(aa.__version__)
