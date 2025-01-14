@@ -94,6 +94,25 @@ optimizer.solve()
 optimizer.print_results()
 ```
 
+## Scaling API
+
+Please refer to the code snippet below as a guide for scaling 
+the design variables, objective, and constraints independent 
+of their definitions.
+
+```{warning}
+The results provided by the optimizer will always be scaled,
+while the values from the models will remain unscaled.
+```
+
+```py
+        # define optimization problem
+        self.add_design_variable('x', lower=0., scaler=2.)
+        self.add_design_variable('y')
+        self.add_objective('z', scaler=5.)
+        self.add_constraint('constraint_1', equals=1., scaler=10.)
+        self.add_constraint('constraint_2', lower=1., scaler=100.)
+```
 
 ## Recommended optimizers for CSDL problems
 

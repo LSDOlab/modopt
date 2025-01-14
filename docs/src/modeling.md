@@ -1,4 +1,4 @@
-# Problem Modeling
+# Defining Optimization Problems
 
 modOpt offers great flexibility in modeling the optimization functions
 (objective and constraint functions) and their derivatives.
@@ -56,11 +56,33 @@ through automatic differentiation, which users can access
 and utilize without any additional effort.
 ```
 
-Please visit the following pages for more guidance on using any
+## Optimization Problem Scaling
+
+Sometimes, it may be necessary to scale the objective, constraints, and/or design variables
+to achieve better performance with a given optimization algorithm.
+modOpt allows users to scale the functions and variables individually, 
+independent from their original definitions.
+modOpt automatically applies the scaling to the initial guess, bounds, 
+objective, constraints, and their derivatives before passing them to the optimizer.
+Note that the results provided by the optimizer will always be scaled,
+while the values from the models will remain unscaled.
+
+```{warning}
+CSDL, CSDL_alpha, and OpenMDAO each provide their own scaling APIs.
+Therefore, to avoid potential errors,
+scaling through modOpt's API is disabled for problems
+interfaced via `CSDLProblem`, `CSDLAlphaProblem`, and `OpenMDAOProblem`.
+```
+
+To learn about the scaling API for a specific modeling class, 
+visit its respective page linked at the end of this page.
+
+## Modeling options
+
+Please refer to the following pages for more guidance on using any
 of the six modeling options discussed above.
 
 ```{toctree}
-:caption: Modeling options
 :maxdepth: 1
 
 modeling/problem_lite
@@ -71,3 +93,6 @@ modeling/jax
 modeling/casadi
 modeling/csdl
 ```
+
+For more detailed information on any of the modeling classes, 
+visit the [API Reference](./api.md).
