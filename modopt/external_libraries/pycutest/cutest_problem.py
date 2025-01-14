@@ -119,6 +119,9 @@ class CUTEstProblem(Problem):
     def setup_derivatives(self):
         pass
 
+    def raise_issues_with_user_setup(self, ):
+        pass
+
     def _setup_scalers(self, ):
         pass
 
@@ -142,31 +145,6 @@ class CUTEstProblem(Problem):
         else:
             self.c_lower = None
             self.c_upper = None
-
-    def compute_objective(self, dvs, obj):
-        pass
-    def compute_objective_gradient(self, dvs, grad):
-        pass
-    def compute_constraints(self, dvs, con):
-        pass
-    def compute_constraint_jacobian(self, dvs, jac):
-        pass
-    def compute_lagrangian(self, dvs, lmult, lag):
-        pass
-    def compute_lagrangian_gradient(self, dvs, lmult, lgrad):
-        pass
-    def compute_objective_hessian(self, dvs, hess):
-        pass
-    def compute_lagrangian_hessian(self, dvs, lmult, lhess):
-        pass
-    def compute_constraint_jvp(self, dvs, v, jvp):
-        pass
-    def compute_constraint_vjp(self, dvs, v, vjp):
-        pass
-    def compute_objective_hvp(self, dvs, v, hvp):
-        pass
-    def compute_lagrangian_hvp(self, dvs, lmult, v, lhvp):
-        pass
     
     # TODO: Add decorators for checking if x is warm and for updating dvs
     # TODO: Add jvp, hvp, laggrad, laghess, etc. for CUTEst problems
@@ -327,7 +305,7 @@ class CUTEstProblem(Problem):
         '''
         if self.constrained:
             raise ValueError("Objective Hessian-vector product is not defined for constrained CUTEST problems."\
-                             "Use 'compute_lagrangian_hvp' for constrained problems.")
+                             "Use '_compute_lagrangian_hvp' for constrained problems.")
         prob = self.options['cutest_problem']
         self.hvp = prob.hprod(v, x=x, v=None)
         return self.hvp
@@ -341,7 +319,7 @@ class CUTEstProblem(Problem):
         '''
         if not self.constrained:
             raise ValueError("Lagrangian Hessian-vector product is not defined for unconstrained CUTEST problems."\
-                             "Use 'compute_objective_hvp' for unconstrained problems.")
+                             "Use '_compute_objective_hvp' for unconstrained problems.")
         prob = self.options['cutest_problem']
         self.lhvp = prob.hprod(v, x=x, v=mu)
         return self.lhvp

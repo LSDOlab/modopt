@@ -68,7 +68,7 @@ def test_pycutest():
     with pytest.raises(ValueError) as excinfo:
         prob_uc._compute_lagrangian_hvp(np.ones(2), np.ones(2), 0)
     assert str(excinfo.value) == "Lagrangian Hessian-vector product is not defined for unconstrained CUTEST problems."\
-                                 "Use 'compute_objective_hvp' for unconstrained problems."
+                                 "Use '_compute_objective_hvp' for unconstrained problems."
 
     # 5. Test mo.CUTEstProblem methods for a constrained problem
 
@@ -94,7 +94,7 @@ def test_pycutest():
     with pytest.raises(ValueError) as excinfo:
         prob_c._compute_objective_hvp(np.ones(110), np.ones(110))
     assert str(excinfo.value) == "Objective Hessian-vector product is not defined for constrained CUTEST problems."\
-                                 "Use 'compute_lagrangian_hvp' for constrained problems."
+                                 "Use '_compute_lagrangian_hvp' for constrained problems."
     
     lag      = prob_c._compute_lagrangian(np.ones(110), np.ones(55)) # Adds +1 to stats['f']
     assert lag == 540.0
@@ -146,22 +146,6 @@ def test_pycutest():
     assert_array_equal(result[2], c)
     assert_array_equal(result[3], g)
     assert_array_equal(result[4], j)
-
-    # 8. Test all dummy methods in mo.CUTEstProblem
-    assert prob_c.compute_objective(1, 2) is None
-    assert prob_c.compute_objective_gradient(1, 2) is None
-    assert prob_c.compute_objective_hessian(1, 2) is None
-    assert prob_c.compute_objective_hvp(1, 2, 3) is None
-
-    assert prob_c.compute_lagrangian(1, 2, 3) is None
-    assert prob_c.compute_lagrangian_gradient(1, 2, 3) is None
-    assert prob_c.compute_lagrangian_hessian(1, 2, 3) is None
-    assert prob_c.compute_lagrangian_hvp(1, 2, 3, 4) is None
-
-    assert prob_c.compute_constraints(1, 2) is None
-    assert prob_c.compute_constraint_jacobian(1, 2) is None
-    assert prob_c.compute_constraint_jvp(1, 2, 3) is None
-    assert prob_c.compute_constraint_vjp(1, 2, 3) is None
 
 if __name__ == '__main__':
     test_pycutest()

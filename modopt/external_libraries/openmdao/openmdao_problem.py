@@ -201,15 +201,6 @@ class OpenMDAOProblem(Problem):
         #     self.c_lower = np.concatenate((self.c_lower, np.full((self.ny,), -np.inf)))
         #     self.c_upper = np.concatenate((self.c_upper, np.full((self.ny,), 0.)))
 
-    def compute_objective(self, dvs, obj):
-        pass
-    def compute_objective_gradient(self, dvs, grad):
-        pass
-    def compute_constraints(self, dvs, con):
-        pass
-    def compute_constraint_jacobian(self, dvs, jac):
-        pass
-    
     # TODO: Add decorators for checking if x is warm and for updating dvs
     @record(['x'], ['obj'])
     @hot_start(['x'], ['obj'])
