@@ -166,20 +166,47 @@ def test_all_dummy_methods():
     obj  = lambda x: np.sum(x**2)
     prob = ProblemLite(x0, obj=obj)
 
-    assert prob.compute_objective(1, 2) is None
-    assert prob.compute_objective_gradient(1, 2) is None
-    assert prob.compute_objective_hessian(1, 2) is None
-    assert prob.compute_objective_hvp(1, 2, 3) is None
+    COMPUTE_NOT_IMPLEMENTED_ERROR = (
+        "Unlike Problem, 'compute_*' methods are not available in ProblemLite because they are user-defined. "
+        "Only '_compute_*' methods are implemented in ProblemLite and callable."
+    )
 
-    assert prob.compute_lagrangian(1, 2, 3) is None
-    assert prob.compute_lagrangian_gradient(1, 2, 3) is None
-    assert prob.compute_lagrangian_hessian(1, 2, 3) is None
-    assert prob.compute_lagrangian_hvp(1, 2, 3, 4) is None
+    dummy_funcs_2 = [
+        prob.compute_objective,
+        prob.compute_objective_gradient,
+        prob.compute_objective_hessian,
 
-    assert prob.compute_constraints(1, 2) is None
-    assert prob.compute_constraint_jacobian(1, 2) is None
-    assert prob.compute_constraint_jvp(1, 2, 3) is None
-    assert prob.compute_constraint_vjp(1, 2, 3) is None
+        prob.compute_constraints,
+        prob.compute_constraint_jacobian,
+    ]
+
+    dummy_funcs_3 = [
+        prob.compute_objective_hvp,
+
+        prob.compute_lagrangian,
+        prob.compute_lagrangian_gradient,
+        prob.compute_lagrangian_hessian,
+
+        prob.compute_constraint_jvp,
+        prob.compute_constraint_vjp
+    ]
+    
+    # test dummy methods with 2 arguments
+    for func in dummy_funcs_2:
+        with pytest.raises(NotImplementedError) as excinfo:
+            func(1, 2)
+        assert str(excinfo.value) == COMPUTE_NOT_IMPLEMENTED_ERROR
+
+    # test dummy methods with 3 arguments
+    for func in dummy_funcs_3:
+        with pytest.raises(NotImplementedError) as excinfo:
+            func(1, 2, 3)
+        assert str(excinfo.value) == COMPUTE_NOT_IMPLEMENTED_ERROR
+    
+    # test dummy methods with 4 arguments
+    with pytest.raises(NotImplementedError) as excinfo:
+        prob.compute_lagrangian_hvp(1, 2, 3, 4)
+    assert str(excinfo.value) == COMPUTE_NOT_IMPLEMENTED_ERROR
 
 def test_str():
     x0 = np.array([1., 1.])

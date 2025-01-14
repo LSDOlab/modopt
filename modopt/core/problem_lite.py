@@ -6,6 +6,11 @@ import numpy as np
 import warnings
 import time
 
+COMPUTE_NOT_IMPLEMENTED_ERROR = (
+    "Unlike Problem, 'compute_*' methods are not available in ProblemLite because they are user-defined. "
+    "Only '_compute_*' methods are implemented in ProblemLite and callable."
+)
+
 class ProblemLite(object):
     '''
     Lightweight base class for defining optimization problems in modOpt.
@@ -548,29 +553,29 @@ class ProblemLite(object):
             return fd_hvp * self.o_scaler / self.x_scaler
         
     def compute_objective(self, dvs, obj):
-        pass
+        raise NotImplementedError(COMPUTE_NOT_IMPLEMENTED_ERROR)
     def compute_objective_gradient(self, dvs, grad):
-        pass
+        raise NotImplementedError(COMPUTE_NOT_IMPLEMENTED_ERROR)
     def compute_constraints(self, dvs, con):
-        pass
+        raise NotImplementedError(COMPUTE_NOT_IMPLEMENTED_ERROR)
     def compute_constraint_jacobian(self, dvs, jac):
-        pass
+        raise NotImplementedError(COMPUTE_NOT_IMPLEMENTED_ERROR)
     def compute_lagrangian(self, dvs, lag_mult, lag):
-        pass
+        raise NotImplementedError(COMPUTE_NOT_IMPLEMENTED_ERROR)
     def compute_lagrangian_gradient(self, dvs, lag_mult, lag_grad):
-        pass
+        raise NotImplementedError(COMPUTE_NOT_IMPLEMENTED_ERROR)
     def compute_objective_hessian(self, dvs, obj_hess):
-        pass
+        raise NotImplementedError(COMPUTE_NOT_IMPLEMENTED_ERROR)
     def compute_lagrangian_hessian(self, dvs, lag_mult, lag_hess):
-        pass
+        raise NotImplementedError(COMPUTE_NOT_IMPLEMENTED_ERROR)
     def compute_constraint_jvp(self, dvs, vec, jvp):
-        pass
+        raise NotImplementedError(COMPUTE_NOT_IMPLEMENTED_ERROR)
     def compute_constraint_vjp(self, dvs, vec, vjp):
-        pass
+        raise NotImplementedError(COMPUTE_NOT_IMPLEMENTED_ERROR)
     def compute_objective_hvp(self, dvs, vec, obj_hvp):
-        pass
+        raise NotImplementedError(COMPUTE_NOT_IMPLEMENTED_ERROR)
     def compute_lagrangian_hvp(self, dvs, lag_mult, vec, lag_hvp):
-        pass
+        raise NotImplementedError(COMPUTE_NOT_IMPLEMENTED_ERROR)
 
     def __str__(self):
         """
