@@ -3,6 +3,6 @@
 ```{eval-rst}
 
 .. autoclass:: modopt.JaxProblem
-    :members: __init__
+    :members: __init__, __str__
 
 ```

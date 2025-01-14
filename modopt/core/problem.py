@@ -638,7 +638,7 @@ class Problem(ABC):
         '''
         Raise errors or warnings associated with declarations made by the user in
         setup() or setup_derivatives().
-        Overridden when using interfaced modeling frameworks like CSDL or OpenMDAO.
+        Overridden when using interfaced modeling frameworks like CSDL or OpenMDAO and CUTEst.
         '''
         if 'dv' not in self.declared_variables:
             raise Exception("No design variables are declared.")
@@ -651,12 +651,19 @@ class Problem(ABC):
             warnings.warn("No objective is declared. Running a feasibility problem.")
             self.add_objective('dummy_obj')
             self.obj['dummy_obj'] = 0. # Default value 1. is replaced with 0. for feasibility problems
+            # Set a dummy function for compute_objective to avoid NotImplementedError 
+            # when calling this optional abstract method that is not implemented by the user
+            # and not required for feasibility problems
+            self.compute_objective = lambda dvs, obj: None
 
             # Add back pF_px only for a gradient-based feasibility problem since 
             # it was deleted in delete_unnecessary_attributes_allocated()
+            # Set a dummy function for compute_objective_gradient to avoid NotImplementedError
             if 'jac' in self.declared_variables: # checking if Jacobian is declared for constraints
                 self.pF_px = Vector(self.design_variables_dict)
                 self.pF_px.allocate(data=np.zeros((self.nx, )), setup_views=False)
+                self.compute_objective_gradient = lambda dvs, grad: None
+
         if 'con' in self.declared_variables:
             if self.compute_constraints.__func__ == Problem.compute_constraints:
                 raise Exception("Constraints are declared but compute_constraints() method is not implemented.")
@@ -1223,6 +1230,18 @@ class Problem(ABC):
     #       2. These methods are never called directly by the user.
     #          They are called by the Problem class methods.
 
+    def raise_not_implemented_error(self, method_name):
+        '''
+        Raise NotImplementedError when an optional abstract method is called 
+        but not implemented by the user in the derived class.
+
+        Parameters
+        ----------
+        method_name : str
+            Name of the method that is not implemented.
+        '''
+        raise NotImplementedError(f"{method_name}() method is not implemented by the user in the derived class {self.__class__.__name__}.")
+
     def compute_objective(self, dvs, obj):
         """
         Compute the objective function given the design variable vector.
@@ -1236,7 +1255,8 @@ class Problem(ABC):
         obj : dict
             Objective function name and value.
         """
-        pass
+        # raise NotImplementedError(f"compute_objective() method is not implemented by the user in the derived class {self.__class__.__name__}.")
+        self.raise_not_implemented_error('compute_objective')
 
     def compute_constraints(self, dvs, con):
         """
@@ -1253,7 +1273,7 @@ class Problem(ABC):
             This abstract vector has dictionary-type views for 
             component constraint vectors.
         """
-        pass
+        self.raise_not_implemented_error('compute_constraints')
 
     def compute_lagrangian(self, dvs, lag_mult, lag):
         """
@@ -1273,7 +1293,7 @@ class Problem(ABC):
         lag : dict
             Objective function name and value.
         """
-        pass
+        self.raise_not_implemented_error('compute_lagrangian')
 
     def compute_objective_gradient(self, dvs, grad):
         """
@@ -1291,7 +1311,7 @@ class Problem(ABC):
             corresponding to component design variable vectors.
             
         """
-        pass
+        self.raise_not_implemented_error('compute_objective_gradient')
 
     def compute_lagrangian_gradient(self, dvs, lag_mult, lag_grad):
         """
@@ -1313,7 +1333,7 @@ class Problem(ABC):
             This abstract vector has dictionary-type views for component gradient vectors 
             corresponding to component design variable vectors.
         """
-        pass
+        self.raise_not_implemented_error('compute_lagrangian_gradient')
 
     def compute_constraint_jacobian(self, dvs, jac):
         """
@@ -1331,7 +1351,7 @@ class Problem(ABC):
             component sub-Jacobians with keys (of,wrt) where 
             'of' is the constraint name and 'wrt' the design variable name.
         """
-        pass
+        self.raise_not_implemented_error('compute_constraint_jacobian')
 
     def compute_constraint_jvp(self, dvs, vec, jvp):
         """
@@ -1353,7 +1373,7 @@ class Problem(ABC):
             This abstract vector has dictionary-type views corresponding to 
             component constraint vectors.
         """
-        pass
+        self.raise_not_implemented_error('compute_constraint_jvp')
 
     def compute_constraint_vjp(self, dvs, vec, vjp):
         """
@@ -1375,7 +1395,7 @@ class Problem(ABC):
             This abstract vector has dictionary-type views corresponding to 
             component design variable vectors.
         """
-        pass
+        self.raise_not_implemented_error('compute_constraint_vjp')
 
     def compute_objective_hessian(self, dvs, obj_hess):
         """
@@ -1394,7 +1414,7 @@ class Problem(ABC):
             'of' is the x design variable name and 
             'wrt' is the y design variable name.
         """
-        pass
+        self.raise_not_implemented_error('compute_objective_hessian')
 
     def compute_lagrangian_hessian(self, dvs, lag_mult, lag_hess):
         """
@@ -1418,7 +1438,7 @@ class Problem(ABC):
             'of' is the x design variable name and 
             'wrt' is the y design variable name.
         """
-        pass
+        self.raise_not_implemented_error('compute_lagrangian_hessian')
     
     def compute_objective_hvp(self, dvs, vec, obj_hvp):
         """
@@ -1440,7 +1460,7 @@ class Problem(ABC):
             This abstract vector has dictionary-type views corresponding to 
             component design variable vectors.
         """
-        pass
+        self.raise_not_implemented_error('compute_objective_hvp')
 
     def compute_lagrangian_hvp(self, dvs, lag_mult, vec, lag_hvp):
         """
@@ -1468,7 +1488,7 @@ class Problem(ABC):
             component design variable vectors.
         """
         # TODO: fill this
-        pass
+        self.raise_not_implemented_error('compute_lagrangian_hvp')
 
     # # SEPARATE CONSTRAINT HESSIANS AND HVP COMPUTATION WILL NOT BE SUPPORTED FOR MEMORY REASONS.
     # # This can be indirectly computed inside compute_lagrangian_hessian and compute_lagrangian_hvp()

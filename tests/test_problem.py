@@ -130,6 +130,7 @@ def test_errors():
 #     pass
 
 def test_all_dummy_methods():
+    # A gradient-free unconstrained problem
     class TestProblem1(Problem):
         def initialize(self):
             self.problem_name = 'test1'
@@ -143,21 +144,48 @@ def test_all_dummy_methods():
 
     prob = TestProblem1()
 
-    # assert prob.compute_objective(1, 2) is None
-    assert prob.compute_objective_gradient(1, 2) is None
-    assert prob.compute_objective_hessian(1, 2) is None
-    assert prob.compute_objective_hvp(1, 2, 3) is None
+    COMPUTE_NOT_IMPLEMENTED_ERROR = r".*\(\) method is not implemented by the user in the derived class TestProblem1."
 
-    assert prob.compute_lagrangian(1, 2, 3) is None
-    assert prob.compute_lagrangian_gradient(1, 2, 3) is None
-    assert prob.compute_lagrangian_hessian(1, 2, 3) is None
-    assert prob.compute_lagrangian_hvp(1, 2, 3, 4) is None
+    # compute_objective() is always implemented,
+    # as feasibility problems will have a dummy objective function,
+    # and a dummy gradient function if the problem is gradient-based.
 
-    assert prob.compute_constraints(1, 2) is None
-    assert prob.compute_constraint_jacobian(1, 2) is None
-    assert prob.compute_constraint_jvp(1, 2, 3) is None
-    assert prob.compute_constraint_vjp(1, 2, 3) is None
+    dummy_funcs_2 = [
+        # prob.compute_objective,  # compute_objective() is implemented
+        prob.compute_objective_gradient,
+        prob.compute_objective_hessian,
 
+        prob.compute_constraints,
+        prob.compute_constraint_jacobian,
+    ]
+
+    dummy_funcs_3 = [
+        prob.compute_objective_hvp,
+
+        prob.compute_lagrangian,
+        prob.compute_lagrangian_gradient,
+        prob.compute_lagrangian_hessian,
+
+        prob.compute_constraint_jvp,
+        prob.compute_constraint_vjp
+    ]
+    
+    # test dummy methods with 2 arguments
+    for func in dummy_funcs_2:
+        with pytest.raises(NotImplementedError, match=COMPUTE_NOT_IMPLEMENTED_ERROR):
+            func(1, 2)
+
+    # test dummy methods with 3 arguments
+    for func in dummy_funcs_3:
+        with pytest.raises(NotImplementedError, match=COMPUTE_NOT_IMPLEMENTED_ERROR):
+            func(1, 2, 3)
+    
+    # test dummy methods with 4 arguments
+    COMPUTE_NOT_IMPLEMENTED_ERROR = r"compute_lagrangian_hvp\(\) method is not implemented by the user in the derived class TestProblem1."
+    with pytest.raises(NotImplementedError, match=COMPUTE_NOT_IMPLEMENTED_ERROR):
+        prob.compute_lagrangian_hvp(1, 2, 3, 4)
+
+    # A gradient-free feasibility problem
     class TestProblem2(Problem):
         def initialize(self):
             self.problem_name = 'test2'
@@ -171,20 +199,43 @@ def test_all_dummy_methods():
     
     prob = TestProblem2()
 
+    COMPUTE_NOT_IMPLEMENTED_ERROR = r".*\(\) method is not implemented by the user in the derived class TestProblem2."
+
+    dummy_funcs_2 = [
+        # prob.compute_objective,  # dummy compute_objective() is implemented
+        prob.compute_objective_gradient,
+        prob.compute_objective_hessian,
+
+        # prob.compute_constraints, # compute_constraints() is implemented
+        prob.compute_constraint_jacobian,
+    ]
+
+    dummy_funcs_3 = [
+        prob.compute_objective_hvp,
+
+        prob.compute_lagrangian,
+        prob.compute_lagrangian_gradient,
+        prob.compute_lagrangian_hessian,
+
+        prob.compute_constraint_jvp,
+        prob.compute_constraint_vjp
+    ]
+
     assert prob.compute_objective(1, 2) is None
-    assert prob.compute_objective_gradient(1, 2) is None
-    assert prob.compute_objective_hessian(1, 2) is None
-    assert prob.compute_objective_hvp(1, 2, 3) is None
+    # test dummy methods with 2 arguments
+    for func in dummy_funcs_2:
+        with pytest.raises(NotImplementedError, match=COMPUTE_NOT_IMPLEMENTED_ERROR):
+            func(1, 2)
 
-    assert prob.compute_lagrangian(1, 2, 3) is None
-    assert prob.compute_lagrangian_gradient(1, 2, 3) is None
-    assert prob.compute_lagrangian_hessian(1, 2, 3) is None
-    assert prob.compute_lagrangian_hvp(1, 2, 3, 4) is None
-
-    # assert prob.compute_constraints(1, 2) is None
-    assert prob.compute_constraint_jacobian(1, 2) is None
-    assert prob.compute_constraint_jvp(1, 2, 3) is None
-    assert prob.compute_constraint_vjp(1, 2, 3) is None
+    # test dummy methods with 3 arguments
+    for func in dummy_funcs_3:
+        with pytest.raises(NotImplementedError, match=COMPUTE_NOT_IMPLEMENTED_ERROR):
+            func(1, 2, 3)
+    
+    # test dummy methods with 4 arguments
+    COMPUTE_NOT_IMPLEMENTED_ERROR = r"compute_lagrangian_hvp\(\) method is not implemented by the user in the derived class TestProblem2."
+    with pytest.raises(NotImplementedError, match=COMPUTE_NOT_IMPLEMENTED_ERROR):
+        prob.compute_lagrangian_hvp(1, 2, 3, 4)
 
 def test_str():
     prob = Scaling()
