@@ -29,7 +29,7 @@ optimizer = SNOPT(prob, solver_options=snopt_options)
 The modOpt-SNOPT interface adds two more options in addition to 
 the standard options available with the SNOPT solver.
 These additional options are described in the table below.
-```{list-table}  ModOpt-specific SNOPT solver options
+```{list-table}  modOpt-specific SNOPT solver options
 :header-rows: 1
 :name: snopt_modopt_options
 

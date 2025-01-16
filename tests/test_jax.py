@@ -6,8 +6,8 @@ import pytest
 @pytest.mark.jax
 def test_jax_problem():
     # METHOD 1: Use Jax functions directly in mo.JaxProblem. 
-    #           ModOpt will auto-generate gradient, Jacobian, and objective Hessian.
-    #           ModOpt will also auto-generate the Lagrangian, its gradient, and Hessian.
+    #           modOpt will auto-generate gradient, Jacobian, and objective Hessian.
+    #           modOpt will also auto-generate the Lagrangian, its gradient, and Hessian.
     #           No need to manually generate or jit functions or their derivatives and then wrap them.
 
     import numpy as np

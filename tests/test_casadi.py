@@ -12,8 +12,8 @@ from numpy.testing import assert_array_equal, assert_array_almost_equal, assert_
 @pytest.mark.casadi
 def test_casadi_problem():
     # METHOD 1: Use CasADi expressions directly in mo.CasadiProblem.
-    #           ModOpt will auto-generate the gradient, Jacobian, and objective Hessian.
-    #           ModOpt will also auto-generate the Lagrangian, its gradient, and Hessian.
+    #           modOpt will auto-generate the gradient, Jacobian, and objective Hessian.
+    #           modOpt will also auto-generate the Lagrangian, its gradient, and Hessian.
     #           No need to manually generate functions or their derivatives and then wrap them.
 
     obj = lambda x: ca.sum1(x**4)

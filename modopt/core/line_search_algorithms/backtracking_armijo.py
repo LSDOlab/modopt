@@ -6,6 +6,24 @@ from modopt import LineSearch
 
 
 class BacktrackingArmijo(LineSearch):
+    """
+    Backtracking line search for steps that satisy the Armijo condition.
+    
+    Parameters
+    ----------
+    f : callable
+        Merit function.
+    g : callable
+        Gradient of the merit function.
+    eta_a : float, default=1e-4
+        Armijo parameter.
+    gamma_c : float, default=0.3
+        Step length contraction factor.
+    maxiter : int, default=25
+        Maximum number of line search iterations.
+    max_step : float, default=1.
+        Maximum step length.
+    """
     def initialize(self):
         # Stepsize contraction factor
         self.options.declare('gamma_c',
@@ -29,6 +47,20 @@ class BacktrackingArmijo(LineSearch):
                              upper=50.)
 
     def search(self, x, p, f0=None, g0=None):
+        """
+        Perform a backtracking line search to find a step length that satisfies the Armijo condition.
+
+        Parameters
+        ----------
+        x : np.ndarray
+            Current point.
+        p : np.ndarray
+            Search direction.
+        f0 : float, optional
+            Value of the merit function at the current point.
+        g0 : np.ndarray, optional
+            Gradient of the merit function at the current point.
+        """
 
         eta_a    = self.options['eta_a']
         gamma_c  = self.options['gamma_c']

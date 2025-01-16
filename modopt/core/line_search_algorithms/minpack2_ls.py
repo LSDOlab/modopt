@@ -185,6 +185,28 @@ def scalar_search_wolfe1(phi, derphi, phi0=None, old_phi0=None,
 line_search = line_search_wolfe1
 
 class Minpack2LS(LineSearch):
+    """
+    The Minpack2 line search algorithm for steps that satisfy the strong Wolfe conditions.
+
+    Parameters
+    ----------
+    f : callable
+        Merit function.
+    g : callable
+        Gradient of the merit function.
+    eta_a : float, default=1e-4
+        Armijo parameter.
+    eta_w : float, default=0.9
+        Wolfe parameter.
+    max_step : float, default=1.
+        Maximum step length.
+    min_step : float, default=1e-12
+        Minimum step length.
+    maxiter : int, default=10
+        Maximum number of line search iterations.
+    alpha_tol : float, default=1e-14
+        Relative tolerance for an acceptable step.
+    """
     def initialize(self):
         # Wolfe parameter (0.5 for QN methods, 0.9 for Newton-based methods)
         self.options.declare('eta_w',
@@ -220,6 +242,20 @@ class Minpack2LS(LineSearch):
                              upper=(1.0 - eps))
 
     def search(self, x, p, f0=None, g0=None):
+        """
+        Perform a line search to find a step length that satisfies the strong Wolfe conditions.
+
+        Parameters
+        ----------
+        x : np.ndarray
+            Current point.
+        p : np.ndarray
+            Search direction.
+        f0 : float, optional
+            Value of the merit function at the current point.
+        g0 : np.ndarray, optional
+            Gradient of the merit function at the current point.
+        """
 
         eta_a = self.options['eta_a']
         eta_w = self.options['eta_w']

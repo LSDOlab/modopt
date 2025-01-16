@@ -8,8 +8,8 @@ import casadi as ca
 E0, L0, b0, vol0, F0 = 1., 1., 0.1, 0.01, -1.
 
 # METHOD 1: Use CasADi expressions directly in mo.CasadiProblem.
-#           ModOpt will auto-generate the gradient, Jacobian, and objective Hessian.
-#           ModOpt will also auto-generate the Lagrangian, its gradient, and Hessian.
+#           modOpt will auto-generate the gradient, Jacobian, and objective Hessian.
+#           modOpt will also auto-generate the Lagrangian, its gradient, and Hessian.
 #           No need to manually generate functions or their derivatives and then wrap them.
 
 def get_problem(n_el, order=1): # 16 statements excluding comments, and returns.

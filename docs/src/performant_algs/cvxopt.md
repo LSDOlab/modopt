@@ -7,8 +7,8 @@ except when importing the optimizer.
 ```{Warning}
 CVXOPT can only solve convex optimization problems.
 Therefore, users should ensure their problems are convex before applying the optimizer.
-ModOpt does not perform any checks to determine if the user-defined problem is indeed
-a convex optimization problems.
+modOpt does not perform any checks to determine if the user-defined problem is indeed
+a convex optimization problem.
 Users must ensure, at a minimum, that the equality constraints are linear.
 ```
 

@@ -1,8 +1,8 @@
 # Welcome to modOpt's documentation
 
-ModOpt is a modular development environment and library for optimization
+modOpt is a modular development environment and library for optimization
 algorithms written fully in Python.
-ModOpt is primarily developed for easy and fast development of 
+modOpt is primarily developed for easy and fast development of 
 gradient-based optimization algorithms through modular construction of 
 algorithms, and testing with built-in problems and interfaced test-suites.
 Since modOpt breaks down algorithms into self-contained components such as
