@@ -28,6 +28,9 @@ class SimulatedAnnealing(Optimizer):
             'f_sd': float,
             'time': float,
         }
+    
+    def setup(self):
+        pass
 
     def cool(self, T, itr):
         return 0.9 * T

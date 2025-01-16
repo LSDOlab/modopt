@@ -310,7 +310,22 @@ class Optimizer(ABC):
         if visualize_callbacks:
             self.problem._visualizer = self.visualizer
             
-    def setup(self, ):
+    @abstractmethod
+    def initialize(self):
+        '''
+        Set solver name and any solver-specific options.
+        '''
+        # raise NotImplementedError("Subclasses must implement this method.")
+        pass
+
+    @abstractmethod
+    def setup(self):
+        '''
+        Set up any solver-specific attributes or modules (e.g., merit function or Hessian approximation)
+        required by the optimization algorithm, during optimizer instantiation.
+        This method is called after initialize().
+        '''
+        # raise NotImplementedError("Subclasses must implement this method.")
         pass
 
     @abstractmethod         # Ensure that the subclasses cannot be instantiated unless the method is implemented

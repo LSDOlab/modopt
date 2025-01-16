@@ -32,6 +32,9 @@ class PSO(Optimizer):
             'nfev': int,
         }
 
+    def setup(self):
+        pass
+
     def solve(self):
         # Assign shorter names to variables and methods
         nx = self.problem.nx
