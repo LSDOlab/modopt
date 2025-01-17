@@ -157,6 +157,7 @@ def visualize(filepath, vars, save_figname=None):
 
     The variables to visualize should be a list of strings, where each string is the name of a variable to visualize. 
     Some examples for the variables are as follows (availability depends on the optimizer used):
+
             - 'obj'         : the objective function value
             - 'opt'         : the optimality measure
             - 'feas'        : the feasibility measure

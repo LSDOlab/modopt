@@ -10,6 +10,43 @@ from modopt.core.approximate_hessians.bfgs_function import bfgs_update
 
 
 class L2PenaltyEq(Optimizer):
+    """
+    Quadratic penalty method for equality-constrained optimization.
+
+    Parameters
+    ----------
+    problem : Problem or ProblemLite
+        Object containing the problem to be solved.
+    recording : bool, default=False
+        If ``True``, record all outputs from the optimization.
+        This needs to be enabled for hot-starting the same problem later,
+        if the optimization is interrupted.
+    hot_start_from : str, optional
+        The record file from which to hot-start the optimization.
+    hot_start_atol : float, default=0.
+        The absolute tolerance check for the inputs 
+        when reusing outputs from the hot-start record.
+    hot_start_rtol : float, default=0.
+        The relative tolerance check for the inputs 
+        when reusing outputs from the hot-start record.
+    visualize : list, default=[]
+        The list of scalar variables to visualize during the optimization.
+    turn_off_outputs : bool, default=False
+        If ``True``, prevents modOpt from generating any output files.
+
+    maxiter : int, default=1000
+        Maximum number of iterations.
+    opt_tol : float, default=1e-6
+        Optimality tolerance.
+    feas_tol : float, default=1e-6
+        Feasibility tolerance.
+    rho : float, default=1000000.
+        Penalty parameter.
+    readable_outputs : list, default=[]
+        List of outputs to be written to readable text output files.
+        Available outputs are: 'itr', 'obj', 'con', 'x', 'opt', 'feas', 
+        'time', 'nfev', 'ngev', 'step', 'merit'.
+    """
     def initialize(self):
         self.solver_name = 'l2_penalty_eq'
 
@@ -19,8 +56,8 @@ class L2PenaltyEq(Optimizer):
         self.jac = self.problem._compute_constraint_jacobian
 
         self.options.declare('maxiter', default=1000, types=int)
-        self.options.declare('opt_tol', types=float)
-        self.options.declare('feas_tol', types=float)
+        self.options.declare('opt_tol', default=1e-6, types=float)
+        self.options.declare('feas_tol', default=1e-6, types=float)
         self.options.declare('rho', types=float, default=1000000.)
         self.options.declare('readable_outputs', types=list, default=[])
 

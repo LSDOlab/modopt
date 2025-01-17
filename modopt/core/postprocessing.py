@@ -195,7 +195,7 @@ def load_variables(filepath, vars):
     '''
     Load specified variable iterates from the record file.
     Returns a dictionary with the variable names as keys and lists of variable iterates as values.
-    Note that the keys for callback variables will be prefixed with 'callback_'
+    Note that the keys for callback variables will be prefixed with 'callback\_'
     as opposed to optimizer variables that will have same key as the specified variable name.
 
     Parameters
@@ -212,7 +212,7 @@ def load_variables(filepath, vars):
     -------
     out_data : dict
         Dictionary with variable names as keys and lists of variable iterates as values.
-        Keys for callback variables will be prefixed with 'callback_'.
+        Keys for callback variables will be prefixed with 'callback\_'.
 
     Examples
     --------
@@ -261,6 +261,7 @@ def load_variables(filepath, vars):
             out_data[in_var] = []
         if var in callback_vars:
             out_data[f'callback_{in_var}'] = []
+            # out_data[f'callback_indices_{in_var}'] = []
 
     for i in range(n_iter):
         for in_var in vars:
@@ -296,6 +297,9 @@ def load_variables(filepath, vars):
             else:
                 idx1, idx2 = map(int, in_var.split('[')[1].split(']')[0].split(','))
                 out_data[f'callback_{in_var}'].append(file[f'callback_{i}'][group_key][var][idx1, idx2])
+
+            # if group_key == 'outputs':
+            #     out_data[f'callback_indices_{in_var}'].append(i)
     
     file.close()
 

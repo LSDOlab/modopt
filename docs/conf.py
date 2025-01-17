@@ -53,6 +53,7 @@ extensions = [
 # Autodoc options
 autodoc_typehints = 'none'
 # autosummary_generate = True
+numpydoc_class_members_toctree = False
 
 # import sphinx as aa
 # print(aa.__version__)
