@@ -38,8 +38,12 @@ class L2PenaltyEq(Optimizer):
         Maximum number of iterations.
     opt_tol : float, default=1e-6
         Optimality tolerance.
+        Certifies convergence when the 2-norm of the gradient of
+        the Quadratic Penalty function is less than this value.
     feas_tol : float, default=1e-6
         Feasibility tolerance.
+        Certifies convergence when the 2-norm of the constraints (constraint violations)
+        is less than this value.
     rho : float, default=1000000.
         Penalty parameter.
     readable_outputs : list, default=[]

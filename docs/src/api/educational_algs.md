@@ -3,12 +3,39 @@
 ```{eval-rst}
 
 .. autosummary::
+    modopt.SteepestDescent
+    modopt.Newton
+    modopt.QuasiNewton
     modopt.NewtonLagrange
     modopt.L2PenaltyEq
     modopt.PSO
     modopt.NelderMeadSimplex
     modopt.SimulatedAnnealing
 
+```
+
+## SteepestDescent
+
+```{eval-rst}
+
+.. autoclass:: modopt.SteepestDescent
+    :members: check_first_derivatives, solve, print_results
+```
+
+## Newton
+
+```{eval-rst}
+
+.. autoclass:: modopt.Newton
+    :members: check_first_derivatives, solve, print_results
+```
+
+## QuasiNewton
+
+```{eval-rst}
+
+.. autoclass:: modopt.QuasiNewton
+    :members: check_first_derivatives, solve, print_results
 ```
 
 ## NewtonLagrange

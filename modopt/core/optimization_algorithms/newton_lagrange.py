@@ -38,8 +38,12 @@ class NewtonLagrange(Optimizer):
         Maximum number of iterations.
     opt_tol : float, default=1e-8
         Optimality tolerance.
+        Certifies convergence when the 2-norm of the Lagrangian gradient 
+        is less than this value.
     feas_tol : float, default=1e-8
         Feasibility tolerance.
+        Certifies convergence when the 2-norm of the constraints (constraint violations)
+        is less than this value.
     readable_outputs : list, default=[]
         List of outputs to be written to readable text output files.
         Available outputs are: 'itr', 'obj', 'x', 'mult', 'con', 'opt', 
