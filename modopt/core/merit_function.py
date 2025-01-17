@@ -30,6 +30,9 @@ class MeritFunction(object):
         self.setup()
 
     def clear_cache(self):
+        """
+        Clear the cache of function evaluations.
+        """
         self.cache = {}
 
     def initialize(self):
@@ -39,6 +42,22 @@ class MeritFunction(object):
         pass
 
     def update_functions_in_cache(self, fnames, x):
+        """
+        Update the function values in the cache for the specified functions 
+        in `fnames` with their values at the given point `x`.
+        If the cache contains no values for a function in `fnames` 
+        or the cached values correspond to a point other than `x`, 
+        the function is evaluated at `x` and the cache is updated accordingly.
+
+        Parameters
+        ----------
+        fnames : str or list of str
+            Function names whose values need to be updated in the cache.
+            `fnames` must be one or a subset of ['f', 'g', 'c', 'j'].
+        x : np.ndarray
+            Point at which to update the functions in `fnames`.
+        """
+
         if not isinstance(fnames, (list, str)):
             raise ValueError("'fnames' must be a string or list of strings")
         

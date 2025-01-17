@@ -16,7 +16,8 @@ api/csdl_alpha_problem
 api/openmdao_problem
 api/csdl_problem
 api/postprocessing
-api/modules
+api/line_searches
+api/merit_functions
 api/cutest_problem
 api/benchmarking
 ```
