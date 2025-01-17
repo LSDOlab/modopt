@@ -8,6 +8,52 @@ import warnings
 
 
 class PSO(Optimizer):
+    """
+    The Particle Swarm Optimization (PSO) algorithm for unconstrained optimization
+    within a bounded domain.
+
+    Note that the problem needs to define the bounds for each variable.
+    Otherwise, the default bounds of -10 and +10 are used for unbounded variables.
+
+    Parameters
+    ----------
+    problem : Problem or ProblemLite
+        Object containing the problem to be solved.
+    recording : bool, default=False
+        If ``True``, record all outputs from the optimization.
+        This needs to be enabled for hot-starting the same problem later,
+        if the optimization is interrupted.
+    hot_start_from : str, optional
+        The record file from which to hot-start the optimization.
+    hot_start_atol : float, default=0.
+        The absolute tolerance check for the inputs 
+        when reusing outputs from the hot-start record.
+    hot_start_rtol : float, default=0.
+        The relative tolerance check for the inputs 
+        when reusing outputs from the hot-start record.
+    visualize : list, default=[]
+        The list of scalar variables to visualize during the optimization.
+    turn_off_outputs : bool, default=False
+        If ``True``, prevents modOpt from generating any output files.
+
+    population : int, default=25
+        Number of particles in the swarm.
+    maxiter : int, default=100
+        Maximum number of iterations.
+    tol : float, default=1e-4
+        Tolerance for the convergence criterion.
+        Certifies convergence when the standard deviation of the 
+        objective function values of the particles is less than this value.
+    inertia_weight : float, default=0.8
+        Inertia weight for the velocity update.
+    cognitive_coeff : float, default=0.1
+        Cognitive coefficient (self influence) for the velocity update.
+    social_coeff : float, default=0.1
+        Social coefficient (social influence) for the velocity update.
+    readable_outputs : list, default=[]
+        List of outputs to be written to readable text output files.
+        Available outputs are: 'itr', 'obj', 'x', 'f_sd', 'time', and 'nfev'.
+    """
     def initialize(self):
         self.solver_name = 'pso'
 
@@ -16,7 +62,7 @@ class PSO(Optimizer):
         # All the options below are empirically chosen for a problem
         self.options.declare('population', default=25, types=int)
         self.options.declare('maxiter', default=100, types=int)
-        self.options.declare('tol', types=float)
+        self.options.declare('tol', default=1e-4, types=float)
         self.options.declare('inertia_weight', default=0.8, types=float)
         self.options.declare('cognitive_coeff', default=0.1, types=float)
         self.options.declare('social_coeff', default=0.1, types=float)
@@ -64,7 +110,7 @@ class PSO(Optimizer):
 
         sampler = qmc.LatinHypercube(d=nx, seed=1)
         sample = sampler.random(n=population)
-        # Limit the velocity to 5 percent of the diffence between upper and lower bound
+        # Limit the velocity to 5 percent of the diffence between upper and lower bounds
         v_max = 0.05 * (x_max - x_min)
         v_min = -v_max
         v0 = qmc.scale(sample, v_min, v_max)

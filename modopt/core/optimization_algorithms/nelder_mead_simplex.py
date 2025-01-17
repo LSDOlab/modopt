@@ -7,6 +7,42 @@ from modopt.merit_functions import AugmentedLagrangianEq, L2Eq
 
 
 class NelderMeadSimplex(Optimizer):
+    """
+    Nelder-Mead simplex algorithm for unconstrained optimization.
+
+    Parameters
+    ----------
+    problem : Problem or ProblemLite
+        Object containing the problem to be solved.
+    recording : bool, default=False
+        If ``True``, record all outputs from the optimization.
+        This needs to be enabled for hot-starting the same problem later,
+        if the optimization is interrupted.
+    hot_start_from : str, optional
+        The record file from which to hot-start the optimization.
+    hot_start_atol : float, default=0.
+        The absolute tolerance check for the inputs 
+        when reusing outputs from the hot-start record.
+    hot_start_rtol : float, default=0.
+        The relative tolerance check for the inputs 
+        when reusing outputs from the hot-start record.
+    visualize : list, default=[]
+        The list of scalar variables to visualize during the optimization.
+    turn_off_outputs : bool, default=False
+        If ``True``, prevents modOpt from generating any output files.
+
+    maxiter : int, default=200
+        Maximum number of iterations.
+    initial_length : float, default=1.
+        Initial length of the simplex edges.
+    tol : float, default=1e-4
+        Tolerance for the convergence criterion.
+        Certifies convergence when the standard deviation of the objective 
+        function values at the simplex vertices is less than this value.
+    readable_outputs : list, default=[]
+        List of outputs to be written to readable text output files.
+        Available outputs are: 'itr', 'obj', 'x', 'f_sd', 'time', and 'nfev'.
+    """
     def initialize(self):
         self.solver_name = 'nelder_mead'
 

@@ -4,6 +4,47 @@ import time
 from modopt import Optimizer
 
 class SimulatedAnnealing(Optimizer):
+    """
+    Simulated Annealing algorithm for discrete, unconstrained optimization.
+
+    Parameters
+    ----------
+    problem : Problem or ProblemLite
+        Object containing the problem to be solved.
+    recording : bool, default=False
+        If ``True``, record all outputs from the optimization.
+        This needs to be enabled for hot-starting the same problem later,
+        if the optimization is interrupted.
+    hot_start_from : str, optional
+        The record file from which to hot-start the optimization.
+    hot_start_atol : float, default=0.
+        The absolute tolerance check for the inputs 
+        when reusing outputs from the hot-start record.
+    hot_start_rtol : float, default=0.
+        The relative tolerance check for the inputs 
+        when reusing outputs from the hot-start record.
+    visualize : list, default=[]
+        The list of scalar variables to visualize during the optimization.
+    turn_off_outputs : bool, default=False
+        If ``True``, prevents modOpt from generating any output files.
+
+    maxiter : int, default=50000
+        Maximum number of iterations.
+    settling_time : int, default=100
+        Number of iterations after which the temperature is decreased.
+    T0 : float, default=1.
+        Initial temperature.
+    std_dev_tol : float, default=1.
+        Tolerance for the convergence criterion.
+        Certifies convergence when the standard deviation of the latest
+        `std_dev_sample_size` function values is less than this value.
+    std_dev_sample_size : int, default=1000
+        Number of latest function values to consider for computing the
+        standard deviation for checking the convergence criterion.
+    readable_outputs : list, default=[]
+        List of outputs to be written to readable text output files.
+        Available outputs are: 'itr', 'obj', 'temp', 'x', 'f_sd', and 'time'.
+    """
     def initialize(self):
         self.solver_name = 'simulated_annealing'
 

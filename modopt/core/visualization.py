@@ -158,14 +158,14 @@ def visualize(filepath, vars, save_figname=None):
     The variables to visualize should be a list of strings, where each string is the name of a variable to visualize. 
     Some examples for the variables are as follows (availability depends on the optimizer used):
 
-            - 'obj'         : the objective function value
-            - 'opt'         : the optimality measure
-            - 'feas'        : the feasibility measure
-            - 'x[i]'        : the i-th variable value
-            - 'con[i]'      : the i-th constraint value
-            - 'jac[i,j]'    : the (i,j)-th element of the Jacobian matrix
-            - 'grad[i]'     : the i-th gradient value
-            - 'lmult[i]'    : the i-th Lagrange multiplier value
+        - 'obj'         : the objective function value
+        - 'opt'         : the optimality measure
+        - 'feas'        : the feasibility measure
+        - 'x[i]'        : the i-th variable value
+        - 'con[i]'      : the i-th constraint value
+        - 'jac[i,j]'    : the (i,j)-th element of the Jacobian matrix
+        - 'grad[i]'     : the i-th gradient value
+        - 'lmult[i]'    : the i-th Lagrange multiplier value
 
     Creates a plot with the specified variables on the y-axis and the iteration number on the x-axis.
     The plots are stacked vertically in the order they are specified in the list.
