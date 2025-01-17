@@ -130,6 +130,8 @@ src/educational_algs/quasi_newton
 src/educational_algs/newton_lagrange
 src/educational_algs/l2_penalty_eq
 
+src/educational_algs/sqp
+
 src/educational_algs/nelder_mead_simplex
 src/educational_algs/pso
 src/educational_algs/simulated_annealing

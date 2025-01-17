@@ -11,6 +11,58 @@ from modopt.approximate_hessians import BFGSScipy as BFGS
 
 # This optimizer takes constraints in all-inequality form, C(x) >= 0
 class SQP(Optimizer):
+    """
+    Sequential Quadratic Programming (SQP) algorithm for general constrained optimization.
+
+    Parameters
+    ----------
+    problem : Problem or ProblemLite
+        Object containing the problem to be solved.
+    recording : bool, default=False
+        If ``True``, record all outputs from the optimization.
+        This needs to be enabled for hot-starting the same problem later,
+        if the optimization is interrupted.
+    hot_start_from : str, optional
+        The record file from which to hot-start the optimization.
+    hot_start_atol : float, default=0.
+        The absolute tolerance check for the inputs 
+        when reusing outputs from the hot-start record.
+    hot_start_rtol : float, default=0.
+        The relative tolerance check for the inputs 
+        when reusing outputs from the hot-start record.
+    visualize : list, default=[]
+        The list of scalar variables to visualize during the optimization.
+    turn_off_outputs : bool, default=False
+        If ``True``, prevents modOpt from generating any output files.
+
+    maxiter : int, default=1000
+        Maximum number of major iterations.
+    opt_tol : float, default=1e-7
+        Optimality tolerance.
+    feas_tol : float, default=1e-7
+        Feasibility tolerance.
+        Certifies convergence when the "scaled" maximum constraint violation 
+        is less than this value.
+    qp_tol : float, default=1e-4
+        Tolerance for the QP subproblem.
+    qp_maxiter : int, default=5000
+        Maximum number of iterations for the QP subproblem.
+    ls_min_step : float, default=1e-14
+        Minimum step size for the line search.
+    ls_max_step : float, default=1.
+        Maximum step size for the line search.
+    ls_maxiter : int, default=10
+        Maximum number of iterations for the line search.
+    ls_alpha_tol : float, default=1e-14
+        Relative tolerance for an acceptable step in the line search.
+    ls_eta_w : float, default=0.9
+        Wolfe (curvature condition) parameter for the line search.
+
+    readable_outputs : list, default=[]
+        List of outputs to be written to readable text output files.
+        Available outputs are: 'major', 'obj', 'x', 'lag_mult', 'slacks', 'constraints', 'opt',
+        'feas', 'time', 'nfev', 'ngev', 'step', 'rho', 'merit'.
+    """
     def initialize(self):
         self.solver_name = 'sqp'
 
@@ -28,6 +80,14 @@ class SQP(Optimizer):
         self.options.declare('opt_tol', default=1e-7, types=float)
         self.options.declare('feas_tol', default=1e-7, types=float)
         self.options.declare('qp_tol', default=1e-4, types=float)
+        self.options.declare('qp_maxiter', default=5000, types=int)
+
+        self.options.declare('ls_min_step', default=1e-14, types=float)
+        self.options.declare('ls_max_step', default=1.0, types=float)
+        self.options.declare('ls_maxiter', default=10, types=int)
+        self.options.declare('ls_alpha_tol', default=1e-14, types=float)
+        self.options.declare('ls_eta_w', default=0.9, types=float)
+
         self.options.declare('readable_outputs', types=list, default=[])
 
         self.available_outputs = {
@@ -80,16 +140,16 @@ class SQP(Optimizer):
         
         self.LSS = Minpack2LS(f=self.MF.compute_function,
                               g=self.MF.compute_gradient,
-                              min_step=1e-14,
-                              max_step=1.,
-                              maxiter=10,
-                              alpha_tol=1e-14,
-                              eta_w=0.9)
+                              min_step=self.options['ls_min_step'],
+                              max_step=self.options['ls_max_step'],
+                              maxiter=self.options['ls_maxiter'],
+                              alpha_tol=self.options['ls_alpha_tol'],
+                              eta_w=self.options['ls_eta_w'])
         
         self.LSB = BacktrackingArmijo(f=self.MF.compute_function,
                                       g=self.MF.compute_gradient,
                                       gamma_c=0.3,
-                                      max_step=1.0,
+                                      max_step=self.options['ls_max_step'],
                                       maxiter=25)
 
     # Adapt constraints to C(x) >= 0
@@ -360,6 +420,7 @@ class SQP(Optimizer):
         x0 = self.problem.x0
         maxiter = self.options['maxiter']
         qp_tol  = self.options['qp_tol']
+        qp_maxiter = self.options['qp_maxiter']
 
         obj  = self.obj
         grad = self.grad
@@ -470,7 +531,7 @@ class SQP(Optimizer):
                 sp.csc_matrix(dummy_A),
                 l_k,
                 u_k,
-                max_iter=5000,
+                max_iter=qp_maxiter,
                 verbose=False,
                 # warm_start=False,
                 # polish=True,

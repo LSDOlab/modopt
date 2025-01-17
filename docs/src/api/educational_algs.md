@@ -8,6 +8,7 @@
     modopt.QuasiNewton
     modopt.NewtonLagrange
     modopt.L2PenaltyEq
+    modopt.SQP
     modopt.PSO
     modopt.NelderMeadSimplex
     modopt.SimulatedAnnealing
@@ -54,12 +55,12 @@
     :members: check_first_derivatives, solve, print_results
 ```
 
-## PSO
+## SQP
 
 ```{eval-rst}
 
-.. autoclass:: modopt.PSO
-    :members: solve, print_results
+.. autoclass:: modopt.SQP
+    :members: check_first_derivatives, solve, print_results
 ```
 
 ## NelderMeadSimplex
@@ -67,6 +68,14 @@
 ```{eval-rst}
 
 .. autoclass:: modopt.NelderMeadSimplex
+    :members: solve, print_results
+```
+
+## PSO
+
+```{eval-rst}
+
+.. autoclass:: modopt.PSO
     :members: solve, print_results
 ```
 

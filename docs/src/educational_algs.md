@@ -11,6 +11,8 @@ educational_algs/quasi_newton
 educational_algs/newton_lagrange
 educational_algs/l2_penalty_eq
 
+educational_algs/sqp
+
 educational_algs/nelder_mead_simplex
 educational_algs/pso
 educational_algs/simulated_annealing

@@ -1,8 +1,9 @@
 # SNOPT
 
-SNOPT (Sparse Nonlinear OPTimizer) is a gradient-based optimization algorithm that uses a 
+SNOPT (Sparse Nonlinear OPTimizer) is a gradient-based optimization algorithm that uses
 sequential quadratic programming (SQP) to solve general nonlinear programming problems.
-It uses the BFGS algorithm to approximate the Hessian of the Lagrangian.
+It uses the BFGS algorithm to approximate the Hessian of the Lagrangian and
+an augmented Lagrangian merit function for the line search.
 
 To use the `SNOPT` solver in modOpt, you need to have it installed on your machine along with its Python interface.
 The binaries can be obtained from **[SNOPT's official website](https://ccom.ucsd.edu/~optimizers/downloads/)**,
