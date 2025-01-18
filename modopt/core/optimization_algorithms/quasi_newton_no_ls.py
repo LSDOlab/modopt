@@ -87,6 +87,9 @@ class QuasiNewtonNoLS(Optimizer):
             w_k = g_new - g_k
             g_k = g_new * 1.0
 
+            nfev += 1
+            ngev += 1
+
             opt = np.linalg.norm(g_k)
 
             # Update the Hessian approximation
