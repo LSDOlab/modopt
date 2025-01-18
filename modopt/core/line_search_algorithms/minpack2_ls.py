@@ -255,6 +255,24 @@ class Minpack2LS(LineSearch):
             Value of the merit function at the current point.
         g0 : np.ndarray, optional
             Gradient of the merit function at the current point.
+
+        Returns
+        -------
+        alpha : float
+            Step length found by the line search.
+        f2 : float
+            Value of the merit function at the new point.
+        g2 : np.ndarray
+            Gradient of the merit function at the new point.
+        slope2 : float
+            Slope of the merit function at the new point along the search direction.
+        nfev : int
+            Number of additional function evaluations.
+        ngev : int
+            Number of additional gradient evaluations.
+        converged : bool
+            ``True`` if the line search converged to a step length
+            that satisfies the strong Wolfe conditions, ``False`` otherwise.
         """
 
         eta_a = self.options['eta_a']

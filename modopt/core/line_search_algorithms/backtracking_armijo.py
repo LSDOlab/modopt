@@ -60,6 +60,20 @@ class BacktrackingArmijo(LineSearch):
             Value of the merit function at the current point.
         g0 : np.ndarray, optional
             Gradient of the merit function at the current point.
+
+        Returns
+        -------
+        alpha : float
+            Step length found by the line search.
+        f2 : float
+            Value of the merit function at the new point.
+        nfev : int
+            Number of additional function evaluations.
+        ngev : int
+            Number of additional gradient evaluations.
+        converged : bool
+            ``True`` if the line search converged to a step length 
+            that satisfies the Armijo condition, ``False`` otherwise.
         """
 
         eta_a    = self.options['eta_a']
@@ -93,7 +107,7 @@ class BacktrackingArmijo(LineSearch):
             f2 = f(x + alpha * p)
             rho = (f2 - f1) / (alpha * slope)
 
-            if (itr <= maxiter) and (rho < eta_a):
+            if (itr < maxiter) and (rho < eta_a):
                 alpha *= gamma_c
                 itr += 1
             else:
