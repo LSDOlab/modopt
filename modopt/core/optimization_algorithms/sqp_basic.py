@@ -27,8 +27,7 @@ class BSQP(Optimizer):
             # self.active_callbacks += ['con', 'jac']
 
         self.options.declare('maxiter', default=1000, types=int)
-        self.options.declare('opt_tol', default=1e-7, types=float)
-        self.options.declare('feas_tol', default=1e-7, types=float)
+        self.options.declare('tol', default=1e-7, types=float)
         self.options.declare('readable_outputs', types=list, default=[])
 
         self.available_outputs = {
@@ -200,8 +199,7 @@ class BSQP(Optimizer):
 
         return s
 
-    def update_scalar_rho(self, rho_k, dir_deriv_al, pTHp, p_pi, c_k,
-                          s_k):
+    def update_scalar_rho(self, rho_k, dir_deriv_al, pTHp, p_pi, c_k, s_k):
         nc = self.nc
         delta_rho = self.delta_rho
 
@@ -244,8 +242,7 @@ class BSQP(Optimizer):
 
         return rho_k
 
-    def update_vector_rho(self, rho_k, dir_deriv_al, pTHp, p_pi, c_k,
-                          s_k):
+    def update_vector_rho(self, rho_k, dir_deriv_al, pTHp, p_pi, c_k, s_k):
         delta_rho = self.delta_rho
 
         rho_ref = np.linalg.norm(rho_k)
@@ -358,16 +355,6 @@ class BSQP(Optimizer):
         return feas_satisfied, feas
 
     def solve(self):
-        try:
-            import osqp
-        except ImportError:
-            raise ImportError("OSQP cannot be imported for the SQP solver.  Install it with 'pip install osqp'.")
-        try:
-            import qpsolvers
-        except ImportError:
-            raise ImportError("qpsolvers cannot be imported for the SQP solver.  Install it with 'pip install qpsolvers'.")
-
-        
         # Assign shorter names to variables and methods
         nx = self.nx
         nc = self.nc
@@ -690,7 +677,7 @@ class BSQP(Optimizer):
                 merit=mf_k)
                 # merit=penalty_k)
 
-            if np.linalg.norm(p_x) < 1e-6:
+            if np.linalg.norm(p_x) < self.options['tol']:
                 break
 
         self.total_time = time.time() - start_time
@@ -707,7 +694,7 @@ class BSQP(Optimizer):
             'ngev': ngev,
             'niter': itr,
             'time': self.total_time,
-            # 'converged': converged
+            'converged': np.linalg.norm(p_x) < self.options['tol']
         }
 
         # Run post-processing for the Optimizer() base class
