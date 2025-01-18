@@ -93,4 +93,4 @@ class BFGSScipy(ApproximateHessian):
 
         if self.options['store_inverse']:
             self.M.update(d, w)
-            self.M_k = self.B.get_matrix()
+            self.M_k = self.M.get_matrix()
