@@ -17,6 +17,7 @@ api/postprocessing
 api/educational_algs
 api/line_searches
 api/merit_functions
+api/approximate_hessians
 api/cutest_problem
 api/benchmarking
 ```

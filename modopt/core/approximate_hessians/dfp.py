@@ -4,24 +4,57 @@ from modopt import ApproximateHessian
 
 
 class DFP(ApproximateHessian):
+    """
+    Davidon-Fletcher-Powell (DFP) Hessian update.
+
+    Parameters
+    ----------
+    nx : int
+        Number of optimization variables.
+    store_hessian : bool, default=False
+        Store the Hessian approximation.
+    store_inverse : bool, default=True
+        Store the inverse Hessian approximation.
+
+    Attributes
+    ----------
+    B_k : np.ndarray
+        Hessian approximation of shape `(nx, nx)`.
+        Available only if ``store_hessian`` is ``True``.
+    M_k : np.ndarray
+        Inverse Hessian approximation of shape `(nx, nx)`.
+        Available only if ``store_inverse`` is ``True``.
+    """
+
     def initialize(self):
         self.options.declare('store_hessian', default=False, types=bool)
         self.options.declare('store_inverse', default=True, types=bool)
 
-    def update(self, dk, wk):
-        if self.options['store_hessian']:
-            Bd = np.dot(self.B_k, dk)
-            dTBd = np.inner(Bd, dk)
-            wTd = np.inner(wk, dk)
+    def update(self, d, w):
+        """
+        Update the stored Hessian approximation `B_k` or its inverse `M_k` using the DFP formula.
+        The update is performed using the step ``d`` and the gradient difference ``w``.
 
-            vec = wk / wTd - Bd / dTBd
+        Parameters
+        ----------
+        d : np.ndarray
+            Step taken in the optimization space.
+        w : np.ndarray
+            Gradient difference along the step ``d``.
+        """
+        if self.options['store_hessian']:
+            Bd = np.dot(self.B_k, d)
+            dTBd = np.inner(Bd, d)
+            wTd = np.inner(w, d)
+
+            vec = w / wTd - Bd / dTBd
 
             self.B_k += -np.outer(Bd, Bd) / dTBd
-            +np.outer(wk, wk) / wTd
+            +np.outer(w, w) / wTd
             +dTBd * np.outer(vec, vec)
 
         if self.options['store_inverse']:
-            Mw = np.dot(self.M_k, wk)
+            Mw = np.dot(self.M_k, w)
 
-            self.M_k += -np.outer(Mw, Mw) / np.inner(Mw, wk)
-            +np.outer(dk, dk) / np.inner(wk, dk)
+            self.M_k += -np.outer(Mw, Mw) / np.inner(Mw, w)
+            +np.outer(d, d) / np.inner(w, d)
