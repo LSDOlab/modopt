@@ -16,6 +16,4 @@ educational_algs/sqp
 educational_algs/nelder_mead_simplex
 educational_algs/pso
 educational_algs/simulated_annealing
-
-educational_algs/std_algs
 ```

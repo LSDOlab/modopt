@@ -135,6 +135,4 @@ src/educational_algs/sqp
 src/educational_algs/nelder_mead_simplex
 src/educational_algs/pso
 src/educational_algs/simulated_annealing
-
-src/educational_algs/std_algs
 ```

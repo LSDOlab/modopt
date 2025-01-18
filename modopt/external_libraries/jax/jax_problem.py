@@ -75,7 +75,7 @@ class JaxProblem(ProblemLite):
         obj = None
         grad = None
         obj_hess = None
-        obj_hvp = None
+        # obj_hvp = None
 
         if jax_obj is not None:
             _obj = jax.jit(jax_obj)
@@ -90,13 +90,13 @@ class JaxProblem(ProblemLite):
                     _obj_hess = jax.jit(jax.hessian(jax_obj))
                     obj_hess  = lambda x: np.array(_obj_hess(x))
 
-                    def jax_obj_hvp(x, v):
-                        return jax.grad(lambda x: jnp.vdot(jax.grad(jax_obj)(x), v))(x)
+                    # def jax_obj_hvp(x, v):
+                    #     return jax.grad(lambda x: jnp.vdot(jax.grad(jax_obj)(x), v))(x)
                     
-                    _obj_hvp = jax.jit(jax_obj_hvp)
-                    obj_hvp  = lambda x, v: np.array(_obj_hvp(x, v))
+                    # _obj_hvp = jax.jit(jax_obj_hvp)
+                    # obj_hvp  = lambda x, v: np.array(_obj_hvp(x, v))
 
-                    # obj_hvp = jax.grad(lambda x: jnp.vdot(jax.grad(jax_obj)(x), v))(x)
+                    # # obj_hvp = jax.grad(lambda x: jnp.vdot(jax.grad(jax_obj)(x), v))(x)
                 else:
                     raise ValueError(f"Higher order derivatives are not supported. 'order' must be 1 or 2.")
 
@@ -105,7 +105,7 @@ class JaxProblem(ProblemLite):
         lag = None
         lag_grad = None
         lag_hess = None
-        lag_hvp  = None
+        # lag_hvp  = None
         
         if jax_con is not None:
             _con = jax.jit(jax_con)
@@ -136,15 +136,15 @@ class JaxProblem(ProblemLite):
                     _lag_hess = jax.jit(jax.hessian(jax_lag))
                     lag_hess  = lambda x, lam: np.array(_lag_hess(x, lam))
 
-                    def jax_lag_hvp(x, lam, v):
-                        return jax.grad(lambda x, lam: jnp.vdot(jax.grad(jax_lag)(x, lam), v))(x, lam)
+                    # def jax_lag_hvp(x, lam, v):
+                    #     return jax.grad(lambda x, lam: jnp.vdot(jax.grad(jax_lag)(x, lam), v))(x, lam)
                     
-                    _lag_hvp = jax.jit(jax_lag_hvp)
-                    lag_hvp  = lambda x, lam, v: np.array(_lag_hvp(x, lam, v))
+                    # _lag_hvp = jax.jit(jax_lag_hvp)
+                    # lag_hvp  = lambda x, lam, v: np.array(_lag_hvp(x, lam, v))
                 else:
                     raise ValueError(f"Higher order derivatives are not supported. 'order' must be 1 or 2.")
 
         super().__init__(x0, name=name, obj=obj, grad=grad, obj_hess=obj_hess, con=con, jac=jac,
                          lag=lag, lag_grad=lag_grad, lag_hess=lag_hess, xl=xl, xu=xu, cl=cl, cu=cu,
-                         x_scaler=x_scaler, o_scaler=o_scaler, c_scaler=c_scaler, grad_free=grad_free,
-                         obj_hvp=obj_hvp, lag_hvp=lag_hvp)
+                         x_scaler=x_scaler, o_scaler=o_scaler, c_scaler=c_scaler, grad_free=grad_free)
+                        #  obj_hvp=obj_hvp, lag_hvp=lag_hvp)
