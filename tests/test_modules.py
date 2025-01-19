@@ -107,34 +107,52 @@ def test_merit_functions():
     print('merit.eval_count', merit.eval_count)
     assert merit.eval_count == {'f': 1+2+1, 'g': 1, 'c': 1+2+1, 'j': 1}
 
-# def test_hessian_approximations():
-#     '''
-#     Test Hessian approximation modules
-#     '''
+def test_approximate_hessians():
+    """
+    Unit tests for Hessian update algorithms
+    """
+    from modopt.approximate_hessians import BFGS, BFGSScipy, SR1, PSB, DFP
 
-#     # Import Base class to test
-#     from modopt import ApproximateHessian
-#     # Import modules to test
-#     from modopt.approximate_hessians import (
-#         Broyden, BroydenFirst, BroydenClass, 
-#         BFGS, BFGSM1, BFGSScipy, 
-#         SR1, DFP, PSB)
+    d = np.array([1., 0.])
+    w = np.array([1., 1.])
 
-#     # Import the problem to test with
-#     from examples.ex_8bean_function import BeanFunction
+    QN = BFGS(nx=2, store_hessian=True, store_inverse=True)
+    assert np.array_equal(QN.B_k, np.eye(2))
+    assert np.array_equal(QN.M_k, np.eye(2))
 
-#     prob = BeanFunction()
-#     tol = 1e-6
-#     maxiter = 200
-#     optimizer = SteepestDescent(prob, maxiter=maxiter, opt_tol=tol)
-#     optimizer.solve()
+    QN.update(d, w)
+    assert np.array_equal(QN.B_k, np.array([[1., 1.], [1., 2.]]))
+    assert np.array_equal(QN.M_k, np.array([[2., -1.], [-1., 1.]]))
 
-#     # Check to make sure values are correct
-#     np.testing.assert_almost_equal(
-#         actual_val, 
-#         desired_val,
-#         decimal = 7,
-#     )
+    d1 = np.array([1.5, 0.])
+    QN = SR1(nx=2)
+    assert np.array_equal(QN.B_k, np.eye(2))
+    QN.update(d1, w)
+    assert np.allclose(QN.B_k, np.array([[2./3, 2./3], [2./3, -1./3]]), atol=1e-12)
+
+    d1 = np.array([1.5, 0.])
+    QN = PSB(nx=2)
+    assert np.array_equal(QN.B_k, np.eye(2))
+    QN.update(d1, w)
+    assert np.allclose(QN.B_k, np.array([[2./3, 2./3], [2./3, 1.]]), atol=1e-12)
+
+    QN = DFP(nx=2, store_hessian=True, store_inverse=True)
+    assert np.array_equal(QN.B_k, np.eye(2))
+    assert np.array_equal(QN.M_k, np.eye(2))
+
+    QN.update(w, d) # swap d and w so that the approximations are the same as BFGS
+    assert np.array_equal(QN.B_k, np.array([[2., -1.], [-1., 1.]]))
+    assert np.array_equal(QN.M_k, np.array([[1., 1.], [1., 2.]]))
+
+    QN = BFGSScipy(nx=2, store_hessian=True, store_inverse=False, exception_strategy='damp_update', init_scale=1.)
+    assert np.array_equal(QN.B_k, np.eye(2))
+    QN.update(d, w)
+    assert np.array_equal(QN.B_k, np.array([[1., 1.], [1., 2.]]))
+
+    QN = BFGSScipy(nx=2, store_hessian=False, store_inverse=True, exception_strategy='damp_update', init_scale=1.)
+    assert np.array_equal(QN.M_k, np.eye(2))
+    QN.update(d, w)
+    assert np.array_equal(QN.M_k, np.array([[2., -1.], [-1., 1.]]))
 
 # def test_trust_region_algorithms():
 #     '''
@@ -165,4 +183,5 @@ def test_merit_functions():
 if __name__ == '__main__':
     test_line_searches()
     test_merit_functions()
+    test_approximate_hessians()
     print('All tests passed!')

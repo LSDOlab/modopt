@@ -49,12 +49,11 @@ class DFP(ApproximateHessian):
 
             vec = w / wTd - Bd / dTBd
 
-            self.B_k += -np.outer(Bd, Bd) / dTBd
-            +np.outer(w, w) / wTd
-            +dTBd * np.outer(vec, vec)
+            self.B_k += -np.outer(Bd, Bd) / dTBd + np.outer(w, w) / wTd + dTBd * np.outer(vec, vec)
 
         if self.options['store_inverse']:
-            Mw = np.dot(self.M_k, w)
+            Mw  = np.dot(self.M_k, w)
+            wMw = np.dot(w, Mw)
+            wTd = np.dot(w, d)
 
-            self.M_k += -np.outer(Mw, Mw) / np.inner(Mw, w)
-            +np.outer(d, d) / np.inner(w, d)
+            self.M_k += -np.outer(Mw, Mw) / wMw + np.outer(d, d) / wTd

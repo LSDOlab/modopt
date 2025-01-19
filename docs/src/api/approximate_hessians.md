@@ -7,6 +7,7 @@
     modopt.approximate_hessians.BFGSScipy
     modopt.approximate_hessians.SR1
     modopt.approximate_hessians.DFP
+    modopt.approximate_hessians.PSB
 
 ```
 
@@ -18,9 +19,12 @@
 .. autoclass:: modopt.approximate_hessians.BFGSScipy
     :members: update
 
+.. autoclass:: modopt.approximate_hessians.SR1
+    :members: update
+
 .. autoclass:: modopt.approximate_hessians.DFP
     :members: update
 
-.. autoclass:: modopt.approximate_hessians.SR1
+.. autoclass:: modopt.approximate_hessians.PSB
     :members: update
 ```
