@@ -4,9 +4,24 @@ from modopt import Optimizer
 
 class ConvexQPSolvers(Optimizer):
     '''
-    Class that interfaces modOpt with the qpsolvers package which provides 
-    a unified interface to various Quadratic Programming (QP) solvers available in Python.
+    Class that interfaces modOpt with the ``qpsolvers`` package which provides
+    a unified interface to various convex Quadratic Programming (QP) solvers available in Python.
     By default, the solver used is 'quadprog'.
+    Make sure to install 'qpsolvers' using ``pip install qpsolvers[wheels_only] quadprog osqp``
+    to install interfaced open-source QP solvers with pre-compiled binaries.
+
+    Parameters
+    ----------
+    problem : Problem or ProblemLite
+        Object containing the convex QP problem to be solved.
+    turn_off_outputs : bool, default=False
+        If ``True``, prevents modOpt from generating any output files.
+
+    solver_options : dict
+        Dictionary containing the solver name and its options.
+        Available global options are: ``'solver'`` and ``'verbose'``.
+        Solver-specific options can also be passed.
+        Make sure the 'solver' specified is installed on your machine.
 
     Attributes
     ----------
@@ -17,54 +32,72 @@ class ConvexQPSolvers(Optimizer):
         A subset of all the suppported solvers that are installed.
     supported_solvers : list
         The list of supported solvers in qpsolvers.
-    qp_problem : qpsolvers.Problem
-        The QP problem to be solved.
-
-        Attributes
-        ----------
-            P : np.ndarray
-                The symmetric cost matrix. Always positive semi-definite for convex QP.
-                Some solvers also require it to be positive definite.
-            q : np.ndarray
-                The cost vector.
-            G : np.ndarray
-                The linear inequality constraint matrix.
-            h : np.ndarray
-                The linear inequality constraint vector.
-            A : np.ndarray
-                The linear equality constraint matrix.
-            b : np.ndarray
-                The linear equality constraint vector.
-            lb : np.ndarray
-                The lower bounds for the variables.
-            ub : np.ndarray
-                The upper bounds for the variables.
-            has_sparse : bool
-                Check whether the problem has sparse matrices.
-            is_unconstrained : bool
-                Check whether the problem has constraints.
-        
-        Methods
-        -------
-            check_constraints()
-                Check if the problem constraints are correctly defined.
-            cond(active_set: qpsolvers.ActiveSet)
-                Compute the condition number of the symmetric problem matrix
-                representing hte problem data.
-            save(filename: str)
-                Save the problem data to a file.
-                The ".npz" extension will be appended to the filename if it is not already there.
-            load(filename: str)
-                Load the problem data from a file.
-            unpack()
-                Unpack the problem data into 
-                a tuple of numpy arrays (P, q, G, h, A, b, lb, ub) and return it.
-            get_cute_classification(interest: str)
-                Get the CUTE classification string of the problem.
-                interest can be 'A', 'M', or 'R', depending on whether your problem
-                is academic, part of a modeling exercise, or has real-world applications.
+    P : np.ndarray
+        The symmetric cost matrix. Always positive semi-definite for convex QP.
+        Some solvers also require it to be positive definite.
+    q : np.ndarray
+        The cost vector.
+    G : np.ndarray
+        The linear inequality constraint matrix.
+    h : np.ndarray
+        The linear inequality constraint vector.
+    A : np.ndarray
+        The linear equality constraint matrix.
+    b : np.ndarray
+        The linear equality constraint vector.
+    lb : np.ndarray
+        The lower bounds for the variables.
+    ub : np.ndarray
+        The upper bounds for the variables.
     results : dict
         The results of the optimization.
+
+    qp_problem: qpsolvers.Problem
+        The QP problem to be solved.
+
+        **Attributes of qpsolvers.Problem:**
+
+        P : np.ndarray
+            The symmetric cost matrix. Always positive semi-definite for convex QP.
+            Some solvers also require it to be positive definite.
+        q : np.ndarray
+            The cost vector.
+        G : np.ndarray
+            The linear inequality constraint matrix.
+        h : np.ndarray
+            The linear inequality constraint vector.
+        A : np.ndarray
+            The linear equality constraint matrix.
+        b : np.ndarray
+            The linear equality constraint vector.
+        lb : np.ndarray
+            The lower bounds for the variables.
+        ub : np.ndarray
+            The upper bounds for the variables.
+        has_sparse : bool
+            Check whether the problem has sparse matrices.
+        is_unconstrained : bool
+            Check whether the problem has constraints.
+
+        **Methods of qpsolvers.Problem:**
+
+        check_constraints()
+            Check if the problem constraints are correctly defined.
+        cond(active_set: qpsolvers.ActiveSet)
+            Compute the condition number of the symmetric problem matrix
+            representing hte problem data.
+        save(filename: str)
+            Save the problem data to a file.
+            The ".npz" extension will be appended to the filename if it is not already there.
+        load(filename: str)
+            Load the problem data from a file.
+        unpack()
+            Unpack the problem data into 
+            a tuple of numpy arrays (P, q, G, h, A, b, lb, ub) and return it.
+        get_cute_classification(interest: str)
+            Get the CUTE classification string of the problem.
+            interest can be 'A', 'M', or 'R', depending on whether your problem
+            is academic, part of a modeling exercise, or has real-world applications.
     '''
     def initialize(self, ):
         '''
@@ -253,6 +286,22 @@ class ConvexQPSolvers(Optimizer):
                       optimal_dual_variables=False,
                       extras=False,
                       all=False):
+        '''
+        Print the results of the optimization problem to the console.
+
+        Parameters
+        ----------
+        optimal_variables : bool, default=False
+            If ``True``, print the optimal variables.
+        optimal_constraints : bool, default=False
+            If ``True``, print the optimal constraints.
+        optimal_dual_variables : bool, default=False
+            If ``True``, print the optimal dual variables.
+        extras : bool, default=False
+            If ``True``, print the solver-specific extra information returned.
+        all : bool, default=False
+            If ``True``, print all available information.
+        '''
 
         output  = "\n\tSolution from qpsolvers:"
         output += "\n\t"+"-" * 100

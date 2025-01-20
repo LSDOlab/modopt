@@ -15,9 +15,11 @@ api/openmdao_problem
 api/csdl_problem
 api/postprocessing
 api/educational_algs
+api/performant_algs
 api/line_searches
 api/merit_functions
 api/approximate_hessians
+api/qp_solvers
 api/cutest_problem
 api/benchmarking
 ```
