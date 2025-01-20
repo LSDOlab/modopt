@@ -6,6 +6,34 @@ from .snopt_optimizer import SNOPTOptimizer
 
 
 class SNOPTc(SNOPTOptimizer):
+    '''
+    Class that interfaces modOpt with the SNOPTc optimization algorithm.
+
+    Parameters
+    ----------
+    problem : Problem or ProblemLite
+        Object containing the problem to be solved.
+    recording : bool, default=False
+        If ``True``, record all outputs from the optimization.
+        This needs to be enabled for hot-starting the same problem later,
+        if the optimization is interrupted.
+    hot_start_from : str, optional
+        The record file from which to hot-start the optimization.
+    hot_start_atol : float, default=0.
+        The absolute tolerance check for the inputs
+        when reusing outputs from the hot-start record.
+    hot_start_rtol : float, default=0.
+        The relative tolerance check for the inputs
+        when reusing outputs from the hot-start record.
+    visualize : list, default=[]
+        The list of scalar variables to visualize during the optimization.
+    turn_off_outputs : bool, default=False
+        If ``True``, prevents modOpt from generating any output files.
+
+    solver_options : dict, default={}
+        Dictionary containing the options to be passed to the solver.
+        See the SNOPT page in modOpt's documentation for more information.
+    '''
     def setup(self):
         self.solver_name += '-c'
         self.update_SNOPT_options_object()

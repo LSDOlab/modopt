@@ -9,6 +9,36 @@ class BFGS(Optimizer):
     Class that interfaces modOpt with the BFGS optimization algorithm from Scipy.
     BFGS (Broyden-Fletcher-Goldfarb-Shanno) is a quasi-Newton optimization algorithm 
     for unconstrained problems. Therefore, it does not support bounds or constraints.
+
+    Parameters
+    ----------
+    problem : Problem or ProblemLite
+        Object containing the problem to be solved.
+    recording : bool, default=False
+        If ``True``, record all outputs from the optimization.
+        This needs to be enabled for hot-starting the same problem later,
+        if the optimization is interrupted.
+    hot_start_from : str, optional
+        The record file from which to hot-start the optimization.
+    hot_start_atol : float, default=0.
+        The absolute tolerance check for the inputs
+        when reusing outputs from the hot-start record.
+    hot_start_rtol : float, default=0.
+        The relative tolerance check for the inputs
+        when reusing outputs from the hot-start record.
+    visualize : list, default=[]
+        The list of scalar variables to visualize during the optimization.
+    turn_off_outputs : bool, default=False
+        If ``True``, prevents modOpt from generating any output files.
+
+    solver_options : dict, default={}
+        Dictionary containing the options to be passed to the solver.
+        Available options are: 'maxiter', 'gtol', 'xrtol', 'norm', 
+        'c1', 'c2', 'hess_inv0', 'return_all', 'disp', 'callback'.
+        See the BFGS page in modOpt's documentation for more information.
+    readable_outputs : list, default=[]
+        List of outputs to be written to readable text output files.
+        Available outputs are: 'x', 'obj'.
     '''
     def initialize(self):
         '''
@@ -110,7 +140,18 @@ class BFGS(Optimizer):
                       optimal_hessian_inverse=False,
                       all=False):
         '''
-        Print the results of the optimization in modOpt's format.
+        Print the optimization results to the console.
+
+        Parameters
+        ----------
+        optimal_variables : bool, default=False
+            If ``True``, print the optimal variables.
+        optimal_gradient : bool, default=False
+            If ``True``, print the optimal objective gradient.
+        optimal_hessian_inverse : bool, default=False
+            If ``True``, print the optimal Hessian inverse.
+        all : bool, default=False
+            If ``True``, print all available information.
         '''
         output  = "\n\tSolution from Scipy BFGS:"
         output += "\n\t"+"-" * 100

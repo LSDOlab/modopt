@@ -183,6 +183,20 @@ class SNOPTOptimizer(Optimizer):
                       optimal_constraints=False,
                       optimal_multipliers=False,
                       all=False):
+        '''
+        Print the optimization results to the console.
+
+        Parameters
+        ----------
+        optimal_variables : bool, default=False
+            If ``True``, print the optimal variables.
+        optimal_constraints : bool, default=False
+            If ``True``, print the optimal constraints.
+        optimal_multipliers : bool, default=False
+            If ``True``, print the optimal multipliers.
+        all : bool, default=False
+            If ``True``, print all available information.
+        '''
         output  = "\n\tSolution from SNOPT:"
         output += "\n\t"+"-" * 100
 

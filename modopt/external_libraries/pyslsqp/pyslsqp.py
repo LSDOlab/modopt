@@ -9,6 +9,37 @@ class PySLSQP(Optimizer):
     a Python wrapper for the SLSQP optimization algorithm.
     PySLSQP can solve nonlinear programming problems with
     equality and inequality constraints.
+
+    Parameters
+    ----------
+    problem : Problem or ProblemLite
+        Object containing the problem to be solved.
+    recording : bool, default=False
+        If ``True``, record all outputs from the optimization.
+        This needs to be enabled for hot-starting the same problem later,
+        if the optimization is interrupted.
+    hot_start_from : str, optional
+        The record file from which to hot-start the optimization.
+    hot_start_atol : float, default=0.
+        The absolute tolerance check for the inputs
+        when reusing outputs from the hot-start record.
+    hot_start_rtol : float, default=0.
+        The relative tolerance check for the inputs
+        when reusing outputs from the hot-start record.
+    visualize : list, default=[]
+        The list of scalar variables to visualize during the optimization.
+    turn_off_outputs : bool, default=False
+        If ``True``, prevents modOpt from generating any output files.
+
+    solver_options : dict, default={}
+        Dictionary containing the options to be passed to the solver.
+        Available options are: 'maxiter', 'acc', 'iprint', 'callback', 'summary_filename',
+        'visualize', 'visualize_vars', 'keep_plot_open', 'save_figname', 'save_itr',
+        'save_vars', 'save_filename', 'load_filename', 'warm_start', 'hot_start'.
+        See the PySLSQP page in modOpt's documentation for more information.
+    readable_outputs : list, default=[]
+        List of outputs to be written to readable text output files.
+        Available outputs are: 'x'.
     '''
     def initialize(self, ):
         self.solver_name = 'pyslsqp'
@@ -29,7 +60,6 @@ class PySLSQP(Optimizer):
             'load_filename': ((type(None), str), None),
             'warm_start': (bool, False),
             'hot_start': (bool, False),
-            'callback': ((type(None), callable), None),
         }
         # Used for verifying the keys and value-types of user-provided solver_options, 
         # and generating an updated pure Python dictionary to provide pyslsqp.optimize()
@@ -166,6 +196,24 @@ class PySLSQP(Optimizer):
                       optimal_jacobian=False,
                       optimal_multipliers=False,
                       all=False):
+        '''
+        Print the optimization results to the console.
+
+        Parameters
+        ----------
+        optimal_variables : bool, default=False
+            If ``True``, print the optimal variables.
+        optimal_gradient : bool, default=False
+            If ``True``, print the optimal objective gradient.
+        optimal_constraints : bool, default=False
+            If ``True``, print the optimal constraints.
+        optimal_jacobian : bool, default=False
+            If ``True``, print the optimal constraint Jacobian.
+        optimal_multipliers : bool, default=False
+            If ``True``, print the optimal multipliers.
+        all : bool, default=False
+            If ``True``, print all available information.
+        '''
         
         output  = "\n\tSolution from PySLSQP:"
         output += "\n\t"+"-" * 100

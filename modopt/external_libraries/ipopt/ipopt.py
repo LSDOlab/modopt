@@ -4,12 +4,37 @@ import time
 
 class IPOPT(Optimizer):
     '''
-    Class that interfaces modOpt with the IPOPT in the CasADi package.
+    Class that interfaces modOpt with the IPOPT solver in the CasADi package.
     IPOPT is an open-source interior point algorithm that can solve 
     nonlinear programming problems with equality and inequality constraints.
     It can make use of second order information in the form of the Hessian of 
     the objective for unconstrained problems or the Hessian of the Lagrangian for constrained 
     problems.
+
+    Parameters
+    ----------
+    problem : Problem or ProblemLite
+        Object containing the problem to be solved.
+    recording : bool, default=False
+        If ``True``, record all outputs from the optimization.
+        This needs to be enabled for hot-starting the same problem later,
+        if the optimization is interrupted.
+    hot_start_from : str, optional
+        The record file from which to hot-start the optimization.
+    hot_start_atol : float, default=0.
+        The absolute tolerance check for the inputs
+        when reusing outputs from the hot-start record.
+    hot_start_rtol : float, default=0.
+        The relative tolerance check for the inputs
+        when reusing outputs from the hot-start record.
+    visualize : list, default=[]
+        The list of scalar variables to visualize during the optimization.
+    turn_off_outputs : bool, default=False
+        If ``True``, prevents modOpt from generating any output files.
+
+    solver_options : dict, default={}
+        Dictionary containing the options to be passed to the solver.
+        See the IPOPT page in modOpt's documentation for more information.
     '''
     def initialize(self, ):
         self.solver_name = 'ipopt'
@@ -170,7 +195,20 @@ class IPOPT(Optimizer):
                       optimal_constraints=False,
                       optimal_multipliers=False,
                       all=False,):
-        
+        '''
+        Print the optimization results to the console.
+
+        Parameters
+        ----------
+        optimal_variables : bool, default=False
+            If ``True``, print the optimal variables.
+        optimal_constraints : bool, default=False
+            If ``True``, print the optimal constraints.
+        optimal_multipliers : bool, default=False
+            If ``True``, print the optimal multipliers.
+        all : bool, default=False
+            If ``True``, print all available information.
+        '''
         output  = "\n\tSolution from ipopt:"
         output += "\n\t"+"-" * 100
 

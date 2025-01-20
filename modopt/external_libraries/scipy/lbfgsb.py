@@ -9,7 +9,37 @@ class LBFGSB(Optimizer):
     Class that interfaces modOpt with the L-BFGS-B optimization algorithm from Scipy.
     L-BFGS-B (Limited-memory BFGS with Bound constraints) 
     is a quasi-Newton optimization algorithm for large-scale bound-constrained problems.
-    Therefore, it does not support other type of constraints.
+    Therefore, it does not support other types of constraints.
+
+    Parameters
+    ----------
+    problem : Problem or ProblemLite
+        Object containing the problem to be solved.
+    recording : bool, default=False
+        If ``True``, record all outputs from the optimization.
+        This needs to be enabled for hot-starting the same problem later,
+        if the optimization is interrupted.
+    hot_start_from : str, optional
+        The record file from which to hot-start the optimization.
+    hot_start_atol : float, default=0.
+        The absolute tolerance check for the inputs
+        when reusing outputs from the hot-start record.
+    hot_start_rtol : float, default=0.
+        The relative tolerance check for the inputs
+        when reusing outputs from the hot-start record.
+    visualize : list, default=[]
+        The list of scalar variables to visualize during the optimization.
+    turn_off_outputs : bool, default=False
+        If ``True``, prevents modOpt from generating any output files.
+
+    solver_options : dict, default={}
+        Dictionary containing the options to be passed to the solver.
+        Available options are: 'maxfun', 'maxiter', 'maxls', 'maxcor',
+        'ftol', 'gtol', 'iprint', 'callback'.
+        See the LBFGSB page in modOpt's documentation for more information.
+    readable_outputs : list, default=[]
+        List of outputs to be written to readable text output files.
+        Available outputs are: 'x', 'obj'.
     '''
     def initialize(self):
         '''
@@ -117,7 +147,18 @@ class LBFGSB(Optimizer):
                       optimal_hessian_inverse=False,
                       all=False):
         '''
-        Print the results of the optimization in modOpt's format.
+        Print the optimization results to the console.
+
+        Parameters
+        ----------
+        optimal_variables : bool, default=False
+            If ``True``, print the optimal variables.
+        optimal_gradient : bool, default=False
+            If ``True``, print the optimal objective gradient.
+        optimal_hessian_inverse : bool, default=False
+            If ``True``, print the optimal Hessian inverse.
+        all : bool, default=False
+            If ``True``, print all available information.
         '''
         output  = "\n\tSolution from Scipy L-BFGS-B:"
         output += "\n\t"+"-" * 100

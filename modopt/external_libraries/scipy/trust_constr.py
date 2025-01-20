@@ -15,6 +15,40 @@ class TrustConstr(Optimizer):
     the objective for unconstrained problems or the Hessian of the Lagrangian for constrained 
     problems. TrustConstr can also use objective HVP (Hessian-vector product) when the
     objective Hessian is unavailable.
+
+    Parameters
+    ----------
+    problem : Problem or ProblemLite
+        Object containing the problem to be solved.
+    recording : bool, default=False
+        If ``True``, record all outputs from the optimization.
+        This needs to be enabled for hot-starting the same problem later,
+        if the optimization is interrupted.
+    hot_start_from : str, optional
+        The record file from which to hot-start the optimization.
+    hot_start_atol : float, default=0.
+        The absolute tolerance check for the inputs
+        when reusing outputs from the hot-start record.
+    hot_start_rtol : float, default=0.
+        The relative tolerance check for the inputs
+        when reusing outputs from the hot-start record.
+    visualize : list, default=[]
+        The list of scalar variables to visualize during the optimization.
+    turn_off_outputs : bool, default=False
+        If ``True``, prevents modOpt from generating any output files.
+
+    solver_options : dict, default={}
+        Dictionary containing the options to be passed to the solver.
+        Available options are: 'maxiter', 'gtol', 'xtol', 'barrier_tol', 'initial_tr_radius',
+        'initial_constr_penalty', 'initial_barrier_parameter', 'initial_barrier_tolerance',
+        'factorization_method', 'sparse_jacobian', 'ignore_exact_hessian', 'verbose', 'callback'.
+        See the TrustConstr page in modOpt's documentation for more information.
+    readable_outputs : list, default=[]
+        List of outputs to be written to readable text output files.
+        Available outputs are: 'x', 'obj', 'opt', 'feas', 'grad', 'lgrad', 'con', 'jac',
+        'lmult_x', 'lmult_c', 'iter', 'cg_niter', 'nfev', 'nfgev', 'nfhev', 'ncev', 'ncgev',
+        'nchev', 'tr_radius', 'constr_penalty', 'barrier_parameter', 'barrier_tolerance',
+        'cg_stop_cond', 'time'.
     '''
     def initialize(self):
         '''
@@ -240,12 +274,29 @@ class TrustConstr(Optimizer):
                       optimal_variables=False,
                       optimal_gradient=False,
                       optimal_constraints=False,
-                      optimal_constraints_jacobian=False,
+                      optimal_constraint_jacobian=False,
                       optimal_lagrange_multipliers=False,
                       optimal_lagrangian_gradient=False,
                       all=False):
         '''
-        Print the results of the optimization in modOpt's format.
+        Print the optimization results to the console.
+
+        Parameters
+        ----------
+        optimal_variables : bool, default=False
+            If ``True``, print the optimal variables.
+        optimal_gradient : bool, default=False
+            If ``True``, print the optimal objective gradient.
+        optimal_constraints : bool, default=False
+            If ``True``, print the optimal constraints.
+        optimal_constraint_jacobian : bool, default=False
+            If ``True``, print the optimal constraints Jacobian.
+        optimal_lagrange_multipliers : bool, default=False
+            If ``True``, print the optimal Lagrange multipliers.
+        optimal_lagrangian_gradient : bool, default=False
+            If ``True``, print the optimal Lagrangian gradient.
+        all : bool, default=False
+            If ``True``, print all available information.
         '''
         constrained = self.problem.constrained
         bounded     = bool(self.bounds)
@@ -298,7 +349,7 @@ class TrustConstr(Optimizer):
             output += f"\n\t{'Optimal obj. gradient':30}: {self.results['grad']}"
         if optimal_constraints or all:
             output += f"\n\t{'Optimal constraints':30}: {self.results['con']}"
-        if optimal_constraints_jacobian or all:
+        if optimal_constraint_jacobian or all:
             output += f"\n\t{'Optimal con. Jacobian':30}: {self.results['jac']}"
         if optimal_lagrange_multipliers or all:
             output += f"\n\t{'Optimal Lag. mult. (bounds)':30}: {self.results['lmult_x']}"

@@ -251,7 +251,7 @@ def test_trust_constr():
     optimizer.solve()
     print(optimizer.results)
     optimizer.print_results(optimal_variables=True, optimal_gradient=True, optimal_constraints=True, 
-                            optimal_constraints_jacobian=True, optimal_lagrange_multipliers=True,
+                            optimal_constraint_jacobian=True, optimal_lagrange_multipliers=True,
                             optimal_lagrangian_gradient=True)
     assert optimizer.results['success'] == True
     # assert optimizer.results['message'] == '`gtol` termination condition is satisfied.'
@@ -266,7 +266,7 @@ def test_trust_constr():
     optimizer.solve()
     print(optimizer.results)
     optimizer.print_results(optimal_variables=True, optimal_gradient=True, optimal_constraints=True,
-                            optimal_constraints_jacobian=True, optimal_lagrange_multipliers=True,
+                            optimal_constraint_jacobian=True, optimal_lagrange_multipliers=True,
                             optimal_lagrangian_gradient=True)
     assert optimizer.results['success'] == True
     assert optimizer.results['message'] == '`xtol` termination condition is satisfied.'
@@ -412,7 +412,7 @@ def test_trust_constr_exact_hess():
     optimizer.solve()
     print(optimizer.results)
     optimizer.print_results(optimal_variables=True, optimal_gradient=True,
-                            optimal_constraints=True, optimal_constraints_jacobian=True,
+                            optimal_constraints=True, optimal_constraint_jacobian=True,
                             optimal_lagrange_multipliers=True, optimal_lagrangian_gradient=True)
     assert optimizer.results['success'] == True
     assert optimizer.results['message'] == '`xtol` termination condition is satisfied.'
@@ -426,7 +426,7 @@ def test_trust_constr_exact_hess():
     optimizer.solve()
     print(optimizer.results)
     optimizer.print_results(optimal_variables=True, optimal_gradient=True,
-                            optimal_constraints=True, optimal_constraints_jacobian=True,
+                            optimal_constraints=True, optimal_constraint_jacobian=True,
                             optimal_lagrange_multipliers=True, optimal_lagrangian_gradient=True)
     assert optimizer.results['success'] == True
     assert optimizer.results['message'] == '`xtol` termination condition is satisfied.'
@@ -441,7 +441,7 @@ def test_trust_constr_exact_hess():
     optimizer.solve()
     print(optimizer.results)
     optimizer.print_results(optimal_variables=True, optimal_gradient=True,
-                            optimal_constraints=True, optimal_constraints_jacobian=True,
+                            optimal_constraints=True, optimal_constraint_jacobian=True,
                             optimal_lagrange_multipliers=True, optimal_lagrangian_gradient=True)
     assert optimizer.results['message'] == '`gtol` termination condition is satisfied.'
     assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=3)
@@ -453,7 +453,7 @@ def test_trust_constr_exact_hess():
     optimizer.solve()
     print(optimizer.results)
     optimizer.print_results(optimal_variables=True, optimal_gradient=True,
-                            optimal_constraints=True, optimal_constraints_jacobian=True,
+                            optimal_constraints=True, optimal_constraint_jacobian=True,
                             optimal_lagrange_multipliers=True, optimal_lagrangian_gradient=True)
     assert optimizer.results['message'] == '`gtol` termination condition is satisfied.'
     assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=3)
@@ -466,7 +466,7 @@ def test_trust_constr_exact_hess():
     optimizer.solve()
     print(optimizer.results)
     optimizer.print_results(optimal_variables=True, optimal_gradient=True,
-                            optimal_constraints=True, optimal_constraints_jacobian=True,
+                            optimal_constraints=True, optimal_constraint_jacobian=True,
                             optimal_lagrange_multipliers=True, optimal_lagrangian_gradient=True)
     assert optimizer.results['success'] == True
     assert optimizer.results['message'] == '`xtol` termination condition is satisfied.'
@@ -479,7 +479,7 @@ def test_trust_constr_exact_hess():
     optimizer.solve()
     print(optimizer.results)
     optimizer.print_results(optimal_variables=True, optimal_gradient=True,
-                            optimal_constraints=True, optimal_constraints_jacobian=True,
+                            optimal_constraints=True, optimal_constraint_jacobian=True,
                             optimal_lagrange_multipliers=True, optimal_lagrangian_gradient=True)
     assert optimizer.results['success'] == True
     assert optimizer.results['message'] == '`xtol` termination condition is satisfied.'
