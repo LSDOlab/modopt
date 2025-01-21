@@ -1,21 +1,18 @@
 # Tutorials
 
-These tutorials are generated from Jupyter notebooks (.ipynb) and
-walks the reader through example scripts providing detailed
-step-by-step instructions.
-Each tutorial contains mix of code and text that shows the
-functionality of your package.
-Tutorials are intended for explaining the fundamental capabilities of the package
-and they get progressively more complicated.
-It is recommeded that the tutorials also include mathematical equations and outputs/visualization 
-from running the script for better understanding for the users.
+The tutorials listed on this page are designed to explain
+the fundamental capabilities of modOpt.
+These tutorials are generated from Jupyter notebooks (.ipynb) and guide
+the reader through Python scripts with detailed step-by-step instructions.
+Each tutorial includes a mix of code and text that demonstrates 
+specific functionalities of modOpt.
+They may also feature mathematical equations, console outputs, 
+and visualizations from running the scripts to enhance user understanding.
 
 ```{toctree}
-:caption: List of tutorials
 :titlesonly:
 :includehidden:
-:maxdepth: 2
+:maxdepth: 1
 
-tutorials/basic
-tutorials/advanced
+_temp/tutorials/simple_example
 ```

@@ -1,13 +1,14 @@
 # Examples
 
-Unlike tutorials, examples are generated from Python files (.py) and
-and is more of a collection of run scripts for reference/benchmarking.
-Examples may contain documentation in the form of comments.
-However, outputs/visualization from running the script is excluded.
-
+Here, we provide several examples demonstrating different use cases of modOpt.
+These examples serve as a collection of run scripts for user reference and benchmarking optimizers.
+Unlike tutorials, most examples are generated from Python (.py) files
+and may include some documentation in the form of comments.
+Some examples may be written in Jupyter Notebooks (.ipynb)
+when console outputs and plots generated from running the scripts are important
+and need to be included in the documentation.
 
 ```{toctree}
-:caption: List of examples
 :titlesonly:
 :includehidden:
 :maxdepth: 2

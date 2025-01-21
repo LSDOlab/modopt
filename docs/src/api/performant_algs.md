@@ -89,6 +89,7 @@
 ```{eval-rst}
 
 .. autoclass:: modopt.SQP
+    :noindex:
     :members: check_first_derivatives, solve, print_results
 ```
 
