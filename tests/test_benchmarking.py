@@ -125,8 +125,6 @@ def test_plot_performance_profiles():
     from modopt.benchmarking import plot_performance_profiles
     plot_performance_profiles(performance, save_figname='performance.pdf')
 
-@pytest.mark.interfaces
-@pytest.mark.pycutest
 @pytest.mark.benchmarking
 def test_filter_cutest_problems():
     from modopt.benchmarking import filter_cutest_problems

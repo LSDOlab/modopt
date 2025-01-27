@@ -308,7 +308,7 @@ def filter_cutest_problems(num_vars=[0,1], num_cons=[0,0]):
     
     import os
     here = os.path.abspath(os.path.dirname(__file__))
-    file_path = os.path.join(here, '../../docs/src/benchmarking/full_cutest_problem_table.md')
+    file_path = os.path.join(here, '../../docs/src/benchmarking/cutest_problem_table.md')
     file_path = os.path.normpath(file_path)
 
     # Load the dataset from the Markdown file
