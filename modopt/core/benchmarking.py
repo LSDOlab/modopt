@@ -66,6 +66,30 @@ def generate_performance_profiles(data):
         The keys are the solver names and the values are the proportion of problems
         solved under the performance ratio corresponding to entries in Tau_n.
         Only returned if the number of evaluations `'nev'` is available in the data.
+    
+    Examples
+    --------
+    >>> from modopt.benchmarking import generate_performance_profiles
+    >>> data = {('problem1', 'solver1'): {'time': 0.1, 'success': True},
+    ...         ('problem1', 'solver2'): {'time': 0.2, 'success': True},
+    ...         ('problem2', 'solver1'): {'time': 0.3, 'success': True},
+    ...         ('problem2', 'solver2'): {'time': 0.4, 'success': False}}
+    >>> Tau, performance_profiles = generate_performance_profiles(data)
+    Total number of problems: 2 
+    <BLANKLINE>
+    Solver: solver1
+    --------------------------------------------------
+    Number of problems solved: 2
+    Percentage of problems solved: 100.0
+    -------------------------------------------------- 
+    <BLANKLINE>
+    Solver: solver2
+    --------------------------------------------------
+    Number of problems solved: 1
+    Percentage of problems solved: 50.0
+    -------------------------------------------------- 
+    <BLANKLINE>
+    >>> print(Tau) # doctest: +SKIP
     '''
     
     # Get the unique solvers and problems
@@ -188,6 +212,29 @@ def plot_performance_profiles(data, save_figname='performance.pdf'):
         If the number of evaluations is available in `data`, 
         the performance profiles for the number of evaluations is also plotted
         and saved to the path with `save_figname` appended with `_nev` before the extension.
+    
+    Examples
+    --------
+    >>> from modopt.benchmarking import plot_performance_profiles
+    >>> data = {('problem1', 'solver1'): {'time': 0.1, 'success': True},
+    ...         ('problem1', 'solver2'): {'time': 0.2, 'success': True},
+    ...         ('problem2', 'solver1'): {'time': 0.3, 'success': True},
+    ...         ('problem2', 'solver2'): {'time': 0.4, 'success': False}}
+    >>> plot_performance_profiles(data, save_figname='performance.pdf')
+    Total number of problems: 2 
+    <BLANKLINE>
+    Solver: solver1
+    --------------------------------------------------
+    Number of problems solved: 2
+    Percentage of problems solved: 100.0
+    -------------------------------------------------- 
+    <BLANKLINE>
+    Solver: solver2
+    --------------------------------------------------
+    Number of problems solved: 1
+    Percentage of problems solved: 50.0
+    -------------------------------------------------- 
+    <BLANKLINE>
     '''
     
     if plt is None:
@@ -234,6 +281,57 @@ def plot_performance_profiles(data, save_figname='performance.pdf'):
         fig.set_size_inches(8, 6)
         plt.savefig(save_figname.replace('.pdf', '_nev.pdf'), bbox_inches='tight')
         plt.show()
+
+def filter_cutest_problems(num_vars=[0,1], num_cons=[0,0]):
+    '''
+    Filter CUTEst problems based on the number of variables and constraints.
+
+    Parameters
+    ----------
+    num_vars : list, default=[0,1]
+        List of two integers denoting the minimum and maximum number of variables.
+    num_cons : list, default=[0,0]
+        List of two integers denoting the minimum and maximum number of constraints.
+
+    Returns
+    -------
+    filtered_problems : list
+        List of CUTEst problems that has the number of variables and constraints within the specified range.
+
+    Examples
+    --------
+    >>> from modopt.benchmarking import filter_cutest_problems
+    >>> problem_names = filter_cutest_problems(num_vars=[1,5], num_cons=[1,1])
+    >>> print(len(problem_names))
+    45
+    '''
+    
+    import os
+    here = os.path.abspath(os.path.dirname(__file__))
+    file_path = os.path.join(here, '../../docs/src/benchmarking/full_cutest_problem_table.md')
+    file_path = os.path.normpath(file_path)
+
+    # Load the dataset from the Markdown file
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+
+    # Extract the table part from the Markdown file
+    table_lines = [line.strip() for line in lines if line.strip() and "|" in line]
+    header_line = table_lines[0]
+    data_lines  = table_lines[2:]  # Skip header and separator lines
+
+    header = [col.strip() for col in header_line.split('|') if col]
+    data   = [[col.strip() for col in line.split('|') if col] for line in data_lines]
+
+    # Get filtered problem names: Only import required problems based on the table
+    filtered_problems = []
+    for line in data:
+        name, nx, nc = line[1], int(line[2]), int(line[3])
+        if nx >= num_vars[0] and nx <= num_vars[1] and nc >= num_cons[0] and nc <= num_cons[1]:
+            filtered_problems.append(name)
+
+    # print('Number of problems filtered:', len(filtered_problems))
+    return filtered_problems
 
 if __name__ == "__main__":
     import doctest

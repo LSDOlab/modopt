@@ -1,1 +1,3 @@
-from modopt.core.benchmarking import generate_performance_profiles, plot_performance_profiles
+from modopt.core.benchmarking import (generate_performance_profiles, 
+                                      plot_performance_profiles, 
+                                      filter_cutest_problems)

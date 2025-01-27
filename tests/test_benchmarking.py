@@ -124,3 +124,19 @@ def test_plot_performance_profiles():
     performance = run_benchmarking()
     from modopt.benchmarking import plot_performance_profiles
     plot_performance_profiles(performance, save_figname='performance.pdf')
+
+@pytest.mark.interfaces
+@pytest.mark.pycutest
+@pytest.mark.benchmarking
+def test_filter_cutest_problems():
+    from modopt.benchmarking import filter_cutest_problems
+
+    # Filter CUTEst problems to only include those with 1-5 variables and 1-1 constraints
+    problems = filter_cutest_problems(num_vars=[1,5], num_cons=[1,1])
+    assert len(problems) == 45
+
+if __name__ == '__main__':
+    test_generate_performance_profiles()
+    test_plot_performance_profiles()
+    test_filter_cutest_problems()
+    print("All tests passed!")

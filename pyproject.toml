@@ -137,12 +137,14 @@ interfaces = [
     "csdl_alpha @ git+https://github.com/LSDOlab/csdl_alpha.git",
     "jax[cpu]",
     "openmdao",
-    "qpsolvers[open_source_solvers]", # Installs the library with open source QP solvers
-    # "cvxopt", # cvxopt is already installed with qpsolvers[open_source_solvers]
+    "qpsolvers",
+    # "qpsolvers[open_source_solvers]", # Installs the library with open source QP solvers
+    "cvxopt", # cvxopt MAY BE already installed with qpsolvers[open_source_solvers]
     "pycutest", # Needs manual installation of the CUTEst library with the test problems
     "casadi", # Needed for the IPOPT interface
     "pyslsqp",
-    # "osqp", # osqp is already installed with qpsolvers[open_source_solvers]
+    "osqp", # osqp MAY BE already installed with qpsolvers[open_source_solvers]
+    "quadprog", # quadprog MAY BE already installed with qpsolvers[open_source_solvers]
     "cobyqa", # cobyqa is already installed with scipy>=1.14.0, which requires python>=3.10
 ]
 visualization = [
