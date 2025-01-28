@@ -191,12 +191,12 @@ def load_attributes(filepath):
     return attr_dict
 
 
-def load_variables(filepath, vars):
+def load_variables(filepath, vars, callback_context=False):
     '''
     Load specified variable iterates from the record file.
     Returns a dictionary with the variable names as keys and lists of variable iterates as values.
     Note that the keys for callback variables will be prefixed with 'callback\_'
-    as opposed to optimizer variables that will have same key as the specified variable name.
+    as opposed to optimizer variables that will have its key as the specified variable name.
 
     Parameters
     ----------
@@ -207,12 +207,20 @@ def load_variables(filepath, vars):
         If only specific scalar variables are needed from an array, use the format 'var_name[idx]'.
         For example, 'x[0]' will load the iterates for the first element of the array 'x', and
         'jac[i,j]' will load the iterates for the (i,j)-th element of the array 'jac'.
+    callback_context : bool, default=False
+        If True, load the callback index and inputs for each callback variable in ``vars``,
+        in addition to the callback variable iterates.
+        The context is stored as a separate list in the output dictionary with its key
+        formatted as the variable name prefixed by 'callback\_context\_'.
+        Each context in the list is a dictionary with the keys 'callback\_index', and
+        the name of the input variable(s) used in the callback (e.g. 'x', 'lag\_mult', etc.).
 
     Returns
     -------
     out_data : dict
         Dictionary with variable names as keys and lists of variable iterates as values.
-        Keys for callback variables will be prefixed with 'callback\_'.
+        Keys for callback variables is prefixed with 'callback\_'
+        and keys for callback variable context is prefixed with 'callback\_context\_'.
 
     Examples
     --------
@@ -235,6 +243,18 @@ def load_variables(filepath, vars):
     'callback_x[0]': [500.0, 500.0, 500.0, 500.0, 500.0, 1.00000..., 1.000000..., 1.00000..., 1.000000...], 
     'callback_obj': [252500.0, 1.000000...], 'callback_con[1]': [450.0, 450.0, 1.000000...], 
     'callback_grad': [array([1000.,  100.]), array([ 2.00000...e+00, -2.0...e-08])], 'callback_jac[0,1]': [1.0, 1.0]}
+    >>> load_variables(results['out_dir']+'/record.hdf5', ['x[0]', 'obj', 'con[1]', 'grad', 'jac[0,1]'], callback_context=True) # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+    {'x[0]': [500.0, 1.0000000..., 1.00000...],
+    'callback_x[0]': [500.0, 500.0, 500.0, 500.0, 500.0, 1.00000..., 1.000000..., 1.00000..., 1.000000...],
+    'callback_context_x[0]': [{'callback_index': 0, 'x': array([500.,  50.])}, {'callback_index': 1, 'x': array([500.,  50.])}, ..., {'callback_index': 8, 'x': array([ 1.000...e+00, -1.0...e-08])}],
+    'callback_obj': [252500.0, 1.000000...],
+    'callback_context_obj': [{'callback_index': 1, 'x': array([500.,  50.])}, {'callback_index': 5, 'x': array([ 1.000...e+00, -1.0...e-08])}],
+    'callback_con[1]': [450.0, 450.0, 1.000000...],
+    'callback_context_con[1]': [{'callback_index': 0, 'x': array([500.,  50.])}, {'callback_index': 3, 'x': array([500.,  50.])}, {'callback_index': 6, 'x': array([ 1.000...e+00, -1.0...e-08])}],
+    'callback_grad': [array([1000.,  100.]), array([ 2.00000...e+00, -2.0...e-08])],
+    'callback_context_grad': [{'callback_index': 2, 'x': array([500.,  50.])}, {'callback_index': 7, 'x': array([ 1.000...e+00, -1.0...e-08])}],
+    'callback_jac[0,1]': [1.0, 1.0],
+    'callback_context_jac[0,1]': [{'callback_index': 4, 'x': array([500.,  50.])}, {'callback_index': 8, 'x': array([ 1.000...e+00, -1.0...e-08])}]}
 
     '''
     if not isinstance(filepath, str):
@@ -262,6 +282,8 @@ def load_variables(filepath, vars):
         if var in callback_vars:
             out_data[f'callback_{in_var}'] = []
             # out_data[f'callback_indices_{in_var}'] = []
+            if callback_context:
+                out_data[f'callback_context_{in_var}'] = []
 
     for i in range(n_iter):
         for in_var in vars:
@@ -300,6 +322,12 @@ def load_variables(filepath, vars):
 
             # if group_key == 'outputs':
             #     out_data[f'callback_indices_{in_var}'].append(i)
+            if callback_context:
+                inputs = list(file[f'callback_{i}']['inputs'].keys())
+                group  = file[f'callback_{i}']['inputs']
+                out_data[f'callback_context_{in_var}'].append(
+                    {'callback_index': i} | {key: group[key][()] for key in inputs}
+                )
     
     file.close()
 
