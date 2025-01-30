@@ -55,6 +55,8 @@ class SQP(Optimizer):
         Maximum number of iterations for the line search.
     ls_alpha_tol : float, default=1e-14
         Relative tolerance for an acceptable step in the line search.
+    ls_eta_a : float, default=1e-4
+        Armijo (sufficient decrease condition) parameter for the line search.
     ls_eta_w : float, default=0.9
         Wolfe (curvature condition) parameter for the line search.
 
@@ -86,6 +88,7 @@ class SQP(Optimizer):
         self.options.declare('ls_max_step', default=1.0, types=float)
         self.options.declare('ls_maxiter', default=10, types=int)
         self.options.declare('ls_alpha_tol', default=1e-14, types=float)
+        self.options.declare('ls_eta_a', default=1e-4, types=float)
         self.options.declare('ls_eta_w', default=0.9, types=float)
 
         self.options.declare('readable_outputs', types=list, default=[])
@@ -144,10 +147,12 @@ class SQP(Optimizer):
                               max_step=self.options['ls_max_step'],
                               maxiter=self.options['ls_maxiter'],
                               alpha_tol=self.options['ls_alpha_tol'],
+                              eta_a=self.options['ls_eta_a'],
                               eta_w=self.options['ls_eta_w'])
         
         self.LSB = BacktrackingArmijo(f=self.MF.compute_function,
                                       g=self.MF.compute_gradient,
+                                      eta_a=self.options['ls_eta_a'],
                                       gamma_c=0.3,
                                       max_step=self.options['ls_max_step'],
                                       maxiter=25)

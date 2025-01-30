@@ -91,6 +91,9 @@ See the table below for the full list of options.
 * - `ls_alpha_tol`
   - *float* (`1e-14`)
   - Relative tolerance for an acceptable step in the line search.
+* - `ls_eta_a`
+  - *float* (`1e-4`)
+  - Armijo (sufficient decrease condition) parameter for the line search.
 * - `ls_eta_w`
   - *float* (`0.9`)
   - Wolfe (curvature condition) parameter for the line search.

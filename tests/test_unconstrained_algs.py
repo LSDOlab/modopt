@@ -50,7 +50,7 @@ def test_quasi_newton():
     prob = Unconstrained()
     prob.x0 = np.array([100., 10.]) # set initial guess to something closer to the minimum [0, 0]
 
-    solver_options = {'maxiter': 100, 'opt_tol': 1e-11}
+    solver_options = {'maxiter': 100, 'opt_tol': 1e-11, 'ls_type':'derivative-based-strong-wolfe'}
     optimizer = QuasiNewton(prob, **solver_options)
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
@@ -81,6 +81,36 @@ def test_quasi_newton():
     assert optimizer.results['niter'] < solver_options['maxiter']
     assert optimizer.results['nfev'] == 76
     assert optimizer.results['ngev'] == 76
+
+    solver_options = {'maxiter': 100, 'opt_tol': 1e-11, 'ls_type':'backtracking-armijo'}
+    optimizer = QuasiNewton(prob, **solver_options)
+    optimizer.check_first_derivatives(prob.x0)
+    optimizer.solve()
+    print(optimizer.results)
+    optimizer.print_results(summary_table=True)
+
+    assert optimizer.results['converged']
+    assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=4)
+    assert_almost_equal(optimizer.results['objective'], 0., decimal=11)
+    assert_almost_equal(optimizer.results['optimality'], 0., decimal=11)
+    assert optimizer.results['niter'] < solver_options['maxiter']
+    assert optimizer.results['nfev'] == 84
+    assert optimizer.results['ngev'] == 74
+
+    solver_options = {'maxiter': 200, 'opt_tol': 1e-11, 'ls_type':None}
+    optimizer = QuasiNewton(prob, **solver_options)
+    optimizer.check_first_derivatives(prob.x0)
+    optimizer.solve()
+    print(optimizer.results)
+    optimizer.print_results(summary_table=True)
+
+    assert optimizer.results['converged']
+    assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=4)
+    assert_almost_equal(optimizer.results['objective'], 0., decimal=11)
+    assert_almost_equal(optimizer.results['optimality'], 0., decimal=11)
+    assert optimizer.results['niter'] < solver_options['maxiter']
+    assert optimizer.results['nfev'] == 117
+    assert optimizer.results['ngev'] == 117
 
 from modopt import Problem, ProblemLite
 import numpy as np
