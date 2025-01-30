@@ -2,7 +2,7 @@ import numpy as np
 import time
 
 from modopt import Optimizer
-from modopt.line_search_algorithms import ScipyLS
+from modopt.line_search_algorithms import ScipyLS, BacktrackingArmijo, Minpack2LS
 
 class SteepestDescent(Optimizer):
     """
@@ -34,6 +34,23 @@ class SteepestDescent(Optimizer):
     opt_tol : float, default=1e-5
         Optimality tolerance.
         Certifies convergence when the 2-norm of the gradient is less than this value.
+    ls_type : {None, 'backtracking-armijo', 'derivative-based-strong-wolfe'}, default='derivative-based-strong-wolfe'
+        Type of line search to use.
+    ls_min_step : float, default=1e-14
+        Minimum step size for the line search.
+    ls_max_step : float, default=1.
+        Maximum step size for the line search.
+    ls_maxiter : int, default=10
+        Maximum number of iterations for the line search.
+    ls_alpha_tol : float, default=1e-14
+        Relative tolerance for an acceptable step in the line search.
+    ls_gamma_c : float, default=0.3
+        Step length contraction factor when backtracking.
+    ls_eta_a : float, default=1e-4
+        Armijo (sufficient decrease condition) parameter for the line search.
+    ls_eta_w : float, default=0.9
+        Wolfe (curvature condition) parameter for the line search.
+
     readable_outputs : list, default=[]
         List of outputs to be written to readable text output files.
         Available outputs are: 'itr', 'obj', 'x', 'opt', 'time', 'nfev', 'ngev', 'step'.
@@ -46,6 +63,20 @@ class SteepestDescent(Optimizer):
 
         self.options.declare('maxiter', types=int, default=500)
         self.options.declare('opt_tol', types=float, default=1e-5)
+
+        self.options.declare('ls_type',
+                             default='derivative-based-strong-wolfe',
+                             values=[None,
+                                     'backtracking-armijo',
+                                     'derivative-based-strong-wolfe'])
+        self.options.declare('ls_min_step', default=1e-14, types=float)
+        self.options.declare('ls_max_step', default=1.0, types=float)
+        self.options.declare('ls_maxiter', default=10, types=int)
+        self.options.declare('ls_alpha_tol', default=1e-14, types=float)
+        self.options.declare('ls_gamma_c', default=0.3, types=float)
+        self.options.declare('ls_eta_a', default=1e-4, types=float)
+        self.options.declare('ls_eta_w', default=0.9, types=float)
+
         self.options.declare('readable_outputs', types=list, default=[])
 
         self.available_outputs = {
@@ -61,7 +92,24 @@ class SteepestDescent(Optimizer):
         }
 
     def setup(self):
-        self.LS = ScipyLS(f=self.obj, g=self.grad, max_step=50.)
+        # self.LS = ScipyLS(f=self.obj, g=self.grad, max_step=50.)
+
+        if self.options['ls_type'] == 'backtracking-armijo':
+            self.LS = BacktrackingArmijo(f=self.obj,
+                                         g=self.grad,
+                                         eta_a=self.options['ls_eta_a'],
+                                         gamma_c=self.options['ls_gamma_c'],
+                                         max_step=self.options['ls_max_step'],
+                                         maxiter=self.options['ls_maxiter'])
+        elif self.options['ls_type'] == 'derivative-based-strong-wolfe':
+            self.LS = Minpack2LS(f=self.obj,
+                                 g=self.grad,
+                                 min_step=self.options['ls_min_step'],
+                                 max_step=self.options['ls_max_step'],
+                                 maxiter=self.options['ls_maxiter'],
+                                 alpha_tol=self.options['ls_alpha_tol'],
+                                 eta_a=self.options['ls_eta_a'],
+                                 eta_w=self.options['ls_eta_w'])
 
     def solve(self):
 
@@ -74,11 +122,9 @@ class SteepestDescent(Optimizer):
         obj = self.obj
         grad = self.grad
 
-        LS = self.LS
-
         start_time = time.time()
 
-        # Set intial values for current iterates
+        # Set initial values for current iterates
         x_k = x0 * 1.
         f_k = obj(x_k)
         g_k = grad(x_k)
@@ -111,9 +157,23 @@ class SteepestDescent(Optimizer):
             p_k = -g_k
 
             # Compute the step length along the search direction via a line search
-            alpha, f_k, g_k, slope_new, new_f_evals, new_g_evals, converged = LS.search(
-                x=x_k, p=p_k, f0=f_k, g0=g_k)
+            if self.options['ls_type'] == 'backtracking-armijo':
+                alpha, f_k, new_f_evals, new_g_evals, converged = self.LS.search(
+                    x=x_k, p=p_k, f0=f_k, g0=g_k)
 
+                g_k = grad(x_k + alpha * p_k)
+                new_g_evals += 1
+
+            elif self.options['ls_type'] == 'derivative-based-strong-wolfe':
+                alpha, f_k, g_k, slope_new, new_f_evals, new_g_evals, converged = self.LS.search(
+                    x=x_k, p=p_k, f0=f_k, g0=g_k)
+
+            else:
+                alpha, f_k, g_k, new_f_evals, new_g_evals, converged = (
+                    1., obj(x_k + p_k), grad(x_k + p_k), 1, 1, True
+                    )
+
+            # Update the number of function and gradient evaluations
             nfev += new_f_evals
             ngev += new_g_evals
 
@@ -123,11 +183,15 @@ class SteepestDescent(Optimizer):
                 x_k += p_k * alpha
                 f_k = obj(x_k)
                 g_k = grad(x_k)
+                nfev += 1
+                ngev += 1
 
             else:
                 x_k += alpha * p_k
-                if g_k == 'Unavailable':
-                    g_k = grad(x_k)
+                if not isinstance(g_k, np.ndarray):
+                    if g_k == 'Unavailable':
+                        g_k = grad(x_k)
+                        ngev += 1
 
             opt = np.linalg.norm(g_k)
 

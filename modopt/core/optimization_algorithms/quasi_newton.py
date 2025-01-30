@@ -37,7 +37,7 @@ class QuasiNewton(Optimizer):
     opt_tol : float, default=1e-6
         Optimality tolerance.
         Certifies convergence when the 2-norm of the gradient is less than this value.
-    ls_type : {None, 'backtracking-armijo', 'derivative-based-strong-wolfe', default='derivative-based-strong-wolfe'}
+    ls_type : {None, 'backtracking-armijo', 'derivative-based-strong-wolfe'}, default='derivative-based-strong-wolfe'
         Type of line search to use.
     ls_min_step : float, default=1e-14
         Minimum step size for the line search.
@@ -205,6 +205,7 @@ class QuasiNewton(Optimizer):
                 if not isinstance(g_new, np.ndarray):
                     if g_new == 'Unavailable':
                         g_new = grad(x_k)
+                        ngev += 1
                 w_k = g_new - g_k
                 g_k = g_new
 
