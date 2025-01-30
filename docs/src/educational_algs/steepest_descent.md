@@ -1,5 +1,10 @@
 # SteepestDescent
 
+## Options table
+
+```{include} ../_temp/options_tables/SteepestDescent_options_table.md
+```
+
 ## Source code
 
 ```{literalinclude} ../../../modopt/core/optimization_algorithms/steepest_descent.py

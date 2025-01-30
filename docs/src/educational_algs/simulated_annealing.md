@@ -1,5 +1,10 @@
 # SimulatedAnnealing
 
+## Options table
+
+```{include} ../_temp/options_tables/SimulatedAnnealing_options_table.md
+```
+
 ## Source code
 
 ```{literalinclude} ../../../modopt/core/optimization_algorithms/simulated_annealing.py

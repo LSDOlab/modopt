@@ -1,5 +1,10 @@
 # NewtonLagrange
 
+## Options table
+
+```{include} ../_temp/options_tables/NewtonLagrange_options_table.md
+```
+
 ## Source code
 
 ```{literalinclude} ../../../modopt/core/optimization_algorithms/newton_lagrange.py

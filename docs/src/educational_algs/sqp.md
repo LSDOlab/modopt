@@ -1,5 +1,10 @@
 # SQP
 
+## Options table
+
+```{include} ../_temp/options_tables/SQP_options_table.md
+```
+
 ## Source code
 
 <!-- ```{literalinclude} ../../../modopt/core/optimization_algorithms/sqp_dense.py

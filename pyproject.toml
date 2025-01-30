@@ -196,6 +196,7 @@ omit = [
     "*/*_dev.py",
     # omit this single file since options dictionary is already tested in openmdao
     "modopt/utils/options_dictionary.py",
+    "modopt/utils/generate_options_table.py", # only used when building docs
     # omit deprecated sqp algorithms
     "modopt/core/optimization_algorithms/sqp.py",
     "modopt/core/optimization_algorithms/sqp_osqp.py",

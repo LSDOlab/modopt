@@ -191,6 +191,8 @@ def split_first_string_between_quotes(code_string, quotes):
     else:
         raise SyntaxError('Docstring for title and description is not declared correctly')
 
+from modopt.utils.generate_options_table import generate_educational_algorithm_tables
+
 collections = {
     
     # copy_tutorials collection copies the contents inside `/tutorials` 
@@ -231,6 +233,17 @@ collections = {
                                     # the original FunctionDriver was supposed to write only 1 file.
       'clean': True,       
       'final_clean': True,      
+    #   'write_result': True,   # this prevents original FunctionDriver from writing to the target file
+   },
+
+   'generate_options_tables': {
+      'driver': 'writer_function',  # uses custom WriterFunctionDriver written by Anugrah
+      'from'  : '_temp/options_tables/',  # source relative to path of makefile, not wrt /src
+      'source': generate_educational_algorithm_tables,   # custom function written in modopt/utils/generate_options_table.py
+      'target': 'options_tables/',  # target was a file for original FunctionDriver, e.g., 'target': 'examples/temp.txt'
+                                    # the original FunctionDriver was supposed to write only 1 file.
+      'clean': True,
+      'final_clean': True,      # Do not clean as these files are directly included in the documentation
     #   'write_result': True,   # this prevents original FunctionDriver from writing to the target file
    },
 }
