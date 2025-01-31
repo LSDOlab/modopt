@@ -1,32 +1,67 @@
 # Welcome to modOpt's documentation
 
 modOpt is a modular development environment and library for optimization
-algorithms written fully in Python.
-modOpt is primarily developed for easy and fast development of 
-gradient-based optimization algorithms through modular construction of 
-algorithms, and testing with built-in problems and interfaced test-suites.
-Since modOpt breaks down algorithms into self-contained components such as
-line-searches and Hessian approximations, students can develop new or modified versions 
-of existing algorithms by replacing or modifying these components.
-It also enables students to perform comparative studies of their versions with a 
-standard algorithm.
+algorithms, written in Python.
+It is primarily designed to support research and education
+in the field of numerical optimization.
+modOpt facilitates rapid and efficient development of optimization algorithms 
+by enabling a modular approach to building algorithms and 
+providing built-in capabilities for testing and benchmarking.
+<!-- testing and benchmarking leveraging 
+built-in problems and interfaced test-suites. -->
+
+<!-- By breaking down algorithms into self-contained modules--such as 
+line searches and Hessian approximations—-modOpt allows optimization practitioners, 
+students, and researchers to develop new or modified versions of existing algorithms 
+by replacing or modifying these component modules.
+Additionally, modOpt's benchmarking capabilities allow users to conveniently 
+perform comparative studies of their algorithms against standard ones 
+included in the library.
+modOpt also includes built-in visualization and recording capabilities, and
+interfaces to modeling frameworks such as JAX, CasADi, OpenMDAO and CSDL,
+and various utilities for testing algorithms and postprocessing optimization results. -->
+
+modOpt offers various features to support students, optimization practitioners, 
+and advanced developers.
+For instance, it includes built-in visualization and recording capabilities, 
+interfaces to modeling frameworks such as JAX, CasADi, OpenMDAO and CSDL, and
+an interface to the CUTEst test problem set.
+It also provides several utilities for testing and benchmarking algorithms, 
+and postprocessing optimization results.
+modOpt is supported on Linux, macOS, and Windows.
+
+modOpt allows users to define computational models specifying
+the objective, constraints, and derivatives of optimization problems 
+using one of the following six options:
+1. The built-in `Problem` class,
+2. The built-in `ProblemLite` class,
+3. CSDL or CSDL_alpha,
+4. OpenMDAO,
+5. JAX, or
+6. CasADi.
+
+Once the model is defined, users can optimize it by selecting and running
+an optimizer of their choice from the library of optimization algorithms 
+available in modOpt.
 
 ## modOpt as a library of optimization algorithms
 
-modOpt allows optimization practitioners to define the computational models that provide
-the objective, constraints, and the derivatives for their optimization problems 
-using one of the following three options:
-1. the built-in `Problem()` class,
-2. **Computational System Design Language** (CSDL), or
-3. **OpenMDAO** modeling framework
-
-Once the model is defined, it needs to be optimized. 
-The users can pick an optimizer of their choice from the
-library of optimization algorithms available in modOpt.
+modOpt as a library includes several gradient-based and gradient-free optimization algorithms.
+It provides interfaces to more than a dozen general-purpose optimizers, 
+along with fully transparent implementations of several educational optimization algorithms.
+The general-purpose optimizers available in modOpt include SLSQP, PySLSQP,
+SNOPT, IPOPT, Trust-Constr, SQP, BFGS, L-BFGS-B, Nelder-Mead, COBYLA, COBYQA, and CVXOPT.
+The ConvexQPSolvers optimizer provides an interface to more than 15 QP solvers
+available through the `qpsolvers` package.
+Note that PySLSQP, SNOPT, IPOPT, COBYQA, CVXOPT, and qpsolvers must be 
+installed separately if users wish to utilize them.
+The modular and transparent educational algorithms in modOpt include
+Steepest Descent, Quasi-Newton, Newton, Newton-Lagrange, Quadratic Penalty, SQP,
+PSO, Nelder-Mead Simplex, and Simulated Annealing.
 
 <!-- ![modopt_lib](/src/images/modopt_lib.png "modOpt as a library") -->
-```{figure} /src/images/modopt_lib.png
-:figwidth: 80 %
+```{figure} /src/images/modopt_library.png
+:figwidth: 100 %
 :align: center
 :alt: modopt_lib
 
@@ -35,12 +70,21 @@ _**modOpt as a library**_
 
 ## modOpt as a development environment for optimization algorithms
 
-There are a number of transparent modules available within the package
-which users can leverage to develop new or modified optimization algorithms.
-Custom optimization algorithms can be developed in a modular fashion 
-using the `Optimizer()` class in modOpt.
-Benchmarking against built-in standard algorithms or interfaced external optimizers
-are also possible.
+modOpt's modular development environment facilitates the construction of 
+optimization algorithms using self-contained modules.
+When implementing new algorithms, developers can reuse stable and efficient modules 
+already available in modOpt, eliminating the need to build these components from scratch. 
+Similarly, existing algorithms in modOpt can be customized for specific applications
+by modifying only the relevant modules.
+Additionally, modOpt's benchmarking capabilities allow users to conveniently 
+perform comparative studies of their algorithms against standard ones 
+included in the library.
+<!-- New optimization algorithms can be developed in a modular fashion 
+by subclassing the `Optimizer` class in modOpt. -->
+<!-- There are a number of transparent modules available within the package
+which users can leverage to develop new or modified optimization algorithms. -->
+<!-- Benchmarking against built-in standard algorithms or interfaced external optimizers
+are also possible. -->
 
 <!-- ![modopt_env](/src/images/modopt_env.png "modOpt as a development environment") -->
 <!-- <img src="/images/modopt_env.png" alt='modopt_env' title="modOpt as a development environment" width="150" height="100"/> -->
@@ -48,7 +92,7 @@ are also possible.
 <!-- <img src="images/modopt_env.png" alt='modopt_env'> -->
 <!-- </p> -->
 ```{figure} /src/images/modopt_env.png
-:figwidth: 80 %
+:figwidth: 70 %
 :align: center
 :alt: modopt_lib
 
@@ -75,9 +119,6 @@ If you use modOpt in your work, please use the following reference for citation:
 
 ```{bibliography} src/references.bib
 ``` -->
-
-<!-- Remove/add custom pages from/to toc as per your package's requirement -->
-<!-- src/basic -->
 
 ```{toctree}
 :maxdepth: 2

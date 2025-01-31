@@ -22,7 +22,7 @@ To install modOpt with JAX, CasADi, OpenMDAO, CSDL, and CSDL_alpha, run:
 ```sh
 pip install "modopt[jax,casadi,openmdao,csdl,csdl_alpha] @ git+https://github.com/lsdolab/modopt.git@main"
 ```
-Remove any dependencies from the list `[jax,casadi,openmdao,csdl,csdl_alpha]` if they are not required.
+Remove any dependencies from the list `[jax,casadi,openmdao,csdl,csdl_alpha]` above if they are not needed.
 
 To uninstall modOpt, run:
 ```sh
@@ -68,8 +68,8 @@ optional dependencies such as JAX, CSDL, OpenMDAO, and others.
 The example below is provided to help users get started with modOpt.
 For information on more advanced features, refer to the 
 [documentation](https://modopt.readthedocs.io/).
-The following example minimizes `$x^2 + y^2$` subject to
-the constraint `$x + y = 1$`.
+The following example minimizes $x^2 + y^2$ subject to
+the constraint $x + y = 1$.
 
 ```python
 import numpy as np
@@ -104,6 +104,7 @@ or the constraint Jacobian.
 In the absence of user-provided derivatives, `ProblemLite` estimates them
 using first-order finite differences.
 However, it is more efficient if the user provides the functions for the exact derivatives.
+
 For more complex examples, such as building models in various modeling languages, using different optimizers,
 or developing new optimizers in modOpt with built-in modules,
 visit the [Examples](https://modopt.readthedocs.io/en/latest/src/examples.html)
