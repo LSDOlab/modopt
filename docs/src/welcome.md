@@ -63,7 +63,7 @@ PSO, Nelder-Mead Simplex, and Simulated Annealing.
 ```{figure} /src/images/modopt_library.png
 :figwidth: 100 %
 :align: center
-:alt: modopt_lib
+:alt: modopt_library
 
 _**modOpt as a library**_
 ```
