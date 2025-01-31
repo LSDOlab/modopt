@@ -148,6 +148,15 @@ interfaces = [
     "quadprog", # quadprog MAY BE already installed with qpsolvers[open_source_solvers]
     "cobyqa", # cobyqa is already installed with scipy>=1.14.0, which requires python>=3.10
 ]
+open_source_optimizers = [
+    "qpsolvers",
+    "cvxopt", # cvxopt MAY BE already installed with qpsolvers[open_source_solvers]
+    "casadi", # Needed for the IPOPT interface
+    "pyslsqp",
+    "osqp", # osqp MAY BE already installed with qpsolvers[open_source_solvers]
+    "quadprog", # quadprog MAY BE already installed with qpsolvers[open_source_solvers]
+    "cobyqa", # cobyqa is already installed with scipy>=1.14.0, which requires python>=3.10
+]
 visualization = [
     "matplotlib",
 ]

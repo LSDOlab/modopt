@@ -1,4 +1,4 @@
-# modOpt
+# modOpt: A MODular development environment and library for OPTimization algorithms
 
 [![GitHub Actions Test Badge](https://github.com/LSDOlab/modopt/actions/workflows/install_test.yml/badge.svg)](https://github.com/LSDOlab/modopt/actions)
 [![Coverage Status](https://coveralls.io/repos/github/LSDOlab/modopt/badge.svg?branch=main&kill_cache=1)](https://coveralls.io/github/LSDOlab/modopt?branch=main)
@@ -12,21 +12,64 @@
 [![Forks](https://img.shields.io/github/forks/LSDOlab/modopt.svg)](https://github.com/LSDOlab/modopt/network)
 [![Issues](https://img.shields.io/github/issues/LSDOlab/modopt.svg)](https://github.com/LSDOlab/modopt/issues) -->
 
+modOpt is a Python platform designed to support research and education
+in the field of numerical optimization.
+Its modular development environment facilitates the construction of 
+optimization algorithms using self-contained modules.
+When implementing new algorithms, developers can reuse stable and efficient modules 
+already available in modOpt, eliminating the need to build these components from scratch. 
+Similarly, existing algorithms in modOpt can be customized for specific applications
+by modifying only the relevant modules.
 
+modOpt as a library includes several gradient-based and gradient-free optimization algorithms.
+It provides interfaces to more than a dozen general-purpose optimizers, 
+along with fully transparent implementations of several educational optimization algorithms.
+Additionally, modOpt offers various features to support students, optimization practitioners, 
+and advanced developers.
+For instance, it includes built-in visualization and recording capabilities, 
+interfaces to modeling frameworks such as JAX, CasADi, OpenMDAO and CSDL, and
+an interface to the CUTEst test problem set.
+It also provides various utilities for testing and benchmarking algorithms, 
+and postprocessing optimization results.
+
+modOpt is supported on Linux, macOS, and Windows.
+The general-purpose optimizers available in modOpt include SLSQP, PySLSQP,
+SNOPT, IPOPT, Trust-Constr, SQP, BFGS, L-BFGS-B, Nelder-Mead, COBYLA, COBYQA, and CVXOPT.
+The ConvexQPSolvers optimizer provides an interface to more than 15 QP solvers
+available through the `qpsolvers` package.
+Note that PySLSQP, SNOPT, IPOPT, COBYQA, CVXOPT, and qpsolvers must be 
+installed separately if users wish to utilize them.
+Similarly, the modeling frameworks JAX, CasADi, OpenMDAO, and CSDL 
+need to be installed separately, if needed.
 
 ## Installation
 
-To install the latest commit from the main branch, run the following command in the terminal
+To install the latest commit from the main branch, run the following command in the terminal:
 ```sh
 pip install git+https://github.com/lsdolab/modopt.git@main
 ```
 
-To uninstall modOpt, run
+To install modOpt with all interfaced open-source optimizers, run:
+```sh
+pip install "modopt[open_source_optimizers] @ git+https://github.com/lsdolab/modopt.git@main"
+```
+This will install `pyslsqp`, `IPOPT`, `cobyqa`, `cvxopt`, and the `qpsolvers` package,
+along with the QP solvers `quadprog` and `osqp`.
+For details on obtaining a copy of `SNOPT`, visit the 
+[SNOPT documentation](https://modopt.readthedocs.io/en/latest/src/performant_algs/snopt.html).
+
+To install modOpt with JAX, CasADi, OpenMDAO, CSDL, and CSDL_alpha, run:
+```sh
+pip install "modopt[jax,casadi,openmdao,csdl,csdl_alpha] @ git+https://github.com/lsdolab/modopt.git@main"
+```
+Remove any dependencies from the list `[jax,casadi,openmdao,csdl,csdl_alpha]` if they are not required.
+
+To uninstall modOpt, run:
 ```sh
 pip uninstall modopt
 ```
 
-To upgrade to the latest commit, first uninstall modOpt and then reinstall with
+To upgrade to the latest commit, uninstall modOpt and then reinstall it using:
 ```sh
 pip uninstall modopt
 pip install git+https://github.com/lsdolab/modopt.git@main
@@ -34,41 +77,39 @@ pip install git+https://github.com/lsdolab/modopt.git@main
 
 ## Installation in development mode
 
-To install modOpt in development mode, first clone the repository
-and then install with
+To install modOpt in development mode, clone the repository and install it using:
 ```sh
 git clone https://github.com/lsdolab/modopt.git
 pip install -e ./modopt
 ```
 The `-e` flag installs the package in editable mode, 
-allowing you to modify the source code without reinstallation.
+allowing you to modify the source code without needing to reinstall it.
 
-To upgrade to the latest commit in development mode, run
+To upgrade to the latest commit in development mode, navigate to the modOpt directory and run:
 ```sh
-cd /path/to/modopt
 git pull
 ```
 
 ## Testing
-To verify that the installed package works correctly, install `pytest` using
+To verify that the installed package works correctly, install `pytest` using:
 ```sh
 pip install pytest
 ```
-and run the following command from the project's root directory:
+Then, run the following command from the project's root directory:
 ```sh
 pytest -m basic
 ```
-The `-m basic` flag runs only the basic test cases, excluding 
-visualization tests and tests for interfaces with 
-optional dependencies such as Jax, CSDL, OpenMDAO, and others.
+The `-m basic` flag runs only the basic test cases, excluding
+visualization tests and tests for interfaces with
+optional dependencies such as JAX, CSDL, OpenMDAO, and others.
 
 ## Usage 
 
 The example below is provided to help users get started with modOpt.
-For information on more advanced features of modOpt, see the 
+For information on more advanced features, refer to the 
 [documentation](https://modopt.readthedocs.io/).
-The following example minimizes `x^2 + y^2` subject to
-the constraint `x + y = 1`.
+The following example minimizes `$x^2 + y^2$` subject to
+the constraint `$x + y = 1$`.
 
 ```python
 import numpy as np
@@ -103,9 +144,9 @@ or the constraint Jacobian.
 In the absence of user-provided derivatives, `ProblemLite` estimates them
 using first-order finite differences.
 However, it is more efficient if the user provides the functions for the exact derivatives.
-For more complex examples on building models in various modeling languages, using different optimizers,
+For more complex examples, such as building models in various modeling languages, using different optimizers,
 or developing new optimizers in modOpt with built-in modules,
-see the [Examples](https://modopt.readthedocs.io/en/latest/src/examples.html)
+visit the [Examples](https://modopt.readthedocs.io/en/latest/src/examples.html)
 section of the documentation.
 
 ## Documentation
