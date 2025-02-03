@@ -69,6 +69,7 @@ class Optimizer(ABC):
                  hot_start_atol:float = 0.,
                  hot_start_rtol:float = 0.,
                  visualize:list = [],
+                 keep_viz_open:bool = False,
                  turn_off_outputs:bool = False,
                  **kwargs):
         '''
@@ -94,6 +95,8 @@ class Optimizer(ABC):
             when reusing outputs from the hot-start record.
         visualize : list, default=[]
             The list of scalar variables to be visualized during the optimization.
+        keep_viz_open : bool, default=False
+            If ``True``, keeps the visualization window open after the optimization is complete.
         turn_off_outputs : bool, default=False
             If ``True``, prevents modOpt from generating any output files.
         **kwargs
@@ -115,6 +118,7 @@ class Optimizer(ABC):
         self.options.declare('hot_start_atol', default=0., types=float)
         self.options.declare('hot_start_rtol', default=0., types=float)
         self.options.declare('visualize', default=[], types=list)
+        self.options.declare('keep_viz_open', default=False, types=bool)
         self.options.declare('turn_off_outputs', default=False, types=bool)
         self.update_outputs_count = 0
 
@@ -126,6 +130,7 @@ class Optimizer(ABC):
                              'hot_start_atol': hot_start_atol,
                              'hot_start_rtol': hot_start_rtol,
                              'visualize': visualize,
+                             'keep_viz_open': keep_viz_open,
                              'turn_off_outputs': turn_off_outputs})
         self.options.update(kwargs)
 
@@ -301,10 +306,10 @@ class Optimizer(ABC):
             if var in self.active_callbacks + ['x']:
                 visualize_vars.append('callback_' + s_var)
         
-        # No need to visualize callbacks if all variables are optimizer outputs
         visualize_callbacks = True
-        if all(s_var.split('[')[0] in self.available_outputs.keys() for s_var in self.options['visualize']):
-            visualize_callbacks = False
+        # # No need to visualize callbacks if all variables are optimizer outputs
+        # if all(s_var.split('[')[0] in self.available_outputs.keys() for s_var in self.options['visualize']):
+        #     visualize_callbacks = False
         
         self.visualizer = Visualizer(self.problem_name, visualize_vars, self.out_dir)
         if visualize_callbacks:
@@ -356,7 +361,11 @@ class Optimizer(ABC):
             return
         
         if self.options['visualize'] != []:
-            self.visualizer.close_plot()
+            if self.options['keep_viz_open']:
+                self.visualizer.keep_plot()
+                # vis_wait = self.visualizer.wait_time
+            else:
+                self.visualizer.close_plot()
             self.results['vis_time'] = self.visualizer.vis_time
 
         self.results['out_dir']     = self.out_dir
