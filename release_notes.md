@@ -1,7 +1,7 @@
 ***********************************
-# modOpt 0.1.0 (Feb xx, 2024)
+# modOpt 0.1.0 (February 3, 2025)
 
-Initial Development Release
+- Initial production release of modOpt
 
 Summary of major changes from the previous release - None
 
