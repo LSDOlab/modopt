@@ -32,8 +32,10 @@ class SQP(Optimizer):
         when reusing outputs from the hot-start record.
     visualize : list, default=[]
         The list of scalar variables to visualize during the optimization.
+    keep_viz_open : bool, default=False
+        If ``True``, keeps the visualization window open after the optimization is complete.
     turn_off_outputs : bool, default=False
-        If ``True``, prevents modOpt from generating any output files.
+        If ``True``, prevent modOpt from generating any output files.
 
     maxiter : int, default=1000
         Maximum number of major iterations.

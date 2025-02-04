@@ -33,8 +33,10 @@ class PSO(Optimizer):
         when reusing outputs from the hot-start record.
     visualize : list, default=[]
         The list of scalar variables to visualize during the optimization.
+    keep_viz_open : bool, default=False
+        If ``True``, keep the visualization window open after the optimization is complete.
     turn_off_outputs : bool, default=False
-        If ``True``, prevents modOpt from generating any output files.
+        If ``True``, prevent modOpt from generating any output files.
 
     population : int, default=25
         Number of particles in the swarm.
