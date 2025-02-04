@@ -1,10 +1,10 @@
 # `Optimizer`
 
-All optimizers in modOpt must inherit from the abstract [**`Optimizer`**](./api/optimizer.md) class.
+All optimizers in modOpt must inherit from the abstract [**`Optimizer`**](../api/optimizer.md) class.
 As a result, tools for checking first derivatives, visualizing, recording, and hot-starting
 are automatically inherited by all optimizers in the library.
 Every optimizer in modOpt is instantiated with a problem object, which should be derived
-from the [**`Problem`**](./api/problem.md) or [**`ProblemLite`**](./api/problem_lite.md) classes. 
+from the [**`Problem`**](../api/problem.md) or [**`ProblemLite`**](../api/problem_lite.md) classes. 
 See the [UML class diagram](../developer_docs.md/#uml-class-diagram-for-modopt) for
 a quick overview of the `Optimizer`, `Problem`, and `ProblemLite` classes.
 
