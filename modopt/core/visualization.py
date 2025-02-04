@@ -41,7 +41,7 @@ class Visualizer:
             Path to the directory where the visualization will be saved.
         '''
 
-        v_start = time.time()
+        v_start = time.perf_counter()
         if plt is None:
             raise ImportError("matplotlib not found, cannot visualize.")
         self.problem_name   = problem_name
@@ -74,7 +74,7 @@ class Visualizer:
         self.lines_dict = lines_dict
         self.var_dict   = var_dict
 
-        self.vis_time  = time.time() - v_start
+        self.vis_time  = time.perf_counter() - v_start
         self.wait_time = 0.0
 
     def update_plot(self, out_dict):
@@ -93,7 +93,7 @@ class Visualizer:
             - 'lmult'   : the Lagrange multiplier values
         '''
 
-        v_start = time.time()
+        v_start = time.perf_counter()
         for k, s_var in enumerate(self.vars):
             var   = s_var.split('[')[0]
             if var in out_dict:
@@ -119,17 +119,17 @@ class Visualizer:
         self.fig.canvas.draw()
         self.fig.canvas.flush_events()
 
-        self.vis_time += time.time() - v_start
+        self.vis_time += time.perf_counter() - v_start
         
     def save_plot(self, ):
         '''
         Save the plot to a file.
         '''
-        v_start = time.time()
+        v_start = time.perf_counter()
         # plt.gcf().set_size_inches(10, 3*len(self.vars))
         # self.fig.set_size_inches(10, 3*len(self.vars), forward=True)
         self.fig.savefig(self.save_figname,)
-        self.vis_time += time.time() - v_start
+        self.vis_time += time.perf_counter() - v_start
 
     def close_plot(self):
         '''
@@ -146,10 +146,10 @@ class Visualizer:
         '''
         self.save_plot()
 
-        w_start = time.time()
+        w_start = time.perf_counter()
         plt.ioff()
         plt.show()
-        self.wait_time += time.time() - w_start
+        self.wait_time += time.perf_counter() - w_start
 
 def visualize(filepath, vars, save_figname=None):
     '''
@@ -199,7 +199,7 @@ def visualize(filepath, vars, save_figname=None):
     >>> visualize(results['out_dir']+'/record.hdf5', ['x[0]', 'obj', 'con[1]', 'grad[0]', 'jac[0,1]']) # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
     '''
 
-    v_start = time.time()
+    v_start = time.perf_counter()
     if plt is None:
         raise ImportError("matplotlib not found, cannot visualize.")
     
@@ -215,7 +215,7 @@ def visualize(filepath, vars, save_figname=None):
     
     n_plots = len(var_dict)
     fig, axs = plt.subplots(n_plots, figsize=(10, 3*n_plots))
-    fig.suptitle(f'modOpt post-Optimization visualization [{filepath}]')
+    fig.suptitle(f'modOpt post-optimization visualization [{filepath}]')
     for ax, var in zip(axs, var_dict):
         # ax.set_title(var)
         # ax.set_xlabel('Iteration')
@@ -234,7 +234,7 @@ def visualize(filepath, vars, save_figname=None):
     if save_figname:
         fig.savefig(save_figname)
     plt.show()
-    vis_time = time.time() - v_start
+    vis_time = time.perf_counter() - v_start
 
 if __name__ == '__main__':
     import doctest
