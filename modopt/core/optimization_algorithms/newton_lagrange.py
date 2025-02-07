@@ -205,11 +205,12 @@ class NewtonLagrange(Optimizer):
             else:
                 d_k = alpha * p_k
 
+            pi_old = pi_k * 1.
             v_k += d_k
 
             # Update previous Lag. gradient with new lag. mult.s
             # before updating the previous values
-            gL_k[:nx] += np.dot(J_k.T, (v_k[nx:] - pi_k))
+            gL_k[:nx] += np.dot(J_k.T, (v_k[nx:] - pi_old))
 
             f_k = obj(x_k)
             g_k = grad(x_k)
