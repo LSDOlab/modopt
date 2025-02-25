@@ -22,35 +22,42 @@ class CSDLAlphaProblem(OptProblem):
         # Set problem dimensions
         sim = self.options['simulator']
 
-        (dScaler, dLower, dUpper, dInitial), (cScaler, cLower, cUpper), oScaler = sim.get_optimization_metadata()
+        (dScaler, dLower, dUpper, dInitial, dAdder), (cScaler, cLower, cUpper, cAdder), (oScaler, oAdder) = sim.get_optimization_metadata()
 
         self.nx = len(dInitial.flatten())
 
-        if not (dScaler.shape == dLower.shape == dUpper.shape == dInitial.shape == (self.nx,)):
-            raise ValueError(f'Design variable metadata dimensions are not consistent. shape(dvScaler, dvLower, dvUpper, dvInitial) = ({dScaler.shape}, {dLower.shape}, {dUpper.shape}, {dInitial.shape})')
+        if not (dScaler.shape == dLower.shape == dUpper.shape == dInitial.shape == dAdder.shape == (self.nx,)):
+            raise ValueError(f'Design variable metadata dimensions are not consistent. shape(dvScaler, dvLower, dvUpper, dvInitial, dvAdder) = ({dScaler.shape}, {dLower.shape}, {dUpper.shape}, {dInitial.shape}, {dAdder.shape})')
         # Note that x0, x_lower, x_upper are all in scaled form
-        self.x0 = dInitial * dScaler
-        self.x_lower  = dLower * dScaler
-        self.x_upper  = dUpper * dScaler
+        self.x0 = (dInitial+dAdder) * dScaler
+        self.x_lower  = (dLower+dAdder) * dScaler
+        self.x_upper  = (dUpper+dAdder) * dScaler
         self.x_scaler = dScaler * 1.0
+        self.x_adder  = dAdder * 1.0
 
-        if (cScaler is None) or (cLower is None) or (cUpper is None):
+        if (cScaler is None) or (cLower is None) or (cUpper is None) or (cAdder is None):
             self.nc = 0
-            if (cScaler is not None) or (cLower is not None) or (cUpper is not None):
-                raise ValueError(f'Constraint metadata is inconsistent. (cScaler, cLower, cUpper) = ({cScaler}, {cLower}, {cUpper})')
+            if (cScaler is not None) or (cLower is not None) or (cUpper is not None) or (cAdder is not None):
+                raise ValueError(f'Constraint metadata is inconsistent. (cScaler, cLower, cUpper, cAdder) = ({cScaler}, {cLower}, {cUpper}, {cAdder})')
         else:
-            self.nc = len(cScaler.flatten())
-            if not (cScaler.shape == cLower.shape == cUpper.shape == (self.nc,)):
-                raise ValueError(f'Constraint metadata dimensions are not consistent. shape(cScaler, cLower, cUpper) = ({cScaler.shape}, {cLower.shape}, {cUpper.shape})')
+            self.nc = len(cScaler.flatten()) # or cAdder.flatten()
+            if not (cScaler.shape == cLower.shape == cUpper.shape == cAdder.shape == (self.nc,)):
+                raise ValueError(f'Constraint metadata dimensions are not consistent. shape(cScaler, cLower, cUpper, cAdder) = ({cScaler.shape}, {cLower.shape}, {cUpper.shape}, {cAdder.shape})')
             # Note that c_lower, c_upper are both in scaled form
-            self.c_lower  = cLower * cScaler
-            self.c_upper  = cUpper * cScaler
+            self.c_lower  = (cLower+cAdder) * cScaler
+            self.c_upper  = (cUpper+cAdder) * cScaler
             self.c_scaler = cScaler * 1.0
+            self.c_adder  = cAdder * 1.0
         
         if oScaler is not None:
             if not (oScaler.shape == (1,)):
                 raise ValueError(f'Objective scaler dimensions must be (1,) for single objective optimization. shape(oScaler) = {oScaler.shape}')
         self.o_scaler = oScaler * 1.0 if oScaler is not None else 1.0
+
+        if oAdder is not None:
+            if not (oAdder.shape == (1,)):
+                raise ValueError(f'Objective adder dimensions must be (1,) for single objective optimization. shape(oAdder) = {oAdder.shape}')
+        self.o_adder = oAdder * 1.0 if oAdder is not None else 0.0
         
         self.model_evals = 0                    # number of model evaluations
         self.deriv_evals = 0                    # number of derivative evaluations
@@ -66,7 +73,7 @@ class CSDLAlphaProblem(OptProblem):
         self.SURF_mode = False # True if using SURF, False if using RS/FS
         
         # Run checks for the first model evaluation
-        sim.update_design_variables(self.x0/self.x_scaler)
+        sim.update_design_variables(self.x0/self.x_scaler - self.x_adder)
         fun_dict = sim.compute_optimization_functions()
         f_us = fun_dict['f']
         c_us = fun_dict['c']
@@ -74,26 +81,34 @@ class CSDLAlphaProblem(OptProblem):
         if f_us is not None:
             if self.o_scaler is None:
                 raise ValueError('Objective scaler is None but objective function returned a value. Please provide a valid scaler.')     
+            if self.o_adder is None:
+                raise ValueError('Objective adder is None but objective function returned a value. Please provide a valid adder.')
             if f_us.shape != (1,):
                 raise ValueError(f'Only single objective optimization is supported but returned multiple objectives. shape(objective) = {f_us.shape}')
             if np.isnan(np.sum(f_us)) or np.isinf(np.sum(f_us)):
                 raise Exception('Objective returned NAN/INF for the first run. Please check the model setup.')
-            self.f_s = f_us * self.o_scaler
+            self.f_s = (f_us+self.o_adder) * self.o_scaler
         else:
             if self.o_scaler is not None:
                 raise ValueError('Objective scaler is not None, but objective function returned None. Please check the model setup.')
+            if self.o_adder is not None:
+                raise ValueError('Objective adder is not None, but objective function returned None. Please check the model setup.')
             
         if c_us is not None:
             if self.c_scaler is None:
                 raise ValueError('Constraint scaler is None but constraint function returned a value. Please provide a valid scaler.')
+            if self.c_adder is None:
+                raise ValueError('Constraint adder is None but constraint function returned a value. Please provide a valid adder.')
             if c_us.shape != (self.nc,):
-                raise ValueError(f'Constraint function returned shape ({c_us.shape},) but ({self.nc},) was expected corresponding to provided cScaler, cLower, and cUpper.')
+                raise ValueError(f'Constraint function returned shape ({c_us.shape},) but ({self.nc},) was expected corresponding to provided cScaler, cLower, cUpper, and cAdder.')
             if np.isnan(np.sum(c_us)) or np.isinf(np.sum(c_us)):
                 raise Exception('Constraints contain NAN/INF for the first run. Please check the model setup.')
-            self.c_s = c_us * self.c_scaler
+            self.c_s = (c_us+self.c_adder) * self.c_scaler
         else:
             if self.c_scaler is not None:
                 raise ValueError('Constraint scaler is not None, but constraint function returned None. Please check the model setup.')
+            if self.c_adder is not None:
+                raise ValueError('Constraint adder is not None, but constraint function returned None. Please check the model setup.')
             self.c_s = None
             
         self.model_evals += 1
@@ -152,19 +167,19 @@ class CSDLAlphaProblem(OptProblem):
         sim = self.options['simulator']
         if not self.SURF_mode:      # for pure RS/FS 
             if (not np.array_equal(self.warm_x, x)) or force_rerun:
-                sim.update_design_variables(x/self.x_scaler)
+                sim.update_design_variables(x/self.x_scaler - self.x_adder)
                 try:
                     fun_dict = sim.compute_optimization_functions()
                     f_us = fun_dict['f']
                     c_us = fun_dict['c']
                     self.fail1 = False
                     if f_us is not None:
-                        self.f_s = f_us * self.o_scaler
+                        self.f_s = (f_us+self.o_adder) * self.o_scaler
                         if np.isnan(np.sum(f_us)) or np.isinf(np.sum(f_us)):
                             raise Exception('Objective returned NAN/INF. Please check the model.')
                             
                     if c_us is not None:
-                        self.c_s = c_us * self.c_scaler
+                        self.c_s = (c_us+self.c_adder) * self.c_scaler
                         if np.isnan(np.sum(c_us)) or np.isinf(np.sum(c_us)):
                             raise Exception('Constraints contain NAN/INF. Please check the model.')
 
@@ -183,7 +198,7 @@ class CSDLAlphaProblem(OptProblem):
         sim = self.options['simulator']
         if not self.SURF_mode:      # for pure RS/FS                     
             if not np.array_equal(self.warm_x_deriv, x) or force_rerun:
-                sim.update_design_variables(x/self.x_scaler)
+                sim.update_design_variables(x/self.x_scaler - self.x_adder)
                 try:
                     deriv_dict = sim.compute_optimization_derivatives()
                     f_us = deriv_dict['f']
@@ -193,12 +208,12 @@ class CSDLAlphaProblem(OptProblem):
                     self.fail2 = False
 
                     if f_us is not None:
-                        self.f_s = f_us * self.o_scaler
+                        self.f_s = (f_us+self.o_adder) * self.o_scaler
                         if np.isnan(np.sum(f_us)) or np.isinf(np.sum(f_us)):
                             raise Exception('Objective returned NAN/INF. Please check the model.')
                         
                     if c_us is not None:
-                        self.c_s = c_us * self.c_scaler
+                        self.c_s = (c_us+self.c_adder) * self.c_scaler
                         if np.isnan(np.sum(c_us)) or np.isinf(np.sum(c_us)):
                             raise Exception('Constraints contain NAN/INF. Please check the model.')
 
