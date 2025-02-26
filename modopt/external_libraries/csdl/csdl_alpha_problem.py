@@ -37,6 +37,7 @@ class CSDLAlphaProblem(OptProblem):
 
         if (cScaler is None) or (cLower is None) or (cUpper is None) or (cAdder is None):
             self.nc = 0
+            self.c_adder = None # This is required since OptProblem does not initialize c_adder=None as for c_scaler and causes issues for unconstrained problems
             if (cScaler is not None) or (cLower is not None) or (cUpper is not None) or (cAdder is not None):
                 raise ValueError(f'Constraint metadata is inconsistent. (cScaler, cLower, cUpper, cAdder) = ({cScaler}, {cLower}, {cUpper}, {cAdder})')
         else:
