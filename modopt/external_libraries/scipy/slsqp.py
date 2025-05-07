@@ -3,6 +3,7 @@ from scipy.optimize import minimize, Bounds
 import time
 from modopt.utils.options_dictionary import OptionsDictionary
 from modopt import Optimizer
+from typing import Callable
 
 class SLSQP(Optimizer):
     ''' 
@@ -51,7 +52,7 @@ class SLSQP(Optimizer):
             'maxiter': (int, 100),
             'ftol': (float, 1e-6),
             'disp': (bool, False),
-            'callback': ((type(None), callable), None),
+            'callback': ((type(None), Callable), None),
         }
 
         # Used for verifying the keys and value-types of user-provided solver_options

@@ -3,6 +3,7 @@ from scipy.optimize import minimize, Bounds
 import time
 from modopt.utils.options_dictionary import OptionsDictionary
 from modopt import Optimizer
+from typing import Callable
 
 class COBYLA(Optimizer):
     '''
@@ -54,7 +55,7 @@ class COBYLA(Optimizer):
             'tol': (float, 1e-4),   # Final accuracy in the optimization (lower bound on the size of the trust region)
             'catol': (float, 2e-4), # Absolute constraint violation tolerance
             'disp': (bool, False),
-            'callback': ((type(None), callable), None),
+            'callback': ((type(None), Callable), None),
         }
 
         # Used for verifying the keys and value-types of user-provided solver_options

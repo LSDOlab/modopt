@@ -4,6 +4,7 @@ from scipy.sparse import coo_array
 import time
 from modopt.utils.options_dictionary import OptionsDictionary
 from modopt import Optimizer
+from typing import Callable
 
 class TrustConstr(Optimizer):
     ''' 
@@ -76,7 +77,7 @@ class TrustConstr(Optimizer):
                                                             # You can set the sparsity globally by setting `sparse_jacobian` True of False."
             'ignore_exact_hessian': (bool, False),  # To ignore exact hessian and use only gradient information to approximate the hessian
             'verbose': (int, 0, (0,1,2,3)),         # Verbosity level
-            'callback': ((type(None), callable), None),
+            'callback': ((type(None), Callable), None),
         }
 
         # Used for verifying the keys and value-types of user-provided solver_options

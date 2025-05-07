@@ -3,6 +3,7 @@ from scipy.optimize import minimize, Bounds
 import time
 from modopt.utils.options_dictionary import OptionsDictionary
 from modopt import Optimizer
+from typing import Callable
 
 class LBFGSB(Optimizer):
     '''
@@ -58,7 +59,7 @@ class LBFGSB(Optimizer):
             'ftol': (float, 2.22e-9),  # Terminate successfully if: `(f^k - f^{k+1})/max{|f^k|,|f^{k+1}|,1} <= ftol`
             'gtol': (float, 1e-5),  # Terminate successfully if: `max{|proj g_i | i = 1, ..., n} <= gtol`, where `proj g_i` is the i-th component of the projected gradient.
             'iprint': (int, -1),    # Controls the frequency of output (<0, =0, 0<iprint<99, =99, =100, >100)
-            'callback': ((type(None), callable), None),
+            'callback': ((type(None), Callable), None),
         }
 
         # Used for verifying the keys and value-types of user-provided solver_options

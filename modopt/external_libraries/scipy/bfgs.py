@@ -3,6 +3,7 @@ from scipy.optimize import minimize, Bounds
 import time
 from modopt.utils.options_dictionary import OptionsDictionary
 from modopt import Optimizer
+from typing import Callable
 
 class BFGS(Optimizer):
     ''' 
@@ -59,7 +60,7 @@ class BFGS(Optimizer):
             'hess_inv0': (np.ndarray, np.identity(self.problem.nx)), # Initial inverse Hessian approximation
             'return_all': (bool, False),# To return a list of the best solution at each major iteration in the final results dict
             'disp': (bool, False),
-            'callback': ((type(None), callable), None),
+            'callback': ((type(None), Callable), None),
         }
 
         # Used for verifying the keys and value-types of user-provided solver_options
