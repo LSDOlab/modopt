@@ -3,6 +3,7 @@ from scipy.optimize import Bounds, LinearConstraint, NonlinearConstraint #, mini
 import time
 from modopt.utils.options_dictionary import OptionsDictionary
 from modopt import Optimizer
+from typing import Callable
 
 class COBYQA(Optimizer):
     ''' 
@@ -66,7 +67,7 @@ class COBYQA(Optimizer):
             'history_size': (int, int(1e6)),    # Maximum number of function evaluations to store in the history
             'debug': (bool, False),             # To perform additional checks during the optimization procedure.
             'disp': (bool, False),
-            'callback': ((type(None), callable), None),
+            'callback': ((type(None), Callable), None),
         }
 
         # Used for verifying the keys and value-types of user-provided solver_options
