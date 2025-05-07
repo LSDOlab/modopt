@@ -2,6 +2,7 @@ import numpy as np
 from modopt import Optimizer
 import time
 from modopt.utils.options_dictionary import OptionsDictionary
+from typing import Callable
 
 class PySLSQP(Optimizer):
     '''
@@ -50,7 +51,7 @@ class PySLSQP(Optimizer):
             'maxiter': (int, 100),
             'acc': (float, 1e-6),
             'iprint': (int, 1),
-            'callback': ((type(None), callable), None),
+            'callback': ((type(None), Callable), None),
             'summary_filename': (str, 'slsqp_summary.out'),
             'visualize': (bool, False),
             'visualize_vars': (list, ['objective', 'optimality', 'feasibility']),
