@@ -3,7 +3,7 @@ from scipy.optimize import minimize, Bounds
 import time
 from modopt.utils.options_dictionary import OptionsDictionary
 from modopt import Optimizer
-
+from typing import Callable
 
 class NelderMead(Optimizer):
     '''
