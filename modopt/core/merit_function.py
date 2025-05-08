@@ -71,10 +71,10 @@ class MeritFunction(object):
         
         for fname in fnames:
             if fname not in self.cache:
-                self.cache[fname] = (x, self.options[fname](x))
+                self.cache[fname] = (x*1., self.options[fname](x))
                 self.eval_count[fname] += 1
             elif not np.array_equal(x, self.cache[fname][0]):
-                self.cache[fname] = (x, self.options[fname](x))
+                self.cache[fname] = (x*1., self.options[fname](x))
                 self.eval_count[fname] += 1
             # else:
             #     print("Cache hit for function: ", fname)
