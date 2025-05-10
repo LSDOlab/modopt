@@ -180,7 +180,7 @@ def generate_performance_profiles(data):
     for solver in solvers:
         print('Solver:', solver)
         print('-'*50)
-        print('Number of problems solved:', int(np.ceil(performance_profiles[solver][-2]*len(problems))))
+        print('Number of problems solved:', round(performance_profiles[solver][-2]*len(problems)))
         print('Percentage of problems solved:', performance_profiles[solver][-2]*100)
         print('-'*50, '\n')
 
