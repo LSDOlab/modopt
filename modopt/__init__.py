@@ -45,10 +45,13 @@ from modopt.core.optimization_algorithms.l2_penalty_eq import L2PenaltyEq
 
 # from modopt.core.optimization_algorithms.interior_point import InteriorPoint
 
+from modopt.core.optimization_algorithms.opensqp import OpenSQP
 from modopt.core.optimization_algorithms.sqp import SQP as SQPSparse
 from modopt.core.optimization_algorithms.sqp_dense import SQP
 from modopt.core.optimization_algorithms.sqp_basic import BSQP
 from modopt.core.optimization_algorithms.sqp_surf import SQP_SURF
+# from modopt.core.optimization_algorithms.sqp_modular_dense import MSQP
+# from modopt.core.optimization_algorithms.sqp_modular_dense_reference_best import MSQP
 
 # continuous gradient-free
 from modopt.core.optimization_algorithms.nelder_mead_simplex import NelderMeadSimplex

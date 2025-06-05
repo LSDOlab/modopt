@@ -11,7 +11,7 @@
     modopt.NelderMead
     modopt.COBYQA
     modopt.TrustConstr
-    modopt.SQP
+    modopt.OpenSQP
     modopt.SNOPT
     modopt.external_libraries.snopt.snoptc.SNOPTc
     modopt.IPOPT
@@ -84,11 +84,11 @@
     :members: check_first_derivatives, solve, print_results
 ```
 
-## SQP
+## OpenSQP
 
 ```{eval-rst}
 
-.. autoclass:: modopt.SQP
+.. autoclass:: modopt.OpenSQP
     :noindex:
     :members: check_first_derivatives, solve, print_results
 ```

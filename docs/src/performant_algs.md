@@ -12,7 +12,7 @@ performant_algs/lbfgsb
 performant_algs/nelder_mead
 performant_algs/cobyqa
 performant_algs/trust_constr
-performant_algs/sqp
+performant_algs/opensqp
 performant_algs/snopt
 performant_algs/ipopt
 performant_algs/qpsolvers
