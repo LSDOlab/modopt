@@ -104,6 +104,6 @@ See the table below for the full list of options.
   - *list* (`[]`)
   - List of outputs to be written to readable text output files. \
     Available outputs are: 'major', 'obj', 'x', 'lag_mult', 'slacks', \
-    'constraints', 'opt', 'feas', 'time', 'nfev', 'ngev', 'step', \
-    'rho', 'merit'.
+    'constraints', 'opt', 'feas', 'sum_viol', 'max_viol', 'time', \
+    'nfev', 'ngev', 'step', 'rho', 'merit', 'elastic', 'gamma', 'low_curvature'.
 ```
