@@ -1,3 +1,4 @@
+from modopt.core.optimization_algorithms.opensqp import OpenSQP
 from modopt.external_libraries.scipy import SLSQP, COBYLA, BFGS, LBFGSB, NelderMead, TrustConstr
 from modopt.external_libraries.cobyqa import COBYQA
 from modopt.external_libraries.pyslsqp import PySLSQP
@@ -14,7 +15,7 @@ def optimize(prob, solver='SLSQP', **kwargs):
     and is made available for users who are only interested in
     solving their optimization problems with solvers in the modOpt library.
     Developers of instructional algorithms are recommended to use
-    ``Optimizer`` subclasses such as ``SLSQP``, ``Newton``, ``SQP``, etc. directly.
+    ``Optimizer`` subclasses such as ``SLSQP``, ``Newton``, ``OpenSQP``, etc. directly.
 
     Parameters
     ----------
@@ -24,7 +25,7 @@ def optimize(prob, solver='SLSQP', **kwargs):
     solver : str, default='SLSQP'
         The solver to be used.
         Available solvers are ``'SLSQP'``, ``'PySLSQP'``, ``'COBYLA'``, ``'BFGS'``,
-        ``'LBFGSB'``, ``'NelderMead'``, ``'COBYQA'``, ``'TrustConstr'``,
+        ``'LBFGSB'``, ``'NelderMead'``, ``'COBYQA'``, ``'TrustConstr'``, ``'OpenSQP'``,
         ``'SNOPT'``, ``'IPOPT'``, ``'CVXOPT'``, and ``'ConvexQPSolvers'``.
     **kwargs
         Additional keyword arguments to be passed to the solver.
@@ -34,8 +35,8 @@ def optimize(prob, solver='SLSQP', **kwargs):
     dict
         The results of the optimization.
     """
-    valid_solvers = ['SLSQP', 'PySLSQP', 'COBYLA', 'BFGS', 
-                     'LBFGSB', 'NelderMead', 'COBYQA', 'TrustConstr',
+    valid_solvers = ['SLSQP', 'PySLSQP', 'COBYLA', 'BFGS',
+                     'LBFGSB', 'NelderMead', 'COBYQA', 'TrustConstr', 'OpenSQP',
                      'SNOPT', 'IPOPT', 'CVXOPT', 'ConvexQPSolvers']
     if solver == 'SLSQP':
         optimizer = SLSQP(prob, **kwargs)
@@ -53,6 +54,8 @@ def optimize(prob, solver='SLSQP', **kwargs):
         optimizer = COBYQA(prob, **kwargs)
     elif solver == 'TrustConstr':
         optimizer = TrustConstr(prob, **kwargs)
+    elif solver == 'OpenSQP':
+        optimizer = OpenSQP(prob, **kwargs)
     elif solver == 'SNOPT':
         optimizer = SNOPT(prob, **kwargs)
     elif solver == 'IPOPT':

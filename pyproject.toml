@@ -181,6 +181,7 @@ markers = [
     "jax: marks tests as jax (deselect with '-m \"not jax\"')",
     "snopt: marks tests as snopt (deselect with '-m \"not snopt\"')",
     "slsqp: marks tests as slsqp (deselect with '-m \"not slsqp\"')",
+    "opensqp: marks tests as opensqp (deselect with '-m \"not opensqp\"')",
     "cobyla: marks tests as cobyla (deselect with '-m \"not cobyla\"')",
     "bfgs: marks tests as bfgs (deselect with '-m \"not bfgs\"')",
     "lbfgsb: marks tests as lbfgsb (deselect with '-m \"not lbfgsb\"')",

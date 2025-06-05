@@ -33,6 +33,25 @@ def test_slsqp():
     assert_almost_equal(results['fun'], 20., decimal=6)
     # assert_almost_equal(results['objective'], 20., decimal=6)
 
+@pytest.mark.opensqp
+def test_opensqp():
+
+    prob = Scaling()
+
+    results = optimize(prob, solver='OpenSQP', maxiter=50)
+    print(results)
+    assert results['success'] == True
+    assert_array_almost_equal(results['x'], [2., 0.], decimal=12)
+    assert_almost_equal(results['objective'], 20., decimal=12)
+
+    prob = scaling_lite()
+
+    results = optimize(prob, solver='OpenSQP', maxiter=50)
+    print(results)
+    assert results['success'] == True
+    assert_array_almost_equal(results['x'], [2., 0.], decimal=12)
+    assert_almost_equal(results['objective'], 20., decimal=12)
+
 @pytest.mark.cobyla
 def test_cobyla():
     import numpy as np
