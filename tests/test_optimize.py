@@ -342,7 +342,7 @@ def test_invalid_solver():
     assert exc_info.type is ValueError
     assert str(exc_info.value) == "Invalid solver named 'InvalidSolver' is specified. Valid solvers are: "\
                                   "['SLSQP', 'PySLSQP', 'COBYLA', 'BFGS', 'LBFGSB', 'NelderMead', 'COBYQA', "\
-                                  "'TrustConstr', 'SNOPT', 'IPOPT', 'CVXOPT', 'ConvexQPSolvers']."
+                                  "'TrustConstr', 'OpenSQP', 'SNOPT', 'IPOPT', 'CVXOPT', 'ConvexQPSolvers']."
 
 if __name__ == '__main__':
     test_slsqp()
