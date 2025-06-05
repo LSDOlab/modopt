@@ -152,7 +152,7 @@ src/performant_algs/lbfgsb
 src/performant_algs/nelder_mead
 src/performant_algs/cobyqa
 src/performant_algs/trust_constr
-src/performant_algs/sqp
+src/performant_algs/opensqp
 src/performant_algs/snopt
 src/performant_algs/ipopt
 src/performant_algs/qpsolvers

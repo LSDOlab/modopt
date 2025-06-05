@@ -89,7 +89,6 @@
 ```{eval-rst}
 
 .. autoclass:: modopt.OpenSQP
-    :noindex:
     :members: check_first_derivatives, solve, print_results
 ```
 
