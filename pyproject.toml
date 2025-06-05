@@ -108,6 +108,7 @@ qpsolvers = [
     "qpsolvers",
     # "qpsolvers[wheels_only]", # Installs the library with open source QP solvers with pre-complied binaries
     "quadprog",               # quadprog and osqp MAY BE installed with qpsolvers[open_source_solvers]
+    "highspy",                   # but not with qpsolvers[wheels_only]
     "osqp",                   # but not with qpsolvers[wheels_only]
 ]
 cvxopt = [    # cvxopt is already installed with qpsolvers[open_source_solvers] or qpsolvers[wheels_only]
@@ -115,6 +116,11 @@ cvxopt = [    # cvxopt is already installed with qpsolvers[open_source_solvers] 
 ]
 sqp = [
     "osqp", # osqp is already installed with qpsolvers[open_source_solvers]
+]
+opensqp = [
+    "qpsolvers",
+    "quadprog",
+    "highspy",
 ]
 cobyqa = [
     "cobyqa", # cobyqa is already installed with scipy>=1.14.0, which requires python>=3.10
