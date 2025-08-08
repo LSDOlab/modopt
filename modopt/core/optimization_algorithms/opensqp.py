@@ -6,6 +6,7 @@ from modopt import Optimizer
 from modopt.line_search_algorithms import Minpack2LS
 from modopt.merit_functions import AugmentedLagrangian
 from modopt.approximate_hessians import BFGSScipy
+from modopt import CSDLAlphaProblem
 
 
 class OpenSQP(Optimizer):
@@ -85,6 +86,16 @@ class OpenSQP(Optimizer):
             self.con_in = self.problem._compute_constraints
             self.jac_in = self.problem._compute_constraint_jacobian
             self.active_callbacks += ['con', 'jac']
+
+        ##################################################################
+        # TEMPORARY: for CSDLAlphaProblem
+        if type(self.problem) is CSDLAlphaProblem:
+            self.obj = lambda x: self.problem._compute_objective(x, check_failure=True)
+            self.grad = lambda x: self.problem._compute_objective_gradient(x, check_failure=True)
+            if self.problem.constrained:
+                self.con_in = lambda x: self.problem._compute_constraints(x, check_failure=True)
+                self.jac_in = lambda x: self.problem._compute_constraint_jacobian(x, check_failure=True)
+        ##################################################################
 
         self.options.declare('maxiter', default=1000, types=int)
         self.options.declare('opt_tol', default=1e-7, types=float)
