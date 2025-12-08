@@ -22,4 +22,5 @@
 ../_temp/examples/ex_16_4starship_landing_jax
 ../_temp/examples/ex_16_5starship_landing_openmdao
 ../_temp/examples/ex_17cutest_problem
+../_temp/examples/ex_19_opensqp_benchmark
 ```
