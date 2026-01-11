@@ -9,6 +9,7 @@
     modopt.NewtonLagrange
     modopt.L2PenaltyEq
     modopt.SQP
+    modopt.InteriorPoint
     modopt.PSO
     modopt.NelderMeadSimplex
     modopt.SimulatedAnnealing
@@ -60,6 +61,14 @@
 ```{eval-rst}
 
 .. autoclass:: modopt.SQP
+    :members: check_first_derivatives, solve, print_results
+```
+
+## InteriorPoint
+
+```{eval-rst}
+
+.. autoclass:: modopt.InteriorPoint
     :members: check_first_derivatives, solve, print_results
 ```
 

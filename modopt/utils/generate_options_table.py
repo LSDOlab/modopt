@@ -73,12 +73,14 @@ def generate_markdown_table(func):
 
 def generate_educational_algorithm_tables(config):
     from modopt import (SteepestDescent, Newton, QuasiNewton, 
-                        NewtonLagrange, L2PenaltyEq, SQP,
+                        NewtonLagrange, L2PenaltyEq, 
+                        SQP, InteriorPoint,
                         NelderMeadSimplex, PSO,
                         SimulatedAnnealing)
 
     # Generate the markdown table for each educational algorithm
-    for algorithm in [SteepestDescent, Newton, QuasiNewton, NewtonLagrange, L2PenaltyEq, SQP, NelderMeadSimplex, PSO, SimulatedAnnealing]:
+    for algorithm in [SteepestDescent, Newton, QuasiNewton, NewtonLagrange, L2PenaltyEq, 
+                      InteriorPoint, SQP, NelderMeadSimplex, PSO, SimulatedAnnealing]:
         markdown_output = generate_markdown_table(algorithm)
 
         # write the markdown table to a file

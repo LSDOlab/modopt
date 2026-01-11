@@ -12,6 +12,7 @@ educational_algs/newton_lagrange
 educational_algs/l2_penalty_eq
 
 educational_algs/sqp
+educational_algs/interior_point
 
 educational_algs/nelder_mead_simplex
 educational_algs/pso

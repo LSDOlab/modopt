@@ -14,7 +14,7 @@ class L1Eq(MeritFunction):
         obj = self.options['f'](x)
         con = self.options['c'](x)
 
-        return obj + rho * np.linalg.norm(con, 1)
+        return obj + np.linalg.norm(rho * con, 1)
 
     # Note: Gradient is not continuous, therefore, not useful
     def compute_gradient(self, x):
@@ -23,14 +23,14 @@ class L1Eq(MeritFunction):
         grad = self.options['g'](x)
         jac = self.options['j'](x)
 
-        return grad + rho * np.matmul(jac.T, np.sign(con))
+        return grad + np.matmul(jac.T, rho * np.sign(con))
 
     def evaluate_function(self, x, f, c):
         rho = self.rho
 
-        return f + rho * np.linalg.norm(c, 1)
+        return f + np.linalg.norm(rho * c, 1)
 
     # Note: Gradient is not continuous, therefore, not useful
     def evaluate_gradient(self, x, f, c, g, j):
         rho = self.rho
-        return g + rho * np.matmul(j.T, np.sign(c))
+        return g + np.matmul(j.T, rho * np.sign(c))

@@ -49,15 +49,15 @@ available in modOpt.
 modOpt as a library includes several gradient-based and gradient-free optimization algorithms.
 It provides interfaces to more than a dozen general-purpose optimizers, 
 along with fully transparent implementations of several educational optimization algorithms.
-The general-purpose optimizers available in modOpt include SLSQP, PySLSQP,
-SNOPT, IPOPT, Trust-Constr, SQP, BFGS, L-BFGS-B, Nelder-Mead, COBYLA, COBYQA, and CVXOPT.
+The general-purpose optimizers available in modOpt include SLSQP, PySLSQP, OpenSQP,
+SNOPT, IPOPT, Trust-Constr, BFGS, L-BFGS-B, Nelder-Mead, COBYLA, COBYQA, and CVXOPT.
 The ConvexQPSolvers optimizer provides an interface to more than 15 QP solvers
 available through the `qpsolvers` package.
 Note that PySLSQP, SNOPT, IPOPT, COBYQA, CVXOPT, and qpsolvers must be 
 installed separately if users wish to utilize them.
 The modular and transparent educational algorithms in modOpt include
-Steepest Descent, Quasi-Newton, Newton, Newton-Lagrange, Quadratic Penalty, SQP,
-PSO, Nelder-Mead Simplex, and Simulated Annealing.
+Steepest Descent, Quasi-Newton, Newton, Newton-Lagrange, Quadratic Penalty, 
+SQP, InteriorPoint, PSO, Nelder-Mead Simplex, and Simulated Annealing.
 
 <!-- ![modopt_lib](/src/images/modopt_lib.png "modOpt as a library") -->
 ```{figure} /src/images/modopt_library.png
@@ -172,6 +172,7 @@ src/educational_algs/newton_lagrange
 src/educational_algs/l2_penalty_eq
 
 src/educational_algs/sqp
+src/educational_algs/interior_point
 
 src/educational_algs/nelder_mead_simplex
 src/educational_algs/pso
