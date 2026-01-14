@@ -106,12 +106,15 @@ To install and start using modOpt, please read the [Getting Started](src/getting
 If you use modOpt in your work, please use the following reference for citation:
 
 ```bibtex
-@article{joshy2024modopt,
+@article{joshy2026modopt,
   title={modOpt: A modular development environment and library for optimization algorithms},
   author={Joshy, Anugrah Jo and Hwang, John T},
-  journal={arXiv preprint arXiv:2410.12942},
-  year={2024},
-  doi={10.48550/arXiv.2410.12942}
+  journal={Advances in Engineering Software},
+  volume={213},
+  pages={104084},
+  year={2026},
+  publisher={Elsevier},
+  doi={10.1016/j.advengsoft.2025.104084}
 }
 ```
 
