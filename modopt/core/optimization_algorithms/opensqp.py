@@ -258,7 +258,7 @@ class OpenSQP(Optimizer):
             # Compute problem constraint Jacobian
             j_in = self.jac_in(x)
 
-        j_out = np.empty((1, nx), dtype=float)
+        j_out = np.empty((0, nx), dtype=float)
 
         # if self.eq_bounded:
         #     j_out = np.append(j_out, np.identity(nx)[ebi], axis=0)
@@ -266,15 +266,15 @@ class OpenSQP(Optimizer):
             j_out = np.append(j_out, j_in[eci], axis=0)
 
         if self.lower_bounded:
-            j_out = np.append(j_out, np.identity(nx)[lbi], axis=0)
+            j_out = np.append(j_out,  np.identity(nx)[lbi], axis=0)
         if self.upper_bounded:
             j_out = np.append(j_out, -np.identity(nx)[ubi], axis=0)
         if self.lower_constrained:
-            j_out = np.append(j_out, j_in[lci], axis=0)
+            j_out = np.append(j_out,  j_in[lci], axis=0)
         if self.upper_constrained:
             j_out = np.append(j_out, -j_in[uci], axis=0)
 
-        return j_out[1:]
+        return j_out
 
     # Minimize A.L. w.r.t. slacks s.t. s >= 0
     def reset_slacks(self, c, pi, rho):

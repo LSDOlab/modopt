@@ -9,10 +9,10 @@ from modopt.line_search_algorithms import ScipyLS, BacktrackingArmijo, Minpack2L
 from modopt.merit_functions import AugmentedLagrangianIneq
 from modopt.approximate_hessians import BFGSScipy as BFGS
 
-# This optimizer takes constraints in all-inequality form, C(x) >= 0
+# This optimizer considers constraints in the all-inequality form, C(x) >= 0
 class SQP(Optimizer):
     """
-    Sequential Quadratic Programming (SQP) algorithm for general constrained optimization.
+    A Sequential Quadratic Programming (SQP) algorithm for general constrained optimization.
 
     Parameters
     ----------
