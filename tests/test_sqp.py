@@ -126,7 +126,89 @@ def test_sqp_basic():
     assert optimizer.results['nfev'] == 1083
     assert optimizer.results['ngev'] == 219
 
+@pytest.mark.opensqp
+@pytest.mark.interfaces # needs quadprog, qpsolvers, and highspy. 
+def test_opensqp(): 
+    import numpy as np
+    from modopt import OpenSQP
+
+    prob = Constrained()
+    prob.x0 = np.array([2., 2.]) # set initial guess to something closer to the minimum [0, 0]
+
+    solver_options = {'maxiter': 100, 'opt_tol': 1e-8, 'feas_tol': 1e-8}
+    optimizer = OpenSQP(prob, **solver_options)
+    optimizer.check_first_derivatives(prob.x0) # Note: this adds 3 to obj/con_evals and 1 to grad/jac_evals
+    optimizer.solve()
+    print(optimizer.results)
+    optimizer.print_results(summary_table=True)
+
+    assert optimizer.results['success']
+    assert_array_almost_equal(optimizer.results['x'], [1., 0.], decimal=8)
+    assert_almost_equal(optimizer.results['objective'], 1., decimal=8)
+    assert_array_almost_equal(optimizer.results['c'], [0., 1.,  0.], decimal=8)
+    assert_array_almost_equal(optimizer.results['pi'], [1.333333, 0., 1.333333], decimal=6)
+    assert_almost_equal(optimizer.results['optimality'], 0., decimal=8)
+    assert_almost_equal(optimizer.results['feasibility'], 0., decimal=8)
+    assert optimizer.results['niter'] < solver_options['maxiter']
+    assert optimizer.results['nfev'] == 6
+    assert optimizer.results['ngev'] == 6
+    
+    prob = constrained_lite()
+    prob.x0 = np.array([2., 2.]) # set initial guess to something closer to the minimum [0, 0]
+
+    optimizer = OpenSQP(prob, **solver_options)
+    optimizer.check_first_derivatives(prob.x0) # Note: this adds 3 to obj/con_evals and 1 to grad/jac_evals
+    optimizer.solve()
+    print(optimizer.results)
+    optimizer.print_results(summary_table=True)
+
+    assert optimizer.results['success']
+    assert_array_almost_equal(optimizer.results['x'], [1., 0.], decimal=8)
+    assert_almost_equal(optimizer.results['objective'], 1., decimal=8)
+    assert_array_almost_equal(optimizer.results['c'], [0., 1.,  0.], decimal=8)
+    assert_array_almost_equal(optimizer.results['pi'], [1.333333, 0., 1.333333], decimal=6)
+    assert_almost_equal(optimizer.results['optimality'], 0., decimal=8)
+    assert_almost_equal(optimizer.results['feasibility'], 0., decimal=8)
+    assert optimizer.results['niter'] < solver_options['maxiter']
+    assert optimizer.results['nfev'] == 6
+    assert optimizer.results['ngev'] == 6
+
+    prob = Unconstrained()
+    prob.x0 = np.array([1., 1.])
+
+    optimizer = OpenSQP(prob, **solver_options) 
+    optimizer.check_first_derivatives(prob.x0) # Note: this adds 3 to obj_evals and 1 to grad_evals
+    optimizer.solve()
+    print(optimizer.results)
+    optimizer.print_results(summary_table=True)
+
+    assert optimizer.results['success']
+    assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=3)
+    assert_almost_equal(optimizer.results['objective'], 0., decimal=8)
+    assert_almost_equal(optimizer.results['optimality'], 0., decimal=8)
+    assert optimizer.results['niter'] < solver_options['maxiter']
+    assert optimizer.results['nfev'] == 21
+    assert optimizer.results['ngev'] == 20
+
+    prob = unconstrained_lite()
+    prob.x0 = np.array([1., 1.])
+
+    optimizer = OpenSQP(prob, **solver_options)
+    optimizer.check_first_derivatives(prob.x0) # Note: this adds 3 to obj_evals and 1 to grad_evals
+    optimizer.solve()
+    print(optimizer.results)
+    optimizer.print_results(summary_table=True)
+
+    assert optimizer.results['success']
+    assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=3)
+    assert_almost_equal(optimizer.results['objective'], 0., decimal=8)
+    assert_almost_equal(optimizer.results['optimality'], 0., decimal=8)
+    assert optimizer.results['niter'] < solver_options['maxiter']
+    assert optimizer.results['nfev'] == 21
+    assert optimizer.results['ngev'] == 20
+
 if __name__ == '__main__':
     test_sqp()
     test_sqp_basic()
+    test_opensqp()
     print('All tests passed!')

@@ -346,6 +346,7 @@ def test_invalid_solver():
 
 if __name__ == '__main__':
     test_slsqp()
+    test_opensqp()
     test_cobyla()
     test_bfgs()
     test_lbfgsb()
