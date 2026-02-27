@@ -55,7 +55,7 @@ jobs:
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/jfowkes/pycutest/master/.install_cutest.sh)"
         cd $SIFDECODE/src ; make -f $SIFDECODE/makefiles/$MYARCH test # test the SIFDecode library
         cd $CUTEST/src ; make -f $CUTEST/makefiles/$MYARCH test       # test the CUTEst library
-        pip install pycutest
+        pip install pycutest==1.7.2
 
       # Run the package tests and generate the coverage report
     - name: Test with pytest
