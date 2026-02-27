@@ -37,11 +37,11 @@ jobs:
       run: |
         mkdir cutest
         cd cutest
-        git clone https://github.com/ralna/ARCHDefs ./archdefs    # ; cd archdefs; git checkout v2.2.8; cd ..
-        git clone https://github.com/ralna/SIFDecode ./sifdecode  # ; cd sifdecode; git checkout v2.4.2; cd ..
+        git clone https://github.com/ralna/ARCHDefs ./archdefs; cd archdefs; git checkout v2.2.8; cd ..
+        git clone https://github.com/ralna/SIFDecode ./sifdecode; cd sifdecode; git checkout v2.4.2; cd ..
         git clone https://github.com/ralna/CUTEst ./cutest
         cd cutest; git checkout v2.2.0; cd ..
-        git clone https://bitbucket.org/optrove/sif ./mastsif
+        git clone https://bitbucket.org/optrove/sif ./mastsif; cd mastsif; git checkout v2.5.2; cd ..
         cd ..
 
     - name: Install CUTEst and pyCUTEst
