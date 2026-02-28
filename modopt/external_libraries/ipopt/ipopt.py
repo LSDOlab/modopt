@@ -177,8 +177,7 @@ class IPOPT(Optimizer):
         start_time = time.time()
         results = solver(x0=x0, **bounds)
         stats = solver.stats()
-        iterations  = stats['iterations']
-        stats = {key: stats[key] for key in stats.keys() if key not in ['iterations']}
+        iterations  = stats.pop('iterations')
         self.total_time = time.time() - start_time
 
         self.results = {
