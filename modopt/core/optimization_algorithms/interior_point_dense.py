@@ -430,7 +430,6 @@ class InteriorPoint(Optimizer):
         opt      = max(np.linalg.norm(lag_grad, ord=np.inf),
                        np.linalg.norm(compl, ord=np.inf))
         c_viol = np.concatenate((np.abs(c_k[:nce]), np.maximum(0., -c_k[nce:]))) if nc > 0 else np.array([0.0])
-        feas   = np.linalg.norm(c_viol, ord=np.inf)
         tol_satisfied = False
 
         # Initializing declared outputs
@@ -442,7 +441,7 @@ class InteriorPoint(Optimizer):
                             obj=f_k/o_scaler,
                             constraints=c_k/c_scaler,
                             opt=opt,
-                            feas=np.linalg.norm(c_viol/c_scaler, np.inf),
+                            feas=np.linalg.norm(c_viol/c_scaler, np.inf) if nc > 0 else 0.,
                             time=time.time() - start_time,
                             nfev=nfev,
                             ngev=ngev,
@@ -681,7 +680,7 @@ class InteriorPoint(Optimizer):
                 obj=f_k/o_scaler,
                 constraints=c_k/c_scaler,
                 opt=opt,
-                feas=np.linalg.norm(c_viol/c_scaler, np.inf),
+                feas=np.linalg.norm(c_viol/c_scaler, np.inf) if nc > 0 else 0.,
                 time=time.time() - start_time,
                 nfev=nfev,
                 ngev=ngev,
@@ -703,7 +702,7 @@ class InteriorPoint(Optimizer):
             'pi': pi_k*c_scaler/o_scaler,
             's': s_k/c_scaler[nce:],
             'optimality': opt,
-            'feasibility': np.linalg.norm(c_viol/c_scaler, np.inf),
+            'feasibility': np.linalg.norm(c_viol/c_scaler, np.inf) if nc > 0 else 0.,
             'nfev': nfev,
             'ngev': ngev,
             'niter': itr,
