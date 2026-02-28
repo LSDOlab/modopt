@@ -1,10 +1,9 @@
-# Test the SQP optimizer
+# Test SQP optimizers
 
 from all_problem_types import Constrained, constrained_lite, Unconstrained, unconstrained_lite
 from numpy.testing import assert_array_almost_equal, assert_array_equal, assert_almost_equal
 import pytest
 
-@pytest.mark.sqp
 @pytest.mark.interfaces # needs osqp
 def test_sqp(): 
     import numpy as np
