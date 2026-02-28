@@ -46,7 +46,7 @@ extensions = [
     "sphinx_copybutton",            # allows copying code embedded in the docs rendered from .md or .ipynb files
     "myst_nb",                      # renders .md, .myst, .ipynb files
     "sphinx.ext.viewcode",          # adds the source code for classes and functions in auto generated api ref
-    "sphinxcontrib.collections",    # adds files from outside src and executes functions before Sphinx builds
+    "sphinx_collections",           # adds files from outside src and executes functions before Sphinx builds
     "sphinxcontrib.bibtex",         # for references and citations
 ]
 

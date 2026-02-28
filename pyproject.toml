@@ -84,7 +84,7 @@ docs = [
     "sphinx-autoapi==2.1.0",   # Defining exact versions to ensure packages don't break
     "astroid==2.15.5",
     "numpydoc==1.5.0",
-    "sphinxcontrib-collections @ git+https://github.com/anugrahjo/sphinx-collections.git",
+    "sphinx_collections @ git+https://github.com/anugrahjo/sphinx-collections.git",
     "sphinxcontrib-bibtex==2.5.0"
 ]
 test = [
