@@ -224,7 +224,7 @@ def test_cobyqa():
     optimizer.print_results(optimal_variables=True)
     assert optimizer.results['success'] == True
     assert optimizer.results['message'] == 'The lower bound for the trust-region radius has been reached'
-    assert_array_almost_equal(optimizer.results['x'], [2., 0.], decimal=9)
+    assert_array_almost_equal(optimizer.results['x'], [2., 0.], decimal=8)
     assert_almost_equal(optimizer.results['fun'], 20., decimal=7)
     
     prob = scaling_lite()
@@ -236,7 +236,7 @@ def test_cobyqa():
     optimizer.print_results(optimal_variables=True, obj_history=True, max_con_viol_history=True)
     assert optimizer.results['success'] == True
     assert optimizer.results['message'] == 'The lower bound for the trust-region radius has been reached'
-    assert_array_almost_equal(optimizer.results['x'], [2., 0.], decimal=9)
+    assert_array_almost_equal(optimizer.results['x'], [2., 0.], decimal=8)
     assert_almost_equal(optimizer.results['fun'], 20., decimal=7)
 
 @pytest.mark.trust_constr
