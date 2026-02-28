@@ -356,6 +356,8 @@ def test_ipopt():
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
     print(optimizer.results)
+    assert optimizer.results['success'] == True
+    assert optimizer.results['return_status'] == 'Solve_Succeeded'
     assert_array_almost_equal(optimizer.results['x'], [2., 0.], decimal=9)
     assert_almost_equal(optimizer.results['f'], 20., decimal=7)
     assert_almost_equal(optimizer.results['c'], [5, 0.5], decimal=9)
@@ -369,6 +371,8 @@ def test_ipopt():
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
     print(optimizer.results)
+    assert optimizer.results['success'] == True
+    assert optimizer.results['return_status'] == 'Solve_Succeeded'
     assert_array_almost_equal(optimizer.results['x'], [2., 0.], decimal=9)
     assert_almost_equal(optimizer.results['f'], 20., decimal=7)
     assert_almost_equal(optimizer.results['c'], [5, 0.5], decimal=9)
@@ -385,6 +389,8 @@ def test_ipopt():
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
     print(optimizer.results)
+    assert optimizer.results['success'] == True
+    assert optimizer.results['return_status'] == 'Solve_Succeeded'
     assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=1)
 
     prob = unconstrained_lite()
@@ -393,6 +399,8 @@ def test_ipopt():
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
     print(optimizer.results)
+    assert optimizer.results['success'] == True
+    assert optimizer.results['return_status'] == 'Solve_Succeeded'
     assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=1)
 
 @pytest.mark.trust_constr
@@ -510,6 +518,8 @@ def test_ipopt_exact_hess():
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
     print(optimizer.results)
+    assert optimizer.results['success'] == True
+    assert optimizer.results['return_status'] == 'Solve_Succeeded'
     assert_array_almost_equal(optimizer.results['x'], [2., 0.], decimal=6)
     assert_almost_equal(optimizer.results['f'], 20., decimal=5)
     assert_almost_equal(optimizer.results['c'], [5, 0.5], decimal=6)
@@ -523,6 +533,8 @@ def test_ipopt_exact_hess():
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
     print(optimizer.results)
+    assert optimizer.results['success'] == True
+    assert optimizer.results['return_status'] == 'Solve_Succeeded'
     assert_array_almost_equal(optimizer.results['x'], [2., 0.], decimal=6)
     assert_almost_equal(optimizer.results['f'], 20., decimal=5)
     assert_almost_equal(optimizer.results['c'], [5, 0.5], decimal=6)
@@ -539,6 +551,8 @@ def test_ipopt_exact_hess():
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
     print(optimizer.results)
+    assert optimizer.results['success'] == True
+    assert optimizer.results['return_status'] == 'Solve_Succeeded'
     assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=1)
 
     prob = second_order_bound_constrained_lite()
@@ -547,6 +561,8 @@ def test_ipopt_exact_hess():
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
     print(optimizer.results)
+    assert optimizer.results['success'] == True
+    assert optimizer.results['return_status'] == 'Solve_Succeeded'
     assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=1)
 
     # test unconstrained problem
@@ -556,6 +572,8 @@ def test_ipopt_exact_hess():
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
     print(optimizer.results)
+    assert optimizer.results['success'] == True
+    assert optimizer.results['return_status'] == 'Solve_Succeeded'
     assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=2)
 
     prob = second_order_unconstrained_lite()
@@ -564,6 +582,8 @@ def test_ipopt_exact_hess():
     optimizer.check_first_derivatives(prob.x0)
     optimizer.solve()
     print(optimizer.results)
+    assert optimizer.results['success'] == True
+    assert optimizer.results['return_status'] == 'Solve_Succeeded'
     assert_array_almost_equal(optimizer.results['x'], [0., 0.], decimal=2)
 
 @pytest.mark.interfaces
@@ -658,6 +678,8 @@ def test_errors():
     optimizer = IPOPT(qp_no_hess_lite(), solver_options={'hessian_approximation':'exact'})
     optimizer.solve()
     optimizer.print_results()
+    assert optimizer.results['success'] == True
+    assert optimizer.results['return_status'] == 'Solve_Succeeded'
     assert_array_almost_equal(optimizer.results['x'], [1., 0.], decimal=8)
 
 if __name__ == '__main__':

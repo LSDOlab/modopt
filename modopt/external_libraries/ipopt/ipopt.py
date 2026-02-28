@@ -176,6 +176,7 @@ class IPOPT(Optimizer):
         # Solve the problem
         start_time = time.time()
         results = solver(x0=x0, **bounds)
+        stats = solver.stats()
         self.total_time = time.time() - start_time
 
         self.results = {
@@ -186,6 +187,10 @@ class IPOPT(Optimizer):
             'lam_x': np.array(results['lam_x']).reshape((self.nx,)),
             'lam_p': np.array(results['lam_p']),
             'time' : self.total_time,
+            'success': stats['return_status'] == 'Solve_Succeeded',
+            # 'success': stats['return_status'] in ['Solve_Succeeded', 'Solved_To_Acceptable_Level'],
+            'return_status': stats['return_status'],
+            'stats': stats,
             }
         
         self.run_post_processing()
@@ -216,6 +221,8 @@ class IPOPT(Optimizer):
 
         output += f"\n\t{'Problem':35}: {self.problem_name}"
         output += f"\n\t{'Solver':35}: {self.solver_name}"
+        output += f"\n\t{'Success':35}: {self.results['success']}"
+        output += f"\n\t{'Return status':35}: {self.results['return_status']}"
         output += f"\n\t{'Objective':35}: {self.results['f']}"
         output += f"\n\t{'Total time':35}: {self.results['time']}"
         output += self.get_callback_counts_string(35)
