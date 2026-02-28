@@ -225,27 +225,27 @@ collections = {
     # convert_examples collection converts all .py files to .md files recursively inside `_temp/examples` 
     # directory and also extracts the docstrings from the .py files to generate title and descriptions
     # for those examples
-  #  'convert_examples': {
-  #     'driver': 'writer_function',  # uses custom WriterFunctionDriver written by Anugrah
-  #     'from'  : '_temp/examples/',  # source relative to path of makefile, not wrt /src
-  #     'source': py2md,              # custom function written above in `conf.py`
-  #     'target': 'examples/',        # target was a file for original FunctionDriver, e.g., 'target': 'examples/temp.txt'
-  #                                   # the original FunctionDriver was supposed to write only 1 file.
-  #     'clean': True,       
-  #     'final_clean': True,      
-  #   #   'write_result': True,   # this prevents original FunctionDriver from writing to the target file
-  #  },
+   'convert_examples': {
+      'driver': 'writer_function',  # uses custom WriterFunctionDriver written by Anugrah
+      'from'  : '_temp/examples/',  # source relative to path of makefile, not wrt /src
+      'source': py2md,              # custom function written above in `conf.py`
+      'target': 'examples/',        # target was a file for original FunctionDriver, e.g., 'target': 'examples/temp.txt'
+                                    # the original FunctionDriver was supposed to write only 1 file.
+      'clean': True,       
+      'final_clean': True,      
+    #   'write_result': True,   # this prevents original FunctionDriver from writing to the target file
+   },
 
-  #  'generate_options_tables': {
-  #     'driver': 'writer_function',  # uses custom WriterFunctionDriver written by Anugrah
-  #     'from'  : '_temp/options_tables/',  # source relative to path of makefile, not wrt /src
-  #     'source': generate_educational_algorithm_tables,   # custom function written in modopt/utils/generate_options_table.py
-  #     'target': 'options_tables/',  # target was a file for original FunctionDriver, e.g., 'target': 'examples/temp.txt'
-  #                                   # the original FunctionDriver was supposed to write only 1 file.
-  #     'clean': True,
-  #     'final_clean': True,      # Do not clean as these files are directly included in the documentation
-  #   #   'write_result': True,   # this prevents original FunctionDriver from writing to the target file
-  #  },
+   'generate_options_tables': {
+      'driver': 'writer_function',  # uses custom WriterFunctionDriver written by Anugrah
+      'from'  : '_temp/options_tables/',  # source relative to path of makefile, not wrt /src
+      'source': generate_educational_algorithm_tables,   # custom function written in modopt/utils/generate_options_table.py
+      'target': 'options_tables/',  # target was a file for original FunctionDriver, e.g., 'target': 'examples/temp.txt'
+                                    # the original FunctionDriver was supposed to write only 1 file.
+      'clean': True,
+      'final_clean': True,      # Do not clean as these files are directly included in the documentation
+    #   'write_result': True,   # this prevents original FunctionDriver from writing to the target file
+   },
 }
 
 collections_target = 'src/_temp'    # default : '_collections', the default storage location for all collections
