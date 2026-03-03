@@ -26,11 +26,13 @@ class BFGSScipy(ApproximateHessian):
 
         - `'skip_update'`: Skip the update and keep the previous approximation.
         - `'damp_update'`: Interpolate between the computed BFGS update and the previous approximation.
-    init_scale : {float, 'auto'}, default='auto'
-        Initial scaling factor for the Hessian approximation.
-
+    init_scale : {float, 'auto', np.ndarray}, default='auto'
+        Initial scaling for the Hessian approximation.
         - `float`: Use ``init_scale*np.eye(nx)`` as the initial approximation.
         - `'auto'`: Use an automatic heuristic to compute the initial scaling factor.
+        - `np.ndarray`: Use the provided array as the initial approximation.
+        The array must be of shape `(nx, nx)`, symmetric, and positive definite.
+        Note that this option only works for SciPy >= 1.14.0.
 
     Attributes
     ----------
@@ -50,7 +52,7 @@ class BFGSScipy(ApproximateHessian):
         self.options.declare('min_curvature', default=0.0, types=float)
         self.options.declare('init_scale',
                              default='auto',
-                             types=(float, str))
+                             types=(float, str, np.ndarray))
 
     def setup(self, ):
         if self.options['min_curvature'] == 0.0:

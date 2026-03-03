@@ -69,7 +69,8 @@ class OpenSQP(Optimizer):
     ls_alpha_tol : float, default=1e-14
         Relative tolerance for an acceptable step in the line search.
     bfgs_init_lag_hess : np.ndarray, default=None
-        Initial symmetric and positive definite Hessian approximation for the BFGS update.
+        Initial symmetric and positive definite approximation of
+        the Lagrangian Hessian of shape (nx,nx) for the BFGS update.
         Available only with SciPy >= 1.14.0.
     init_multipliers : dict, default=None
         Initial Lagrange multiplier values for the bounds and constraints.
