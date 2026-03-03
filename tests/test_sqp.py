@@ -129,12 +129,24 @@ def test_sqp_basic():
 @pytest.mark.interfaces # needs quadprog, qpsolvers, and highspy. 
 def test_opensqp(): 
     import numpy as np
+    import scipy
+    from scipy._lib._pep440 import Version
     from modopt import OpenSQP
 
     prob = Constrained()
     prob.x0 = np.array([2., 2.]) # set initial guess to something closer to the minimum [0, 0]
 
     solver_options = {'maxiter': 100, 'opt_tol': 1e-8, 'feas_tol': 1e-8}
+    if Version(scipy.__version__) >= Version("1.14.0"):
+        solver_options['bfgs_init_lag_hess'] = np.eye(2)
+    init_multipliers = {
+        'xl': np.zeros(prob.nx),
+        'xu': np.zeros(prob.nx),
+        'cl': np.zeros(prob.nc),
+        'cu': np.zeros(prob.nc)
+    }
+    solver_options['init_multipliers'] = init_multipliers
+    
     optimizer = OpenSQP(prob, **solver_options)
     optimizer.check_first_derivatives(prob.x0) # Note: this adds 3 to obj/con_evals and 1 to grad/jac_evals
     optimizer.solve()

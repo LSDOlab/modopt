@@ -1,12 +1,17 @@
 import numpy as np
 import time
 import warnings
+from typing import Dict
 
 from modopt import Optimizer
 from modopt.line_search_algorithms import Minpack2LS
 from modopt.merit_functions import AugmentedLagrangian
 from modopt.approximate_hessians import BFGSScipy
 from modopt import CSDLAlphaProblem
+
+import scipy
+# from packaging.version import Version
+from scipy._lib._pep440 import Version
 
 
 class OpenSQP(Optimizer):
@@ -63,6 +68,14 @@ class OpenSQP(Optimizer):
         Wolfe (curvature condition) parameter for the line search.
     ls_alpha_tol : float, default=1e-14
         Relative tolerance for an acceptable step in the line search.
+    bfgs_init_lag_hess : np.ndarray, default=None
+        Initial symmetric and positive definite Hessian approximation for the BFGS update.
+        Available only with SciPy >= 1.14.0.
+    init_multipliers : dict, default=None
+        Initial Lagrange multiplier values for the bounds and constraints.
+        Should be a dict with keys 'cl', 'cu', 'xl', 'xu' corresponding to
+        the lower and upper bounds of the constraints and variables, and
+        values being arrays of the same length as the number of constraints/variables.
 
     readable_outputs : list, default=[]
         List of outputs to be written to readable text output files.
@@ -113,6 +126,12 @@ class OpenSQP(Optimizer):
         self.options.declare('ls_eta_w', default=0.95, types=float)
         self.options.declare('ls_alpha_tol', default=1e-14, types=float)
 
+        self.options.declare('init_multipliers', default=None, types=(type(None), Dict))
+        if Version(scipy.__version__) >= Version("1.14.0"):
+            self.options.declare('bfgs_init_lag_hess', default=None, types=(type(None), np.ndarray))
+        else:
+            print("SciPy version is less than 1.14.0, 'bfgs_init_lag_hess' option is not available.")
+
         self.available_outputs = {
             'major': int,
             'obj': float,
@@ -141,6 +160,7 @@ class OpenSQP(Optimizer):
 
     def setup(self):
         self.setup_constraints()
+        self.setup_initial_multipliers()
         nx   = self.nx
         nc   = self.nc
         nc_e = self.nc_e
@@ -155,9 +175,12 @@ class OpenSQP(Optimizer):
 
         self.successive_undefined_iterations = 0
         
+        init_scale = 1.0
+        if Version(scipy.__version__) >= Version("1.14.0") and self.options['bfgs_init_lag_hess'] is not None:
+            init_scale = self.options['bfgs_init_lag_hess'] * 1.0
         self.QN = BFGSScipy(nx=nx,
                             exception_strategy='damp_update',
-                            init_scale=1.0)
+                            init_scale=init_scale)
             
         self.MF = AugmentedLagrangian(nx=nx,
                                       nc=nc,
@@ -214,6 +237,39 @@ class OpenSQP(Optimizer):
         self.nc   = self.nc_e + self.nc_i
 
         self.non_bound_indices = np.concatenate([np.arange(self.nc_e), np.arange(self.nc_e+self.nc_b, self.nc)])
+
+    def setup_initial_multipliers(self, ):
+        pi_ = self.options['init_multipliers']
+        if pi_ is None:
+            self.pi_0 = None
+            return
+        
+        if self.nc_b > 0 and not {'xl', 'xu'}.issubset(pi_.keys()):
+            raise ValueError("init_multipliers must contain keys 'xl'and 'xu' for problems with variable bounds. \
+                             If unsure about some of the multipliers, set them as zeros.")
+        lbi = self.lower_bound_indices
+        ubi = self.upper_bound_indices
+        
+        if self.problem.constrained:
+            if not {'cl', 'cu'}.issubset(pi_.keys()):
+                raise ValueError("init_multipliers must contain keys 'cl' and 'cu' for problems with constraints. \
+                                 If unsure about some of the multipliers, set them as zeros.")
+            eci = self.eq_constraint_indices
+            lci = self.lower_constraint_indices
+            uci = self.upper_constraint_indices
+
+        pi_0 = np.array([])
+        if self.eq_constrained:
+            pi_0 = np.append(pi_0, pi_['cl'][eci])
+        if self.lower_bounded:
+            pi_0 = np.append(pi_0, pi_['xl'][lbi])
+        if self.upper_bounded:
+            pi_0 = np.append(pi_0, pi_['xu'][ubi])
+        if self.lower_constrained:
+            pi_0 = np.append(pi_0, pi_['cl'][lci])
+        if self.upper_constrained:
+            pi_0 = np.append(pi_0, pi_['cu'][uci])
+        self.pi_0 = pi_0
 
     def con(self, x):
         ebi = self.eq_bound_indices
@@ -604,7 +660,7 @@ class OpenSQP(Optimizer):
 
         # Set initial values for multipliers and slacks
         # pi_k = np.full((nc, ), 1.)
-        pi_k = np.full((nc, ), 0.)
+        pi_k = self.pi_0 * 1. if self.pi_0 is not None else np.full((nc, ), 0.)
 
         nfev = 1
         ngev = 1
