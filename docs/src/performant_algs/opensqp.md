@@ -100,6 +100,17 @@ See the table below for the full list of options.
 * - `ls_alpha_tol`
   - *float* (`1e-14`)
   - Relative tolerance for an acceptable step in the line search.
+* - `bfgs_init_lag_hess`
+  - *np.ndarray* (`None`)
+  - Initial symmetric and positive definite approximation of \
+    the Lagrangian Hessian of shape (nx,nx) for the BFGS update. \
+    Available only with SciPy >= 1.14.0.
+* - `init_multipliers`
+  - *dict* (`None`)
+    Initial Lagrange multiplier values for the bounds and constraints. \
+    Should be a dict with keys 'cl', 'cu', 'xl', 'xu' corresponding to \
+    the lower and upper bounds of the constraints and variables, and \
+    values being arrays of the same length as the number of constraints/variables.
 * - `readable_outputs`
   - *list* (`[]`)
   - List of outputs to be written to readable text output files. \
