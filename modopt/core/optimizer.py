@@ -65,6 +65,7 @@ class Optimizer(ABC):
     def __init__(self, 
                  problem:Union[Problem, ProblemLite], 
                  recording:bool = False,
+                 out_dir:str = None,
                  hot_start_from:str = None,
                  hot_start_atol:float = 0.,
                  hot_start_rtol:float = 0.,
@@ -85,6 +86,8 @@ class Optimizer(ABC):
             If ``True``, record all outputs from the optimization.
             This needs to be enabled for hot-starting the same problem later,
             if the optimization is interrupted.
+        out_dir : str, optional
+            The directory to store all the output files generated from the optimization.
         hot_start_from : str, optional
             The record file from which to hot-start the optimization.
         hot_start_atol : float, default=0.
@@ -114,6 +117,7 @@ class Optimizer(ABC):
         self.problem_name = problem.problem_name
         self.solver_name = 'unnamed_solver'
         self.options.declare('recording', default=False, types=bool)
+        self.options.declare('out_dir', default=None, types=(type(None), str))
         self.options.declare('hot_start_from', default=None, types=(type(None), str))
         self.options.declare('hot_start_atol', default=0., types=float)
         self.options.declare('hot_start_rtol', default=0., types=float)
@@ -126,6 +130,7 @@ class Optimizer(ABC):
 
         self.initialize()
         self.options.update({'recording': recording,
+                             'out_dir': out_dir,
                              'hot_start_from': hot_start_from,
                              'hot_start_atol': hot_start_atol,
                              'hot_start_rtol': hot_start_rtol,
@@ -140,12 +145,16 @@ class Optimizer(ABC):
 
         # Create the outputs directory
         if not self.options['turn_off_outputs']:
-            self.out_dir = f"{problem.problem_name}_outputs/{self.timestamp}"
+            default_out_dir = f"{self.problem_name}_outputs/{self.timestamp}"
+            user_out_dir    = self.options['out_dir']
+            self.out_dir =  f"{user_out_dir}/{self.timestamp}" if user_out_dir else default_out_dir
             self.modopt_output_files  = [f"directory: {self.out_dir}", 'modopt_results.out']
             os.makedirs(self.out_dir) # recursively create the directory
         else:
             if self.options['recording']:
                 raise ValueError("Cannot record with 'turn_off_outputs=True'.")
+            if self.options['out_dir']:
+                raise ValueError("Cannot specify 'out_dir' with 'turn_off_outputs=True'.")
             if self.options['readable_outputs'] != []:
                 raise ValueError("Cannot write 'readable_outputs' with 'turn_off_outputs=True'.")
             if self.options['visualize'] != []:

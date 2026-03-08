@@ -12,7 +12,7 @@ def test_sqp():
     prob = Constrained()
     prob.x0 = np.array([2., 2.]) # set initial guess to something closer to the minimum [0, 0]
 
-    solver_options = {'maxiter': 100, 'opt_tol': 1e-8, 'feas_tol': 1e-8, 'qp_tol':1e-8}
+    solver_options = {'maxiter': 100, 'opt_tol': 1e-8, 'feas_tol': 1e-8, 'qp_tol':1e-8, 'out_dir':'sqp_test_outputs'}
     optimizer = SQP(prob, **solver_options)
     optimizer.check_first_derivatives(prob.x0) # Note: this adds 3 to obj/con_evals and 1 to grad/jac_evals
     optimizer.solve()
