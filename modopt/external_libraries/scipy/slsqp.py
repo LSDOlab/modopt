@@ -17,6 +17,8 @@ class SLSQP(Optimizer):
         If ``True``, record all outputs from the optimization.
         This needs to be enabled for hot-starting the same problem later,
         if the optimization is interrupted.
+    out_dir : str, optional
+        The directory to store all the output files generated from the optimization.
     hot_start_from : str, optional
         The record file from which to hot-start the optimization.
     hot_start_atol : float, default=0.
