@@ -131,7 +131,7 @@ class ProblemLite(object):
         self.o_scaler = o_scaler * np.ones((1,))
         self.x_scaler = x_scaler * np.ones((nx,))
 
-        self.x0 = np.asfarray(x0) * x_scaler
+        self.x0 = np.asarray(x0, dtype=float) * x_scaler
         self.x_lower = xl * self.x_scaler if xl is not None else np.full(nx, -np.inf)
         self.x_upper = xu * self.x_scaler if xu is not None else np.full(nx,  np.inf)
 

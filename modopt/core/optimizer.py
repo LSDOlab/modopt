@@ -215,7 +215,7 @@ class Optimizer(ABC):
             for key in s_outs:
                 if a_outs[key] in (int, np.int_, np.int32, np.int64):
                     header += "%10s " % key
-                elif a_outs[key] in (float, np.float_, np.float32, np.float64):
+                elif a_outs[key] in (float, np.float32, np.float64):
                     header += "%16s " % key
 
             with open(f"{dir}/modopt_summary.out", 'w') as f:
@@ -424,7 +424,7 @@ class Optimizer(ABC):
             for key in self.scalar_outputs:
                 if a_outs[key] in (int, np.int_, np.int32, np.int64):
                     new_row += "%10i " % kwargs[key]
-                elif a_outs[key] in (float, np.float_, np.float32, np.float64):
+                elif a_outs[key] in (float, np.float32, np.float64):
                     new_row += "%16.6E " % kwargs[key]
 
             with open(f"{dir}/modopt_summary.out", 'a') as f:
