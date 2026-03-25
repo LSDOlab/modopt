@@ -66,6 +66,8 @@ class InteriorPoint(Optimizer):
         Armijo parameter for the line search.
     ls_gamma_c : float, default=0.5
         Step length contraction factor for backtracking line search.
+    ls_max_step : float, default=1.0
+        Maximum step length for line search.
 
     bfgs_reset_frequency : int, default=100
         Iteration frequency to reset the BFGS approximate Hessian.
@@ -86,6 +88,17 @@ class InteriorPoint(Optimizer):
         if self.problem.constrained:
             self.con_in = self.problem._compute_constraints
             self.jac_in = self.problem._compute_constraint_jacobian
+        ##################################################################
+        # TEMPORARY: for CSDLAlphaProblem
+        from modopt import CSDLAlphaProblem
+ 
+        if type(self.problem) is CSDLAlphaProblem:
+            self.obj = lambda x: self.problem._compute_objective(x, check_failure=True)
+            self.grad = lambda x: self.problem._compute_objective_gradient(x, check_failure=True)
+            if self.problem.constrained:
+                self.con_in = lambda x: self.problem._compute_constraints(x, check_failure=True)
+                self.jac_in = lambda x: self.problem._compute_constraint_jacobian(x, check_failure=True)
+        ##################################################################
 
         self.options.declare('maxiter', default=1000, types=int)
         self.options.declare('opt_tol', default=1e-6, types=float)
@@ -100,6 +113,7 @@ class InteriorPoint(Optimizer):
         self.options.declare('ls_maxiter', default=10, types=int)
         self.options.declare('ls_eta_a', default=1e-4, types=float)
         self.options.declare('ls_gamma_c', default=0.5, types=float)
+        self.options.declare('ls_max_step', default=1.0, upper=1.0, lower =1e-12, types=float)
 
         self.options.declare('bfgs_reset_frequency', default=100, types=int)
 
@@ -366,6 +380,14 @@ class InteriorPoint(Optimizer):
         g_k *= o_scaler
         obj  = self.obj  = lambda x: o_scaler * self.problem._compute_objective(x)
         grad = self.grad = lambda x: o_scaler * self.problem._compute_objective_gradient(x)
+        ##################################################################
+        # TEMPORARY: for CSDLAlphaProblem
+        from modopt import CSDLAlphaProblem
+ 
+        if type(self.problem) is CSDLAlphaProblem:
+            obj  = self.obj  = lambda x: o_scaler * self.problem._compute_objective(x, check_failure=True)
+            grad = self.grad = lambda x: o_scaler * self.problem._compute_objective_gradient(x, check_failure=True)
+        ##################################################################
 
         if nc > ncb:
             nbce = non_bound_con_indices = np.concatenate((np.arange(nce, dtype=int), np.arange(nce+ncb, nc, dtype=int)))
@@ -552,6 +574,10 @@ class InteriorPoint(Optimizer):
                                         #  alpha_sig_max * p_pi,
                                          alpha_max_min * p_pi,
                                          alpha_s_max * p_s))
+            
+            # Enforce the maximum step length for line search
+            p_k *= self.options['ls_max_step']
+            # p_k *= self.options['ls_max_step'] / max(np.linalg.norm(p_k, ord=np.inf), self.options['ls_max_step'])
                 
             # Form the barrier subproblem variables
             bsp_xk = np.concatenate((x_k, s_k))
