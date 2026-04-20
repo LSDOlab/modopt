@@ -282,9 +282,9 @@ def plot_performance_profiles(data, save_figname='performance.pdf'):
         plt.savefig(save_figname.replace('.pdf', '_nev.pdf'), bbox_inches='tight')
         plt.show()
 
-def filter_cutest_problems(num_vars=[0,1], num_cons=[0,0]):
+def filter_cutest_problems(num_vars=[0,1], num_cons=[0,0], tags=[], return_metadata=False):
     '''
-    Filter CUTEst problems based on the number of variables and constraints.
+    Filter CUTEst problems based on the number of variables, number of constraints, and problem tags.
 
     Parameters
     ----------
@@ -292,18 +292,41 @@ def filter_cutest_problems(num_vars=[0,1], num_cons=[0,0]):
         List of two integers denoting the minimum and maximum number of variables.
     num_cons : list, default=[0,0]
         List of two integers denoting the minimum and maximum number of constraints.
+    tags : list, default=[]
+        List of tags indicating the desired optimization problem types.
+        For example, `['UC']` for unconstrained problems, `['BC']` for bound-constrained problems,
+        `['QP']` for quadratic programming problems, `['LP']` for linear programming problems,
+        `['FP']` for feasible point problems, and any valid combination of these tags
+        for problems that satisfy multiple criteria.
+        A problem is selected if it contains all the specified tags.
+    return_metadata : bool, default=False
+        If True, also return a dictionary containing the metadata of the filtered problems.
 
     Returns
     -------
     filtered_problems : list
-        List of CUTEst problems that has the number of variables and constraints within the specified range.
+        List of CUTEst problems that have the specified tags and
+        the number of variables and constraints within the specified range.
+    metadata : dict, optional
+        Dictionary containing the metadata of the filtered problems.
+        The keys are the filtered problem names and the values are dictionaries
+        containing the number of variables, number of constraints, tags,
+        and the cutest classification string for the corresponding filtered problem.
+        Only returned if `return_metadata` is True.
 
     Examples
     --------
     >>> from modopt.benchmarking import filter_cutest_problems
     >>> problem_names = filter_cutest_problems(num_vars=[1,5], num_cons=[1,1])
-    >>> print(len(problem_names))
+    >>> len(problem_names)
     45
+    >>> pnames, metadata = filter_cutest_problems(num_vars=[1,2], tags=['BC'], return_metadata=True)
+    >>> len(pnames)
+    24
+    >>> pnames[0]
+    'BQP1VAR'
+    >>> metadata[pnames[0]]
+    {'nx': 1, 'nc': 0, 'tags': ['BC', 'QP'], 'cutest_cls': 'QBR2-AN-1-0'}
     '''
     
     import os
@@ -323,14 +346,22 @@ def filter_cutest_problems(num_vars=[0,1], num_cons=[0,0]):
     header = [col.strip() for col in header_line.split('|') if col]
     data   = [[col.strip() for col in line.split('|') if col] for line in data_lines]
 
-    # Get filtered problem names: Only import required problems based on the table
+    # Filter problems based on the table data
     filtered_problems = []
+    metadata = {}
     for line in data:
         name, nx, nc = line[1], int(line[2]), int(line[3])
-        if nx >= num_vars[0] and nx <= num_vars[1] and nc >= num_cons[0] and nc <= num_cons[1]:
+        ptags = [item.strip(" '") for item in line[4].split(',')]
+        ptags = [] if ptags==[''] else ptags
+        cutest_cls = line[5]
+        if nx >= num_vars[0] and nx <= num_vars[1] and \
+           nc >= num_cons[0] and nc <= num_cons[1] and \
+           set(tags).issubset(ptags):
             filtered_problems.append(name)
+            metadata[name] = {'nx': nx, 'nc': nc, 'tags': ptags, 'cutest_cls': cutest_cls}
 
-    # print('Number of problems filtered:', len(filtered_problems))
+    if return_metadata:
+        return filtered_problems, metadata
     return filtered_problems
 
 if __name__ == "__main__":

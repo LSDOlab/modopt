@@ -4,7 +4,7 @@ This file contains tests for the examples within docstrings.
 import os
 import sys
 here = os.path.abspath(os.path.dirname(__file__))
-sys.path.append(os.path.join(here, '../modopt/core'))  # Add the pyslsqp directory to the Python path
+sys.path.append(os.path.join(here, '../modopt/core'))
 import doctest
 
 import pytest
