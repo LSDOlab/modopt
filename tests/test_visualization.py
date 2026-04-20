@@ -5,9 +5,6 @@ from all_problem_types import (SecondOrderScaling, second_order_scaling_lite,
                                 Feasibility, feasibility_lite, Unconstrained, unconstrained_lite,
                                 IneqConstrained, ineq_constrained_lite)
 from modopt import optimize, SLSQP, SNOPT, PySLSQP
-from test_csdl import prob as csdl_prob
-from test_csdl import alpha_prob
-from test_openmdao import prob as om_prob
 import pytest
 from numpy.testing import assert_almost_equal, assert_array_almost_equal
 import h5py

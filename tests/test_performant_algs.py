@@ -630,11 +630,10 @@ def test_errors():
 
     # 3. Raise error when no hessians are available for IPOPT
     from modopt import IPOPT, TrustConstr
-    from test_csdl import prob as csdl_prob
-    from test_csdl import alpha_prob
-    from test_openmdao import prob as om_prob
+    from test_csdl import get_csdl_prob, get_csdl_alpha_prob
+    from test_openmdao import get_om_prob
 
-    for prob in [csdl_prob, alpha_prob, om_prob]:
+    for prob in [get_csdl_prob(), get_csdl_alpha_prob(), get_om_prob()]:
         with pytest.raises(ValueError) as excinfo:
             optimizer = IPOPT(prob, solver_options={'hessian_approximation':'exact'})
         assert str(excinfo.value) == "Exact Hessians are not available with 'OpenMDAOProblem', 'CSDLProblem' or 'CSDLAlphaProblem'."

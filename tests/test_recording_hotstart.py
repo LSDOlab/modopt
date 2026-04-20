@@ -5,9 +5,8 @@ from all_problem_types import (SecondOrderScaling, second_order_scaling_lite,
                                 Feasibility, feasibility_lite, Unconstrained, unconstrained_lite,
                                 IneqConstrained, ineq_constrained_lite)
 from modopt import optimize, SLSQP, SNOPT, PySLSQP
-from test_csdl import prob as csdl_prob
-from test_csdl import alpha_prob
-from test_openmdao import prob as om_prob
+from test_csdl import get_csdl_prob, get_csdl_alpha_prob
+from test_openmdao import get_om_prob
 import pytest
 from numpy.testing import assert_almost_equal, assert_array_almost_equal
 import h5py
@@ -40,8 +39,8 @@ def test_recording():
 @pytest.mark.recording
 @pytest.mark.interfaces
 def test_csdl_recording():
-    from test_csdl import prob as csdl_prob
-    from test_csdl import alpha_prob
+    csdl_prob  = get_csdl_prob()
+    alpha_prob = get_csdl_alpha_prob()
 
     for prob in [csdl_prob, alpha_prob]:
         optimizer = SLSQP(prob, solver_options={'ftol': 1e-6, 'maxiter': 20, 'disp': True}, recording=True)
@@ -65,8 +64,7 @@ def test_csdl_recording():
 @pytest.mark.recording
 @pytest.mark.interfaces
 def test_openmdao_recording():
-    from test_openmdao import prob
-
+    prob = get_om_prob()
     optimizer = SLSQP(prob, solver_options={'ftol': 1e-6, 'maxiter': 20, 'disp': True}, recording=True)
     optimizer.check_first_derivatives()
     results = optimizer.solve()
@@ -92,9 +90,9 @@ def test_openmdao_recording():
 @pytest.mark.interfaces
 @pytest.mark.snopt
 def test_compute_all_recording():
-    from test_csdl import prob as csdl_prob
-    from test_csdl import alpha_prob
-    from test_openmdao import prob as om_prob
+    csdl_prob  = get_csdl_prob()
+    alpha_prob = get_csdl_alpha_prob()
+    om_prob    = get_om_prob()
 
     for prob in [csdl_prob, alpha_prob, om_prob]:
         optimizer = SNOPT(prob, recording=True)
@@ -255,8 +253,8 @@ def test_hot_start():
 @pytest.mark.recording
 @pytest.mark.interfaces
 def test_csdl_hot_start():
-    from test_csdl import prob as csdl_prob
-    from test_csdl import alpha_prob
+    csdl_prob  = get_csdl_prob()
+    alpha_prob = get_csdl_alpha_prob()
 
     for prob in [csdl_prob, alpha_prob]:
         optimizer = SLSQP(prob, solver_options={'ftol': 1e-6, 'maxiter': 20, 'disp': True}, recording=True)
@@ -308,8 +306,7 @@ def test_csdl_hot_start():
 @pytest.mark.recording
 @pytest.mark.interfaces
 def test_openmdao_hot_start():
-    from test_openmdao import prob
-
+    prob = get_om_prob()
     optimizer = SLSQP(prob, solver_options={'ftol': 1e-6, 'maxiter': 20, 'disp': True}, recording=True)
     optimizer.check_first_derivatives()
     results = optimizer.solve()
@@ -363,9 +360,9 @@ def test_openmdao_hot_start():
 @pytest.mark.interfaces
 @pytest.mark.snopt
 def test_compute_all_hot_start():
-    from test_csdl import prob as csdl_prob
-    from test_csdl import alpha_prob
-    from test_openmdao import prob as om_prob
+    csdl_prob  = get_csdl_prob()
+    alpha_prob = get_csdl_alpha_prob()
+    om_prob    = get_om_prob()
 
     for prob in [csdl_prob, alpha_prob, om_prob]:
         optimizer = SNOPT(prob, recording=True)
