@@ -92,7 +92,8 @@ test = [
     "pytest-cov",
 ]
 jax = [
-    "jax[cpu]",
+    "jax",
+    "jaxlib",
 ]
 openmdao = [
     "openmdao",
@@ -141,7 +142,8 @@ interfaces = [
     "csdl @ git+https://github.com/LSDOlab/csdl.git", # csdl is deprecated with dependencies fixed in the main package
     "python_csdl_backend @ git+https://github.com/LSDOlab/python_csdl_backend.git",
     "csdl_alpha @ git+https://github.com/LSDOlab/csdl_alpha.git",
-    "jax[cpu]",
+    "jax",
+    "jaxlib",
     "openmdao",
     "qpsolvers",
     # "qpsolvers[open_source_solvers]", # Installs the library with open source QP solvers
@@ -195,6 +197,7 @@ markers = [
     "cvxopt: marks tests as cvxopt (deselect with '-m \"not cvxopt\"')",
     "pycutest: marks tests as pycutest (deselect with '-m \"not pycutest\"')",
 ]
+norecursedirs = ['docs', 'examples', 'tutorials', '.git', '.pytest_cache', '.github']
 
 [tool.coverage.run]
 omit = [
