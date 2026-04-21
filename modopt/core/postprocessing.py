@@ -134,13 +134,17 @@ def load_results(filepath):
     'out_dir': '...', 'reused_callbacks': 0, 'status': 0, 'success': True, 'total_callbacks': 9, 'x': array([ 1.0..., -1.0...e-08])}
 
     '''
-    file = import_h5py_file(filepath)
     result_dict = {}
-    for key in file['results'].keys():
-        result_dict[key] = file['results'][key][()]
-        if key in ['message', 'out_dir']:
-            result_dict[key] = result_dict[key].decode('utf-8')
-    file.close()
+    with import_h5py_file(filepath) as file:
+        for key, dset in file["results"].items():
+            if h5py.check_string_dtype(dset.dtype) is not None: # Check if the dataset is a string type
+                result_dict[key] = dset.asstr()[()]
+            else:
+                val = dset[()]
+                if isinstance(val, np.generic): # Base class for all NumPy scalar types.
+                    result_dict[key] = val.item()
+                else:
+                    result_dict[key] = val
     return result_dict
 
 def load_attributes(filepath):
@@ -181,13 +185,16 @@ def load_attributes(filepath):
     'solver_options-ftol': 1e-06, 'solver_options-maxiter': 100, 'timestamp': '...', 'visualize': [], 
     'x0': array([500.,  50.]), 'x_lower': array([  1., -inf]), 'x_scaler': array([1., 1.]), 'x_upper': array([inf, inf])}
     '''
-    file = import_h5py_file(filepath)
+    LIST_ATTRS = {"visualize", "modopt_output_files", "readable_outputs"}
     attr_dict = {}
-    for key in file.attrs.keys():
-        attr_dict[key] = file.attrs[key]
-        if key in ['visualize', 'modopt_output_files', 'readable_outputs']:
-            attr_dict[key] = list(file.attrs[key])
-    file.close()
+    with import_h5py_file(filepath) as file: # This closes the file automatically
+        for key, val in file.attrs.items():
+            if key in LIST_ATTRS:
+                attr_dict[key] = list(val)
+            elif isinstance(val, np.generic): # Base class for all NumPy scalar types. 
+                attr_dict[key] = val.item()
+            else:
+                attr_dict[key] = val
     return attr_dict
 
 
@@ -294,10 +301,10 @@ def load_variables(filepath, vars, callback_context=False):
                 out_data[in_var].append(file[f'iteration_{i}'][var][()])
             elif ',' not in in_var:
                 idx = int(in_var.split('[')[1].split(']')[0])
-                out_data[in_var].append(file[f'iteration_{i}'][var][idx])
+                out_data[in_var].append(file[f'iteration_{i}'][var][idx].item())
             else:
                 idx1, idx2 = map(int, in_var.split('[')[1].split(']')[0].split(','))
-                out_data[in_var].append(file[f'iteration_{i}'][var][idx1, idx2])
+                out_data[in_var].append(file[f'iteration_{i}'][var][idx1, idx2].item())
 
     for i in range(n_cb):
         for in_var in vars:
@@ -312,13 +319,15 @@ def load_variables(filepath, vars, callback_context=False):
             
             group_key = 'outputs' if var in list(file[f'callback_{i}']['outputs'].keys()) else 'inputs'
             if '[' not in in_var:
-                out_data[f'callback_{in_var}'].append(file[f'callback_{i}'][group_key][var][()])
+                value = file[f'callback_{i}'][group_key][var][()]
+                value = value.item() if isinstance(value, np.generic) else value
+                out_data[f'callback_{in_var}'].append(value)
             elif ',' not in in_var:
                 idx = int(in_var.split('[')[1].split(']')[0])
-                out_data[f'callback_{in_var}'].append(file[f'callback_{i}'][group_key][var][idx])
+                out_data[f'callback_{in_var}'].append(file[f'callback_{i}'][group_key][var][idx].item())
             else:
                 idx1, idx2 = map(int, in_var.split('[')[1].split(']')[0].split(','))
-                out_data[f'callback_{in_var}'].append(file[f'callback_{i}'][group_key][var][idx1, idx2])
+                out_data[f'callback_{in_var}'].append(file[f'callback_{i}'][group_key][var][idx1, idx2].item())
 
             # if group_key == 'outputs':
             #     out_data[f'callback_indices_{in_var}'].append(i)

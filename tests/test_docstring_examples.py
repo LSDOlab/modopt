@@ -29,3 +29,4 @@ def test_visualization():
 if __name__ == '__main__':
     test_postprocessing()
     test_visualization()
+    print("All tests passed!")
