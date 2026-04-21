@@ -21,7 +21,7 @@ keywords=[
     ]
 dynamic = ["version"]
 dependencies = [
-    'numpy>=1.24<3',
+    'numpy>=1.24,<3',
     'scipy>=1.11,<2',
     'array_manager @ git+https://github.com/anugrahjo/array_manager.git@modopt',
     'h5py>=3.11.0,<4',
