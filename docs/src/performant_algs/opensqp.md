@@ -63,6 +63,10 @@ See the table below for the full list of options.
 * - `turn_off_outputs`
   - *bool* (`False`)
   - If `True`, prevents modOpt from generating any output files.
+* - `verbosity`
+  - *int* (`0`)
+  - If `0`, suppresses all console outputs. \
+    If `1`, prints various convergence measures and diagnostic messages.
 * - `maxiter`
   - *int* (`1000`)
   - Maximum number of major iterations.

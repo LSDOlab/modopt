@@ -44,6 +44,10 @@ class OpenSQP(Optimizer):
     turn_off_outputs : bool, default=False
         If ``True``, prevent modOpt from generating any output files.
 
+    verbosity : {0, 1}, default=0
+        If ``0``, suppresses all console outputs.
+        If ``1``, prints various convergence measures to monitor optimization progress
+        and diagnostic messages for debugging purposes.
     maxiter : int, default=1000
         Maximum number of major iterations.
     opt_tol : float, default=1e-7
@@ -113,6 +117,7 @@ class OpenSQP(Optimizer):
                 self.jac_in = lambda x: self.problem._compute_constraint_jacobian(x, check_failure=True)
         ##################################################################
 
+        self.options.declare('verbosity', default=0, values=[0, 1])
         self.options.declare('maxiter', default=1000, types=int)
         self.options.declare('opt_tol', default=1e-7, types=float)
         self.options.declare('feas_tol', default=1e-7, types=float)
@@ -133,7 +138,7 @@ class OpenSQP(Optimizer):
         if Version(scipy.__version__) >= Version("1.14.0"):
             self.options.declare('bfgs_init_lag_hess', default=None, types=(type(None), np.ndarray))
         else:
-            print("SciPy version is less than 1.14.0, 'bfgs_init_lag_hess' option is not available.")
+            warnings.warn("SciPy version is less than 1.14.0, 'bfgs_init_lag_hess' option is not available.")
 
         self.available_outputs = {
             'major': int,
@@ -529,10 +534,11 @@ class OpenSQP(Optimizer):
         opt_check3 = (stat_violation <= scaled_opt_tol)
 
         # opt is always nonnegative
-        print('opt_tol_factor:', opt_tol_factor)
-        print('nonneg_violation:', nonneg_violation)
-        print('compl_violation:', compl_violation)
-        print('stat_violation:', stat_violation)
+        if self.options['verbosity'] == 1:
+            print('opt_tol_factor:', opt_tol_factor)
+            print('nonneg_violation:', nonneg_violation)
+            print('compl_violation:', compl_violation)
+            print('stat_violation:', stat_violation)
         opt = max(nonneg_violation, compl_violation,
                   stat_violation) / opt_tol_factor
         opt_satisfied = (opt_check1 and opt_check2 and opt_check3)
@@ -559,19 +565,22 @@ class OpenSQP(Optimizer):
         feas_satisfied = feas_check
         return feas_satisfied, feas, sum_con_violation, max_con_violation
 
-    def get_results_dict(self, x_k, f_k, c_k, pi_k, opt, feas, nfev, ngev, niter, time, success):
-        results = {'x': x_k,
-                   'objective': f_k,
-                   'c': c_k,
-                   'pi': pi_k,
-                   'optimality': opt,
-                   'feasibility': feas,
-                   'nfev': nfev,
-                   'ngev': ngev,
-                   'niter': niter,
-                   'time': time,
-                   'success': success}
-        return results
+    def exit_early(self, x_k, f_k, c_k, pi_k, opt, feas, nfev, ngev, niter, time, success, exit_msg):
+        if self.options['verbosity'] == 1:
+            print(f'{exit_msg} Exiting ...')
+        self.results = {'x': x_k,
+                        'objective': f_k,
+                        'c': c_k,
+                        'pi': pi_k,
+                        'optimality': opt,
+                        'feasibility': feas,
+                        'nfev': nfev,
+                        'ngev': ngev,
+                        'niter': niter,
+                        'time': time,
+                        'success': success,
+                        'exit_msg': exit_msg}
+        return self.results
 
     def solve(self):
         try:
@@ -596,11 +605,12 @@ class OpenSQP(Optimizer):
         nc_i = self.nc_i
 
         x0 = self.problem.x0
-        maxiter = self.options['maxiter']
+        verbosity       = self.options['verbosity']
+        maxiter         = self.options['maxiter']
         aqp_primal_tol  = self.options['aqp_primal_feas_tol']
         aqp_dual_tol    = self.options['aqp_dual_feas_tol']
         aqp_time_limit  = self.options['aqp_time_limit']
-        # qp_maxiter = self.options['qp_maxiter']
+        # qp_maxiter     = self.options['qp_maxiter']
 
         LSS = self.LSS
         QN = self.QN
@@ -632,13 +642,13 @@ class OpenSQP(Optimizer):
         elif np.any(np.isnan(J_k)) or np.any(np.isinf(J_k)):
             warnings.warn('Constraint Jacobian at the computed proximal initial point contains NaN or Inf. Trying given initial point ...')
             undefined_proximal_point = True
-        else:
+        elif verbosity == 1:
             print('Proximal point initialization is well-defined and good to go.')
         
         if undefined_proximal_point:
             if np.all(x0 == x_k):
-                print('Initial point provided and proximal point computed were the same and is undefined. Exiting ...')
-                return self.get_results_dict(x_k, f_k, c_k, None, None, None, 1, 1, 0, time.time() - start_time, False)
+                exit_msg = 'Initial point provided and proximal point computed were the same and is undefined.'
+                return self.exit_early(x_k, f_k, c_k, None, None, None, 1, 1, 0, time.time() - start_time, False, exit_msg)
             
             x_k = x0 * 1.
 
@@ -649,17 +659,17 @@ class OpenSQP(Optimizer):
             J_k = self.MF.cache['j'][1]
 
             if np.isnan(f_k) or np.isinf(f_k):
-                print('Objective value at given initial point and computed proximal point is NaN or Inf. Exiting ...')
-                return self.get_results_dict(x_k, f_k, c_k, None, None, None, 2, 2, 0, time.time() - start_time, False)
+                exit_msg = 'Objective value at given initial point and computed proximal point is NaN or Inf.'
+                return self.exit_early(x_k, f_k, c_k, None, None, None, 2, 2, 0, time.time() - start_time, False, exit_msg)
             elif np.any(np.isnan(c_k)) or np.any(np.isinf(c_k)):
-                print('Constraint values at given initial point and computed proximal point contains NaN or Inf. Exiting ...')
-                return self.get_results_dict(x_k, f_k, c_k, None, None, None, 2, 2, 0, time.time() - start_time, False)
+                exit_msg = 'Constraint values at given initial point and computed proximal point contains NaN or Inf.'
+                return self.exit_early(x_k, f_k, c_k, None, None, None, 2, 2, 0, time.time() - start_time, False, exit_msg)
             elif np.any(np.isnan(g_k)) or np.any(np.isinf(g_k)):
-                print('Gradient at given initial point and computed proximal point contains NaN or Inf. Exiting ...')
-                return self.get_results_dict(x_k, f_k, c_k, None, None, None, 2, 2, 0, time.time() - start_time, False)
+                exit_msg = 'Gradient at given initial point and computed proximal point contains NaN or Inf.'
+                return self.exit_early(x_k, f_k, c_k, None, None, None, 2, 2, 0, time.time() - start_time, False, exit_msg)
             elif np.any(np.isnan(J_k)) or np.any(np.isinf(J_k)):
-                print('Constraint Jacobian at given initial point and computed proximal point contains NaN or Inf. Exiting ...')
-                return self.get_results_dict(x_k, f_k, c_k, None, None, None, 2, 2, 0, time.time() - start_time, False)
+                exit_msg = 'Constraint Jacobian at given initial point and computed proximal point contains NaN or Inf.'
+                return self.exit_early(x_k, f_k, c_k, None, None, None, 2, 2, 0, time.time() - start_time, False, exit_msg)
 
         # Set initial values for multipliers and slacks
         # pi_k = np.full((nc, ), 1.)
@@ -764,11 +774,13 @@ class OpenSQP(Optimizer):
                 eta = 0.
 
             except Exception as e:
-                print('QP solver failed at major iteration:', itr)
-                print(e)
+                if verbosity == 1:
+                    print('QP solver failed at major iteration:', itr)
+                    print(e)
 
                 if "matrix G is not positive definite" in str(e):
-                    print('Matrix G is not positive definite. Resetting Hessian.')
+                    if verbosity == 1:
+                        print('Matrix G is not positive definite. Resetting Hessian.')
                     # Reset Hessian
                     wTw = np.dot(w_k, w_k)
                     wTd = np.dot(w_k, d_k[:nx])
@@ -787,12 +799,14 @@ class OpenSQP(Optimizer):
                 "bad operand type for unary -: 'NoneType'" in str(e) or \
                 "x_qp is zero" in str(e) or \
                 "Rank(A) < p or Rank([P; A; G]) < n" in str(e):
-                    print('Infeasible QP problem. Entering elastic mode.')
+                    if verbosity == 1:
+                        print('Infeasible QP problem. Entering elastic mode.')
                     elastic_mode = True
                     while True:
                         el_feas_arr[elastic_itr % el_wt_check_freq] = feas
                         elastic_itr += 1
-                        print('Elastic programmming with weight:', gamma)
+                        if verbosity == 1:
+                            print('Elastic programmming with weight:', gamma)
 
                         # METHOD: Modified Powell's treatment of infeasible QP problems - eq ->ineq
                         # TODO: only for violation of inequality constraints
@@ -822,7 +836,8 @@ class OpenSQP(Optimizer):
                         qp_solver = 'highs'
                         qp_initvals = np.zeros((nx+1, ))
                         qp_initvals[-1] = 1.
-                        print('Using elastic QP solver', qp_solver, 'with weight', gamma)
+                        if verbosity == 1:
+                            print('Using elastic QP solver', qp_solver, 'with weight', gamma)
                         qp_sol = qpsolvers.solve_problem(qp_prob,
                                                          qp_solver,
                                                         #  initvals=qp_initvals,
@@ -844,8 +859,8 @@ class OpenSQP(Optimizer):
                         break
 
                 if np.linalg.norm(qp_sol.x[:nx]) == 0 and qp_sol.x[nx] == 1.:
-                    print('Augmented QP is also infeasible. Terminating ...')
-                    return self.get_results_dict(x_k, f_k, c_k, pi_k, opt, feas, nfev, ngev, itr, time.time() - start_time, False)
+                    exit_msg = 'Augmented QP is also infeasible'
+                    return self.exit_early(x_k, f_k, c_k, pi_k, opt, feas, nfev, ngev, itr, time.time() - start_time, False, exit_msg)
 
             # Clip the step length such that the design variables remain within bounds
             p_k[:nx] = np.clip(p_x, self.problem.x_lower - x_k, self.problem.x_upper - x_k)
@@ -854,8 +869,9 @@ class OpenSQP(Optimizer):
             # (c_k + J_k @ p_x) is the new estimate for s for iniequality constraints
             p_k[(nx + nc):] = c_k[nc_e:] + J_k[nc_e:] @ p_k[:nx] - v_k[nx + nc:]
 
-            print('Major iteration:', itr)
-            print("=====================================")
+            if verbosity == 1:
+                print('Major iteration:', itr)
+                print("=====================================")
 
             if self.nc > 0:
                 dir_deriv_al = np.dot(mfg_k, p_k)
@@ -886,7 +902,8 @@ class OpenSQP(Optimizer):
             undefined_direction = False
             if np.isnan(mf_new) or np.isinf(mf_new) or np.isnan(mfg_new).any() or np.isinf(mfg_new).any():
                 undefined_direction = True
-                print('Merit function or its gradient at the new point has NaN or inf.')
+                if verbosity == 1:
+                    print('Merit function or its gradient at the new point has NaN or inf.')
             else:
                 nfev += new_f_evals
                 ngev += new_g_evals
@@ -899,7 +916,8 @@ class OpenSQP(Optimizer):
                 nfev += new_f_evals
                 
             if not undefined_direction:
-                print("###### SUCCESSFUL LINE SEARCH #######")
+                if verbosity == 1:
+                    print("###### SUCCESSFUL LINE SEARCH #######")
                 d_k = alpha * p_k
                 d_k[nx:(nx + nc)] = d_k[nx:(nx + nc)] / np.sqrt(alpha)
                 d_k_temp = d_k * 1.
@@ -924,7 +942,8 @@ class OpenSQP(Optimizer):
                 new_g_evals = 0
 
                 while np.isnan(f_new) or np.isinf(f_new):
-                    print('Objective function is NaN or Inf. Stepping back x_k_new.')
+                    if verbosity == 1:
+                        print('Objective function is NaN or Inf. Stepping back x_k_new.')
                     alpha *= 0.1
                     d_k_temp = alpha * p_k
                     x_k_new = x_k + d_k_temp[:nx]
@@ -937,7 +956,8 @@ class OpenSQP(Optimizer):
                 
                 if not undefined_new_point:
                     while np.any(np.isnan(c_new)) or np.any(np.isinf(c_new)):
-                        print('Constraint values contain NaN or Inf. Stepping back x_k_new.')
+                        if verbosity == 1:
+                            print('Constraint values contain NaN or Inf. Stepping back x_k_new.')
                         alpha *= 0.1
                         d_k_temp = alpha * p_k
                         x_k_new = x_k + d_k_temp[:nx]
@@ -950,7 +970,8 @@ class OpenSQP(Optimizer):
                 
                 if not undefined_new_point:
                     while np.any(np.isnan(g_new)) or np.any(np.isinf(g_new)):
-                        print('Objective gradient contains NaN or Inf. Stepping back x_k_new.')
+                        if verbosity == 1:
+                            print('Objective gradient contains NaN or Inf. Stepping back x_k_new.')
                         alpha *= 0.1
                         d_k_temp = alpha * p_k
                         x_k_new = x_k + d_k_temp[:nx]
@@ -963,7 +984,8 @@ class OpenSQP(Optimizer):
 
                 if not undefined_new_point:
                     while np.any(np.isnan(J_new)) or np.any(np.isinf(J_new)):
-                        print('Constraint Jacobian contains NaN or Inf. Stepping back x_k_new.')
+                        if verbosity == 1:
+                            print('Constraint Jacobian contains NaN or Inf. Stepping back x_k_new.')
                         alpha *= 0.1
                         d_k_temp = alpha * p_k
                         x_k_new = x_k + d_k_temp[:nx]
@@ -984,20 +1006,22 @@ class OpenSQP(Optimizer):
             if undefined_new_point:
                 self.successive_undefined_iterations += 1
                 if self.successive_undefined_iterations == 1:
-                    print('No points along the search direction is well-defined. Resetting Hessian.')
+                    if verbosity == 1:
+                        print('No points along the search direction is well-defined. Resetting Hessian.')
                     self.QN = QN = BFGSScipy(nx=nx,
                                              exception_strategy='damp_update',
                                              init_scale=1.)
                     continue
 
                 if self.successive_undefined_iterations == 2:
-                    print('Two successive iterations with unsuccessful search along predicted direction for well-defined points. Terminating ...')
-                    return self.get_results_dict(x_k, f_k, c_k, pi_k, opt, feas, nfev, ngev, itr, time.time() - start_time, False)
+                    exit_msg = 'Two successive iterations with unsuccessful search along predicted direction for well-defined points.'
+                    return self.exit_early(x_k, f_k, c_k, pi_k, opt, feas, nfev, ngev, itr, time.time() - start_time, False, exit_msg)
      
             elif undefined_direction:
                 self.successive_undefined_iterations = 0
 
-                print('alpha successful without nan:', alpha)
+                if verbosity == 1:
+                    print('alpha successful without nan:', alpha)
 
                 # If the line search failed with nans at alpha=1 earlier, reperform line search with a smaller alpha found above
                 alpha_new, mf_new, mfg_new, mf_slope_new, new_f_evals, new_g_evals, converged = LSS.search(
@@ -1007,8 +1031,9 @@ class OpenSQP(Optimizer):
                 ngev += new_g_evals
                 
                 # If the line search failed to find a point satisfying the Wolfe conditions, try backtracking line search
-                if not converged: 
-                    print('Inside SLSQP line search: Reperforming backtracking line search with a smaller alpha found above.')
+                if not converged:
+                    if verbosity == 1:
+                        print('Inside SLSQP line search: Reperforming backtracking line search with a smaller alpha found above.')
                     
                     new_f_evals, converged, alpha_new = self.l1_penalty_line_search(x_k, eta, x_qp, alpha*p_k, rho_k_Powell, f_k, c_k, g_k)
                     nfev += new_f_evals
@@ -1089,8 +1114,14 @@ class OpenSQP(Optimizer):
                 low_curvature=low_curvature,)
                 # merit=penalty_k)
             if tol_satisfied:
-                print('Convergence achieved!')
+                exit_msg = 'Specified convergence tolerances achieved.'
                 break
+
+        if not tol_satisfied:
+            exit_msg = 'Maximum iterations reached without convergence.'
+
+        if verbosity == 1:
+            print(f'{exit_msg} Exiting ...')
 
         self.total_time = time.time() - start_time
 
@@ -1105,7 +1136,8 @@ class OpenSQP(Optimizer):
             'ngev': ngev,
             'niter': itr,
             'time': self.total_time,
-            'success': tol_satisfied
+            'success': tol_satisfied,
+            'exit_msg': exit_msg
         }
 
         # Run post-processing for the Optimizer() base class
