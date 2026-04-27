@@ -258,7 +258,7 @@ def test_str():
     "\n"\
     "\tDesign Variables:\n"\
     "\tIndex | Name       | Scaler        | Lower Limit   | Value         | Upper Limit   \n"\
-    "\t    0 | x[0]       | +2.000000e+00 | +0.000000e+00 | +5.000000e+01 | +1.000000e+99\n"\
+    "\t    0 | x[0]       | +2.000000e+00 | +0.000000e+00 | +2.500000e+01 | +1.000000e+99\n"\
     "\t    1 | x[1]       | +2.000000e-01 | -1.000000e+99 | +5.000000e+00 | +1.000000e+99\n"\
     "\n"\
     "\tConstraints:\n"\

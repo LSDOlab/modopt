@@ -288,7 +288,8 @@ class Scaling(Problem):
                                   lower=np.array([0., -np.inf]),
                                   upper=np.array([np.inf, np.inf]),
                                   scaler=np.array([2., 0.2]),
-                                  vals=np.array([50., 5.]))
+                                  vals=np.array([25., 5.]))
+                                #   vals=np.array([50., 5.])) # slsqp in scipy 1.17.1 reports pos dir deriv for these initial values
                                 #   vals=np.array([500., 5.])) # slsqp diverges when starting from these initial values
         
         self.add_objective('f', scaler=20.)
@@ -322,7 +323,8 @@ class Scaling(Problem):
 
 def scaling_lite():
     # x0 = np.array([500., 5.]) # slsqp diverges when starting from these initial values
-    x0 = np.array([50., 5.])
+    # x0 = np.array([50., 5.])  # slsqp in scipy 1.17.1 reports pos dir deriv for these initial values
+    x0 = np.array([25., 5.])
     xl = np.array([0., -np.inf])
     xu = np.array([np.inf, np.inf])
     cl = np.array([1., 1.])
@@ -354,7 +356,8 @@ class FiniteDiff(Problem):
                                   lower=np.array([0., -np.inf]),
                                   upper=np.array([np.inf, np.inf]),
                                   scaler=np.array([2., 0.2]),
-                                  vals=np.array([25., 5.]))
+                                  vals=np.array([5., 5.]))
+                                #   vals=np.array([25., 5.])) # slsqp in scipy 1.17.1 reports pos dir deriv for these initial values when using FD for derivatives
                                 #   vals=np.array([50., 5.])) # slsqp diverges when starting from these initial values with FD derivatives
                                 #   vals=np.array([500., 5.])) # slsqp diverges when starting from these initial values
         self.add_objective('f', scaler=20)
@@ -403,7 +406,8 @@ def finite_diff_lite():
                                 # Same problem converges when using analytical derivatives in 'scaling_lite' above
                                 # It doesn't converge starting from even x0 = [30., 5.] when using FD for derivatives
                                 # However, SNOPT converged even from x0 = [500., 5.]
-    x0 = np.array([25., 5.])
+    # x0 = np.array([25., 5.]) # slsqp in scipy 1.17.1 reports pos dir deriv for these initial values when using FD for derivatives
+    x0 = np.array([5., 5.])
     xl = np.array([0., -np.inf])
     xu = np.array([np.inf, np.inf])
     cl = np.array([1., 1.])

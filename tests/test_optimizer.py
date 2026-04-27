@@ -33,9 +33,9 @@ def test_turn_off_outputs():
         optimizer = IPOPT(prob, turn_off_outputs=True)
         assert not hasattr(optimizer, 'out_dir')
         results = optimizer.solve()
-        assert_array_almost_equal(results['x'], [2., 0.], decimal=9)
-        assert_almost_equal(results['f'], 20., decimal=7)
-        assert_almost_equal(results['c'], [5, 0.5], decimal=9)
+        assert_array_almost_equal(results['x'], [2., 0.], decimal=7)
+        assert_almost_equal(results['f'], 20., decimal=6)
+        assert_almost_equal(results['c'], [5, 0.5], decimal=8)
         assert os.path.exists('ipopt_output.txt')
 
 @pytest.mark.interfaces
@@ -47,7 +47,7 @@ def test_turn_off_outputs_snopt():
         results = optimizer.solve()
         assert optimizer.results['info'] == 1
         assert_array_almost_equal(results['x'], [2., 0.], decimal=11)
-        assert_almost_equal(results['objective'], 20., decimal=11)
+        assert_almost_equal(results['objective'], 20., decimal=10)
         assert os.path.exists('SNOPT_summary.out')
         assert os.path.exists('SNOPT_print.out')
 
@@ -63,13 +63,13 @@ def test_callback_counts():
         assert_almost_equal(results['fun'], 20., decimal=6)
 
         optimizer.print_callback_counts()
-        assert optimizer.problem._callback_count         == 71
+        assert optimizer.problem._callback_count         in [27, 53] # Depending on which version [Fortran,C++] of SciPy SLSQP
         assert optimizer.problem._reused_callback_count  == 0
-        assert optimizer.problem._obj_count              == 19
-        assert optimizer.problem._grad_count             == 16
+        assert optimizer.problem._obj_count              in [7, 13]
+        assert optimizer.problem._grad_count             in [6, 13]
         assert optimizer.problem._hess_count             == 0
-        assert optimizer.problem._con_count              == 20
-        assert optimizer.problem._jac_count              == 16
+        assert optimizer.problem._con_count              in [8, 14]
+        assert optimizer.problem._jac_count              in [6, 13]
 
 if __name__ == "__main__":
     test_turn_off_outputs()

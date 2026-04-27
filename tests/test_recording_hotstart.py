@@ -24,15 +24,15 @@ def test_recording():
         assert results['message'] == 'Optimization terminated successfully'
         assert_array_almost_equal(results['x'], [2., 0.], decimal=8)
         assert_almost_equal(results['fun'], 20., decimal=6)
-        assert prob._callback_count == 79
+        assert prob._callback_count in [35, 61] # Depending on which version [Fortran,C++] of SciPy SLSQP
         assert prob._reused_callback_count == 0
 
         file        = h5py.File(results['out_dir']+'/record.hdf5', 'r')
         groups      = list(file.keys())
         callbacks   = [key for key in groups if key.startswith('callback_')]
         iterations  = [key for key in groups if key.startswith('iteration_')]
-        assert len(callbacks)  == 79
-        assert len(iterations) == 17
+        assert len(callbacks)  in [35, 61]
+        assert len(iterations) in [7, 14]
 
 @pytest.mark.csdl
 @pytest.mark.csdl_alpha
@@ -155,8 +155,8 @@ def test_all_solvers_recording(): # except SNOPT and SLSQP (already tested above
     groups      = list(file.keys())
     callbacks   = [key for key in groups if key.startswith('callback_')]
     iterations  = [key for key in groups if key.startswith('iteration_')]
-    assert len(callbacks)  == 179
-    assert len(iterations) == 90
+    assert len(callbacks)  in [179, 90] # Depending on which version of SciPy COBYLA
+    assert len(iterations) in [90, 35]
 
     for OPT in [PySLSQP, COBYQA, TrustConstr, SQP, IPOPT]:
         optimizer = OPT(Scaling(), recording=True)
@@ -203,7 +203,7 @@ def test_hot_start():
         assert results['message'] == 'Optimization terminated successfully'
         assert_array_almost_equal(results['x'], [2., 0.], decimal=8)
         assert_almost_equal(results['fun'], 20., decimal=6)
-        assert prob._callback_count == 79
+        assert prob._callback_count in [35, 61] # Depending on which version [Fortran,C++] of SciPy SLSQP
         assert prob._reused_callback_count == 0
 
         filename    = results['out_dir']+'/record.hdf5'
@@ -211,8 +211,8 @@ def test_hot_start():
         groups      = list(file.keys())
         callbacks   = [key for key in groups if key.startswith('callback_')]
         iterations  = [key for key in groups if key.startswith('iteration_')]
-        assert len(callbacks)  == 79
-        assert len(iterations) == 17
+        assert len(callbacks) in [35, 61] # Depending on which version [Fortran,C++] of SciPy SLSQP
+        assert len(iterations) in [7, 14]
 
         # hot start from previous optimization
         optimizer = SLSQP(prob, solver_options={'maxiter':50}, hot_start_from=filename)
@@ -224,8 +224,8 @@ def test_hot_start():
         assert results['message'] == 'Optimization terminated successfully'
         assert_array_almost_equal(results['x'], [2., 0.], decimal=8)
         assert_almost_equal(results['fun'], 20., decimal=6)
-        assert prob._callback_count == 79
-        assert prob._reused_callback_count == 79
+        assert prob._callback_count in [35, 61] # Depending on which version [Fortran,C++] of SciPy SLSQP
+        assert prob._reused_callback_count in [35, 61]
         
         # hotstart and record from first optimization
         optimizer = SLSQP(prob, solver_options={'maxiter':50}, hot_start_from=filename, recording=True)
@@ -237,16 +237,16 @@ def test_hot_start():
         assert results['message'] == 'Optimization terminated successfully'
         assert_array_almost_equal(results['x'], [2., 0.], decimal=8)
         assert_almost_equal(results['fun'], 20., decimal=6)
-        assert prob._callback_count == 79
-        assert prob._reused_callback_count == 79
+        assert prob._callback_count in [35, 61] # Depending on which version [Fortran,C++] of SciPy SLSQP
+        assert prob._reused_callback_count in [35, 61]
 
         filename    = results['out_dir']+'/record.hdf5'
         file        = h5py.File(filename, 'r')
         groups      = list(file.keys())
         callbacks   = [key for key in groups if key.startswith('callback_')]
         iterations  = [key for key in groups if key.startswith('iteration_')]
-        assert len(callbacks)  == 79
-        assert len(iterations) == 17
+        assert len(callbacks)  in [35, 61] # Depending on which version [Fortran,C++] of SciPy SLSQP
+        assert len(iterations) in [7, 14]
 
 @pytest.mark.csdl
 @pytest.mark.csdl_alpha
