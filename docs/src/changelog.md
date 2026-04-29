@@ -5,6 +5,12 @@ A more detailed description of major changes between releases can be found
 in `RELEASE_NOTES.md` in the project root directory.
 
 ***********************************
+## Version 0.2.1 (April 29, 2026)
+
+- Add `verbosity` option to `OpenSQP`
+- Update tests to ensure comaptibility with latest Python and SciPy versions
+
+***********************************
 ## Version 0.2.0 (April 22, 2026)
 
 ### Feature Additions

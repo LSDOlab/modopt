@@ -1,4 +1,10 @@
 ***********************************
+# modOpt 0.2.1 (April 29, 2026)
+
+- Add `verbosity` option to `OpenSQP`
+- Update tests to ensure comaptibility with latest Python and SciPy versions
+
+***********************************
 # modOpt 0.2.0 (April 22, 2026)
 
 ## Feature Additions
