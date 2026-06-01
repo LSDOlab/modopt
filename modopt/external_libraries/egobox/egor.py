@@ -1,4 +1,5 @@
 import time
+import inspect
 
 import numpy as np
 
@@ -10,8 +11,8 @@ class Egor(Optimizer):
     """
     Class that interfaces modOpt with the ``egobox`` package's Egor optimizer.
     Egor is a gradient-free efficient global optimization solver that requires
-    finite bounds on every design variable and supports nonlinear inequality
-    constraints through functions of the form ``c(x) <= 0``.
+    finite bounds on every design variable and supports nonlinear constraints
+    with bound specifications (``<=``, ``>=``, equality, and double-sided).
 
     Parameters
     ----------
@@ -38,12 +39,13 @@ class Egor(Optimizer):
 
     solver_options : dict, default={}
         Dictionary containing the options to be passed to the Egor solver.
-        Supported options are ``'max_iters'``, ``'gp_config'``, ``'n_start'``,
+        Supported options are ``'max_iters'``, ``'gp_config'``, ``'n_cstr'``, ``'n_start'``,
         ``'n_doe'``, ``'doe'``, ``'infill_strategy'``, ``'cstr_infill'``,
         ``'cstr_strategy'``, ``'qei_config'``, ``'infill_optimizer'``,
         ``'trego'``, ``'coego_n_coop'``, ``'target'``, ``'outdir'``,
         ``'warm_start'``, ``'hot_start'``, ``'failsafe_strategy'``,
-        ``'seed'``, and ``'cstr_tol'``.
+        ``'seed'``, ``'cstr_tol'``, ``'run_info'``, ``'timeout'``, ``'verbose'``,
+        ``'fcstrs'``, and ``'fcstr_specs'``.
     readable_outputs : list, default=[]
         List of outputs to be written to readable text output files.
         Available outputs are ``'x'`` and ``'obj'``.
@@ -65,6 +67,7 @@ class Egor(Optimizer):
         self.default_solver_options = {
             "max_iters": (int, 20),
             "gp_config": (object, egx.GpConfig()),
+            "n_cstr": (int, 0),
             "n_start": (int, 20),
             "n_doe": (int, 0),
             "doe": ((type(None), list, tuple, np.ndarray), None),
@@ -82,6 +85,12 @@ class Egor(Optimizer):
             "failsafe_strategy": (object, egx.FailsafeStrategy.REJECTION),
             "seed": ((type(None), int), None),
             "cstr_tol": ((type(None), list, tuple, np.ndarray), None),
+            "cstr_specs": ((type(None), list, tuple), None),
+            "run_info": ((type(None), object), None),
+            "timeout": ((type(None), float, int), None),
+            "verbose": ((type(None), int, object), None),
+            "fcstrs": ((list, tuple), []),
+            "fcstr_specs": ((list, tuple), []),
         }
 
         self.solver_options = OptionsDictionary()
@@ -146,7 +155,6 @@ class Egor(Optimizer):
         ).tolist()
 
     def _setup_constraints(self):
-        self.fcstrs = []
         self._constraint_specs = []
 
         if not self.problem.constrained:
@@ -156,103 +164,137 @@ class Egor(Optimizer):
         cu = self.problem.c_upper
 
         for index, (lower, upper) in enumerate(zip(cl, cu)):
-            if np.isfinite(lower) and np.isfinite(upper) and np.isclose(lower, upper):
-                raise ValueError(
-                    "Egor does not support equality constraints. "
-                    "Use a different solver (PySLSQP, IPOPT, etc.) or reformulate the problem with inequalities."
-                )
+            if not np.isfinite(lower) and not np.isfinite(upper):
+                continue
 
-            if np.isfinite(upper):
-                self._constraint_specs.append(
-                    {"index": index, "kind": "upper", "bound": upper}
-                )
-            if np.isfinite(lower):
-                self._constraint_specs.append(
-                    {"index": index, "kind": "lower", "bound": lower}
-                )
+            if np.isfinite(lower) and np.isfinite(upper):
+                if np.isclose(lower, upper):
+                    spec = self.egx.CstrSpec.eq(float(lower))
+                else:
+                    spec = self.egx.CstrSpec.btw(float(lower), float(upper))
+            elif np.isfinite(upper):
+                spec = self.egx.CstrSpec.leq(float(upper))
+            else:
+                spec = self.egx.CstrSpec.geq(float(lower))
 
-        if self._constraint_specs:
-            self.fcstrs = [self._make_fcstr(spec) for spec in self._constraint_specs]
+            self._constraint_specs.append({"index": index, "spec": spec})
 
     def _normalize_solver_options(self):
+        user_n_cstr = self.options_to_pass.get("n_cstr", 0)
+        if user_n_cstr < 0:
+            raise ValueError("solver_options['n_cstr'] must be >= 0.")
+
+        user_cstr_specs = self.options_to_pass.get("cstr_specs")
+        if user_cstr_specs is not None and not self.problem.constrained:
+            raise ValueError(
+                "solver_options['cstr_specs'] requires a constrained modOpt problem with a constraint callback."
+            )
+
+        if user_cstr_specs is not None and self.problem.constrained:
+            raise ValueError(
+                "Do not pass solver_options['cstr_specs'] for constrained modOpt problems. "
+                "Constraint specs are generated automatically from problem.c_lower/c_upper."
+            )
+
         if self.options_to_pass["doe"] is not None:
             self.options_to_pass["doe"] = np.asarray(
                 self.options_to_pass["doe"], dtype=float
             )
 
+        if self.problem.constrained:
+            computed_n_cstr = len(self._constraint_specs)
+            if user_n_cstr not in (0, computed_n_cstr):
+                raise ValueError(
+                    f"solver_options['n_cstr'] must be 0 or {computed_n_cstr} for this constrained modOpt problem."
+                )
+
+            self.options_to_pass["cstr_specs"] = [
+                spec["spec"] for spec in self._constraint_specs
+            ]
+            self.options_to_pass["n_cstr"] = computed_n_cstr
+        elif user_cstr_specs is None:
+            if user_n_cstr != 0:
+                raise ValueError(
+                    "solver_options['n_cstr'] > 0 requires a constrained modOpt problem with constraint outputs."
+                )
+            self.options_to_pass.pop("cstr_specs", None)
+            self.options_to_pass["n_cstr"] = 0
+
         cstr_tol = self.options_to_pass["cstr_tol"]
         if cstr_tol is not None:
-            if not self.fcstrs:
+            if not self._constraint_specs:
                 raise ValueError(
                     "solver_options['cstr_tol'] was provided but the problem has no inequality constraints."
                 )
 
             cstr_tol = np.asarray(cstr_tol, dtype=float).reshape(-1)
-            if cstr_tol.size != len(self.fcstrs):
+            if cstr_tol.size != len(self._constraint_specs):
                 raise ValueError(
-                    f"solver_options['cstr_tol'] must have length {len(self.fcstrs)} for Egor after "
+                    f"solver_options['cstr_tol'] must have length {len(self._constraint_specs)} for Egor after "
                     "converting the modOpt constraint bounds to c(x) <= 0 form."
                 )
             self.options_to_pass["cstr_tol"] = cstr_tol.tolist()
 
-        if (
-            self.fcstrs
-            and self.options_to_pass["infill_optimizer"]
-            == self.egx.InfillOptimizer.SLSQP
-        ):
-            self.check_if_callbacks_are_declared(
-                "jac", "Constraint Jacobian", "Egor with SLSQP infill optimizer"
-            )
-            self.jac = self.problem._compute_constraint_jacobian
-            self.active_callbacks += ["jac"]
-
-    def _make_fcstr(self, spec):
-        def fcstr(x, gradient=False):
-            x = np.asarray(x, dtype=float)
-            if gradient:
-                return self._constraint_gradient(x, spec)
-            return self._constraint_value(x, spec)
-
-        return fcstr
-
-    def _constraint_value(self, x, spec):
-        values = np.asarray(self.con(x), dtype=float).reshape(-1)
-        value = values[spec["index"]]
-        if spec["kind"] == "upper":
-            return float(value - spec["bound"])
-        return float(spec["bound"] - value)
-
-    def _constraint_gradient(self, x, spec):
-        jacobian = np.asarray(self.jac(x), dtype=float)
-        gradient = jacobian[spec["index"]].reshape(-1)
-        if spec["kind"] == "upper":
-            return gradient
-        return -gradient
-
-    def _egor_objective(self, x):
+    def _egor_fun(self, x):
         # Egor can evaluate several candidate points at once. Convert batched inputs
-        # to repeated modOpt objective evaluations and return a column vector.
+        # to repeated modOpt objective/constraint evaluations and return a matrix
+        # with columns [obj, c_1, ..., c_n].
         x = np.asarray(x, dtype=float)
         if x.ndim == 1:
-            return np.asarray([[self.obj(x)]], dtype=float)
+            x = x.reshape((1, -1))
         if x.ndim != 2:
             raise ValueError(
                 "Egor objective callback expects input with shape (n, nx) or (nx,)."
             )
 
-        values = [self.obj(xi) for xi in x]
-        return np.asarray(values, dtype=float).reshape((-1, 1))
+        obj_vals = [self.obj(xi) for xi in x]
+        outputs = np.asarray(obj_vals, dtype=float).reshape((-1, 1))
+
+        if self.problem.constrained:
+            con_vals = [np.asarray(self.con(xi), dtype=float).reshape((1, -1)) for xi in x]
+            con_block = np.vstack(con_vals)
+            selected = con_block[:, [spec["index"] for spec in self._constraint_specs]]
+            outputs = np.hstack((outputs, selected))
+
+        return outputs
 
     def solve(self):
         constructor_options = self.options_to_pass.copy()
-        minimize_kwargs = {"max_iters": self.max_iters, "fcstrs": self.fcstrs}
+        minimize_kwargs = {"max_iters": self.max_iters}
 
-        if "seed" in constructor_options and constructor_options["seed"] is not None:
-            minimize_kwargs["seed"] = constructor_options.pop("seed")
+        # Runtime-only controls are passed via minimize().
+        # NOTE: Egobox accepts seed in the constructor, but this is deprecated upstream.
+        for option_name in ("run_info", "timeout", "seed"):
+            value = constructor_options.pop(option_name, None)
+            if value is not None:
+                minimize_kwargs[option_name] = value
+
+        # Shared controls exist on both constructor and minimize in current Egobox API.
+        for option_name in ("outdir", "warm_start", "hot_start", "verbose"):
+            value = constructor_options.get(option_name, None)
+            if value is not None:
+                minimize_kwargs[option_name] = value
+
+        # Function constraints are optional and independent of modOpt's grouped constraints.
+        fcstrs = list(constructor_options.pop("fcstrs", []))
+        if fcstrs:
+            minimize_kwargs["fcstrs"] = fcstrs
+
+        fcstr_specs = list(constructor_options.pop("fcstr_specs", []))
+
+        minimize_signature = inspect.signature(self.egx.Egor.minimize)
+        minimize_parameters = set(minimize_signature.parameters.keys())
+        if fcstr_specs:
+            if "fcstr_specs" not in minimize_parameters:
+                raise ValueError(
+                    "solver_options['fcstr_specs'] was provided, but the installed egobox version "
+                    "does not support the fcstr_specs argument in Egor.minimize()."
+                )
+            minimize_kwargs["fcstr_specs"] = fcstr_specs
 
         start_time = time.time()
         optimizer = self.egx.Egor(self.xspecs, **constructor_options)
-        egor_output = optimizer.minimize(self._egor_objective, **minimize_kwargs)
+        egor_output = optimizer.minimize(self._egor_fun, **minimize_kwargs)
         self.total_time = time.time() - start_time
 
         status = getattr(egor_output, "status", None)

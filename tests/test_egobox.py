@@ -184,11 +184,58 @@ def test_egor_requires_finite_bounds():
     )
 
 
-def test_egor_rejects_equality_constraints():
-    with pytest.raises(ValueError) as exc_info:
-        Egor(EqualityConstraintProblem(), turn_off_outputs=True)
-
-    assert str(exc_info.value) == (
-        "Egor does not support equality constraints. "
-        "Use a different solver (PySLSQP, IPOPT, etc.) or reformulate the problem with inequalities."
+def test_egor_supports_equality_constraints():
+    optimizer = Egor(
+        EqualityConstraintProblem(),
+        solver_options={"max_iters": 15, "n_doe": 5, "seed": 13},
+        turn_off_outputs=True,
     )
+    results = optimizer.solve()
+    assert results["success"] is True
+    assert_allclose(results["x"], [0.5], atol=1e-1)
+    assert abs(results["constraints"][0] - 0.5) <= 1e-1
+
+
+class MixedBoundIneqProblem(Problem):
+    def initialize(self):
+        self.problem_name = "mixed_bound_ineq_problem"
+
+    def setup(self):
+        self.add_design_variables(
+            "x",
+            shape=(1,),
+            lower=np.array([-1.0]),
+            upper=np.array([1.0]),
+            vals=np.array([0.0]),
+        )
+        self.add_objective("f")
+        self.add_constraints(
+            "c", shape=(2,), lower=np.array([-np.inf, 0.0]), upper=np.array([0.2, np.inf])
+        )
+
+    def setup_derivatives(self):
+        self.declare_constraint_jacobian(of="c", wrt="x", vals=np.array([[1.0], [1.0]]))
+
+    def compute_objective(self, dvs, obj):
+        obj["f"] = (dvs["x"][0] - 0.1) ** 2
+
+    def compute_constraints(self, dvs, cons):
+        x = dvs["x"][0]
+        cons["c"][0] = x  # x <= 0.2
+        cons["c"][1] = x  # x >= 0.0
+
+    def compute_constraint_jacobian(self, dvs, jac):
+        pass
+
+
+def test_egor_with_upper_and_lower_ineq_constraints():
+    optimizer = Egor(
+        MixedBoundIneqProblem(),
+        solver_options={"max_iters": 8, "n_doe": 4, "seed": 5},
+        turn_off_outputs=True,
+    )
+    results = optimizer.solve()
+    assert results["success"] is True
+    # Ensure wrapper accepts both <= and >= forms and returns finite result.
+    assert np.isfinite(results["x"]).all()
+    assert np.isfinite(results["fun"])

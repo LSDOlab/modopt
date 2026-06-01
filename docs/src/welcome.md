@@ -50,10 +50,10 @@ modOpt as a library includes several gradient-based and gradient-free optimizati
 It provides interfaces to more than a dozen general-purpose optimizers, 
 along with fully transparent implementations of several educational optimization algorithms.
 The general-purpose optimizers available in modOpt include SLSQP, PySLSQP, OpenSQP,
-SNOPT, IPOPT, Trust-Constr, BFGS, L-BFGS-B, Nelder-Mead, COBYLA, COBYQA, and CVXOPT.
+SNOPT, IPOPT, Trust-Constr, BFGS, L-BFGS-B, Nelder-Mead, COBYLA, COBYQA, CVXOPT, and Egor.
 The ConvexQPSolvers optimizer provides an interface to more than 15 QP solvers
 available through the `qpsolvers` package.
-Note that PySLSQP, SNOPT, IPOPT, COBYQA, CVXOPT, and qpsolvers must be 
+Note that PySLSQP, SNOPT, IPOPT, COBYQA, CVXOPT, Egor, and qpsolvers must be 
 installed separately if users wish to utilize them.
 The modular and transparent educational algorithms in modOpt include
 Steepest Descent, Quasi-Newton, Newton, Newton-Lagrange, Quadratic Penalty, 
@@ -160,6 +160,7 @@ src/performant_algs/snopt
 src/performant_algs/ipopt
 src/performant_algs/qpsolvers
 src/performant_algs/cvxopt
+src/performant_algs/egor
 ```
 
 ```{toctree}

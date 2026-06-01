@@ -167,6 +167,7 @@ open_source_optimizers = [
     "osqp", # osqp MAY BE already installed with qpsolvers[open_source_solvers]
     "quadprog", # quadprog MAY BE already installed with qpsolvers[open_source_solvers]
     "cobyqa", # cobyqa is already installed with scipy>=1.14.0, which requires python>=3.10
+    "egobox",
 ]
 visualization = [
     "matplotlib",
