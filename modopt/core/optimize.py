@@ -8,8 +8,7 @@ from modopt.external_libraries.cvxopt import CVXOPT
 from modopt.external_libraries.qpsolvers import ConvexQPSolvers
 from modopt.external_libraries.egobox import Egor
 
-
-def optimize(prob, solver="SLSQP", **kwargs):
+def optimize(prob, solver='SLSQP', **kwargs):
     """
     Optimize given problem with the specified solver.
 
