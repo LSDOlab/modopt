@@ -2,7 +2,7 @@ import numpy as np
 from numpy.testing import assert_allclose
 import pytest
 
-pytest.importorskip("egobox")
+egx = pytest.importorskip("egobox")
 
 from modopt import Egor, Problem, ProblemLite, optimize
 
@@ -96,6 +96,41 @@ def double_sided_ineq_lite():
         cl=np.array([0.2]),
         cu=np.array([0.6]),
         name="double_sided_ineq_lite",
+    )
+
+
+def g24_lite():
+    """
+    Egobox G24 constrained benchmark.
+    Global optimum is approximately f* = -5.508 at x* = [2.3295, 3.1785].
+    """
+
+    x0 = np.array([1.0, 1.0])
+
+    def obj(x):
+        return -x[0] - x[1]
+
+    def con(x):
+        c1 = -2.0 * x[0] ** 4.0 + 8.0 * x[0] ** 3.0 - 8.0 * x[0] ** 2.0 + x[1] - 2.0
+        c2 = (
+            -4.0 * x[0] ** 4.0
+            + 32.0 * x[0] ** 3.0
+            - 88.0 * x[0] ** 2.0
+            + 96.0 * x[0]
+            + x[1]
+            - 36.0
+        )
+        return np.array([c1, c2])
+
+    return ProblemLite(
+        x0,
+        obj=obj,
+        con=con,
+        xl=np.array([0.0, 0.0]),
+        xu=np.array([3.0, 4.0]),
+        cl=np.array([-np.inf, -np.inf]),
+        cu=np.array([0.0, 0.0]),
+        name="g24_lite",
     )
 
 
@@ -239,3 +274,24 @@ def test_egor_with_upper_and_lower_ineq_constraints():
     # Ensure wrapper accepts both <= and >= forms and returns finite result.
     assert np.isfinite(results["x"]).all()
     assert np.isfinite(results["fun"])
+
+
+def test_egor_g24_constrained_problem_lite():
+    optimizer = Egor(
+        g24_lite(),
+        solver_options={
+            "max_iters": 20,
+            "n_doe": 5,
+            "seed": 42,
+            "infill_strategy": egx.InfillStrategy.WB2,
+            "infill_optimizer": egx.InfillOptimizer.SLSQP,
+            "cstr_tol": [1e-3, 1e-3],
+        },
+        turn_off_outputs=True,
+    )
+    results = optimizer.solve()
+
+    assert results["success"] is True
+    assert_allclose(results["x"], [2.3295, 3.1785], atol=2e-1)
+    assert results["fun"] <= -5.4
+    assert np.all(results["constraints"] <= 1e-3)
