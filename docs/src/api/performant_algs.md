@@ -17,6 +17,7 @@
     modopt.IPOPT
     modopt.ConvexQPSolvers
     modopt.CVXOPT
+    modopt.Egor
 
 ```
 
@@ -124,4 +125,12 @@
 
 .. autoclass:: modopt.CVXOPT
     :members: check_first_derivatives, solve, print_results
+```
+
+## Egor
+
+```{eval-rst}
+
+.. autoclass:: modopt.Egor
+    :members: solve, print_results
 ```

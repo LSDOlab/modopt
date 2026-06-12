@@ -6,6 +6,7 @@ from modopt.external_libraries.snopt import SNOPTc as SNOPT
 from modopt.external_libraries.ipopt import IPOPT
 from modopt.external_libraries.cvxopt import CVXOPT
 from modopt.external_libraries.qpsolvers import ConvexQPSolvers
+from modopt.external_libraries.egobox import Egor
 
 def optimize(prob, solver='SLSQP', **kwargs):
     """
@@ -26,7 +27,7 @@ def optimize(prob, solver='SLSQP', **kwargs):
         The solver to be used.
         Available solvers are ``'SLSQP'``, ``'PySLSQP'``, ``'COBYLA'``, ``'BFGS'``,
         ``'LBFGSB'``, ``'NelderMead'``, ``'COBYQA'``, ``'TrustConstr'``, ``'OpenSQP'``,
-        ``'SNOPT'``, ``'IPOPT'``, ``'CVXOPT'``, and ``'ConvexQPSolvers'``.
+        ``'SNOPT'``, ``'IPOPT'``, ``'CVXOPT'``, ``'ConvexQPSolvers'``, and ``'Egor'``.
     **kwargs
         Additional keyword arguments to be passed to the solver.
 
@@ -64,6 +65,8 @@ def optimize(prob, solver='SLSQP', **kwargs):
         optimizer = CVXOPT(prob, **kwargs)
     elif solver == 'ConvexQPSolvers':
         optimizer = ConvexQPSolvers(prob, **kwargs)
+    elif solver == 'Egor':
+        optimizer = Egor(prob, **kwargs)
     else:
         raise ValueError(f"Invalid solver named '{solver}' is specified. Valid solvers are: {valid_solvers}.")
 

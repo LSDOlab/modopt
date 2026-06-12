@@ -1,4 +1,4 @@
-__version__ = '0.2.1'
+__version__ = '0.3.0'
 
 # import modopt base classes
 from modopt.core.optimizer import Optimizer
@@ -27,6 +27,7 @@ from modopt.external_libraries.snopt import SNOPTc as SNOPT
 from modopt.external_libraries.ipopt import IPOPT
 from modopt.external_libraries.qpsolvers import ConvexQPSolvers
 from modopt.external_libraries.cvxopt import CVXOPT
+from modopt.external_libraries.egobox import Egor
 
 # import built-in optimizers
 # unconstrained

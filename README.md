@@ -36,7 +36,7 @@ and postprocessing optimization results.
 
 modOpt is supported on Linux, macOS, and Windows.
 The general-purpose optimizers available in modOpt include SLSQP, PySLSQP, OpenSQP,
-SNOPT, IPOPT, Trust-Constr, InteriorPoint, BFGS, L-BFGS-B, Nelder-Mead, COBYLA, COBYQA, and CVXOPT.
+SNOPT, IPOPT, Trust-Constr, InteriorPoint, BFGS, L-BFGS-B, Nelder-Mead, COBYLA, COBYQA, CVXOPT, and Egor.
 The ConvexQPSolvers optimizer provides an interface to more than 15 QP solvers
 available through the `qpsolvers` package.
 Note that PySLSQP, SNOPT, IPOPT, COBYQA, CVXOPT, and qpsolvers must be 
@@ -55,7 +55,7 @@ To install modOpt with all interfaced open-source optimizers, run:
 ```sh
 pip install "modopt[open_source_optimizers] @ git+https://github.com/lsdolab/modopt.git@main"
 ```
-This will install `pyslsqp`, `IPOPT`, `cobyqa`, `cvxopt`, and the `qpsolvers` package,
+This will install `pyslsqp`, `IPOPT`, `cobyqa`, `cvxopt`, `egobox`, and the `qpsolvers` package,
 along with the QP solvers `quadprog` and `osqp`.
 For details on obtaining a copy of `SNOPT`, visit the 
 [SNOPT documentation](https://modopt.readthedocs.io/en/latest/src/performant_algs/snopt.html).

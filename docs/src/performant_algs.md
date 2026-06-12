@@ -17,4 +17,5 @@ performant_algs/snopt
 performant_algs/ipopt
 performant_algs/qpsolvers
 performant_algs/cvxopt
+performant_algs/egor
 ```
