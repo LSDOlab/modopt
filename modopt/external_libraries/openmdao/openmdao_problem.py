@@ -105,10 +105,19 @@ class OpenMDAOProblem(Problem):
         om_prob = self.options['om_problem']
         if not self.SURF_mode:      # for pure RS/FS 
             if (not np.array_equal(self.warm_x, x)) or force_rerun:
-                start = 0
-                for (dv_name, dv_size) in zip(self.dv_names, self.dv_sizes):
-                    om_prob.driver.set_design_var(dv_name, x[start:start+dv_size])
-                    start += dv_size
+
+                if getattr(om_prob.driver, '_vectors', None) is not None:
+                    # OpenMDAO >= 3.44
+                    dv_vec = om_prob.driver._vectors['design_var']
+                    dv_vec.set_data(x, driver_scaling=True)
+                    om_prob.driver._set_design_vars(desvar_names=self.dv_names, driver_scaling=True)
+
+                else:
+                    # OpenMDAO < 3.44
+                    start = 0
+                    for (dv_name, dv_size) in zip(self.dv_names, self.dv_sizes):
+                        om_prob.driver.set_design_var(dv_name, x[start:start+dv_size])
+                        start += dv_size
 
                 om_prob.run_model()
                 # self.fail1 = sim.run(check_failure=check_failure)
@@ -153,6 +162,59 @@ class OpenMDAOProblem(Problem):
     def _setup_bounds(self): # x and c bounds don't include states y and residuals R for SURF
         om_prob = self.options['om_problem']
 
+        autoscaler = getattr(om_prob.driver, 'autoscaler', None)
+        dv_meta = om_prob.driver._designvars
+        print(dv_meta)
+        if autoscaler is not None:
+            # OpenMDAO >= 3.44
+            from openmdao.core.constants import INF_BOUND
+
+            # Design-variable bounds in driver/optimizer space
+            lower_dv, upper_dv, _ = autoscaler.get_bounds_scaling('design_var')
+
+            x_l = []
+            x_u = []
+            # Note: no equals for design variables
+            for dv_name in self.dv_names:
+                l = lower_dv[dv_name]
+                u = upper_dv[dv_name]
+    
+                x_l = np.concatenate((x_l, l.flatten()))
+                x_u = np.concatenate((x_u, u.flatten()))
+
+            self.x_lower = np.where(x_l <= -INF_BOUND, -np.inf, x_l)
+            self.x_upper = np.where(x_u >=  INF_BOUND,  np.inf, x_u)
+
+            # Constraint bounds in driver/optimizer space
+            if self.nc > 0:
+                lower_con, upper_con, equals_con = (autoscaler.get_bounds_scaling('constraint'))
+
+                c_l_parts = []
+                c_u_parts = []
+
+                for con_name in self.con_names:
+                    meta = om_prob.driver._cons[con_name]
+
+                    if meta['equals'] is not None:
+                        bound = np.asarray(equals_con[con_name], dtype=float).reshape(-1)
+                        c_l_parts.append(bound)
+                        c_u_parts.append(bound.copy())
+                    else:
+                        c_l_parts.append(np.asarray(lower_con[con_name], dtype=float).reshape(-1))
+                        c_u_parts.append(np.asarray(upper_con[con_name], dtype=float).reshape(-1))
+
+                c_l = np.concatenate(c_l_parts)
+                c_u = np.concatenate(c_u_parts)
+
+                self.c_lower = np.where(c_l <= -INF_BOUND, -np.inf, c_l)
+                self.c_upper = np.where(c_u >=  INF_BOUND,  np.inf, c_u)
+            else:
+                self.c_lower = np.empty(0)
+                self.c_upper = np.empty(0)
+
+            return 
+        
+        # OpenMDAO < 3.44
         # Set design variable bounds
         dv_meta = om_prob.driver._designvars
         x_l = []
@@ -167,7 +229,7 @@ class OpenMDAOProblem(Problem):
             x_u = np.concatenate((x_u, (u * np.ones((size,))).flatten()))
 
         self.x_lower = np.where(x_l == -1.0e30, -np.inf, x_l)
-        self.x_upper = np.where(x_u == 1.0e30, np.inf, x_u)
+        self.x_upper = np.where(x_u ==  1.0e30,  np.inf, x_u)
 
         # if self.SURF_mode:
         #     self.x_lower = np.concatenate((self.x_lower, np.full((self.ny,), -np.inf)))

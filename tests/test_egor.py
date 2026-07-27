@@ -295,3 +295,13 @@ def test_egor_g24_constrained_problem_lite():
     assert_allclose(results["x"], [2.3295, 3.1785], atol=2e-1)
     assert results["fun"] <= -5.4
     assert np.all(results["constraints"] <= 1e-3)
+
+if __name__ == '__main__':
+    test_egor_direct_interface()
+    test_egor_with_inequality_constraints()
+    test_optimize_with_egor()
+    test_egor_requires_finite_bounds()
+    test_egor_supports_equality_constraints()
+    test_egor_with_upper_and_lower_ineq_constraints()
+    test_egor_g24_constrained_problem_lite()
+    print('All tests passed!')
