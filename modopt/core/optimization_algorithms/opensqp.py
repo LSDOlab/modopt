@@ -84,6 +84,27 @@ class OpenSQP(Optimizer):
         the lower and upper bounds of the constraints and variables, and
         values being arrays of the same length as the number of constraints/variables.
 
+    hvp_mode : {'fd', 'exact', None}, default=None
+        Method to use for computing the Hessian-vector products
+        for the quasi-Newton BFGS Hessian approximation.
+    hvp_stepsize : float, default=1e-6
+        Stepsize for computing the Hessian-vector products
+        using a first-order finite-difference approximation.
+    hvp_lmult_sign : {1, -1}, default=-1
+        Indicates whether user-supplied problem Lagrangian function (and its derivatives)
+        adds or subtracts lmult.T @ c with the objective.
+        This is needed to accommodate the different formulations of the Lagrangian
+        in different problems, e.g., L = f - lmult * c vs L = f + lmult * c.
+    hvp_init_itr : int, default=10
+        Indicates at which iteration to apply hvp for the first time.
+    hvp_app_freq : int, default=1
+        Indicates the gap between iterations where hvps are applied.
+    hvp_batch_size : int, default=1
+        Indicates the number of hvps to use whenever it is applied.
+    hvp_dir : {'StepHist', 'StepKrylov', 'GradKrylov'}, default=GradKrylov
+        Indicates directions along which to compute subsequent hvps 
+        after the first one is computed along the most recent step.
+
     readable_outputs : list, default=[]
         List of outputs to be written to readable text output files.
         Available outputs are: 'major', 'obj', 'x', 'lag_mult', 'slacks', 'constraints', 'opt',
@@ -99,7 +120,7 @@ class OpenSQP(Optimizer):
 
         self.nx = self.problem.nx
 
-        self.obj = self.problem._compute_objective
+        self.obj  = self.problem._compute_objective
         self.grad = self.problem._compute_objective_gradient
         self.active_callbacks = ['obj', 'grad']
         if self.problem.constrained:
@@ -140,6 +161,14 @@ class OpenSQP(Optimizer):
         else:
             warnings.warn("SciPy version is less than 1.14.0, 'bfgs_init_lag_hess' option is not available.")
 
+        self.options.declare('hvp_mode', default=None, values=('fd', 'exact', None))
+        self.options.declare('hvp_stepsize', default=1e-6, types=float)
+        self.options.declare('hvp_lmult_sign', default=-1, values=(1, -1))
+        self.options.declare('hvp_init_itr', default=10, types=int, lower=0)
+        self.options.declare('hvp_app_freq', default=1, types=int, lower=1)
+        self.options.declare('hvp_batch_size', default=1, types=int, lower=1)
+        self.options.declare('hvp_dir', default='GradKrylov', values=('StepHist', 'StepKrylov', 'GradKrylov'))
+
         self.available_outputs = {
             'major': int,
             'obj': float,
@@ -166,9 +195,61 @@ class OpenSQP(Optimizer):
             'low_curvature': int,
         }
 
+    def fd_hvp(self, x, v, lmult=None):
+        stepsize = self.options['hvp_stepsize'] / np.linalg.norm(v, ord=2)
+        x1 = x + stepsize * v
+        g_k = self.MF.cache['g'][1]
+
+        if not self.problem.constrained:
+            g1 = self.grad(x1)
+            g0 = g_k * 1.0
+        else:
+            J_k = self.MF.cache['j'][1]
+            g0 = g_k - J_k.T @ lmult
+            g1 = self.grad(x1) - self.jac(x1).T @ lmult
+        
+        hvp = (g1 - g0) / stepsize
+        return hvp
+
+    def compute_problem_lmult(self, pi):
+        eq_pi   = pi[:self.nc_e]
+        ineq_pi = pi[self.nc_e+self.nc_b:]
+        prob_pi = np.zeros((self.nc_prob,))
+
+        prob_pi[self.eq_constraint_indices] += eq_pi
+
+        lci = self.lower_constraint_indices
+        uci = self.upper_constraint_indices
+
+        prob_pi[self.lower_constraint_indices] += ineq_pi[:len(lci)]
+        prob_pi[self.upper_constraint_indices] -= ineq_pi[len(lci):]
+
+        return prob_pi
+    
+    def setup_hvp(self):
+        if self.options['hvp_mode'] is None:
+            return
+        if self.options['hvp_dir'] == 'StepHist':
+            self.S_hist = np.ones((self.nx, self.options['hvp_batch_size']))
+        
+        if self.options['hvp_mode']=='fd':
+            if not self.problem.constrained:
+                self.hvp = self.fd_hvp
+            else:
+                self.hvp = lambda x, pi, v: self.fd_hvp(x, v, pi)
+            
+        elif self.options['hvp_mode']=='exact':
+            if not self.problem.constrained:
+                self.hvp = self.problem._compute_objective_hvp
+                self.active_callbacks += ['obj_hvp']
+            else:
+                self.hvp = self.problem._compute_lagrangian_hvp
+                self.active_callbacks += ['lag_hvp']
+    
     def setup(self):
         self.setup_constraints()
         self.setup_initial_multipliers()
+        self.setup_hvp()
         nx   = self.nx
         nc   = self.nc
         nc_e = self.nc_e
@@ -290,6 +371,9 @@ class OpenSQP(Optimizer):
             uci = self.upper_constraint_indices
             # Compute problem constraints
             c_in = self.con_in(x)
+            self.nc_prob = len(c_in)
+        else:
+            self.nc_prob = 0
 
         c_out = np.array([])
 
@@ -612,6 +696,11 @@ class OpenSQP(Optimizer):
         aqp_time_limit  = self.options['aqp_time_limit']
         # qp_maxiter     = self.options['qp_maxiter']
 
+        hii = self.options['hvp_init_itr']
+        haf = self.options['hvp_app_freq']
+        hbs = self.options['hvp_batch_size']
+        hvd = self.options['hvp_dir']
+
         LSS = self.LSS
         QN = self.QN
         MF = self.MF
@@ -859,7 +948,7 @@ class OpenSQP(Optimizer):
                         break
 
                 if np.linalg.norm(qp_sol.x[:nx]) == 0 and qp_sol.x[nx] == 1.:
-                    exit_msg = 'Augmented QP is also infeasible'
+                    exit_msg = 'Augmented QP is also infeasible.'
                     return self.exit_early(x_k, f_k, c_k, pi_k, opt, feas, nfev, ngev, itr, time.time() - start_time, False, exit_msg)
 
             # Clip the step length such that the design variables remain within bounds
@@ -1077,7 +1166,67 @@ class OpenSQP(Optimizer):
 
             QN_d_k = d_k[:nx]
 
-            QN.update(QN_d_k, w_k)
+            if self.problem.constrained and self.options['hvp_mode']:
+                fac = -self.options['hvp_lmult_sign']
+                if self.options['hvp_mode'] == 'exact':
+                    prob_pi = fac * self.compute_problem_lmult(pi_k)
+                else:
+                    prob_pi = pi_k
+
+            if self.options['hvp_mode'] and hvd == 'StepHist':
+                self.S_hist[:,1:] = self.S_hist[:,:-1]
+                self.S_hist[:, 0] = d_k[:nx]
+
+            if self.options['hvp_mode'] and itr >= hii and itr%haf == 0:
+                ac_hbs = min(nx, hbs)
+                S = np.ones((nx, ac_hbs))
+                Y = np.ones(S.shape)
+                if hvd == 'StepHist':
+                    ac_hbs = min(nx, hbs, itr)
+                    S[:,:] = self.S_hist[:,:ac_hbs]
+                S[:, 0] = d_k[:nx]
+                if not self.problem.constrained:
+                    Y[:, 0] = self.hvp(x_k, S[:, 0]) # Hessian-vector product with the ith column of S (the step taken)
+                else:
+                    Y[:, 0] = self.hvp(x_k, prob_pi, S[:, 0])
+                QN.update(S[:, 0], Y[:, 0])
+
+                eps = 2.22e-16
+
+                if ac_hbs > 1:
+                    # Using Krylov of the gradient
+                    if hvd == 'GradKrylov':
+                        S[:, 1] = g_k * 1.0
+
+                    # Using Krylov of the last step
+                    elif hvd == 'StepKrylov':
+                        s_1_ = d_k[:nx] / (np.linalg.norm(d_k[:nx]) + eps)
+                        S[:, 1] = Y[:, 0] - s_1_ * (s_1_.T @ Y[:, 0])         
+
+                for i in range(1, ac_hbs):
+                    if not self.problem.constrained:
+                        Y[:, i] = self.hvp(x_k, S[:, i]) # Hessian-vector product with the ith column of S (the step taken)
+                    else:
+                        Y[:, i] = self.hvp(x_k, prob_pi, S[:, i])
+                    ngev += 1
+
+                    QN.update(S[:, i], Y[:, i])
+
+                    if hvd != 'StepHist':
+                        s_new   = Y[:, i] * 1.
+                        for j in range(i-1, -1, -1):
+                            s_j_   = S[:, j] / (np.linalg.norm(S[:, j]) + eps)
+                            s_new  = s_new - s_j_ * (s_j_.T @ s_new)
+                            
+                        if i+1 < ac_hbs and np.linalg.norm(s_new, ord=np.inf) > eps:
+                            s_new[np.abs(s_new) < eps] = 0.0
+                            S[:, i+1] = s_new
+                        else:
+                            break
+
+            else:
+                QN.update(QN_d_k, w_k)
+
 
             # # <<<<<<<<<<<<<<<<<<<
             # # ALGORITHM ENDS HERE
