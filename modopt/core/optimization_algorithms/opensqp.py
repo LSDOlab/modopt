@@ -10,8 +10,7 @@ from modopt.approximate_hessians import BFGSScipy
 from modopt import CSDLAlphaProblem
 
 import scipy
-# from packaging.version import Version
-from scipy._lib._pep440 import Version
+SCIPY_VERSION = tuple(int(part) for part in scipy.__version__.split(".")[:2])
 
 
 class OpenSQP(Optimizer):
@@ -163,7 +162,7 @@ class OpenSQP(Optimizer):
         self.options.declare('ls_alpha_tol', default=1e-14, types=float)
 
         self.options.declare('init_multipliers', default=None, types=(type(None), Dict))
-        if Version(scipy.__version__) >= Version("1.14.0"):
+        if SCIPY_VERSION >= (1, 14):
             self.options.declare('bfgs_init_lag_hess', default=None, types=(type(None), np.ndarray))
         else:
             warnings.warn("SciPy version is less than 1.14.0, 'bfgs_init_lag_hess' option is not available.")
@@ -272,7 +271,7 @@ class OpenSQP(Optimizer):
         self.successive_undefined_iterations = 0
         
         init_scale = 1.0
-        if Version(scipy.__version__) >= Version("1.14.0") and self.options['bfgs_init_lag_hess'] is not None:
+        if SCIPY_VERSION >= (1, 14) and self.options['bfgs_init_lag_hess'] is not None:
             init_scale = self.options['bfgs_init_lag_hess'] * 1.0
         self.QN = BFGSScipy(nx=nx,
                             exception_strategy='damp_update',
