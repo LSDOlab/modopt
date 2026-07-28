@@ -5,6 +5,15 @@ A more detailed description of major changes between releases can be found
 in `RELEASE_NOTES.md` in the project root directory.
 
 ***********************************
+## Version 0.3.0 (July 28, 2026)
+
+### Feature Additions
+- Integrate the `Egor` optimizer from the `EGOBox` library.
+- Upgrade `OpenMDAOProblem` interface for compatibility with OpenMDAO>=3.44.
+- `OpenSQP` can now take advantage of Hessian-Vector Products through in-place BFGS updates.
+- If HVPs are unavailable, `OpenSQP` provides an option to estimate them with finite differences.
+
+***********************************
 ## Version 0.2.1 (April 29, 2026)
 
 - Add `verbosity` option to `OpenSQP`
