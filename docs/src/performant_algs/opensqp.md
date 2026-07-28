@@ -119,6 +119,7 @@ See the table below for the full list of options.
   - *str* (`None`)
   - Method for computing the Hessian-vector products to use within \
     in-place BFGS Hessian updates. \
+    If `None`, no Hessian-vector products are computed and the standard BFGS update is applied. \
     If `'fd'`, estimate HVPs using first-order finite differences. \
     If `'exact'`, use exact HVPs available from the problem object.
 * - `hvp_stepsize`
@@ -138,7 +139,8 @@ See the table below for the full list of options.
   - First major iteration at which to start applying HVPs in the BFGS update.
 * - `hvp_app_freq`
   - *int* (`1`)
-  - How often to apply HVPs in the BFGS update after the first application.
+  - How often to apply HVPs in the BFGS update after the first application. \
+    Indicates the gap between major iterations in which HVPs are applied.
 * - `hvp_batch_size`
   - *int* (`1`)
   - How many HVPs to compute and subsequent in-place BFGS updates to apply \
