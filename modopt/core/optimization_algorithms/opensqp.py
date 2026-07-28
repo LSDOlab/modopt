@@ -1197,6 +1197,7 @@ class OpenSQP(Optimizer):
                     Y[:, 0] = self.hvp(x_k, S[:, 0]) # Hessian-vector product with the ith column of S (the step taken)
                 else:
                     Y[:, 0] = self.hvp(x_k, prob_pi, S[:, 0])
+                ngev += 1
                 QN.update(S[:, 0], Y[:, 0])
 
                 eps = 2.22e-16
