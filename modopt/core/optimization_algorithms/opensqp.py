@@ -172,7 +172,7 @@ class OpenSQP(Optimizer):
         self.options.declare('hvp_mode', default=None, values=('fd', 'exact', None))
         self.options.declare('hvp_stepsize', default=1e-6, types=float)
         self.options.declare('hvp_lmult_sign', default=-1, values=(1, -1))
-        self.options.declare('hvp_init_itr', default=10, types=int, lower=0)
+        self.options.declare('hvp_init_itr', default=10, types=int, lower=1)
         self.options.declare('hvp_app_freq', default=1, types=int, lower=1)
         self.options.declare('hvp_batch_size', default=1, types=int, lower=1)
         self.options.declare('hvp_dir', default='GradKrylov', values=('StepHist', 'StepKrylov', 'GradKrylov'))
@@ -1185,14 +1185,15 @@ class OpenSQP(Optimizer):
                 self.S_hist[:,1:] = self.S_hist[:,:-1]
                 self.S_hist[:, 0] = d_k[:nx]
 
-            if self.options['hvp_mode'] and itr >= hii and itr%haf == 0:
-                ac_hbs = min(nx, hbs)
-                S = np.ones((nx, ac_hbs))
-                Y = np.ones(S.shape)
-                if hvd == 'StepHist':
+            if self.options['hvp_mode'] and itr >= hii and (itr-hii)%haf == 0:
+                if hvd == 'StepKrylov' or hvd == 'GradKrylov':
+                    ac_hbs = min(nx, hbs)
+                    S = np.ones((nx, ac_hbs))
+                    Y = np.ones((nx, ac_hbs))
+                    S[:, 0] = d_k[:nx]
+                elif hvd == 'StepHist':
                     ac_hbs = min(nx, hbs, itr)
                     S[:,:] = self.S_hist[:,:ac_hbs]
-                S[:, 0] = d_k[:nx]
                 if not self.problem.constrained:
                     Y[:, 0] = self.hvp(x_k, S[:, 0]) # Hessian-vector product with the 1st column of S (the step taken)
                 else:
