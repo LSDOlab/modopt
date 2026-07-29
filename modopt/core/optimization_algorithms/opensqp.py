@@ -96,7 +96,7 @@ class OpenSQP(Optimizer):
         Indicates whether the user-supplied problem Lagrangian function (and its derivatives)
         in the problem object adds or subtracts lmult.T @ c with the objective.
         This is needed to accommodate the differences in formulation of the Lagrangian
-        in different problems. 
+        in different problems.
         If `-1`, L = f - lmult * c. If `1`, L = f + lmult * c.
     hvp_init_itr : int, default=10
         First major iteration at which to start applying HVPs in the BFGS update.
@@ -1194,7 +1194,7 @@ class OpenSQP(Optimizer):
                     S[:,:] = self.S_hist[:,:ac_hbs]
                 S[:, 0] = d_k[:nx]
                 if not self.problem.constrained:
-                    Y[:, 0] = self.hvp(x_k, S[:, 0]) # Hessian-vector product with the ith column of S (the step taken)
+                    Y[:, 0] = self.hvp(x_k, S[:, 0]) # Hessian-vector product with the 1st column of S (the step taken)
                 else:
                     Y[:, 0] = self.hvp(x_k, prob_pi, S[:, 0])
                 ngev += 1
@@ -1209,8 +1209,8 @@ class OpenSQP(Optimizer):
 
                     # Using Krylov of the last step
                     elif hvd == 'StepKrylov':
-                        s_1_ = d_k[:nx] / (np.linalg.norm(d_k[:nx]) + eps)
-                        S[:, 1] = Y[:, 0] - s_1_ * (s_1_.T @ Y[:, 0])         
+                        s_0_ = d_k[:nx] / (np.linalg.norm(d_k[:nx]) + eps)
+                        S[:, 1] = Y[:, 0] - s_0_ * (s_0_.T @ Y[:, 0])
 
                 for i in range(1, ac_hbs):
                     if not self.problem.constrained:
@@ -1223,12 +1223,12 @@ class OpenSQP(Optimizer):
 
                     if hvd != 'StepHist':
                         s_new   = Y[:, i] * 1.
-                        for j in range(i-1, -1, -1):
+                        for j in range(i, -1, -1):
                             s_j_   = S[:, j] / (np.linalg.norm(S[:, j]) + eps)
                             s_new  = s_new - s_j_ * (s_j_.T @ s_new)
                             
                         if i+1 < ac_hbs and np.linalg.norm(s_new, ord=np.inf) > eps:
-                            s_new[np.abs(s_new) < eps] = 0.0
+                            s_new[np.abs(s_new) < eps] = 0.0 # Clip entries < 2e-16
                             S[:, i+1] = s_new
                         else:
                             break
