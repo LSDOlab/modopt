@@ -1223,6 +1223,9 @@ class OpenSQP(Optimizer):
 
                     QN.update(S[:, i], Y[:, i])
 
+                    if i+1 >= ac_hbs:
+                        break
+
                     if hvd == 'StepHist':
                         s_new   = S[:, i+1] * 1.
                     elif hvd == 'GradKrylov' or hvd == 'StepKrylov':
@@ -1232,7 +1235,7 @@ class OpenSQP(Optimizer):
                         s_j_   = S[:, j] / (np.linalg.norm(S[:, j]) + eps)
                         s_new  = s_new - s_j_ * (s_j_.T @ s_new)
 
-                    if i+1 < ac_hbs and np.linalg.norm(s_new, ord=np.inf) > eps:
+                    if np.linalg.norm(s_new, ord=np.inf) > eps:
                         s_new[np.abs(s_new) < eps] = 0.0 # Clip entries < 2e-16
                         S[:, i+1] = s_new
                     else:
