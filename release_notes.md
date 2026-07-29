@@ -1,4 +1,10 @@
 ***********************************
+# modOpt 0.3.1 (July 29, 2026)
+
+- Several updates to `OpenSQP` related to HVP usage in iBFGS.
+- Remove use of private SciPy API token for version comparisons.
+
+***********************************
 # modOpt 0.3.0 (July 28, 2026)
 
 ## Feature Additions

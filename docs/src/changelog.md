@@ -5,6 +5,12 @@ A more detailed description of major changes between releases can be found
 in `RELEASE_NOTES.md` in the project root directory.
 
 ***********************************
+## Version 0.3.1 (July 29, 2026)
+
+- Several updates to `OpenSQP` related to HVP usage in iBFGS.
+- Remove use of private SciPy API token for version comparisons.
+
+***********************************
 ## Version 0.3.0 (July 28, 2026)
 
 ### Feature Additions
