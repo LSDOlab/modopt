@@ -1186,12 +1186,11 @@ class OpenSQP(Optimizer):
                 self.S_hist[:, 0] = d_k[:nx]
 
             if self.options['hvp_mode'] and itr >= hii and (itr-hii)%haf == 0:
-                if hvd == 'StepKrylov' or hvd == 'GradKrylov':
-                    ac_hbs = min(nx, hbs)
-                    S = np.ones((nx, ac_hbs))
-                    Y = np.ones((nx, ac_hbs))
-                    S[:, 0] = d_k[:nx]
-                elif hvd == 'StepHist':
+                ac_hbs = min(nx, hbs)
+                S = np.ones((nx, ac_hbs))
+                Y = np.ones((nx, ac_hbs))
+                S[:, 0] = d_k[:nx]
+                if hvd == 'StepHist':
                     ac_hbs = min(nx, hbs, itr)
                     S[:,:] = self.S_hist[:,:ac_hbs]
                 if not self.problem.constrained:
