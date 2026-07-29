@@ -1205,7 +1205,9 @@ class OpenSQP(Optimizer):
                 if ac_hbs > 1:
                     # Using Krylov of the gradient
                     if hvd == 'GradKrylov':
-                        S[:, 1] = g_k * 1.0
+                        lg_k = g_k - J_k.T @ pi_k
+                        s_0_ = d_k[:nx] / (np.linalg.norm(d_k[:nx]) + eps)
+                        S[:, 1] = lg_k - s_0_ * (s_0_.T @ lg_k)
 
                     # Using Krylov of the last step
                     elif hvd == 'StepKrylov':
@@ -1221,17 +1223,20 @@ class OpenSQP(Optimizer):
 
                     QN.update(S[:, i], Y[:, i])
 
-                    if hvd != 'StepHist':
+                    if hvd == 'StepHist':
+                        s_new   = S[:, i+1] * 1.
+                    elif hvd == 'GradKrylov' or hvd == 'StepKrylov':
                         s_new   = Y[:, i] * 1.
-                        for j in range(i, -1, -1):
-                            s_j_   = S[:, j] / (np.linalg.norm(S[:, j]) + eps)
-                            s_new  = s_new - s_j_ * (s_j_.T @ s_new)
-                            
-                        if i+1 < ac_hbs and np.linalg.norm(s_new, ord=np.inf) > eps:
-                            s_new[np.abs(s_new) < eps] = 0.0 # Clip entries < 2e-16
-                            S[:, i+1] = s_new
-                        else:
-                            break
+
+                    for j in range(i, -1, -1):
+                        s_j_   = S[:, j] / (np.linalg.norm(S[:, j]) + eps)
+                        s_new  = s_new - s_j_ * (s_j_.T @ s_new)
+
+                    if i+1 < ac_hbs and np.linalg.norm(s_new, ord=np.inf) > eps:
+                        s_new[np.abs(s_new) < eps] = 0.0 # Clip entries < 2e-16
+                        S[:, i+1] = s_new
+                    else:
+                        break
 
             else:
                 QN.update(QN_d_k, w_k)
