@@ -1192,7 +1192,7 @@ class OpenSQP(Optimizer):
                 S[:, 0] = d_k[:nx]
                 if hvd == 'StepHist':
                     ac_hbs = min(nx, hbs, itr)
-                    S[:,:] = self.S_hist[:,:ac_hbs]
+                    S = self.S_hist[:,:ac_hbs]
                 if not self.problem.constrained:
                     Y[:, 0] = self.hvp(x_k, S[:, 0]) # Hessian-vector product with the 1st column of S (the step taken)
                 else:
