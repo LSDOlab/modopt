@@ -164,13 +164,20 @@ class OpenMDAOProblem(Problem):
 
         autoscaler = getattr(om_prob.driver, 'autoscaler', None)
         dv_meta = om_prob.driver._designvars
-        print(dv_meta)
         if autoscaler is not None:
             # OpenMDAO >= 3.44
             from openmdao.core.constants import INF_BOUND
 
             # Design-variable bounds in driver/optimizer space
-            lower_dv, upper_dv, _ = autoscaler.get_bounds_scaling('design_var')
+            try:
+                lower_dv, upper_dv, _ = autoscaler.get_bounds_scaling('design_var')
+            except ValueError as exc:
+                if "not enough values to unpack" in str(exc):
+                    dv_bounds = autoscaler.get_bounds_scaling('design_var')
+                    lower_dv = {name: dv_bounds[name].lower for name in self.dv_names}
+                    upper_dv = {name: dv_bounds[name].upper for name in self.dv_names}
+                else:
+                    raise ImportError(exc)
 
             x_l = []
             x_u = []
@@ -178,6 +185,9 @@ class OpenMDAOProblem(Problem):
             for dv_name in self.dv_names:
                 l = lower_dv[dv_name]
                 u = upper_dv[dv_name]
+
+                l = l if l is not None else np.full((dv_meta[dv_name]["size"],), -np.inf)
+                u = u if u is not None else np.full((dv_meta[dv_name]["size"],),  np.inf)
     
                 x_l = np.concatenate((x_l, l.flatten()))
                 x_u = np.concatenate((x_u, u.flatten()))
@@ -187,7 +197,16 @@ class OpenMDAOProblem(Problem):
 
             # Constraint bounds in driver/optimizer space
             if self.nc > 0:
-                lower_con, upper_con, equals_con = (autoscaler.get_bounds_scaling('constraint'))
+                try:
+                    lower_con, upper_con, equals_con = (autoscaler.get_bounds_scaling('constraint'))
+                except ValueError as exc:
+                    if "not enough values to unpack" in str(exc):
+                        con_bounds = autoscaler.get_bounds_scaling('constraint')
+                        lower_con  = {name: con_bounds[name].lower for name in self.con_names}
+                        upper_con  = {name: con_bounds[name].upper for name in self.con_names}
+                        equals_con = {name: con_bounds[name].equals for name in self.con_names}
+                    else:
+                        raise ImportError(exc)
 
                 c_l_parts = []
                 c_u_parts = []
@@ -200,8 +219,19 @@ class OpenMDAOProblem(Problem):
                         c_l_parts.append(bound)
                         c_u_parts.append(bound.copy())
                     else:
-                        c_l_parts.append(np.asarray(lower_con[con_name], dtype=float).reshape(-1))
-                        c_u_parts.append(np.asarray(upper_con[con_name], dtype=float).reshape(-1))
+                        if meta['lower'] is not None:
+                            c_l_parts.append(np.asarray(lower_con[con_name], dtype=float).reshape(-1))
+                            print(np.asarray(lower_con[con_name], dtype=float).reshape(-1))
+                        else:
+                            c_l_parts.append(np.full((meta["size"],), -np.inf))
+                            print(np.full((meta["size"],), -np.inf))
+
+                        if meta['upper'] is not None:
+                            c_u_parts.append(np.asarray(upper_con[con_name], dtype=float).reshape(-1))
+                            print(np.asarray(upper_con[con_name], dtype=float).reshape(-1))
+                        else:
+                            c_u_parts.append(np.full((meta["size"],),  np.inf))
+                            print(np.full((meta["size"],),  np.inf))
 
                 c_l = np.concatenate(c_l_parts)
                 c_u = np.concatenate(c_u_parts)
