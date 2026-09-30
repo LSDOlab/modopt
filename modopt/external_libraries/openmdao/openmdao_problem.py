@@ -221,17 +221,13 @@ class OpenMDAOProblem(Problem):
                     else:
                         if meta['lower'] is not None:
                             c_l_parts.append(np.asarray(lower_con[con_name], dtype=float).reshape(-1))
-                            print(np.asarray(lower_con[con_name], dtype=float).reshape(-1))
                         else:
                             c_l_parts.append(np.full((meta["size"],), -np.inf))
-                            print(np.full((meta["size"],), -np.inf))
 
                         if meta['upper'] is not None:
                             c_u_parts.append(np.asarray(upper_con[con_name], dtype=float).reshape(-1))
-                            print(np.asarray(upper_con[con_name], dtype=float).reshape(-1))
                         else:
                             c_u_parts.append(np.full((meta["size"],),  np.inf))
-                            print(np.full((meta["size"],),  np.inf))
 
                 c_l = np.concatenate(c_l_parts)
                 c_u = np.concatenate(c_u_parts)
