@@ -5,6 +5,14 @@ A more detailed description of major changes between releases can be found
 in `RELEASE_NOTES.md` in the project root directory.
 
 ***********************************
+## Version 0.4.0 (October 10, 2026)
+
+- Bugfix in `OpenSQP` related to iBFGS-StepHist.
+- Upgrade `OpenMDAOProblem` to support changes in dv/con bound scaling in OpenMDAO>=3.45.1.
+- Update `Egor` wrapper against `EGOBox` 0.38.
+- Update `array_manager` dependency to its main branch.
+
+***********************************
 ## Version 0.3.1 (July 29, 2026)
 
 - Several updates to `OpenSQP` related to HVP usage in iBFGS.
