@@ -1,4 +1,4 @@
-__version__ = '0.3.1'
+__version__ = '0.4.0'
 
 # import modopt base classes
 from modopt.core.optimizer import Optimizer

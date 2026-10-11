@@ -285,7 +285,7 @@ def test_egor_g24_constrained_problem_lite():
             "seed": 42,
             "infill_strategy": egx.InfillStrategy.WB2,
             "infill_optimizer": egx.InfillOptimizer.SLSQP,
-            "cstr_tol": [1e-3, 1e-3],
+            "cstr_tols": [1e-3, 1e-3],
         },
         turn_off_outputs=True,
     )
@@ -296,6 +296,104 @@ def test_egor_g24_constrained_problem_lite():
     assert results["fun"] <= -5.4
     assert np.all(results["constraints"] <= 1e-3)
 
+
+def test_egor_cstr_tols_per_constraint():
+    # One tolerance per modOpt constraint, also for equality constraints which
+    # expand to two internal constraints in Egor.
+    with pytest.raises(ValueError, match="scalar or have length 1"):
+        Egor(
+            EqualityConstraintProblem(),
+            solver_options={"cstr_tols": [1e-3, 1e-3]},
+            turn_off_outputs=True,
+        )
+
+    for cstr_tols in (1e-2, [1e-2]):
+        optimizer = Egor(
+            EqualityConstraintProblem(),
+            solver_options={
+                "max_iters": 15,
+                "n_doe": 5,
+                "seed": 13,
+                "cstr_tols": cstr_tols,
+            },
+            turn_off_outputs=True,
+        )
+        results = optimizer.solve()
+        assert results["success"] is True
+        assert_allclose(results["x"], [0.5], atol=1e-1)
+
+
+def test_egor_initial_doe():
+    x_doe = np.array([[-0.5], [0.0], [0.5], [0.9]])
+    y_doe = (x_doe - 0.25) ** 2
+
+    optimizer = Egor(
+        finite_bounds_lite(),
+        solver_options={"max_iters": 10, "seed": 3, "x_doe": x_doe, "y_doe": y_doe},
+        turn_off_outputs=True,
+    )
+    results = optimizer.solve()
+    assert results["success"] is True
+    assert_allclose(results["x_doe"][:4], x_doe)
+    assert_allclose(results["x"], [0.25], atol=8e-2)
+
+
+def test_egor_deprecated_options():
+    x_doe = np.array([[-0.5], [0.0], [0.5], [0.9]])
+    with pytest.warns(DeprecationWarning):
+        optimizer = Egor(
+            finite_bounds_lite(),
+            solver_options={"max_iters": 5, "seed": 3, "n_start": 10, "doe": x_doe},
+            turn_off_outputs=True,
+        )
+    assert optimizer.options_to_pass["infill_n_start"] == 10
+    assert_allclose(optimizer.options_to_pass["x_doe"], x_doe)
+    assert optimizer.options_to_pass["y_doe"] is None
+    assert optimizer.solve()["success"] is True
+
+    with pytest.warns(DeprecationWarning, match="cstr_tol"):
+        optimizer = Egor(
+            EqualityConstraintProblem(),
+            solver_options={"cstr_tol": [1e-2]},
+            turn_off_outputs=True,
+        )
+    assert optimizer.options_to_pass["cstr_specs"] is not None
+
+    with pytest.raises(ValueError, match="only one"):
+        with pytest.warns(DeprecationWarning):
+            Egor(
+                finite_bounds_lite(),
+                solver_options={"n_start": 10, "infill_n_start": 10},
+                turn_off_outputs=True,
+            )
+
+
+def test_egor_runtime_and_feasible_infill_options():
+    # Feasible infill (EFI) is not implemented upstream for the default LOG_EI criterion.
+    with pytest.raises(ValueError, match="LOG_EI"):
+        Egor(
+            g24_lite(),
+            solver_options={"feasible_infill_strategy": egx.FeasibleInfillStrategy.EFI_P},
+            turn_off_outputs=True,
+        )
+
+    optimizer = Egor(
+        g24_lite(),
+        solver_options={
+            "max_iters": 10,
+            "n_doe": 5,
+            "seed": 42,
+            "infill_strategy": egx.InfillStrategy.EI,
+            "feasible_infill_strategy": egx.FeasibleInfillStrategy.EFI_P,
+            "stop_on_error": True,
+            "verbose": 0,
+        },
+        turn_off_outputs=True,
+    )
+    results = optimizer.solve()
+    assert results["success"] is True
+    assert np.isfinite(results["fun"])
+
 if __name__ == '__main__':
     test_egor_direct_interface()
     test_egor_with_inequality_constraints()
@@ -304,4 +402,8 @@ if __name__ == '__main__':
     test_egor_supports_equality_constraints()
     test_egor_with_upper_and_lower_ineq_constraints()
     test_egor_g24_constrained_problem_lite()
+    test_egor_cstr_tols_per_constraint()
+    test_egor_initial_doe()
+    test_egor_deprecated_options()
+    test_egor_runtime_and_feasible_infill_options()
     print('All tests passed!')
